@@ -1,6 +1,7 @@
 const allInstances = [
     {id: 1, env:'PROD', project:'kernel', service:'kernel', name: 'kernel' , host:'10.143.29.42', folder:'prod-kernel', version:'2.2.0', revision: 34560, status: 'LIVE'},
     {id: 2, env:'PROD', project:'kernel', service:'kernel', name: 'kernel2', host:'10.143.29.41', folder:'prod-kernel', version:'2.1.0', revision: 33982, status: 'LOADING'},
+    {id: 22, env:'PROD', project:'kernel', service:'kernel', name: 'kernel3', host:'10.143.29.41', folder:'prod-kernel', version:'2.1.0', revision: null, status: 'LOADING'},
     {id: 3, env:'PROD', project:'basket', service:'basket', name: 'basket' , host:'10.143.3.58', folder:'prod-basket', version:'5.1.3-SNAPSHOT', revision: 34433, status: 'LIVE'},
     {id: 4, env:'PROD', project:'basket', service:'basket', name: 'basket2', host:'10.143.3.56', folder:'prod-basket', version:'5.1.3-SNAPSHOT', revision: 35002, status: 'DOWN'},
     {id: 5, env:'PROD', project:'order',  service:'order',  name: 'order1', host:'10.143.3.58', folder:'prod-order', version:'5.1.3', revision: 35002, status: 'LIVE'},
@@ -26,6 +27,9 @@ const sampleCommits = [
     {revision: 35490, message:'refactor'},
     {revision: 35488, message:'[JIRA-5409] feature 2'},
     {revision: 35487, message:'feature1'},
-    {revision: 35469, message:'initial commit'},
+    {revision: 35469, message:'feature 0'},
+    {revision: 34561, message:'POC, lkhs sdpfousd sdfhpsmdnf sfspdh dk s kjf s jkhsdkjhdfos sjdfjs d sdkmfdf shjehkjdfksbdf  ukejhdkh sjd ksdhfjk qksjvkdv kbqsdbqk'},
+    {revision: 34560, message:'structure'},
+    {revision: 33982, message:'initial commit'},
 
 ];

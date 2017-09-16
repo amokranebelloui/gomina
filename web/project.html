@@ -16,23 +16,52 @@
 
     class ScmLog extends React.Component {
         render() {
-            const project = this.props.project;
-            const commits = this.props.commits;
+            //const project = this.props.project;
+            const sortedCommits = this.props.commits;
             const instances = this.props.instances;
+            const instancesByRevision = groupBy(instances, 'revision');
+            const log = {};
+            sortedCommits.map(commit => {
+                log[commit.revision] = {message: commit.message, instances: []};
+            });
+            Object.keys(instancesByRevision).map(revision => {
+                log[revision] = log[revision] || {};
+                log[revision].instances = instancesByRevision[revision] || [];
+                log[revision].version = instancesByRevision[revision][0].version;
+            });
             return (
                 <div>
                     <b>SVN Log</b>
                     <br/>
-                    <ul>
-                        {commits.map(commit =>
-                            <li key={commit.revision}>{commit.revision} -> {commit.message}</li>
+                        {Object.keys(log).sort((a,b) => b-a).map(revision =>
+                            <Well block key={revision}>
+                                <div style={{overflow: 'auto'}}>
+                                    <span style={{float: 'left', marginRight: '2px'}}>
+                                        {revision || '-'}
+                                    </span>
+                                    <span style={{display: 'block', marginLeft: '60px', minHeight: '20px', paddingLeft: '1px', paddingRight: '1px'}}>
+                                        {log[revision].message || '-'}
+
+                                        <span style={{float: 'right', position: 'top'}}>
+                                            {log[revision].version &&
+                                                <span style={{paddingLeft: '2px', paddingRight: '2px'}}>
+                                                    <Version version={log[revision].version} />
+                                                </span>
+                                            }
+                                            {log[revision].instances.map(instance =>
+                                                <span style={{paddingLeft: '2px', paddingRight: '2px'}}>
+                                                    <Badge key={instance.id} backgroundColor="#EEEEAA">
+                                                        {instance.env} {instance.name}&nbsp;
+                                                    </Badge>
+                                                </span>
+                                            )}
+
+                                        </span>
+                                    </span>
+
+                                </div>
+                            </Well>
                         )}
-                    </ul>
-                    <ul>
-                        {instances.map(instance =>
-                                <li key={instance.id}>{instance.revision} -> {instance.version} : {instance.env} {instance.name}</li>
-                        )}
-                    </ul>
                 </div>
             )
         }
