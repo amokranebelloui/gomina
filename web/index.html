@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <title>Hello World</title>
-    <script src="react.js"></script>
-    <script src="react-dom.js"></script>
-    <script src="babel.min.js"></script>
+    <script src="lib/react.js"></script>
+    <script src="lib/react-dom.js"></script>
+    <script src="lib/babel.min.js"></script>
     <!--
     <script src="https://unpkg.com/react@latest/dist/react.js"></script>
     <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>
@@ -133,31 +133,12 @@
         );
     }
 
-    function Menu(props) {
-        return (
-            <div style={{display: "inline-block"}}>
-                Menu1 - Menu2 - Menu3
-            </div>
-        );
-    }
 
-    function Badge(props) {
-        return (
-            <span style={{padding: "3px", margin: "0px 2px", backgroundColor: "lightgray", borderRadius: "5px", display: "inline-block"}}>
-                {props.children}
-            </span>
-        )
-    }
-
-    function Version(props) {
-        return (
-                <Badge>{props.version}<br/><span style={{fontSize: "10px"}}>{props.revision}</span></Badge>
-        )
-    }
 
     const posts = [
-        {id: 1, title: 'Hello World', content: 'Welcome to learning React!'},
-        {id: 2, title: 'Installation', content: 'You can install React from npm.'}
+        {id: 1, title: 'Hello World 4', content: 'Welcome to learning React!'},
+        {id: 2, title: 'Installation', content: 'You can install React from npm.'},
+        {id: 3, title: 'Live Edit in Jetbrains, wo', content: 'You can live edit from Jetbrains IDE, wow!'}
     ];
 
     class Posts extends React.Component {
@@ -166,7 +147,6 @@
             //this.state = {logged: false, user: "amo"}
         }
         render() {
-            console.info(this.props.posts)
             return (
                 <ul>
                     {this.props.posts.map((post) =>
@@ -195,9 +175,11 @@
                         <tbody>
                         <tr>
                             <td>
-                                <Menu /> {this.state.logged && <Clock />}
+                                <a href="index.html">index</a>&nbsp;
+                                <a href="environments.html">envs</a>
                                 <br/>
-                                <span>{status}</span>
+                                <span>{status}</span>&nbsp;
+                                {this.state.logged && <Clock />}
                                 <br/>
 
                                 Linked toggles
@@ -210,12 +192,6 @@
                                 <WarningBanner warn="" />
                                 <br/>
                                 <Posts posts={this.props.posts} />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <Version version="3.2.0" revision="14837"/>
-                                <Version version="2.2.1" revision="14837"/>
                             </td>
                         </tr>
                         </tbody>

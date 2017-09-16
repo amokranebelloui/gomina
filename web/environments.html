@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <script src="lib/react.js"></script>
+    <script src="lib/react-dom.js"></script>
+    <script src="lib/babel.min.js"></script>
+    <!--
+    <script src="https://unpkg.com/react@latest/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    -->
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="gomina.js"></script>
+<script type="text/babel">
+
+
+
+    class Instance extends React.Component {
+        render() {
+            const instance = this.props.instance;
+            const opacity = this.props.highlighted ? 1 : 0.06;
+            return (
+                    <Well>
+                        <div style={{display: "inline-block", verticalAlign: 'top', opacity:opacity}}>
+                            {instance.name}&nbsp;
+                            <Status status={instance.status} />&nbsp;
+                            <Version version={instance.version} revision={instance.revision}/>
+                            <br/>
+                            {instance.host} {instance.folder}
+                        </div>
+
+
+                    </Well>
+            )
+        }
+    }
+
+    class Service extends React.Component {
+        render() {
+            const instances = this.props.instances ? this.props.instances : [];
+            const differentVersions = new Set(instances.map(instance => instance.version)).size > 1;
+            const highlightFunction = this.props.highlight || (instance => true);
+            return (
+                    <div style={{padding: '2px'}}>
+                        <div style={{width: '140px', display: 'inline-block', verticalAlign: 'top', marginRight: '2px'}}>
+                            <span><b>{this.props.name}</b></span>
+                            <br/>
+                            {differentVersions && <Badge backgroundColor="orange">versions?</Badge>}
+                        </div>
+                        {instances.map((instance) =>
+                        <span key={instance.id} style={{marginLeft: '2px', marginRight: '2px'}}>
+                            <Instance instance={instance} highlighted={highlightFunction(instance)}/>
+                        </span>
+                        )}
+                    </div>
+            )
+        }
+    }
+
+    class EnvironmentLogical extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {highlight: instance => true}
+        }
+        render() {
+            const instances = this.props.instances;
+            const services = groupBy(instances, 'service');
+            const highlightAll = instance => true;
+            const highlightDown = instance => instance.status == 'DOWN';
+            const highlightSnapshot = instance => isSnapshot(instance.version);
+
+            return (
+                    <div>
+                        <button onClick={e => this.setState({highlight: highlightAll})}>ALL</button>
+                        <button onClick={e => this.setState({highlight: highlightDown})}>DOWN</button>
+                        <button onClick={e => this.setState({highlight: highlightSnapshot})}>SNAPSHOTS</button>
+                        <button onClick={e => this.setState({highlight: instance => instance.host == '10.2.3.58'})}>10.2.3.58</button>
+                        <button onClick={e => this.setState({highlight: instance => instance.host == '10.2.3.56'})}>10.2.3.56</button>
+
+                        {Object.keys(services).map( service =>
+                            <Service key={service} name={service} instances={services[service]} highlight={this.state.highlight} />
+                        )}
+                    </div>
+            )
+        }
+    }
+
+    const allInstances = [
+        {id: 1, env:'PROD', service:'kernel', name: 'kernel' , host:'10.143.29.42', folder:'prod-kernel', version:'2.2.0', revision: 34560, status: 'LIVE'},
+        {id: 2, env:'PROD', service:'kernel', name: 'kernel2', host:'10.143.29.41', folder:'prod-kernel', version:'2.1.0', revision: 33982, status: 'LOADING'},
+        {id: 3, env:'PROD', service:'basket', name: 'basket' , host:'10.143.3.58', folder:'prod-basket', version:'5.1.3-SNAPSHOT', revision: 34433, status: 'LIVE'},
+        {id: 4, env:'PROD', service:'basket', name: 'basket2', host:'10.143.3.56', folder:'prod-basket', version:'5.1.3-SNAPSHOT', revision: 35002, status: 'DOWN'},
+        {id: 5, env:'PROD', service:'order', name: 'order1', host:'10.143.3.58', folder:'prod-order', version:'5.1.3', revision: 35002, status: 'LIVE'},
+        {id: 6, env:'PROD', service:'order', name: 'order2', host:'10.143.3.56', folder:'prod-order', version:'5.1.3-SNAPSHOT', revision: 35002, status: 'DOWN'},
+        {id: 7, env:'UAT', service:'kernel', name: 'kernel' , host:'10.2.29.42', folder:'uat-kernel', version:'2.3.0-SNAPSHOT', revision: 34561, status: 'LIVE'},
+        {id: 8, env:'UAT', service:'kernel', name: 'kernel2', host:'10.2.29.41', folder:'uat-kernel', version:'2.3.0-SNAPSHOT', revision: 34560, status: 'LOADING'},
+        {id: 9, env:'UAT', service:'basket', name: 'basket' , host:'10.2.3.58', folder:'uat-basket', version:'5.1.3-SNAPSHOT', revision: 34433, status: 'LIVE'},
+        {id: 10, env:'UAT', service:'basket', name: 'basket2', host:'10.2.3.56', folder:'uat-basket', version:'5.1.3-SNAPSHOT', revision: 35014, status: 'DOWN'},
+
+    ];
+
+    class App extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {env: 'UAT'}
+        }
+        selectEnv(env) {
+            this.setState({env: env});
+        }
+        render() {
+            const instancesByEnv = groupBy(allInstances, 'env');
+            const instances = instancesByEnv[this.state.env];
+
+            return (
+                    <div>
+                        <Menu /><br/>
+                        <button onClick={e => this.selectEnv('UAT')}>UAT</button>
+                        <button onClick={e => this.selectEnv('PROD')}>PROD</button>
+                        <h3>{this.state.env}</h3>
+                        <EnvironmentLogical instances={instances} />
+                    </div>
+            );
+        }
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+
+</script>
+
+
+</body>
+</html>
