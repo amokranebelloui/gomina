@@ -10,6 +10,28 @@ function isSnapshot(version) {
     return version ? version.includes("-SNAPSHOT") : false;
 }
 
+
+function compareVersions (a, b) {
+    var res = compareVersions2(a.replace("-SNAPSHOT", ""), b.replace("-SNAPSHOT", ""));
+    return res != 0 ? res : a.includes("-SNAPSHOT") ? 0 : 1 - b.includes("-SNAPSHOT") ? 0 : 1;
+}
+
+function compareVersions2 (a, b) {
+    var i, diff;
+    var regExStrip0 = /(\.0+)+$/;
+    var segmentsA = a.replace(regExStrip0, '').split('.');
+    var segmentsB = b.replace(regExStrip0, '').split('.');
+    var l = Math.min(segmentsA.length, segmentsB.length);
+
+    for (i = 0; i < l; i++) {
+        diff = parseInt(segmentsA[i], 10) - parseInt(segmentsB[i], 10);
+        if (diff) {
+            return diff;
+        }
+    }
+    return segmentsA.length - segmentsB.length;
+}
+
 function Menu(props) {
     return (
         <div style={{display: "inline-block"}}>
@@ -38,7 +60,7 @@ class Badge extends React.Component {
 class Well extends React.Component {
     render() {
         return (
-            <div style={{padding: '2px', display: 'inline-block',
+            <div style={{padding: '2px', margin: this.props.margin, display: this.props.block ? null : 'inline-block',
                 backgroundColor: '#F8F8F8', border: '1px solid #E3E3E3', borderRadius: '5px'}}>
                 {this.props.children}
             </div>
@@ -47,15 +69,20 @@ class Well extends React.Component {
 }
 
 function Version(props) {
-    const version = props.version
+    const simplifiedVersion = props.version
         ? props.version.replace("-SNAPSHOT", "-S")
         : "unknown";
-    const color = isSnapshot(props.version) ? "white" : "black";
-    const backgroundColor = isSnapshot(props.version) ? "red" : "lightgray";
+
+    const defaultStylingFunction = (version => isSnapshot(version) ? {color: 'white', backgroundColor: '#c30014'} : null);
+    const stylingFunction = props.styling || defaultStylingFunction;
+    const style = stylingFunction(props.version) || {color: 'black', backgroundColor: 'lightgray'}
+
+    //const color = isSnapshot(props.version) ? "white" : "black";
+    //const backgroundColor = isSnapshot(props.version) ? "#c30014" : "lightgray";
     const revision = props.revision ? props.revision : "*";
     return (
-        <Badge color={color} backgroundColor={backgroundColor}>
-            <span title={revision}>{version}</span>
+        <Badge color={style.color} backgroundColor={style.backgroundColor}>
+            <span title={revision}>{simplifiedVersion}</span>
             &nbsp;
             {isSnapshot && <span style={{fontSize: "9px"}}>({revision})</span>}
         </Badge>
