@@ -14,7 +14,8 @@ function Menu(props) {
     return (
         <div style={{display: "inline-block"}}>
             <a href="index.html">index</a>&nbsp;
-            <a href="environments.html">envs</a>
+            <a href="environments.html">envs</a>&nbsp;
+            <a href="pipeline.html">pipeline</a>
         </div>
     );
 }

@@ -2,22 +2,16 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <title>Hello World</title>
+    <title>Environments</title>
     <script src="lib/react.js"></script>
     <script src="lib/react-dom.js"></script>
     <script src="lib/babel.min.js"></script>
-    <!--
-    <script src="https://unpkg.com/react@latest/dist/react.js"></script>
-    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
-    -->
+    <script type="text/babel" src="gomina.js"></script>
 </head>
 <body>
 <div id="root"></div>
-<script type="text/babel" src="gomina.js"></script>
+
 <script type="text/babel">
-
-
 
     class Instance extends React.Component {
         render() {
@@ -130,7 +124,6 @@
     ReactDOM.render(<App />, document.getElementById('root'));
 
 </script>
-
 
 </body>
 </html>

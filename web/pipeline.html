@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Pipeline</title>
+    <script src="lib/react.js"></script>
+    <script src="lib/react-dom.js"></script>
+    <script src="lib/babel.min.js"></script>
+    <script type="text/babel" src="gomina.js"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+
+
+    class App extends React.Component {
+        render() {
+            return (
+                    <div>
+                        <Menu /><br/>
+                        Pipeline
+                    </div>
+            );
+        }
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+
+</script>
+
+</body>
+</html>
