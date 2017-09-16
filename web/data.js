@@ -15,10 +15,10 @@ const allInstances = [
 ];
 
 const allProjects = [
-    {id: 1, name:'kernel', svn:'/svn/kernel', latest: '2.3.0-SNAPSHOT', released: '2.2.0'},
-    {id: 2, name:'basket', svn:'/svn/basket', latest: '5.1.3-SNAPSHOT', released: '5.1.2'},
-    {id: 3, name:'order',  svn:'/svn/order' , latest: '5.1.3',          released: '5.1.3'},
-    {id: 4, name:'fixin',  svn:'/svn/fixin' , latest: '0.9.2-SNAPSHOT', released: '0.9.0'},
+    {id:'kernel', svn:'/svn/kernel', latest: '2.3.0-SNAPSHOT', released: '2.2.0'},
+    {id:'basket', svn:'/svn/basket', latest: '5.1.3-SNAPSHOT', released: '5.1.2'},
+    {id:'order',  svn:'/svn/order' , latest: '5.1.3',          released: '5.1.3'},
+    {id:'fixin',  svn:'/svn/fixin' , latest: '0.9.2-SNAPSHOT', released: '0.9.0'},
 
 ];
 

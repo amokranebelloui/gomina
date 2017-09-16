@@ -42,11 +42,11 @@
         render() {
             const project = allProjects[0];
             const commits = sampleCommits;
-            const instances = allInstances.filter(instance => instance.project == project.name);
+            const instances = allInstances.filter(instance => instance.project == project.id);
             return (
                     <div>
                         <Menu /><br/>
-                        Project {project.name}
+                        Project {project.id}(label?)
                         <br/>
                         <ScmLog key={project.id} project={project} commits={commits} instances={instances} />
                     </div>

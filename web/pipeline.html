@@ -24,7 +24,7 @@
             return (
                 <Well block margin="0 0 2px 0">
                     <div style={{display: 'inline-block', verticalAlign: 'top', minWidth: '50px'}}>
-                        <b>{project.name}</b>&nbsp;
+                        <b>{project.id}(label?)</b>&nbsp;
                     </div>
                     <div style={{display: 'inline-block'}}>
                         {sortedVersions.map(version =>
@@ -52,7 +52,7 @@
                         Pipeline
                         <br/>
                         {projects.map(project =>
-                            <ProjectPipeline key={project.id} project={project} instances={instancesByProject[project.name]} />
+                            <ProjectPipeline key={project.id} project={project} instances={instancesByProject[project.id]} />
                         )}
                     </div>
             );
