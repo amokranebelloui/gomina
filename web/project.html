@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Project</title>
+    <script src="lib/react.js"></script>
+    <script src="lib/react-dom.js"></script>
+    <script src="lib/babel.min.js"></script>
+    <script type="text/babel" src="data.js"></script>
+    <script type="text/babel" src="gomina.js"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+
+    class ScmLog extends React.Component {
+        render() {
+            const project = this.props.project;
+            const commits = this.props.commits;
+            const instances = this.props.instances;
+            return (
+                <div>
+                    <b>SVN Log</b>
+                    <br/>
+                    <ul>
+                        {commits.map(commit =>
+                            <li key={commit.revision}>{commit.revision} -> {commit.message}</li>
+                        )}
+                    </ul>
+                    <ul>
+                        {instances.map(instance =>
+                                <li key={instance.id}>{instance.revision} -> {instance.version} : {instance.env} {instance.name}</li>
+                        )}
+                    </ul>
+                </div>
+            )
+        }
+    }
+
+    class App extends React.Component {
+        render() {
+            const project = allProjects[0];
+            const commits = sampleCommits;
+            const instances = allInstances.filter(instance => instance.project == project.name);
+            return (
+                    <div>
+                        <Menu /><br/>
+                        Project {project.name}
+                        <br/>
+                        <ScmLog key={project.id} project={project} commits={commits} instances={instances} />
+                    </div>
+            );
+        }
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+
+</script>
+
+</body>
+</html>

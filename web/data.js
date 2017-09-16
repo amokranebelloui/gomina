@@ -21,3 +21,11 @@ const allProjects = [
     {id: 4, name:'fixin',  svn:'/svn/fixin' , latest: '0.9.2-SNAPSHOT', released: '0.9.0'},
 
 ];
+
+const sampleCommits = [
+    {revision: 35490, message:'refactor'},
+    {revision: 35488, message:'[JIRA-5409] feature 2'},
+    {revision: 35487, message:'feature1'},
+    {revision: 35469, message:'initial commit'},
+
+];
