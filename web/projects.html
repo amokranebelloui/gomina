@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Projects</title>
+    <script src="lib/react.js"></script>
+    <script src="lib/react-dom.js"></script>
+    <script src="lib/babel.min.js"></script>
+    <script type="text/babel" src="data.js"></script>
+    <script type="text/babel" src="gomina.js"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+
+    class ProjectSummary extends React.Component {
+        render() {
+            const project = this.props.project;
+            return (
+                <Well block margin="0 0 2px 0">
+                    <div style={{display: 'inline-block', verticalAlign: 'top', minWidth: '50px'}}>
+                        <b>{project.name}</b>&nbsp;{project.svn} {project.released} {project.latest}<br/>
+                        (Size) (Coverage) (Unit tests) (Build status) (svn log)
+                    </div>
+                </Well>
+            )
+        }
+    }
+
+    class App extends React.Component {
+        render() {
+            const projects = allProjects;
+            return (
+                    <div>
+                        <Menu /><br/>
+                        Projects
+                        <br/>
+                        {projects.map(project =>
+                            <ProjectSummary key={project.id} project={project} />
+                        )}
+                    </div>
+            );
+        }
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+
+</script>
+
+</body>
+</html>
