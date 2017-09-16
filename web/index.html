@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Hello World</title>
+    <script src="react.js"></script>
+    <script src="react-dom.js"></script>
+    <script src="babel.min.js"></script>
+    <!--
+    <script src="https://unpkg.com/react@latest/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@latest/dist/react-dom.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+    -->
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+    function Clock1(props) {
+        return (
+            <span>
+                <b>It's {props.date.toLocaleTimeString()}.</b>
+            </span>
+        )
+    }
+
+    class Clock extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {date: new Date()};
+
+        }
+        componentDidMount() {
+            console.info("mounted clock")
+            this.tid = setInterval(() => this.tick(), 1000);
+        }
+        componentWillUnmount() {
+            console.info("unmounted clock")
+            clearInterval(this.tid);
+        }
+        tick() {
+            console.info("tick")
+            // setState to re-trigger a render
+            this.setState({date: new Date()});
+        }
+        render() {
+            return (
+                <span>
+                    <b>It's {this.state.date.toLocaleTimeString()}.</b>
+                </span>
+            );
+        }
+    }
+
+    class Toggle2 extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {isToggleOn: true};
+
+            // This binding is necessary to make `this` work in the callback
+            this.toggle = this.toggle.bind(this);
+        }
+
+        toggle() {
+             this.setState(prevState => ({
+                isToggleOn: !prevState.isToggleOn
+             }));
+        }
+
+        render() {
+            return (
+                    <button onClick={this.toggle}>
+                        {this.state.isToggleOn ? 'ON' : 'OFF'}
+                    </button>
+            );
+        }
+    }
+
+    class Toggle extends React.Component {
+        constructor(props) {
+            super(props);
+            //this.state = {isToggleOn: props.toggled};
+
+            // This binding is necessary to make `this` work in the callback
+            //this.toggle = this.toggle.bind(this);
+        }
+
+        toggle(e) {
+            /*
+            this.setState(prevState => ({
+                isToggleOn: !prevState.isToggleOn
+            }));
+            */
+            //this.setState({isToggleOn: e})
+            if (this.props.onToggleChanged) {
+                this.props.onToggleChanged(e)
+            }
+        }
+
+        render() {
+            return (
+                    <button onClick={e => this.toggle(!this.props.toggled)}>
+                        {this.props.toggled ? 'ON' : 'OFF'}
+                    </button>
+            );
+        }
+    }
+
+    class LoggingButton extends React.Component {
+
+        handleClick() {
+            console.log('this is:', this);
+        }
+
+        render() {
+            return (
+                    <button onClick={e => this.handleClick(e)}>
+                        Click me
+                    </button>
+            );
+        }
+    }
+
+    function WarningBanner(props) {
+        if (!props.warn) {
+            return null;
+        }
+
+        return (
+                <div className="warning">
+                    Warning! {props.warn}
+                </div>
+        );
+    }
+
+    function Menu(props) {
+        return (
+            <div style={{display: "inline-block"}}>
+                Menu1 - Menu2 - Menu3
+            </div>
+        );
+    }
+
+    function Badge(props) {
+        return (
+            <span style={{padding: "3px", margin: "0px 2px", backgroundColor: "lightgray", borderRadius: "5px", display: "inline-block"}}>
+                {props.children}
+            </span>
+        )
+    }
+
+    function Version(props) {
+        return (
+                <Badge>{props.version}<br/><span style={{fontSize: "10px"}}>{props.revision}</span></Badge>
+        )
+    }
+
+    const posts = [
+        {id: 1, title: 'Hello World', content: 'Welcome to learning React!'},
+        {id: 2, title: 'Installation', content: 'You can install React from npm.'}
+    ];
+
+    class Posts extends React.Component {
+        constructor(props) {
+            super(props);
+            //this.state = {logged: false, user: "amo"}
+        }
+        render() {
+            console.info(this.props.posts)
+            return (
+                <ul>
+                    {this.props.posts.map((post) =>
+                        <li key={post.id}>{post.title}</li>
+                    )}
+                </ul>
+            )
+        }
+    }
+
+    class App extends React.Component {
+        constructor(props) {
+            super(props);
+            this.state = {logged: true, user: "amo"}
+        }
+        render() {
+            let status;
+            if (this.state.logged) {
+                status = <span>Hello '{this.state.user}'</span>
+            }
+            else {
+                status = <span>Hi buddy</span>
+            }
+            return (
+                    <table>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <Menu /> {this.state.logged && <Clock />}
+                                <br/>
+                                <span>{status}</span>
+                                <br/>
+
+                                Linked toggles
+                                <Toggle toggled={this.state.logged} onToggleChanged={e => {this.setState({logged: e})}} />
+                                <Toggle toggled={this.state.logged} onToggleChanged={e => {this.setState({logged: e})}} />
+                                <br/>
+                                Independent <Toggle2 />
+                                <LoggingButton/>
+                                <WarningBanner warn="Something happened" />
+                                <WarningBanner warn="" />
+                                <br/>
+                                <Posts posts={this.props.posts} />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <Version version="3.2.0" revision="14837"/>
+                                <Version version="2.2.1" revision="14837"/>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+            );
+        }
+    }
+
+    ReactDOM.render(<App posts={posts}/>, document.getElementById('root'));
+
+</script>
+
+</body>
+</html>
