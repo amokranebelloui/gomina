@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Environments</title>
+    <script src="lib/react.js"></script>
+    <script src="lib/react-dom.js"></script>
+    <script src="lib/babel.min.js"></script>
+    <script type="text/babel" src="data.js"></script>
+    <script type="text/babel" src="gomina.js"></script>
+
+    <script src="lib/d3.js"></script>
+    <style>
+        div.tooltip {
+            position: absolute;
+            text-align: center;
+            width: 100px;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: lightsteelblue;
+            border: 0px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+<div id="root"></div>
+
+<svg width="960" height="500"></svg>
+
+<!--canvas width="960" height="500"></canvas-->
+
+
+<script>
+
+var canvas = d3.select("canvas");
+
+var positions = [
+	{name: "referential", x:400, y:400}, 
+    {name: "basket", x:100, y:200}, 
+	{name: "order", x:150, y:120}, 
+	{name: "market", x:200, y:200},
+	{name: "cross", x:300, y:100},
+	{name: "fixout", x:300, y:150},
+	{name: "emma", x:300, y:200},
+	{name: "fidessa", x:150, y:50},
+	{name: "pie", x:100, y:50},
+	{name: "pita", x:50, y:50},
+	{name: "fixin", x:50, y:150},
+	{name: "audit", x:150, y:400},
+	{name: "mis", x:200, y:400},
+]
+var dependencies = [
+	{from:1, to:2}, // basket, order
+	{from:3, to:1}, // market, order
+]
+
+//var svg = d3.select("body").append("svg").attr("width", 960).attr("height", 500);
+var svg = d3.select("svg");
+
+var comps = svg.selectAll("g node-group").data(positions)
+
+svg.selectAll("line").data(dependencies).enter()
+.append("line")
+.attr("x1", function (d) { console.log(positions, d); return positions[d.from].x; })
+.attr("x2", function (d) { console.log(positions, d); return positions[d.to].x; })
+.attr("y1", function (d) { console.log(positions, d); return positions[d.from].y; })
+.attr("y2", function (d) { console.log(positions, d); return positions[d.to].y; })
+.attr("stroke-width", 1)
+.attr("stroke", "black");
+
+var div = d3.select("body").append("div")	
+    .attr("class", "tooltip")				
+    .style("opacity", 0);
+
+	
+var comp = comps.enter()
+    .append("g")
+    .attr("class", "node-group")
+    .attr("transform", function(d) {
+      return "translate(" + d.x + "," + d.y + ")"
+    })
+	.on("mouseenter", function(d) {		
+		div.transition().duration(200).style("opacity", .9);		
+		div.html(d.name + "<br/><hr> with some short description text of "  + d.name + " service")
+			//.style("left", (d3.event.pageX) + "px")
+			//.style("top", (d3.event.pageY - 28) + "px");
+			.style("left", (d.x + 5) + "px")
+			.style("top", (d.y + 5) + "px");
+		})					
+	.on("mouseleave", function(d) {		
+		div.transition()		
+			.duration(500)		
+			.style("opacity", 0);	
+	});
+	
+comp.append("circle")
+    .attr("r", function(d) { return 30/*d.r*/; })
+    .attr("stroke", function(d) { return "yellow"/*d.color*/; })
+	.attr("fill", "lightblue")
+
+comp.append("text")
+    .text(function(d) { return d.name })
+	.attr("x", 0)
+    .attr("dy", ".35em")
+    .attr("text-anchor", "middle")
+	
+	
+
+				
+				/*
+var components = svg.selectAll("circle")
+                         .data(positions)
+                         .enter()
+                         .append("circle")
+						 
+						 .attr("cx", function (d) { return d.x; })
+                      .attr("cy", function (d) { return d.y; })
+                      .attr("r", function (d) { return 40; })
+					  .attr("fill", "blue")
+					  
+					  .append("text")
+	   				  .attr("x", 0)
+					  .attr("dy", ".35em")
+					  .attr("text-anchor", "middle")
+					  .text(function(d) { return d.name; });*/
+			/*
+			components
+                      .attr("cx", function (d) { return d.x; })
+                      .attr("cy", function (d) { return d.y; })
+                      .attr("r", function (d) { return 20; })
+					  .attr("fill", "green")
+			*/
+
+
+		/*	
+var context = canvas.node().getContext("2d"),
+    width = canvas.property("width"),
+    height = canvas.property("height"),
+    radius = 32;
+
+var circles = d3.range(5).map(function(i) {
+  return {
+    index: i,
+    x: Math.round(Math.random() * (width - radius * 2) + radius),
+    y: Math.round(Math.random() * (height - radius * 2) + radius)
+  };
+});
+
+var color = d3.scaleOrdinal()
+    .range(d3.schemeCategory20);
+
+render();
+
+canvas.call(d3.drag()
+    .subject(dragsubject)
+    .on("start", dragstarted)
+    .on("drag", dragged)
+    .on("end", dragended)
+    .on("start.render drag.render end.render", render));
+
+function render() {
+  context.clearRect(0, 0, width, height);
+  for (var i = 0, n = circles.length, circle; i < n; ++i) {
+    circle = circles[i];
+    context.beginPath();
+    context.moveTo(circle.x + radius, circle.y);
+    context.arc(circle.x, circle.y, radius, 0, 2 * Math.PI);
+    context.fillStyle = color(circle.index);
+    context.fill();
+    if (circle.active) {
+      context.lineWidth = 2;
+      context.stroke();
+    }
+  }
+}
+
+function dragsubject() {
+  var i = 0,
+      n = circles.length,
+      dx,
+      dy,
+      d2,
+      s2 = radius * radius * 4, // Double the radius.
+      circle,
+      subject;
+
+  for (i = 0; i < n; ++i) {
+    circle = circles[i];
+    dx = d3.event.x - circle.x;
+    dy = d3.event.y - circle.y;
+    d2 = dx * dx + dy * dy;
+    if (d2 < s2) subject = circle, s2 = d2;
+  }
+
+  return subject;
+}
+
+function dragstarted() {
+  circles.splice(circles.indexOf(d3.event.subject), 1);
+  circles.push(d3.event.subject);
+  d3.event.subject.active = true;
+}
+
+function dragged() {
+  d3.event.subject.x = d3.event.x;
+  d3.event.subject.y = d3.event.y;
+}
+
+function dragended() {
+  d3.event.subject.active = false;
+}
+*/
+</script>
+
+
+<script type="text/babel">
+    ReactDOM.render(<Menu />, document.getElementById('root'));
+</script>
+
+</body>
+</html>
