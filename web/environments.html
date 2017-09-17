@@ -6,6 +6,7 @@
     <script src="lib/react.js"></script>
     <script src="lib/react-dom.js"></script>
     <script src="lib/babel.min.js"></script>
+    <script src="lib/sockjs-0.3.4.min.js"></script>
     <script type="text/babel" src="data.js"></script>
     <script type="text/babel" src="gomina.js"></script>
 </head>
@@ -87,18 +88,65 @@
     class App extends React.Component {
         constructor(props) {
             super(props);
-            this.state = {env: 'UAT'}
+            this.state = {env: 'UAT', realtime: false, instances: this.props.instances}
+            this.connect = this.connect.bind(this)
+            this.switch = this.switch.bind(this)
+        }
+        connect() {
+            this.sock = new SockJS('/realtime');
+
+            const thisComponent = this;
+            var eventsDiv = this.eventsList;
+            this.sock.onopen = function() {
+                console.log('open');
+                thisComponent.setState({realtime: true});
+                eventsDiv.innerHTML = eventsDiv.innerHTML + 'Open<br>';
+                //sock.send('test');
+            };
+
+            this.sock.onmessage = function(e) {
+                var r = Math.floor((Math.random() * 3) + 1);
+                var fakeStatus = r == 1 ? 'LIVE' : r == 2 ? 'LOADING' : 'DOWN';
+                console.log('message', e.data, fakeStatus);
+                eventsDiv.innerHTML = eventsDiv.innerHTML + ' ' + e.data + ' ' + fakeStatus + '<br>';
+
+                thisComponent.state.instances[0].status = fakeStatus;
+                thisComponent.setState({instances: thisComponent.state.instances});
+            };
+
+            this.sock.onclose = function() {
+                console.log('close');
+                thisComponent.setState({realtime: false});
+                eventsDiv.innerHTML = eventsDiv.innerHTML + 'Close<br>';
+            };
+        }
+        switch(newStatus) {
+            if (this.state != newStatus) {
+                if (newStatus) {
+                    this.connect();
+                }
+                else {
+                    this.sock.close();
+                }
+            }
+        }
+        componentDidMount() {
+            //this.connect();
         }
         selectEnv(env) {
             this.setState({env: env});
         }
         render() {
-            const instancesByEnv = groupBy(allInstances, 'env');
+            const instancesByEnv = groupBy(this.state.instances, 'env');
             const instances = instancesByEnv[this.state.env];
 
             return (
                     <div>
                         <Menu /><br/>
+                        <div style={{float: 'right'}}>
+                            <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
+                            <div ref={node => this.eventsList = node}></div>
+                        </div>
                         <button onClick={e => this.selectEnv('UAT')}>UAT</button>
                         <button onClick={e => this.selectEnv('PROD')}>PROD</button>
                         <h3>{this.state.env}</h3>
@@ -108,7 +156,7 @@
         }
     }
 
-    ReactDOM.render(<App />, document.getElementById('root'));
+    ReactDOM.render(<App instances={allInstances} />, document.getElementById('root'));
 
 </script>
 
