@@ -32,19 +32,6 @@ function compareVersions2 (a, b) {
     return segmentsA.length - segmentsB.length;
 }
 
-function Menu(props) {
-    return (
-        <div style={{display: "inline-block"}}>
-            <a href="index.html">index</a>&nbsp;
-            <a href="architecture.html">architecture</a>&nbsp;
-            <a href="environments.html">envs</a>&nbsp;
-            <a href="projects.html">projects</a>&nbsp;
-            <a href="project.html">project</a>&nbsp;
-            <a href="pipeline.html">pipeline</a>
-        </div>
-    );
-}
-
 class Toggle extends React.Component {
     constructor(props) {
         super(props);

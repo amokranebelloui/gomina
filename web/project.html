@@ -6,84 +6,31 @@
     <script src="lib/react.js"></script>
     <script src="lib/react-dom.js"></script>
     <script src="lib/babel.min.js"></script>
-    <script type="text/babel" src="data.js"></script>
-    <script type="text/babel" src="gomina.js"></script>
+    <script type="text/babel" src="components/data.js"></script>
+    <script type="text/babel" src="components/gomina.js"></script>
+    <script type="text/babel" src="components/layout.js"></script>
+    <script type="text/babel" src="components/project.js"></script>
 </head>
 <body>
 <div id="root"></div>
 
 <script type="text/babel">
 
-    class ScmLog extends React.Component {
-        render() {
-            //const project = this.props.project;
-            const sortedCommits = this.props.commits;
-            const instances = this.props.instances;
-            const instancesByRevision = groupBy(instances, 'revision');
-            const log = {};
-            sortedCommits.map(commit => {
-                log[commit.revision] = {message: commit.message, instances: []};
-            });
-            Object.keys(instancesByRevision).map(revision => {
-                log[revision] = log[revision] || {};
-                log[revision].instances = instancesByRevision[revision] || [];
-                log[revision].version = instancesByRevision[revision][0].version;
-            });
-            return (
-                <div>
-                    <b>SVN Log</b>
-                    <br/>
-                        {Object.keys(log).sort((a,b) => b-a).map(revision =>
-                            <Well block key={revision}>
-                                <div style={{overflow: 'auto'}}>
-                                    <span style={{float: 'left', marginRight: '2px'}}>
-                                        {revision || '-'}
-                                    </span>
-                                    <span style={{display: 'block', marginLeft: '60px', minHeight: '20px', paddingLeft: '1px', paddingRight: '1px'}}>
-                                        {log[revision].message || '-'}
-
-                                        <span style={{float: 'right', position: 'top'}}>
-                                            {log[revision].version &&
-                                                <span style={{paddingLeft: '2px', paddingRight: '2px'}}>
-                                                    <Version version={log[revision].version} />
-                                                </span>
-                                            }
-                                            {log[revision].instances.map(instance =>
-                                                <span key={instance.id} style={{paddingLeft: '2px', paddingRight: '2px'}}>
-                                                    <Badge backgroundColor="#EEEEAA">
-                                                        {instance.env} {instance.name}&nbsp;
-                                                    </Badge>
-                                                </span>
-                                            )}
-
-                                        </span>
-                                    </span>
-
-                                </div>
-                            </Well>
-                        )}
-                </div>
-            )
-        }
-    }
-
-    class App extends React.Component {
+    class ProjectApp extends React.Component {
         render() {
             const project = allProjects[0];
             const commits = sampleCommits;
             const instances = allInstances.filter(instance => instance.project == project.id);
+            const title = "Project '" + project.label + "'";
             return (
-                    <div>
-                        <Menu /><br/>
-                        Project {project.id}(label?)
-                        <br/>
-                        <ScmLog key={project.id} project={project} commits={commits} instances={instances} />
-                    </div>
+                <AppLayout title={title}>
+                    <ScmLog key={project.id} project={project} commits={commits} instances={instances} />
+                </AppLayout>
             );
         }
     }
 
-    ReactDOM.render(<App />, document.getElementById('root'));
+    ReactDOM.render(<ProjectApp />, document.getElementById('root'));
 
 </script>
 

@@ -6,7 +6,8 @@
     <script src="lib/react.js"></script>
     <script src="lib/react-dom.js"></script>
     <script src="lib/babel.min.js"></script>
-    <script type="text/babel" src="gomina.js"></script>
+    <script type="text/babel" src="components/gomina.js"></script>
+    <script type="text/babel" src="components/layout.js"></script>
 </head>
 <body>
 <div id="root"></div>
@@ -18,34 +19,6 @@
                 <b>It's {props.date.toLocaleTimeString()}.</b>
             </span>
         )
-    }
-
-    class Clock extends React.Component {
-        constructor(props) {
-            super(props);
-            this.state = {date: new Date()};
-
-        }
-        componentDidMount() {
-            console.info("mounted clock")
-            this.tid = setInterval(() => this.tick(), 1000);
-        }
-        componentWillUnmount() {
-            console.info("unmounted clock")
-            clearInterval(this.tid);
-        }
-        tick() {
-            console.info("tick")
-            // setState to re-trigger a render
-            this.setState({date: new Date()});
-        }
-        render() {
-            return (
-                <span>
-                    <b>It's {this.state.date.toLocaleTimeString()}.</b>
-                </span>
-            );
-        }
     }
 
     class Toggle2 extends React.Component {
@@ -137,34 +110,22 @@
                 status = <span>Hi buddy</span>
             }
             return (
-                <div>
-                    <Menu /><br/>
-                    <table>
-                        <tbody>
-                        <tr>
-                            <td>
-                                <a href="index.html">index</a>&nbsp;
-                                <a href="environments.html">envs</a>
-                                <br/>
-                                <span>{status}</span>&nbsp;
-                                {this.state.logged && <Clock />}
-                                <br/>
+                <AppLayout title='Sandbox'>
+                    <span>{status}</span>&nbsp;
+                    {this.state.logged && <Clock />}
+                    <br/>
 
-                                Linked toggles
-                                <Toggle toggled={this.state.logged} onToggleChanged={e => {this.setState({logged: e})}} />
-                                <Toggle toggled={this.state.logged} onToggleChanged={e => {this.setState({logged: e})}} />
-                                <br/>
-                                Independent <Toggle2 />
-                                <LoggingButton/>
-                                <WarningBanner warn="Something happened" />
-                                <WarningBanner warn="" />
-                                <br/>
-                                <Posts posts={this.props.posts} />
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
+                    Linked toggles
+                    <Toggle toggled={this.state.logged} onToggleChanged={e => {this.setState({logged: e})}} />
+                    <Toggle toggled={this.state.logged} onToggleChanged={e => {this.setState({logged: e})}} />
+                    <br/>
+                    Independent <Toggle2 />
+                    <LoggingButton/>
+                    <WarningBanner warn="Something happened" />
+                    <WarningBanner warn="" />
+                    <br/>
+                    <Posts posts={this.props.posts} />
+                </AppLayout>
             );
         }
     }
