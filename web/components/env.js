@@ -23,15 +23,48 @@ class Instance extends React.Component {
 class RedisInstance extends React.Component {
     render() {
         const instance = this.props.instance;
+        const isSlave = instance.extra.redisRole == 'SLAVE';
+        const isMaster = instance.extra.redisRole == 'MASTER';
+        const persistenceModeColor = instance.extra.redisMode == 'AOF' ? 'green' : instance.extra.redisMode == 'RDB' ? 'lightgreen' : 'gray';
         return (
             <div>
-                REDIS {instance.name}&nbsp;
+                <span>{instance.name}</span>&nbsp;
+                {instance.extra.redisMaster && <Badge title={'Master in ServiceRegistry'} backgroundColor='#FFD21C' color='white'>***</Badge>}
+                &nbsp;
                 <Status status={instance.status} />&nbsp;
-                <Version version={instance.version} revision={instance.revision}/>
+                {isSlave && (instance.extra.redisMasterInfo.link
+                    ? <Badge title={'Link Up'} backgroundColor='#FCF6D4' color='white'>OK</Badge>
+                    : <Badge title={'Link Down Since ' + instance.extra.redisMasterInfo.since} backgroundColor='#FF2929' color='white'>KO</Badge>)
+                }
+                &nbsp;
+                {instance.extra.redisRW == 'rw' && <Badge backgroundColor='#969696' color='white' title="Read/Write">RW</Badge>}
+                {instance.extra.redisRW == 'ro' && <Badge backgroundColor='#DBDBDB' color='white' title="Read Only">RO</Badge>}
+                &nbsp;
+
+                <span title={'Role ' + instance.extra.redisRole + ' ' + instance.extra.redisSlaveCount + ' slaves'}>
+                    {instance.extra.redisRole} {instance.extra.redisSlaveCount}
+                </span>
+                &nbsp;
+
+                {!instance.confCommited && <Badge title={'Config in not Committed'} backgroundColor='darkred' color='white'>chg</Badge>}
+
+                <Badge title={'Persistence Mode ' + instance.extra.redisMode} backgroundColor={persistenceModeColor} color='white'>
+                    {instance.extra.redisMode}
+                </Badge>
+
+                <span title={instance.extra.redisClientCount + ' clients'}>
+                    {instance.extra.redisClientCount}
+                </span>
                 <br/>
-                {instance.extra.redisRole} {instance.extra.redisRW}
+
+                {instance.extra.redisInfo.host}:{instance.extra.redisInfo.port} -> {instance.extra.redisMasterInfo.host}:{instance.extra.redisMasterInfo.port}
+                <span title="Offset (Diff)" style={{fontSize: 9, color: 'gray'}}>
+                    {instance.extra.redisOffset} {isSlave && ('(' + instance.extra.redisOffsetDiff + ')')}
+                </span>
                 <br/>
+
                 {instance.host} {instance.folder}
+                <Version version={instance.version} revision={instance.revision}/>
             </div>
         )
     }

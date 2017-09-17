@@ -68,7 +68,8 @@ class Badge extends React.Component {
     }
     render() {
         return (
-            <span style={{padding: "3px", fontSize: '10px',
+            <span title={this.props.title}
+                style={{padding: "3px", fontSize: '10px',
                 color: this.props.color, backgroundColor: this.props.backgroundColor,
                 borderRadius: "5px", display: "inline-block"}}>
                     {this.props.children}
