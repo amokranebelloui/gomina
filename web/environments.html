@@ -19,18 +19,52 @@
         render() {
             const instance = this.props.instance;
             const opacity = this.props.highlighted ? 1 : 0.06;
+            let comp;
+            if (instance.type == 'redis') {
+                comp = <RedisInstance instance={instance} />
+            }
+            else {
+                comp = <AppInstance instance={instance} />
+            }
             return (
-                    <Well>
-                        <div style={{display: "inline-block", verticalAlign: 'top', opacity:opacity}}>
-                            {instance.name}&nbsp;
-                            <Status status={instance.status} />&nbsp;
-                            <Version version={instance.version} revision={instance.revision}/>
-                            <br/>
-                            {instance.host} {instance.folder}
-                        </div>
+                <Well>
+                    <div style={{display: "inline-block", verticalAlign: 'top', opacity:opacity}}>
+                    {comp}
+                    </div>
+                </Well>
+            )
+        }
+    }
 
+    class RedisInstance extends React.Component {
+        render() {
+            const instance = this.props.instance;
+            return (
+                <div>
+                    REDIS {instance.name}&nbsp;
+                    <Status status={instance.status} />&nbsp;
+                    <Version version={instance.version} revision={instance.revision}/>
+                    <br/>
+                    {instance.extra.redisRole} {instance.extra.redisRW}
+                    <br/>
+                    {instance.host} {instance.folder}
+                </div>
+            )
+        }
+    }
 
-                    </Well>
+    class AppInstance extends React.Component {
+        render() {
+            const instance = this.props.instance;
+            return (
+                <div>
+                    {instance.name}&nbsp;
+                    <Status status={instance.status} />&nbsp;
+                    <Version version={instance.version} revision={instance.revision}/>
+                    <br/>
+                    {instance.host} {instance.folder}
+                </div>
+
             )
         }
     }
@@ -88,7 +122,7 @@
     class App extends React.Component {
         constructor(props) {
             super(props);
-            this.state = {env: 'UAT', realtime: false, instances: this.props.instances}
+            this.state = {env: 'PROD', realtime: false, instances: this.props.instances}
             this.connect = this.connect.bind(this)
             this.switch = this.switch.bind(this)
         }
@@ -147,8 +181,8 @@
                             <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
                             <div ref={node => this.eventsList = node}></div>
                         </div>
-                        <button onClick={e => this.selectEnv('UAT')}>UAT</button>
                         <button onClick={e => this.selectEnv('PROD')}>PROD</button>
+                        <button onClick={e => this.selectEnv('UAT')}>UAT</button>
                         <h3>{this.state.env}</h3>
                         <EnvironmentLogical instances={instances} />
                     </div>
