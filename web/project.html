@@ -49,8 +49,8 @@
                                                 </span>
                                             }
                                             {log[revision].instances.map(instance =>
-                                                <span style={{paddingLeft: '2px', paddingRight: '2px'}}>
-                                                    <Badge key={instance.id} backgroundColor="#EEEEAA">
+                                                <span key={instance.id} style={{paddingLeft: '2px', paddingRight: '2px'}}>
+                                                    <Badge backgroundColor="#EEEEAA">
                                                         {instance.env} {instance.name}&nbsp;
                                                     </Badge>
                                                 </span>

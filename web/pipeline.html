@@ -17,7 +17,7 @@
     class ProjectPipeline extends React.Component {
         render() {
             const project = this.props.project;
-            const instancesByVersion = groupBy(this.props.instances, 'version')
+            const instancesByVersion = groupBy(this.props.instances || [], 'version')
             instancesByVersion[project.latest] = instancesByVersion[project.latest] || [];
             instancesByVersion[project.released] = instancesByVersion[project.released] || [];
             const sortedVersions = Object.keys(instancesByVersion).sort(compareVersions);
@@ -45,6 +45,7 @@
     class App extends React.Component {
         render() {
             const instancesByProject = groupBy(allInstances, 'project');
+            console.info('instances by project', instancesByProject);
             const projects = allProjects;
             return (
                     <div>
