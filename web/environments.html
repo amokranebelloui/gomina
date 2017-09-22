@@ -72,6 +72,8 @@
         render() {
             const instancesByEnv = groupBy(this.state.instances, 'env');
             const instances = instancesByEnv[this.state.env];
+            const envs = Object.keys(instancesByEnv);
+            console.info('envs', envs);
 
             return (
                 <AppLayout title={"Environment '" + this.state.env + "'"}>
@@ -79,8 +81,10 @@
                         <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
                         <div ref={node => this.eventsList = node}></div>
                     </div>
-                    <button onClick={e => this.selectEnv('PROD')}>PROD</button>
-                    <button onClick={e => this.selectEnv('UAT')}>UAT</button>
+                    {envs.map(env =>
+                        <button key={env} style={{color: this.state.env == env ? 'gray' : null}} onClick={e => this.selectEnv(env)}>{env}</button>
+                    )}
+                    <hr/>
                     <EnvironmentLogical instances={instances} />
                 </AppLayout>
             );

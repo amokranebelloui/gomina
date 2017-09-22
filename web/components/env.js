@@ -71,35 +71,6 @@ class RedisInstance extends React.Component {
     }
 }
 
-class CopyButton extends React.Component {
-    copyToClipboard(text) {
-        //event.originalTarget.parentNode.children[2].select()
-        this.textEdit.select()
-        var successful = document.execCommand('copy');
-        console.log(successful, text, this.textEdit.value);
-    }
-    render() {
-        return (
-            <span style={{
-                    display: 'inline-block',
-                    backgroundColor: 'black', color: 'white',
-                    padding: 1, fontSize: 9, borderRadius: 4,
-                    cursor: 'pointer'}}
-                  onClick={e => this.copyToClipboard(this.props.value)}>
-
-                <span style={{padding: 1, verticalAlign: 'top', align: 'middle'}}>
-                    &gt;<input type="text" readOnly
-                                   ref={node => this.textEdit = node}
-                                   value={this.props.value}
-                                   style={{opacity: 0, backgroundColor: 'red', width: 1, height: 1, border: 0}} />
-                    &gt;
-                </span>
-            </span>
-        )
-    }
-}
-
-
 class AppInstance extends React.Component {
     render() {
         const instance = this.props.instance;
@@ -139,7 +110,7 @@ class Service extends React.Component {
     render() {
         const instances = this.props.instances ? this.props.instances : [];
         const differentVersions = new Set(instances.map(instance => instance.version)).size > 1;
-        const highlightFunction = this.props.highlight || (instance => true);
+        const highlightFunction = this.props.highlightFunction || (instance => true);
         return (
             <div style={{padding: '2px'}}>
                 <div style={{width: '140px', display: 'inline-block', verticalAlign: 'top', marginRight: '2px'}}>
@@ -157,28 +128,57 @@ class Service extends React.Component {
     }
 }
 
+class Selection extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        return (
+            <button style={{color: this.props.id == this.props.selected ? 'gray' : null}}
+                    onClick={this.props.onSelectionChanged && this.props.onSelectionChanged}>{this.props.label}</button>
+        )
+    }
+}
+
 class EnvironmentLogical extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {highlight: instance => true}
+        this.state = {id: 'all', highlight: instance => true}
+    }
+    changeSelected(id, highlightFunction) {
+        console.log('this is:', id, highlightFunction);
+        this.setState({id: id, highlight: highlightFunction})
     }
     render() {
         const instances = this.props.instances;
         const services = groupBy(instances, 'service');
-        const highlightAll = instance => true;
-        const highlightDown = instance => instance.status == 'DOWN';
-        const highlightSnapshot = instance => isSnapshot(instance.version);
+        const iterable = instances.map(instance => instance.host);
+        const hosts = Array.from(new Set(iterable)).sort();
 
         return (
             <div>
-                <button onClick={e => this.setState({highlight: highlightAll})}>ALL</button>
-                <button onClick={e => this.setState({highlight: highlightDown})}>DOWN</button>
-                <button onClick={e => this.setState({highlight: highlightSnapshot})}>SNAPSHOTS</button>
-                <button onClick={e => this.setState({highlight: instance => instance.host == '10.2.3.58'})}>10.2.3.58</button>
-                <button onClick={e => this.setState({highlight: instance => instance.host == '10.2.3.56'})}>10.2.3.56</button>
+
+                <Selection id='all' label='ALL' selected={this.state.id}
+                           onSelectionChanged={e => this.changeSelected('all', instance => true)} />
+                <Selection id='loading' label='LOADING' selected={this.state.id}
+                           onSelectionChanged={e => this.changeSelected('loading', instance => instance.status == 'LOADING')} />
+                <Selection id='down' label='DOWN' selected={this.state.id}
+                           onSelectionChanged={e => this.changeSelected('down', instance => instance.status == 'DOWN')} />
+                <Selection id='running' label='RUNNING' selected={this.state.id}
+                           onSelectionChanged={e => this.changeSelected('running', instance => instance.status == 'LIVE')} />
+
+                <Selection id='snapshots' label='SNAPSHOTS' selected={this.state.id}
+                           onSelectionChanged={e => this.changeSelected('snapshots', instance => isSnapshot(instance.version))} />
+                <Selection id='released' label='RELEASED' selected={this.state.id}
+                           onSelectionChanged={e => this.changeSelected('released', instance => !isSnapshot(instance.version))} />
+
+                {hosts.map(host =>
+                    <Selection key={host} id={host} label={host} selected={this.state.id}
+                               onSelectionChanged={e => this.changeSelected(host, instance => instance.host == host)} />
+                )}
 
                 {Object.keys(services).map( service =>
-                    <Service key={service} name={service} instances={services[service]} highlight={this.state.highlight} />
+                    <Service key={service} name={service} instances={services[service]} highlightFunction={this.state.highlight} />
                 )}
             </div>
         )
