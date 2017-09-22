@@ -160,22 +160,37 @@ class EnvironmentLogical extends React.Component {
 
                 <Selection id='all' label='ALL' selected={this.state.id}
                            onSelectionChanged={e => this.changeSelected('all', instance => true)} />
-                <Selection id='loading' label='LOADING' selected={this.state.id}
-                           onSelectionChanged={e => this.changeSelected('loading', instance => instance.status == 'LOADING')} />
-                <Selection id='down' label='DOWN' selected={this.state.id}
-                           onSelectionChanged={e => this.changeSelected('down', instance => instance.status == 'DOWN')} />
-                <Selection id='running' label='RUNNING' selected={this.state.id}
-                           onSelectionChanged={e => this.changeSelected('running', instance => instance.status == 'LIVE')} />
 
-                <Selection id='snapshots' label='SNAPSHOTS' selected={this.state.id}
-                           onSelectionChanged={e => this.changeSelected('snapshots', instance => isSnapshot(instance.version))} />
-                <Selection id='released' label='RELEASED' selected={this.state.id}
-                           onSelectionChanged={e => this.changeSelected('released', instance => !isSnapshot(instance.version))} />
+                <span>&nbsp;&nbsp;&nbsp;</span>
 
-                {hosts.map(host =>
-                    <Selection key={host} id={host} label={host} selected={this.state.id}
-                               onSelectionChanged={e => this.changeSelected(host, instance => instance.host == host)} />
-                )}
+                <div style={{display: 'inline-block'}}>
+                    <Selection id='loading' label='LOADING' selected={this.state.id}
+                               onSelectionChanged={e => this.changeSelected('loading', instance => instance.status == 'LOADING')} />
+                    <Selection id='down' label='DOWN' selected={this.state.id}
+                               onSelectionChanged={e => this.changeSelected('down', instance => instance.status == 'DOWN')} />
+                    <Selection id='running' label='RUNNING' selected={this.state.id}
+                               onSelectionChanged={e => this.changeSelected('running', instance => instance.status == 'LIVE')} />
+                </div>
+
+                <span>&nbsp;&nbsp;&nbsp;</span>
+
+                <div style={{display: 'inline-block'}}>
+                    <Selection id='snapshots' label='SNAPSHOTS' selected={this.state.id}
+                               onSelectionChanged={e => this.changeSelected('snapshots', instance => isSnapshot(instance.version))} />
+                    <Selection id='released' label='RELEASED' selected={this.state.id}
+                               onSelectionChanged={e => this.changeSelected('released', instance => !isSnapshot(instance.version))} />
+                </div>
+
+                <span>&nbsp;&nbsp;&nbsp;</span>
+
+                <div style={{display: 'inline-block'}}>
+                    {hosts.map(host =>
+                        <Selection key={host} id={host} label={host} selected={this.state.id}
+                                   onSelectionChanged={e => this.changeSelected(host, instance => instance.host == host)} />
+                    )}
+                </div>
+
+                <br/>
 
                 {Object.keys(services).map( service =>
                     <Service key={service} name={service} instances={services[service]} highlightFunction={this.state.highlight} />
