@@ -115,7 +115,7 @@ class AppInstance extends React.Component {
                     &nbsp;
                     {!instance.confCommited && <Badge title={'Config in not Committed'} backgroundColor='darkred' color='white'>chg</Badge>}
 
-                    <BuildLink url={instance.project} />
+                    <BuildLink url={instance.project} /> {/* // TODO Project Build URL */}
                 </div>
                 <div style={{display: 'flex', fontSize: 10}}>
                     <span>{instance.host}</span>
@@ -125,7 +125,10 @@ class AppInstance extends React.Component {
                     <span>{instance.folder}</span>
                 </div>
                 <div>
-                    Quickfix - Bus - Core - Jmx
+                    <Badge>{instance.extra.quickfixPersistence}</Badge>
+                    <Badge>{instance.extra.busVersion}</Badge>
+                    <Badge>{instance.extra.coreVersion}</Badge>
+                    <Badge>{instance.extra.jmx}</Badge>
                 </div>
             </div>
         )
