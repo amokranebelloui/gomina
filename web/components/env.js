@@ -63,25 +63,71 @@ class RedisInstance extends React.Component {
                 </span>
                 <br/>
 
-                {instance.host} {instance.folder}
+                <CopyButton value={instance.folder} />
+                <span style={{fontSize: 10}}>{instance.host} {instance.folder}</span>
                 <Version version={instance.version} revision={instance.revision}/>
             </div>
         )
     }
 }
 
+class CopyButton extends React.Component {
+    copyToClipboard(text) {
+        //event.originalTarget.parentNode.children[2].select()
+        this.textEdit.select()
+        var successful = document.execCommand('copy');
+        console.log(successful, text, this.textEdit.value);
+    }
+    render() {
+        return (
+            <span style={{
+                    display: 'inline-block',
+                    backgroundColor: 'black', color: 'white',
+                    padding: 1, fontSize: 9, borderRadius: 4,
+                    cursor: 'pointer'}}
+                  onClick={e => this.copyToClipboard(this.props.value)}>
+
+                <span style={{padding: 1, verticalAlign: 'top', align: 'middle'}}>
+                    &gt;<input type="text" readOnly
+                                   ref={node => this.textEdit = node}
+                                   value={this.props.value}
+                                   style={{opacity: 0, backgroundColor: 'red', width: 1, height: 1, border: 0}} />
+                    &gt;
+                </span>
+            </span>
+        )
+    }
+}
+
+
 class AppInstance extends React.Component {
     render() {
         const instance = this.props.instance;
+        //, alignItems: 'top', justifyContent: 'center'
         return (
             <div>
-                {instance.name}&nbsp;
-                <Status status={instance.status} />&nbsp;
-                <Version version={instance.version} revision={instance.revision}/>
-                <br/>
-                {instance.host} {instance.folder}
-            </div>
+                <div>
+                    <span>{instance.name}</span>
+                    &nbsp;
+                    <Status status={instance.status} />
+                    &nbsp;
+                    <Version version={instance.version} revision={instance.revision}/>
+                    &nbsp;
+                    {!instance.confCommited && <Badge title={'Config in not Committed'} backgroundColor='darkred' color='white'>chg</Badge>}
 
+                    <BuildLink url={instance.project} />
+                </div>
+                <div style={{display: 'flex', fontSize: 10}}>
+                    <span>{instance.host}</span>
+                    &nbsp;
+                    <CopyButton value={instance.folder} />
+                    &nbsp;
+                    <span>{instance.folder}</span>
+                </div>
+                <div>
+                    Quickfix - Bus - Core - Jmx
+                </div>
+            </div>
         )
     }
 }
