@@ -1,3 +1,6 @@
+
+import React from 'react';
+
 function groupBy(list, property) {
     return list.reduce((result, obj) => {
         const value = obj[property];
@@ -136,8 +139,8 @@ class Status extends React.Component {
 class CopyButton extends React.Component {
     copyToClipboard(text) {
         //event.originalTarget.parentNode.children[2].select()
-        this.textEdit.select()
-        var successful = document.execCommand('copy');
+        this.textEdit.select();
+        let successful = document.execCommand('copy');
         console.log(successful, text, this.textEdit.value);
     }
     render() {
@@ -161,3 +164,4 @@ class CopyButton extends React.Component {
     }
 }
 
+export {Toggle, Badge, Well, Status, CopyButton, Version, groupBy, isSnapshot, compareVersions}

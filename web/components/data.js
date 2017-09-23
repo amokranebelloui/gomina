@@ -37,3 +37,13 @@ const sampleCommits = [
     {revision: 33982, message:'initial commit'},
 
 ];
+
+const posts = [
+    {id: 1, title: 'Hello World 4', content: 'Welcome to learning React!'},
+    {id: 2, title: 'Installation', content: 'You can install React from npm.'},
+    {id: 3, title: 'Live Edit in Jetbrains, wo', content: 'You can live edit from Jetbrains IDE, wow!'}
+];
+
+
+
+export {allInstances, allProjects, sampleCommits, posts}

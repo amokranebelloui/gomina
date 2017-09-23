@@ -1,4 +1,13 @@
 
+import React from 'react';
+import * as d3 from 'd3'; // FIXME ???
+
+import {Toggle} from './gomina';
+
+import './archi-diagram.css'
+
+console.info("d3", d3);
+
 class Diagram extends React.Component {
     constructor(props){
         super(props);
@@ -15,7 +24,8 @@ class Diagram extends React.Component {
     }
     componentWillUnmount() {
         console.info("destroy")
-        var el = this.getDOMNode();
+        var el = this.node;
+        console.info(el, d3); // FIXME ???
         d3.destroy(el);
     }
     createDiagram() {
@@ -83,3 +93,5 @@ class Diagram extends React.Component {
         );
     }
 }
+
+export {Diagram};

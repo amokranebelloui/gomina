@@ -1,4 +1,8 @@
 
+import React from 'react';
+
+import {groupBy, Well, Version, Badge} from './gomina';
+
 class LinesOfCode extends React.Component {
     render() {
         const base = {padding: '2px', borderRadius: '3px', display: 'block'};
@@ -149,6 +153,8 @@ class ScmLog extends React.Component {
         )
     }
 }
+
+export {BuildLink, ScmLog, ProjectSummary, ScmLink}
 
 
 

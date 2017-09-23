@@ -1,4 +1,8 @@
 
+import React from 'react';
+
+import {groupBy, compareVersions, Well, Version} from './gomina';
+
 class ProjectPipeline extends React.Component {
     render() {
         const project = this.props.project;
@@ -26,3 +30,5 @@ class ProjectPipeline extends React.Component {
         )
     }
 }
+
+export {ProjectPipeline}

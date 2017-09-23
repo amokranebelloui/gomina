@@ -1,4 +1,9 @@
 
+import React from 'react';
+
+import {groupBy, isSnapshot, Well, Badge, Status, CopyButton, Version} from './gomina';
+import {BuildLink} from './project';
+
 class Instance extends React.Component {
     render() {
         const instance = this.props.instance;
@@ -24,7 +29,7 @@ class RedisInstance extends React.Component {
     render() {
         const instance = this.props.instance;
         const isSlave = instance.extra.redisRole == 'SLAVE';
-        const isMaster = instance.extra.redisRole == 'MASTER';
+        //const isMaster = instance.extra.redisRole == 'MASTER';
         const persistenceModeColor = instance.extra.redisMode == 'AOF' ? 'green' : instance.extra.redisMode == 'RDB' ? 'lightgreen' : 'gray';
         return (
             <div>
@@ -200,3 +205,4 @@ class EnvironmentLogical extends React.Component {
     }
 }
 
+export {EnvironmentLogical}

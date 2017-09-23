@@ -99,7 +99,7 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
 
-        router.route("/*").handler(StaticHandler.create("web").setCachingEnabled(false).setIndexPage("index.html"));
+        router.route("/*").handler(StaticHandler.create("web").setCachingEnabled(false).setIndexPage("/app/"));
 
         Thread thread = new Thread(() -> {
             while (true) {

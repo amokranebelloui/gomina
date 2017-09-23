@@ -14,8 +14,8 @@ module.exports = {
     */
     //entry: "./web/components/app.js",
     entry: {
-        app1: './web/components/app.js',
-        app2: './web/components/app2.js'
+        components: './web/components/components.js',
+        app: './web/components/application.js'
     },
     plugins: [
         new CleanWebpackPlugin(['web/dist']),
