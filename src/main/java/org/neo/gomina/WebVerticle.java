@@ -81,7 +81,8 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
 
-        router.route().pathRegex("/([^/]*)/*.*").handler(ctx -> {
+        router.route().pathRegex("/(app|test)/.*").handler(ctx -> {
+        //router.route().pathRegex("/([^/.]*)/*.*").handler(ctx -> {
             HttpServerResponse response = ctx.response();
             response.putHeader("content-type", "text/html");
             try {
