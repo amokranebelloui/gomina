@@ -1,5 +1,10 @@
 
 var path = require('path');
+
+const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+
 module.exports = {
     /*
     resolve: {
@@ -7,10 +12,24 @@ module.exports = {
         moduleDirectories: ["web"]
     },
     */
-    entry: "./web/components/app.js",
+    //entry: "./web/components/app.js",
+    entry: {
+        app1: './web/components/app.js',
+        app2: './web/components/app2.js'
+    },
+    plugins: [
+        new CleanWebpackPlugin(['web/dist']),
+        new HtmlWebpackPlugin({
+            title: 'Application',
+            template: 'web/index.template.ejs',
+            inject: 'body',
+            filename: 'index.html'
+        }),
+        new webpack.optimize.CommonsChunkPlugin({name: 'shared'})
+    ],
     output: {
         path: path.resolve(__dirname, 'web/dist'),
-        filename: 'bundle.js'
+        filename: '[name].bundle.js'
     },
     module: {
         loaders: [
