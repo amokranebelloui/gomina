@@ -7,3 +7,15 @@ Lib Location
 <script src="http://cdn.sockjs.org/sockjs-0.3.4.min.js"></script>
 
     
+    
+    import React from 'react';
+    import ReactDOM from 'react-dom';
+    
+npm install --save-dev babel-loader babel-core babel-preset-env webpack
+npm install --save react react-dom
+
+npm install --save-dev babel-preset-react babel-preset-es2015
+
+
+
+webpack --profile --json > stats.json
