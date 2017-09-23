@@ -28,8 +28,6 @@ class Blocker extends React.Component {
                 <Link to="/app/sandbox">sandbox</Link> -&nbsp;
                 <Link to="/app/unknown">unknown page</Link>&nbsp;
                 <br/>
-                {this.props.location.pathname} *
-                <hr/>
 
                 <Switch>
                     <Route exact path="/app" component={Index}/>
@@ -43,6 +41,7 @@ class Blocker extends React.Component {
                     <Route path="*" component={() => <div>I don't know you man!!!</div>} />
                 </Switch>
                 <hr/>
+                {this.props.location.pathname}
             </div>
         );
     }

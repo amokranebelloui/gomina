@@ -205,21 +205,21 @@ class SandboxApp extends React.Component {
 function Index(props) {
     console.info('index');
     return (
-        <div>
+        <AppLayout title='Index'>
             Index
-        </div>
+        </AppLayout>
     );
 }
 
 function About(props) {
     console.info('about');
     return (
-        <div>
+        <AppLayout title='About'>
             <Switch>
                 <Route path="/app/about/detail/:id" component={About2}/>
                 <Route path="/app/about" component={About1}/>
             </Switch>
-        </div>
+        </AppLayout>
     );
 }
 
