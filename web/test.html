@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Sample</title>
+    <!--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.2/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.2/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    -->
+
+    <!--
+    <script src="https://npmcdn.com/react-router/umd/ReactRouter.min.js"></script>
+    <script src="https://unpkg.com/react-router/umd/react-router.min.js"></script>
+    <script src="https://unpkg.com/react-router-dom/umd/react-router-dom.min.js"></script>
+    -->
+
+    <!--
+    <script src="https://npmcdn.com/history/umd/History.min.js"></script>
+    <script src="https://unpkg.com/history/umd/history.min.js"></script>
+    -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+    <script src="https://unpkg.com/react@15.3.1/dist/react.js"></script>
+    <script src="https://unpkg.com/react-dom@15.3.1/dist/react-dom.js"></script>
+    <script src="https://unpkg.com/react-router@4.2.0/umd/react-router.js"></script>
+    <script src="https://unpkg.com/react-router-dom@4.2.2/umd/react-router-dom.js"></script>
+    <script src="https://unpkg.com/history@4.7.2/umd/history.min.js"></script>
+
+</head>
+<body>
+<div id="content"></div>
+<script type="text/babel">
+    // To get started with this tutorial running your own code, simply remove
+    // the script tag loading scripts/example.js and start writing code here.
+    // make these convenietly available so we don't have to fully qualify them (i.e Router vs ReactRouter.Router)
+    var Router = ReactRouter.Router;
+    var Switch = ReactRouter.Switch;
+    var Link = ReactRouterDOM.Link; // instead of straight up <a href="blah"> we'll have to use the Link component instead
+    var Route = ReactRouter.Route;
+    const history = History.createBrowserHistory();
+    //var history = History.useBasename(History.createHistory)();
+    //var history = History.createHistory;
+
+    class IndexPage extends React.Component {
+        render() {
+            return (
+                    <div>
+                        Hello, world! I am a index page.
+                        <ul>
+                            <li><Link to="/test/details">Details</Link></li>
+                            <li><Link to="/test/users">Users</Link></li>
+                            <li><Link to="/test/stand-alone">Stand Alone</Link></li>
+                        </ul>
+
+                    </div>
+            );
+        }
+    };
+    class DetailsPage extends React.Component {
+        render() {
+            return (
+                    <div className="detailsPage">
+                        Hello, world! I am a details page.
+                    </div>
+            );
+        }
+    };
+    class NotFound extends React.Component {
+        render() {
+            return (
+                    <div className="no-match">
+                        Woah dere!!! 404 Not Found From Julia G's Sample App Buddy...Fix that!!!
+                    </div>
+            );
+        }
+    };
+    class Users extends React.Component {
+        render() {
+            return (
+                    <div id="users">
+                        This is just the users shell, bra!!!
+                        <div><Link to="/test/users/user/1">See User #1</Link></div>
+                        My child content for the Users component is.....
+                        {this.props.children}
+                    </div>
+            );
+        }
+    };
+    class User extends React.Component {
+        render() {
+            return (
+                    <div id="user-{this.props.params.userId}">
+                        The user you are retrieving details for is {this.props.match.params.userId}
+                    </div>
+            );
+        }
+    };
+    class NonNestedPage extends React.Component {
+        render() {
+            return (
+                    <p>Hi, I do not share content with the IndexPage component. I am stand alone</p>
+            );
+        }
+    };
+
+    /*
+     <Route path="users" component={Users}>
+     <Route path="user/:userId" component={User} />
+     </Route>
+
+     */
+
+    class SampleApp extends React.Component {
+        render() {
+            return (
+            <div>
+                <Switch>
+                    <Route path="/test" exact component={IndexPage} />
+                    <Route path="/test/" exact component={IndexPage} />
+                    <Route path="/test/details" component={DetailsPage} />
+                    <Route path="/test/stand-alone" component={NonNestedPage} />
+                    <Route path="/test/users/user/:userId" component={User} />
+                    <Route path="/test/users" component={Users} />
+                    <Route path="*" component={NotFound} />
+                </Switch>
+            </div>
+            )}
+    };
+    ReactDOM.render(
+            <Router path="/test" history={history}>
+                <Route component={SampleApp} />
+            </Router>,
+        document.getElementById('content')
+    );
+</script>
+</body>
+</html>

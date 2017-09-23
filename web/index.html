@@ -8,6 +8,9 @@
     <script src="lib/babel.min.js"></script>
     <script type="text/babel" src="components/gomina.js"></script>
     <script type="text/babel" src="components/layout.js"></script>
+
+    <script src="https://unpkg.com/prop-types/prop-types.js"></script>
+
 </head>
 <body>
 <div id="root"></div>
@@ -21,26 +24,38 @@
         )
     }
 
+    class MyComponent extends React.Component {
+        render() {
+            let text = "'" + this.props.label + "'";
+            if (this.props.highlighted) {
+                text = <b> {text} </b>;
+            }
+            return (
+                <span>Special {text}</span>
+            )
+        }
+    }
+    MyComponent.propTypes = {
+        label: PropTypes.string.isRequired,
+        highlighted: PropTypes.bool
+    };
+
     class Toggle2 extends React.Component {
         constructor(props) {
             super(props);
             this.state = {isToggleOn: true};
-
-            // This binding is necessary to make `this` work in the callback
-            this.toggle = this.toggle.bind(this);
+            this.toggle = this.toggle.bind(this); // This binding is necessary to make `this` work in the callback
         }
-
         toggle() {
              this.setState(prevState => ({
                 isToggleOn: !prevState.isToggleOn
              }));
         }
-
         render() {
             return (
-                    <button onClick={this.toggle}>
-                        {this.state.isToggleOn ? 'ON' : 'OFF'}
-                    </button>
+                <button onClick={this.toggle}>
+                    {this.state.isToggleOn ? 'ON' : 'OFF'}
+                </button>
             );
         }
     }
@@ -125,6 +140,8 @@
                     <WarningBanner warn="" />
                     <br/>
                     <Posts posts={this.props.posts} />
+                    <MyComponent label="hello world" highlighted={true} />
+                    <MyComponent label="hello world" />
                 </AppLayout>
             );
         }

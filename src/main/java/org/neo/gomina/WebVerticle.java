@@ -16,6 +16,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSSocket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,6 +78,23 @@ public class WebVerticle extends AbstractVerticle {
             catch (IOException e) {
                 ctx.fail(404);
                 e.printStackTrace();
+            }
+        });
+
+        router.route().pathRegex("/([^/]*)/*.*").handler(ctx -> {
+            HttpServerResponse response = ctx.response();
+            response.putHeader("content-type", "text/html");
+            try {
+                String root = ctx.request().getParam("param0");
+                logger.info("root " + root);
+                String filename = "web/" + root + ".html";
+                if (!new File(filename).exists()) {
+                    throw new Exception("App " + root + " doesn't exist");
+                }
+                response.sendFile(filename);
+            }
+            catch (Exception e) {
+                ctx.fail(404);
             }
         });
 
