@@ -13,6 +13,7 @@ module.exports = {
     },
     */
     //entry: "./web/components/app.js",
+    devtool: 'source-map',
     entry: {
         components: './web/components/components.js',
         app: './web/components/application.js'

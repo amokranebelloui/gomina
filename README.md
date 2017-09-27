@@ -17,5 +17,9 @@ npm install --save react react-dom
 npm install --save-dev babel-preset-react babel-preset-es2015
 
 
+### Watching
+webpack --progress --colors --watch
 
+### Generate stats
 webpack --profile --json > stats.json
+
