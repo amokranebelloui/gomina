@@ -1,12 +1,10 @@
 
 import React from 'react';
-import * as d3 from 'd3'; // FIXME ???
+import * as d3 from 'd3';
 
 import {Toggle} from './gomina';
 
 import './archi-diagram.css'
-
-console.info("d3", d3);
 
 class Diagram extends React.Component {
     constructor(props){
@@ -25,8 +23,9 @@ class Diagram extends React.Component {
     componentWillUnmount() {
         console.info("destroy")
         var el = this.node;
-        console.info(el, d3); // FIXME ???
-        d3.destroy(el);
+        console.info(el);
+        //d3.destroy(el); // Doesn't work
+        //d3.select("svg").remove(); // Is it necessary?
     }
     createDiagram() {
         //const svg = this.node;
