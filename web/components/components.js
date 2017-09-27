@@ -2,7 +2,7 @@
 import React from 'react';
 import { Router, Switch, Route } from 'react-router'
 
-//import {SockJS} from 'sockjs-client';
+import SockJS from 'sockjs-client';
 
 import {groupBy, Toggle} from './gomina';
 import {AppLayout} from './layout';
@@ -15,7 +15,6 @@ import {MyComponent, Toggle2, LoggingButton, Posts, WarningBanner} from './sandb
 import {allInstances, allProjects, sampleCommits} from './data'
 
 import C1 from './module.js';
-
 
 var components = [
     {name: "referential", x:400, y:350},
