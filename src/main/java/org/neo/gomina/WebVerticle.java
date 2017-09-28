@@ -81,14 +81,16 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
 
-        router.route().pathRegex("/(app|test)/.*").handler(ctx -> {
+        router.route("/*").pathRegex(".*\\.js").handler(StaticHandler.create("dist").setCachingEnabled(false));
+
+        router.route().pathRegex("/.*").handler(ctx -> {
         //router.route().pathRegex("/([^/.]*)/*.*").handler(ctx -> {
             HttpServerResponse response = ctx.response();
             response.putHeader("content-type", "text/html");
             try {
                 String root = ctx.request().getParam("param0");
                 logger.info("root " + root);
-                String filename = "web/" + root + ".html";
+                String filename = "dist/index.html";
                 if (!new File(filename).exists()) {
                     throw new Exception("App " + root + " doesn't exist");
                 }
@@ -99,7 +101,7 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
 
-        router.route("/*").handler(StaticHandler.create("web").setCachingEnabled(false).setIndexPage("/app/"));
+        //router.route("/*").handler(StaticHandler.create("dist").setCachingEnabled(false));
 
         Thread thread = new Thread(() -> {
             while (true) {

@@ -215,8 +215,8 @@ function About(props) {
     return (
         <AppLayout title='About'>
             <Switch>
-                <Route path="/app/about/detail/:id" component={About2}/>
-                <Route path="/app/about" component={About1}/>
+                <Route path="/about/detail/:id" component={About2}/>
+                <Route path="/about" component={About1}/>
             </Switch>
         </AppLayout>
     );

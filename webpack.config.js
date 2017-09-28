@@ -28,9 +28,9 @@ module.exports = {
         //react: ['react', 'react-router', 'react-dom']
     },
     plugins: [
-        new CleanWebpackPlugin(['web/dist']),
+        new CleanWebpackPlugin(['dist']),
         new HtmlWebpackPlugin({
-            title: 'Application',
+            title: 'Gomina!',
             template: 'web/index.template.ejs',
             inject: 'body',
             filename: 'index.html'
@@ -82,7 +82,7 @@ module.exports = {
         */
     ],
     output: {
-        path: path.resolve(__dirname, 'web/dist'),
+        path: path.resolve(__dirname, 'dist'),
         filename: '[name].bundle.js'
     },
     module: {

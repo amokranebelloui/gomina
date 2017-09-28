@@ -16,28 +16,28 @@ class Blocker extends React.Component {
         console.info('blocker');
         return (
             <div>
-                <Link to="/app/">index</Link> -&nbsp;
-                <Link to="/app/archi">archi</Link> -&nbsp;
-                <Link to="/app/envs">envs</Link> -&nbsp;
-                <Link to="/app/pipeline">pipeline</Link> -&nbsp;
-                <Link to="/app/projects">projects</Link> -&nbsp;
-                <Link to="/app/project">project</Link> -&nbsp;
-                <Link to="/app/about">about</Link> -&nbsp;
-                <Link to="/app/about/detail/amokrane">about amokrane</Link> -&nbsp;
-                <Link to="/app/about/detail/jim">about jim</Link> -&nbsp;
-                <Link to="/app/sandbox">sandbox</Link> -&nbsp;
-                <Link to="/app/unknown">unknown page</Link>&nbsp;
+                <Link to="/">index</Link> -&nbsp;
+                <Link to="/archi">archi</Link> -&nbsp;
+                <Link to="/envs">envs</Link> -&nbsp;
+                <Link to="/pipeline">pipeline</Link> -&nbsp;
+                <Link to="/projects">projects</Link> -&nbsp;
+                <Link to="/project">project</Link> -&nbsp;
+                <Link to="/about">about</Link> -&nbsp;
+                <Link to="/about/detail/amokrane">about amokrane</Link> -&nbsp;
+                <Link to="/about/detail/jim">about jim</Link> -&nbsp;
+                <Link to="/sandbox">sandbox</Link> -&nbsp;
+                <Link to="/unknown">unknown page</Link>&nbsp;
                 <br/>
 
                 <Switch>
-                    <Route exact path="/app" component={Index}/>
-                    <Route path="/app/archi" component={ArchiDiagramApp}/>
-                    <Route path="/app/envs" component={() => <EnvApp instances={allInstances}/>}/>
-                    <Route path="/app/pipeline" component={PipelineApp}/>
-                    <Route path="/app/projects" component={ProjectsApp}/>
-                    <Route path="/app/project" component={ProjectApp}/>
-                    <Route path="/app/about" component={About}/>
-                    <Route path="/app/sandbox" component={() => <SandboxApp posts={posts}/>}/>
+                    <Route exact path="/" component={Index}/>
+                    <Route path="/archi" component={ArchiDiagramApp}/>
+                    <Route path="/envs" component={() => <EnvApp instances={allInstances}/>}/>
+                    <Route path="/pipeline" component={PipelineApp}/>
+                    <Route path="/projects" component={ProjectsApp}/>
+                    <Route path="/project" component={ProjectApp}/>
+                    <Route path="/about" component={About}/>
+                    <Route path="/sandbox" component={() => <SandboxApp posts={posts}/>}/>
                     <Route path="*" component={() => <div>I don't know you man!!!</div>} />
                 </Switch>
                 <hr/>
