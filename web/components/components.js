@@ -69,13 +69,21 @@ class EnvApp extends React.Component {
         };
 
         this.sock.onmessage = function(e) {
-            var r = Math.floor((Math.random() * 3) + 1);
-            var fakeStatus = r == 1 ? 'LIVE' : r == 2 ? 'LOADING' : 'DOWN';
-            console.log('message', e.data, fakeStatus);
-            eventsDiv.innerHTML = eventsDiv.innerHTML + ' ' + e.data + ' ' + fakeStatus + '<br>';
+            //var r = Math.floor((Math.random() * 3) + 1);
+            //var fakeStatus = r == 1 ? 'LIVE' : r == 2 ? 'LOADING' : 'DOWN';
+            let event = JSON.parse(e.data);
+            //console.log('message', event);
+            eventsDiv.innerHTML = eventsDiv.innerHTML + ' ' + e.data + '<br>';
 
-            thisComponent.state.instances[0].status = fakeStatus;
-            thisComponent.setState({instances: thisComponent.state.instances});
+            // FIXME review how to identify instances
+            const found = thisComponent.state.instances.find(instance => instance.name == event.id);
+
+            //console.info("found", found);
+
+            if (found) {
+                found.status = event.status;
+                thisComponent.setState({instances: thisComponent.state.instances});
+            }
         };
 
         this.sock.onclose = function() {

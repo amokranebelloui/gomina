@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-import {groupBy, isSnapshot, Well, Badge, Status, CopyButton, Version} from './gomina';
+import {groupBy, isSnapshot, Well, Badge, Status, StatusWrapper, CopyButton, Version} from './gomina';
 import {BuildLink} from './project';
 
 class Instance extends React.Component {
@@ -16,11 +16,11 @@ class Instance extends React.Component {
             comp = <AppInstance instance={instance} />
         }
         return (
-            <Well>
+            <StatusWrapper status={instance.status}>
                 <div style={{display: "inline-block", verticalAlign: 'top', opacity:opacity}}>
                     {comp}
                 </div>
-            </Well>
+            </StatusWrapper>
         )
     }
 }
@@ -31,12 +31,13 @@ class RedisInstance extends React.Component {
         const isSlave = instance.extra.redisRole == 'SLAVE';
         //const isMaster = instance.extra.redisRole == 'MASTER';
         const persistenceModeColor = instance.extra.redisMode == 'AOF' ? 'green' : instance.extra.redisMode == 'RDB' ? 'lightgreen' : 'gray';
+        /*<Status status={instance.status} />&nbsp;*/
         return (
             <div>
                 <span>{instance.name}</span>&nbsp;
                 {instance.extra.redisMaster && <Badge title={'Master in ServiceRegistry'} backgroundColor='#FFD21C' color='white'>***</Badge>}
                 &nbsp;
-                <Status status={instance.status} />&nbsp;
+
                 {isSlave && (instance.extra.redisMasterInfo.link
                     ? <Badge title={'Link Up'} backgroundColor='#FCF6D4' color='white'>OK</Badge>
                     : <Badge title={'Link Down Since ' + instance.extra.redisMasterInfo.since} backgroundColor='#FF2929' color='white'>KO</Badge>)
@@ -80,12 +81,13 @@ class AppInstance extends React.Component {
     render() {
         const instance = this.props.instance;
         //, alignItems: 'top', justifyContent: 'center'
+        /*<Status status={instance.status} />*/
         return (
             <div>
                 <div>
                     <span>{instance.name}</span>
                     &nbsp;
-                    <Status status={instance.status} />
+
                     &nbsp;
                     <Version version={instance.version} revision={instance.revision}/>
                     &nbsp;

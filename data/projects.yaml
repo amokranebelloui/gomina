@@ -1,0 +1,42 @@
+- id: tradex-core
+  label: core
+  type: common
+  svnUrl: OMS/Server/tradex-core
+  maven: x.oms.core:tradex-core
+  jenkinsJob: 6.14 SERVER-SrvTradexCore
+
+- id: tradex-kernel
+  type: server
+  svnUrl: OMS/Server/tradex-kernel
+  maven: x.oms.kernel:tradex-kernel
+  jenkinsJob: 6.14 SERVER-SrvTradexKernel
+
+- id: tradex-viewkernel
+  type: server
+  svnUrl: OMS/Server/tradex-viewkernel
+  maven: x.oms.viewkernel:tradex-viewkernel
+  jenkinsJob: 6.14 SERVER-SrvTradexViewKernel
+
+- id: tradex-referential
+  type: server
+  svnUrl: OMS/Server/tradex-referential
+  maven: x.oms.referential:tradex-referential
+  jenkinsJob: 6.14 SERVER-SrvTradexReferential
+
+- id: tradex-basketmanager
+  type: server
+  svnUrl: OMS/Server/tradex-basketmanager
+  maven: x.oms.vac:voms-basketmanager
+  jenkinsJob: 6.14 SERVER-SrvManagerBasket
+
+- id: tradex-ordermanager
+  type: server
+  svnUrl: OMS/Server/tradex-ordermanager
+  maven: x.oms.vac:voms-ordermanager
+  jenkinsJob: 6.14 SERVER-SrvManagerOrder
+
+- id: tradex-marketmanager
+  type: server
+  svnUrl: OMS/Server/tradex-marketmanager
+  maven: x.oms.vac:voms-marketmanager
+  jenkinsJob: 6.14 SERVER-SrvManagerMarket

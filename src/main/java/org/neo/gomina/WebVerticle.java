@@ -1,5 +1,6 @@
 package org.neo.gomina;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
@@ -15,12 +16,16 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSSocket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.neo.gomina.model.monitoring.Monitoring;
+import org.neo.gomina.model.project.Project;
+import org.neo.gomina.model.project.ProjectRepository;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class WebVerticle extends AbstractVerticle {
 
@@ -30,6 +35,8 @@ public class WebVerticle extends AbstractVerticle {
     public void start() throws Exception {
         logger.info("Starting...");
         Router router = Router.router(vertx);
+
+        Monitoring monitoring = new Monitoring();
 
         SockJSHandlerOptions options = new SockJSHandlerOptions().setHeartbeatInterval(2000);
         SockJSHandler sockJSHandler = SockJSHandler.create(vertx, options);
@@ -51,15 +58,45 @@ public class WebVerticle extends AbstractVerticle {
         });
         router.route("/realtime/*").handler(sockJSHandler);
 
-
         final ObjectMapper mapper = new ObjectMapper();
-        //mapper.configure()
-        router.route("/data/sample.js").handler(ctx -> {
+
+        monitoring.add((instanceId, newValues) -> {
+            Map<String, String> map = new HashMap<>();
+            map.put("id", instanceId);
+            map.putAll(newValues);
             try {
+                String message = mapper.writeValueAsString(map);
+                Buffer buffer = Buffer.buffer(message);
+                sockets.forEach(socket -> socket.write(buffer));
+            }
+            catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        });
+
+        //mapper.configure()
+        router.route("/data/projects").handler(ctx -> {
+            try {
+                ProjectRepository projectRepository = new ProjectRepository();
+                List<Project> projects = projectRepository.getProjects();
                 HttpServerResponse response = ctx.response();
                 response.putHeader("content-type", "text/javascript");
-                List<String> list = Arrays.asList("a", "b", "c", "d", "eee");
-                response.end("var data = " + mapper.writeValueAsString(list));
+                //List<String> list = Arrays.asList("a", "b", "c", "d", "eee");
+                response.end("var data = " + mapper.writeValueAsString(projects));
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        router.route("/data/instances").handler(ctx -> {
+            try {
+                ProjectRepository projectRepository = new ProjectRepository();
+                List<Project> projects = projectRepository.getProjects();
+                HttpServerResponse response = ctx.response();
+                response.putHeader("content-type", "text/javascript");
+                //List<String> list = Arrays.asList("a", "b", "c", "d", "eee");
+                response.end("var data = " + mapper.writeValueAsString(projects));
             }
             catch (IOException e) {
                 e.printStackTrace();
@@ -103,6 +140,7 @@ public class WebVerticle extends AbstractVerticle {
 
         //router.route("/*").handler(StaticHandler.create("dist").setCachingEnabled(false));
 
+        /*
         Thread thread = new Thread(() -> {
             while (true) {
                 String message = "Sample " + System.currentTimeMillis();
@@ -117,6 +155,7 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
         thread.start();
+        */
 
         HttpServer server = vertx.createHttpServer();
         server.requestHandler(router::accept).listen(8080);

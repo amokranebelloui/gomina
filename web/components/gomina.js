@@ -136,6 +136,23 @@ class Status extends React.Component {
     }
 }
 
+class StatusWrapper extends React.Component {
+    render() {
+        const status = this.props.status;
+        const color =
+            status == 'LIVE' ? 'green' :
+                status == 'LOADING' ? 'orange' :
+                    status == 'DOWN' ? 'gray' :
+                        'red';
+        return (
+            <div style={{padding: '2px', margin: this.props.margin, display: this.props.block ? null : 'inline-block',
+                backgroundColor: '#F8F8F8', border: '3px solid ' + color, borderRadius: '5px'}}>
+                {this.props.children}
+            </div>
+        )
+    }
+}
+
 class CopyButton extends React.Component {
     copyToClipboard(text) {
         //event.originalTarget.parentNode.children[2].select()
@@ -164,4 +181,4 @@ class CopyButton extends React.Component {
     }
 }
 
-export {Toggle, Badge, Well, Status, CopyButton, Version, groupBy, isSnapshot, compareVersions}
+export {Toggle, Badge, Well, Status, StatusWrapper, CopyButton, Version, groupBy, isSnapshot, compareVersions}
