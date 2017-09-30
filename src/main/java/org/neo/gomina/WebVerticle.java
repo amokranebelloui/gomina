@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.FileTemplateLoader;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
@@ -19,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.neo.gomina.model.monitoring.Monitoring;
 import org.neo.gomina.model.project.Project;
 import org.neo.gomina.model.project.ProjectRepository;
+import org.neo.gomina.runner.GominaModule;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,7 +39,11 @@ public class WebVerticle extends AbstractVerticle {
         logger.info("Starting...");
         Router router = Router.router(vertx);
 
-        Monitoring monitoring = new Monitoring();
+        Injector injector = Guice.createInjector(new GominaModule());
+
+        Monitoring monitoring = injector.getInstance(Monitoring.class);
+        ProjectRepository projectRepository = injector.getInstance(ProjectRepository.class);
+
 
         SockJSHandlerOptions options = new SockJSHandlerOptions().setHeartbeatInterval(2000);
         SockJSHandler sockJSHandler = SockJSHandler.create(vertx, options);
@@ -77,7 +84,6 @@ public class WebVerticle extends AbstractVerticle {
         //mapper.configure()
         router.route("/data/projects").handler(ctx -> {
             try {
-                ProjectRepository projectRepository = new ProjectRepository();
                 List<Project> projects = projectRepository.getProjects();
                 HttpServerResponse response = ctx.response();
                 response.putHeader("content-type", "text/javascript");
@@ -91,7 +97,6 @@ public class WebVerticle extends AbstractVerticle {
 
         router.route("/data/instances").handler(ctx -> {
             try {
-                ProjectRepository projectRepository = new ProjectRepository();
                 List<Project> projects = projectRepository.getProjects();
                 HttpServerResponse response = ctx.response();
                 response.putHeader("content-type", "text/javascript");

@@ -1,15 +1,21 @@
 package org.neo.gomina.model.monitoring;
 
+import org.neo.gomina.model.inventory.InventoryRepository;
+
+import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Monitoring {
 
+    @Inject private InventoryRepository inventoryRepository;
+
     private List<MonitoringListener> listeners = new CopyOnWriteArrayList<>();
 
-    public Monitoring() {
-        new MonitoringThread(this).start();
+    @Inject
+    public void init() {
+        new MonitoringThread(inventoryRepository, this).start();
     }
 
     public void add(MonitoringListener listener) {
