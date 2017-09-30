@@ -1,0 +1,322 @@
+<!-- An example that demonstrates automatic generation
+     of data flow diagrams for reactive models.
+     Curran Kelleher 5/20/2014
+     Updated July 2014 to use new Model.js API. -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!--
+    <script src="test.js"></script>
+    <script src="test2.js"></script>
+    -->
+    <title>Reactive Model Data Flow Diagram</title>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <style>
+        #container {
+            position: fixed;
+            top: 0px;
+            bottom: 0px;
+            left: 0px;
+            right: 0px;
+        }
+
+        .node {
+            stroke: black;
+            stroke-width: 1.5px;
+        }
+        .nodeLabel {
+            font-size: 2em;
+            /* Center text horizontally */
+            text-anchor: middle;
+        }
+
+        .link {
+            stroke: black;
+        }
+        .arrow {
+            /* stroke-width controls arrowhead size */
+            stroke-width: 1.5px;
+        }
+    </style>
+</head>
+<body>
+<div id="container"></div>
+<div id="logs"></div>
+<script>
+    console.info("test", d3);
+
+
+    var components = [
+        {name: "referential", x:400, y:350},
+        {name: "basket", x:100, y:200},
+        {name: "order", x:150, y:120},
+        {name: "market", x:200, y:200},
+        {name: "cross", x:300, y:100},
+        {name: "fixout", x:300, y:150},
+        {name: "emma", x:300, y:200},
+        {name: "fidessa", x:150, y:50},
+        {name: "pie", x:100, y:50},
+        {name: "pita", x:50, y:50},
+        {name: "fixin", x:50, y:150},
+        {name: "audit", x:150, y:350},
+        {name: "mis", x:200, y:350},
+    ];
+
+    var components2 = [
+        {name: "referential"},
+        {name: "basket"},
+        {name: "order"},
+        {name: "market"},
+        {name: "cross"},
+        {name: "fixout"},
+        {name: "emma"},
+        {name: "fidessa"},
+        {name: "pie"},
+        {name: "pita"},
+        {name: "fixin"},
+        {name: "audit"},
+        {name: "mis"},
+    ];
+
+    var dependencies = [
+        {from:1, to:2}, // basket, order
+        {from:3, to:1}, // market, order
+    ];
+
+
+    var nodes = [
+        {"id": "Alice"},
+        {"id": "Bob"},
+        {"id": "Carol"}
+    ];
+
+    var links = [
+        {"source": 0, "target": 1}, // Alice → Bob
+        {"source": 1, "target": 2}, // Bob → Carol
+        {"source": 5, "target": 2}, // Bob → Carol
+        {"source": 6, "target": 2}, // Bob → Carol
+        {"source": 7, "target": 2} // Bob → Carol
+    ];
+
+    var simulation = d3.forceSimulation(components2)
+        .force("link", d3.forceLink(links))
+        .force("collide",d3.forceCollide(10).iterations(16))
+        .force("charge", d3.forceManyBody())
+        .force("center", d3.forceCenter(300, 300))
+        .force("y", d3.forceY(200))
+        .force("x", d3.forceX(200));
+
+        /*
+    var simulation = d3.forceSimulation(components)
+        //.force("charge", d3.forceManyBody())
+        .force("link", d3.forceLink(links))
+        .force("center", d3.forceCenter([300, 300]))
+        .force("size", d3.forceCenter([600, 600]))
+        .force("collide", d3.forceCollide(20));
+*/
+    //simulation.restart();
+
+    console.info("simulation", simulation, components);
+
+
+    /*
+    var force = d3.forceSimulation.force()
+        .charge(-200)
+        .linkDistance(140)
+        .gravity(0.03);
+
+    var zoom = d3.behavior.zoom()
+            .on('zoom', function (){
+                model.scale = zoom.scale();
+                model.translate = zoom.translate();
+            });
+            */
+    var div = document.getElementById('container');
+    var logs = document.getElementById('logs');
+    var svg = d3.select(div)
+            .append('svg')
+            .style('position', 'absolute')
+            //.call(zoom);
+
+        // g is used for panning and zooming
+    var g = svg.append('g');
+
+        // These 3 groups exist for control of Z-ordering.
+    var nodeG = g.append('g');
+    var linkG = g.append('g');
+    var arrowG = g.append('g');
+
+        // The size of nodes and arrows
+    var nodeSize = 20;
+    var arrowWidth = 8;
+
+    var comps = svg.selectAll("g node-group").data(components);
+
+    comps.enter()
+
+    svg.append('defs')
+        .append('marker')
+        .attr('id', 'arrow')
+        .attr('orient', 'auto')
+        .attr('preserveAspectRatio', 'none')
+        // See also http://www.w3.org/TR/SVG/coords.html#ViewBoxAttribute
+        //.attr('viewBox', '0 -' + arrowWidth + ' 10 ' + (2 * arrowWidth))
+        .attr('viewBox', '0 -5 10 10')
+        // See also http://www.w3.org/TR/SVG/painting.html#MarkerElementRefXAttribute
+        .attr('refX', 10)
+        .attr('refY', 0)
+        .attr('markerWidth', 10)
+        .attr('markerHeight', arrowWidth)
+        .append('path')
+        .attr('d', 'M0,-5L10,0L0,5');
+
+    svg.attr('width', 800 + 'px').attr('height', 800 + 'px').attr("border", "1px");
+    svg.style('left', 0 + 'px').style('top', 0 + 'px');
+    //force.size([box.width, box.height]);
+
+    redrawlines = function (){
+        console.info("redraw lines");
+
+        svg.selectAll("line").data(dependencies)
+            .attr("x1", function (d) { console.log(components, d); return components[d.from].x; })
+            .attr("x2", function (d) { console.log(components, d); return components[d.to].x; })
+            .attr("y1", function (d) { console.log(components, d); return components[d.from].y; })
+            .attr("y2", function (d) { console.log(components, d); return components[d.to].y; })
+            .attr("stroke-width", 1)
+            .attr("stroke", "black");
+
+    };
+
+    svg.selectAll("line").data(dependencies).enter()
+        .append("line")
+        .attr("x1", function (d) { console.log(components, d); return components[d.from].x; })
+        .attr("x2", function (d) { console.log(components, d); return components[d.to].x; })
+        .attr("y1", function (d) { console.log(components, d); return components[d.from].y; })
+        .attr("y2", function (d) { console.log(components, d); return components[d.to].y; })
+        .attr("stroke-width", 1)
+        .attr("stroke", "black");
+
+    var comp = comps.enter()
+        .append("g")
+        .attr("id", function(d) { return "comp-" + d.name })
+        .attr("class", "node-group")
+        .attr("transform", function(d) {
+            return "translate(" + (d.x) + "," + (d.y) + ")"
+        })
+        .call(d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended))
+        .on("mouseenter", function(d) {
+            //console.info("enter", d);
+            //logs.innerHTML = d + "<br/>" + logs.innerHTML;
+            d3.select(this).select("circle").attr("fill", "blue");
+            /*
+            div.transition().duration(200).style("opacity", .9);
+            div.html(d.name + "<br/><hr> with some short description text of "  + d.name + " service")
+            //.style("left", (d3.event.pageX) + "px")
+            //.style("top", (d3.event.pageY - 28) + "px");
+                .style("left", (d.x + 5) + "px")
+                .style("top", (d.y + 5) + "px");
+                */
+        })
+        .on("mouseleave", function(d) {
+            //console.info("leave", d);
+            d3.select(this).select("circle").attr("fill", "lightblue");
+            /*
+            div.transition()
+                .duration(500)
+                .style("opacity", 0);
+                */
+        })
+    comp.append("circle")
+        .attr("r", function(d) { return 30/*d.r*/; })
+        .attr("stroke", function(d) { return "yellow"/*d.color*/; })
+        .attr("fill", "lightblue")
+
+    comp.append("text")
+        .text(function(d) { return d.name })
+        .attr("x", 0)
+        .attr("dy", ".35em")
+        .attr("text-anchor", "middle")
+        .attr("color", "black")
+
+
+    function dragstarted(d) {
+        console.info("drag start", d, this);
+        d.dragging = true;
+        d3.select(this).interrupt().raise().classed("active", true);
+        d3.select(this).select("circle").attr("stroke", "red");
+        d3.event.sourceEvent.stopPropagation();
+    }
+
+    function dragged(d) {
+        console.info("drag", d3.event.x, d3.event.y, d, this, d3.select(this));
+
+        d.x = d3.event.x;
+        d.y = d3.event.y;
+        //Translate the object on the actual moved point
+        /*
+        d3.select(this).attr({
+            transform: "translate(" + d3.event.x + "," + d3.event.y + ")"
+        });
+        */
+        redrawlines();
+        d3.select(this).attr("transform", function(d) {
+            return "translate(" + d.x + "," + d.y + ")"
+        });
+
+        /*
+        d3.select(this).select("text")
+            .attr("x", d.x = d3.event.x)
+            .attr("y", d.y = d3.event.y);
+        d3.select(this)
+            .attr("x", d.x = d3.event.x)
+            .attr("y", d.y = d3.event.y);
+        */
+    }
+
+    function dragended(d) {
+        console.info("drag end", d, this);
+        d.dragging = false;
+        d3.select(this).classed("active", false);
+        d3.select(this).select("circle").attr("stroke", "yellow");
+    }
+
+
+    var somecomp = document.getElementById('comp-pie');
+    console.info(somecomp, d3.select(somecomp));
+    d3.select(somecomp).select("circle").attr("fill", "black");
+
+    /*
+    link = linkG.selectAll('.link').data(graph.links);
+    link.enter().append('line').attr('class', 'link')
+    link.exit().remove();
+    */
+
+    window.setInterval(function() {
+        //components[0].x = components[0].x + 10;
+        let data = d3.select(somecomp).data();
+        console.info("data", data[0].dragging)
+        if (!data[0].dragging) {
+            d3.select(somecomp)
+                .transition()
+                .ease(d3.easeLinear)
+                .duration(1000)
+                .attr("transform", function(d) {
+                    console.info("tick", d.x, d.y, components);
+                    d.x = d.x + 30;
+                    return "translate(" + d.x + "," + d.y + ")"
+                })
+            ;
+        }
+
+
+    }, 1000);
+
+
+
+</script>
+</body>
+</html>
