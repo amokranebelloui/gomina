@@ -2,7 +2,7 @@ package org.neo.gomina.model.inventory;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class Instance {
+public class InvInstance {
 
     public String id;
     public String host;

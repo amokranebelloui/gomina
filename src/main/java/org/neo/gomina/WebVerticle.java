@@ -18,8 +18,8 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSSocket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.neo.gomina.model.instances.InstanceRepository;
 import org.neo.gomina.model.monitoring.Monitoring;
-import org.neo.gomina.model.project.Project;
 import org.neo.gomina.model.project.ProjectRepository;
 import org.neo.gomina.runner.GominaModule;
 
@@ -43,6 +43,7 @@ public class WebVerticle extends AbstractVerticle {
 
         Monitoring monitoring = injector.getInstance(Monitoring.class);
         ProjectRepository projectRepository = injector.getInstance(ProjectRepository.class);
+        InstanceRepository instanceRepository = injector.getInstance(InstanceRepository.class);
 
 
         SockJSHandlerOptions options = new SockJSHandlerOptions().setHeartbeatInterval(2000);
@@ -81,30 +82,26 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
 
-        //mapper.configure()
         router.route("/data/projects").handler(ctx -> {
             try {
-                List<Project> projects = projectRepository.getProjects();
-                HttpServerResponse response = ctx.response();
-                response.putHeader("content-type", "text/javascript");
-                //List<String> list = Arrays.asList("a", "b", "c", "d", "eee");
-                response.end("var data = " + mapper.writeValueAsString(projects));
+                ctx.response().putHeader("content-type", "text/javascript")
+                        .end(mapper.writeValueAsString(projectRepository.getProjects()));
             }
-            catch (IOException e) {
-                e.printStackTrace();
+            catch (Exception e) {
+                logger.error("Cannot get projects", e);
+                ctx.fail(500);
             }
         });
 
         router.route("/data/instances").handler(ctx -> {
             try {
-                List<Project> projects = projectRepository.getProjects();
-                HttpServerResponse response = ctx.response();
-                response.putHeader("content-type", "text/javascript");
-                //List<String> list = Arrays.asList("a", "b", "c", "d", "eee");
-                response.end("var data = " + mapper.writeValueAsString(projects));
+                ctx.response()
+                        .putHeader("content-type", "text/javascript")
+                        .end(mapper.writeValueAsString(instanceRepository.getInstances()));
             }
             catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Cannot get instances", e);
+                ctx.fail(500);
             }
         });
 
@@ -161,6 +158,12 @@ public class WebVerticle extends AbstractVerticle {
         });
         thread.start();
         */
+
+        router.get().failureHandler(ctx -> {
+            logger.info("Handling failure {}", ctx.statusCode());
+            ctx.response().setStatusCode(ctx.statusCode()).end("Ooops! something went wrong");
+
+        });
 
         HttpServer server = vertx.createHttpServer();
         server.requestHandler(router::accept).listen(8080);

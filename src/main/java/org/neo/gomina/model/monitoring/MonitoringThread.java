@@ -1,6 +1,6 @@
 package org.neo.gomina.model.monitoring;
 
-import org.neo.gomina.model.inventory.Instance;
+import org.neo.gomina.model.inventory.InvInstance;
 import org.neo.gomina.model.inventory.InventoryRepository;
 import org.neo.gomina.model.inventory.Service;
 
@@ -26,7 +26,7 @@ public class MonitoringThread extends Thread {
         while (true) {
             for (String env : inventoryRepository.getEnvs()) {
                 for (Service service : inventoryRepository.getEnvironment(env).services) {
-                    for (Instance instance : service.instances) {
+                    for (InvInstance instance : service.instances) {
                         Map<String, String> map = new HashMap<>();
                         int i = random.nextInt(15);
                         String status =

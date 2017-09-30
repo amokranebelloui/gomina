@@ -9,7 +9,7 @@ public class Service {
     public String svc;
     public String type;
     public String project;
-    public List<Instance> instances;
+    public List<InvInstance> instances;
 
     @Override
     public String toString() {
