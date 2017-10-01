@@ -4,33 +4,33 @@ public class Instance {
 
     // FIXME Clean values
 
-    public String env = "PROD";
-    public String id = "-1"; // Unique by env
-    public String type = "redis"; // Y Functional
-    public String service = "redis"; // Z Partitioning
-    public String name = "redis1"; // X Replication
+    public String env;
+    public String id; // Unique by env
+    public String type; // Y Functional
+    public String service; // Z Partitioning
+    public String name; // X Replication
 
     public String pid = "13456";
-    public String host = "10.143.29.42";
-    public String status = "LIVE";
+    public String host;
+    public String status;
 
-    public String project = "redis";
-    public String deployHost = "10.143.29.42";
-    public String deployFolder = "/home/svc/prod-redis";
-    public boolean confCommited = false;
-    public boolean confUpToDate = false;
+    public String project;
+    public String deployHost;
+    public String deployFolder;
+    public Boolean confCommited = false;
+    public Boolean confUpToDate = false;
     public String version = "1.0.0";
     public String revision = "34560";
 
-    public String jmx = null;
+    public Integer jmx = null;
     public String busVersion = "2.0";
     public String coreVersion = "1.1";
     public String quickfixPersistence = null;
     public String redisHost = "vil";
     public Integer redisPort = 2345;
     public String redisMasterHost = "";
-    public String redisMasterPort = null;
-    public String redisMasterLink = null;
+    public Integer redisMasterPort = null;
+    public Boolean redisMasterLink = null;
     public String redisMasterLinkDownSince = null;
     public Integer redisOffset = 543445;
     public Integer redisOffsetDiff = 0;

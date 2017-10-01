@@ -1,0 +1,18 @@
+
+- id: 12
+  env: 'DEV'
+  name: 'fixinfid1'
+  type: 'app'
+  project: 'fixin'
+  service: 'fixinfid'
+  host: '10.2.3.56'
+  folder: '/home/svc/uat-fixinfid'
+  confCommited: true
+  version: '0.9.1-SNAPSHOT'
+  revision: 35014
+  status: 'DOWN'
+
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: 'REDIS'
+

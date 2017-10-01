@@ -1,0 +1,221 @@
+
+- id: -1
+  env: 'PROD'
+  name: 'redis1'
+  type: 'redis'
+  project: 'redis'
+  service: 'redis'
+  host: '10.143.29.42'
+  folder: '/home/svc/prod-redis'
+  confCommited: false
+  version: '1.0.0'
+  revision: 34560
+  status: 'LIVE'
+
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: null
+  redisHost: 'vil'
+  redisPort: 2345
+  redisMasterHost: ''
+  redisMasterPort: null
+  redisMasterLink: null
+  redisMasterLinkDownSince: null
+  redisOffset: 543445
+  redisOffsetDiff: 0
+  redisMaster: true
+  redisRole: 'MASTER'
+  redisRW: 'rw'
+  redisMode: 'AOF'
+  redisStatus: 'LIVE'
+  redisSlaveCount: 1
+  redisClientCount: 12
+
+- id: -2
+  env: 'PROD'
+  name: 'redis2'
+  type: 'redis'
+  project: 'redis'
+  service: 'redis'
+  host: '10.143.29.42'
+  folder: '/home/svc/prod-redis'
+  confCommited: true
+  version: '1.0.0'
+  revision: 34560
+  status: 'LIVE'
+
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence:
+  redisHost: 'bak'
+  redisPort: 2346
+  redisMasterHost: 'vil'
+  redisMasterPort: 2345
+  redisMasterLink: false
+  redisMasterLinkDownSince: '342'
+  redisOffset: 543445
+  redisOffsetDiff: 0
+  redisMaster: false
+  redisRole: 'SLAVE'
+  redisRW: 'ro'
+  redisMode: 'RDB'
+  redisStatus: 'LIVE'
+  redisSlaveCount: 0
+  redisClientCount: 9
+
+- id: -3
+  env: 'PROD'
+  name: 'redis3'
+  type: 'redis'
+  project: 'redis'
+  service: 'redis'
+  host: '10.143.29.42'
+  folder: '/home/svc/prod-redis'
+  confCommited: false
+  version: '1.0.0'
+  revision: 34560
+  status: 'LIVE'
+
+  busVersion: "1.9.9"
+  coreVersion: "1.1"
+  quickfixPersistence:
+  redisHost: 'bak'
+  redisPort: 2346
+  redisMasterHost: 'vil'
+  redisMasterPort: 2345
+  redisMasterLink: true
+  redisMasterLinkDownSince: '0'
+  redisOffset: 543445
+  redisOffsetDiff: 0
+  redisMaster: false
+  redisRole: 'SLAVE'
+  redisRW: 'ro'
+  redisMode: 'RDB'
+  redisStatus: 'LIVE'
+  redisSlaveCount: 0
+  redisClientCount: 9
+
+- id: 1
+  env: 'PROD'
+  name: 'kernel'
+  type: 'app'
+  project: 'kernel'
+  service: 'kernel'
+  host: '10.143.29.42'
+  folder: '/home/svc/prod-kernel'
+  confCommited: true
+  version: '2.2.0'
+  revision: 34560
+  status: 'LIVE'
+
+  jmx: 4040
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence:
+
+- id: 2
+  env: 'PROD'
+  name: 'kernel2'
+  type: 'app'
+  project: 'kernel'
+  service: 'kernel'
+  host: '10.143.29.41'
+  folder: '/home/svc/prod-kernel'
+  confCommited: false
+  version: '2.1.0'
+  revision: 33982
+  status: 'LOADING'
+
+  jmx: 4041
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence:
+
+- id: 22
+  env: 'PROD'
+  name: 'kernel3'
+  type: 'app'
+  project: 'kernel'
+  service: 'kernel'
+  host: '10.143.29.41'
+  folder: '/home/svc/prod-kernel'
+  confCommited: false
+  version: '2.1.0'
+  revision:
+  status: 'LOADING'
+
+  jmx: 4042
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: 'FILE'
+
+- id: 3
+  env: 'PROD'
+  name: 'basket'
+  type: 'app'
+  project: 'basket'
+  service: 'basket'
+  host: '10.143.3.58'
+  folder: '/home/svc/prod-basket'
+  confCommited: true
+  version: '5.1.3-SNAPSHOT'
+  revision: 34433
+  status: 'LIVE'
+
+  jmx: 7800
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: 'REDIS'
+
+- id: 4
+  env: 'PROD'
+  name: 'basket2'
+  type: 'app'
+  project: 'basket'
+  service: 'basket'
+  host: '10.143.3.56'
+  folder: '/home/svc/prod-basket'
+  confCommited: true
+  version: '5.1.3-SNAPSHOT'
+  revision: 35002
+  status: 'DOWN'
+
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: 'REDIS'
+
+- id: 5
+  env: 'PROD'
+  name: 'order1'
+  type: 'app'
+  project: 'order'
+  service: 'order'
+  host: '10.143.3.58'
+  folder: '/home/svc/prod-order'
+  confCommited: true
+  version: '5.1.3'
+  revision: 35002
+  status: 'LIVE'
+
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: 'FILE'
+
+- id: 6
+  env: 'PROD'
+  name: 'order2'
+  type: 'app'
+  project: 'order'
+  service: 'order'
+  host: '10.143.3.56'
+  folder: '/home/svc/prod-order'
+  confCommited: true
+  version: '5.1.3-SNAPSHOT'
+  revision: 35002
+  status: 'DOWN'
+
+  jmx: 7700
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: 'REDIS'
+

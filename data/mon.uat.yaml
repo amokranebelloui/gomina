@@ -1,0 +1,87 @@
+
+- id: 7
+  env: 'UAT'
+  name: 'kernel'
+  type: 'app'
+  project: 'kernel'
+  service: 'kernel'
+  host: '10.2.29.42'
+  folder: '/home/svc/uat-kernel'
+  confCommited: false
+  version: '2.3.0-SNAPSHOT'
+  revision: 34561
+  status: 'LIVE'
+
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: 'FILE'
+
+- id: 8
+  env: 'UAT'
+  name: 'kernel2'
+  type: 'app'
+  project: 'kernel'
+  service: 'kernel'
+  host: '10.2.29.41'
+  folder: '/home/svc/uat-kernel'
+  confCommited: true
+  version: '2.3.0-SNAPSHOT'
+  revision: 34560
+  status: 'LOADING'
+
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: 'REDIS'
+
+- id: 9
+  env: 'UAT'
+  name: 'basket'
+  type: 'app'
+  project: 'basket'
+  service: 'basket'
+  host: '10.2.3.58'
+  folder: '/home/svc/uat-basket'
+  confCommited: true
+  version: '5.1.3-SNAPSHOT'
+  revision: 34433
+  status: 'LIVE'
+
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: 'REDIS'
+
+- id: 10
+  env: 'UAT'
+  name: 'basket2'
+  type: 'app'
+  project: 'basket'
+  service: 'basket'
+  host: '10.2.3.56'
+  folder: '/home/svc/uat-basket'
+  confCommited: true
+  version: '5.1.3-SNAPSHOT'
+  revision: 35014
+  status: 'DOWN'
+
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: 'REDIS'
+
+- id: 11
+  env: 'UAT'
+  name: 'fixintbx1'
+  type: 'app'
+  project: 'fixin'
+  service: 'fixintbx'
+  host: '10.2.3.58'
+  folder: '/home/svc/uat-fixintbx'
+  confCommited: true
+  version: '0.9.0-SNAPSHOT'
+  revision: 34433
+  status: 'LIVE'
+
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: 'REDIS'
+
+

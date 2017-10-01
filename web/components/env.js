@@ -16,11 +16,11 @@ class Instance extends React.Component {
             comp = <AppInstance instance={instance} />
         }
         return (
-            <StatusWrapper status={instance.status}>
-                <div style={{display: "inline-block", verticalAlign: 'top', opacity:opacity}}>
+            <div style={{display: "inline-block", verticalAlign: 'top', opacity:opacity}}>
+                <StatusWrapper status={instance.status}>
                     {comp}
-                </div>
-            </StatusWrapper>
+                </StatusWrapper>
+            </div>
         )
     }
 }
@@ -28,44 +28,45 @@ class Instance extends React.Component {
 class RedisInstance extends React.Component {
     render() {
         const instance = this.props.instance;
-        const isSlave = instance.extra.redisRole == 'SLAVE';
+        //let extra = instance.extra || {};
+        let extra = instance || {}; // FIXME Extra
+        const isSlave = extra.redisRole == 'SLAVE';
         //const isMaster = instance.extra.redisRole == 'MASTER';
-        const persistenceModeColor = instance.extra.redisMode == 'AOF' ? 'green' : instance.extra.redisMode == 'RDB' ? 'lightgreen' : 'gray';
+        const persistenceModeColor = extra.redisMode == 'AOF' ? 'green' : extra.redisMode == 'RDB' ? 'lightgreen' : 'gray';
         /*<Status status={instance.status} />&nbsp;*/
         return (
             <div>
                 <span>{instance.name}</span>&nbsp;
-                {instance.extra.redisMaster && <Badge title={'Master in ServiceRegistry'} backgroundColor='#FFD21C' color='white'>***</Badge>}
+                {extra.redisMaster && <Badge title={'Master in ServiceRegistry'} backgroundColor='#FFD21C' color='white'>***</Badge>}
                 &nbsp;
 
-                {isSlave && (instance.extra.redisMasterInfo.link
+                {isSlave && (extra.redisMasterLink
                     ? <Badge title={'Link Up'} backgroundColor='#FCF6D4' color='white'>OK</Badge>
-                    : <Badge title={'Link Down Since ' + instance.extra.redisMasterInfo.since} backgroundColor='#FF2929' color='white'>KO</Badge>)
+                    : <Badge title={'Link Down Since ' + extra.redisMasterLinkDownSince} backgroundColor='#FF2929' color='white'>KO</Badge>)
                 }
                 &nbsp;
-                {instance.extra.redisRW == 'rw' && <Badge backgroundColor='#969696' color='white' title="Read/Write">RW</Badge>}
-                {instance.extra.redisRW == 'ro' && <Badge backgroundColor='#DBDBDB' color='white' title="Read Only">RO</Badge>}
+                {extra.redisRW == 'rw' && <Badge backgroundColor='#969696' color='white' title="Read/Write">RW</Badge>}
+                {extra.redisRW == 'ro' && <Badge backgroundColor='#DBDBDB' color='white' title="Read Only">RO</Badge>}
                 &nbsp;
 
-                <span title={'Role ' + instance.extra.redisRole + ' ' + instance.extra.redisSlaveCount + ' slaves'}>
-                    {instance.extra.redisRole} {instance.extra.redisSlaveCount}
+                <span title={'Role ' + extra.redisRole + ' ' + extra.redisSlaveCount + ' slaves'}>
+                    {extra.redisRole} {extra.redisSlaveCount}
                 </span>
                 &nbsp;
 
                 {!instance.confCommited && <Badge title={'Config in not Committed'} backgroundColor='darkred' color='white'>chg</Badge>}
 
-                <Badge title={'Persistence Mode ' + instance.extra.redisMode} backgroundColor={persistenceModeColor} color='white'>
-                    {instance.extra.redisMode}
+                <Badge title={'Persistence Mode ' + extra.redisMode} backgroundColor={persistenceModeColor} color='white'>
+                    {extra.redisMode}
                 </Badge>
 
-                <span title={instance.extra.redisClientCount + ' clients'}>
-                    {instance.extra.redisClientCount}
+                <span title={extra.redisClientCount + ' clients'}>
+                    {extra.redisClientCount}
                 </span>
                 <br/>
-
-                {instance.extra.redisInfo.host}:{instance.extra.redisInfo.port} -> {instance.extra.redisMasterInfo.host}:{instance.extra.redisMasterInfo.port}
+                {extra.redisHost}:{extra.redisPort} -> {extra.redisMasterHost}:{extra.redisMasterPort}
                 <span title="Offset (Diff)" style={{fontSize: 9, color: 'gray'}}>
-                    {instance.extra.redisOffset} {isSlave && ('(' + instance.extra.redisOffsetDiff + ')')}
+                    {extra.redisOffset} {isSlave && ('(' + extra.redisOffsetDiff + ')')}
                 </span>
                 <br/>
 
@@ -80,6 +81,8 @@ class RedisInstance extends React.Component {
 class AppInstance extends React.Component {
     render() {
         const instance = this.props.instance;
+        //let extra = instance.extra || {};
+        let extra = instance || {}; // FIXME Extra
         //, alignItems: 'top', justifyContent: 'center'
         /*<Status status={instance.status} />*/
         return (
@@ -103,10 +106,10 @@ class AppInstance extends React.Component {
                     <span>{instance.folder}</span>
                 </div>
                 <div>
-                    <Badge>{instance.extra.quickfixPersistence}</Badge>
-                    <Badge>{instance.extra.busVersion}</Badge>
-                    <Badge>{instance.extra.coreVersion}</Badge>
-                    <Badge>{instance.extra.jmx}</Badge>
+                    <Badge>{extra.quickfixPersistence}</Badge>
+                    <Badge>{extra.busVersion}</Badge>
+                    <Badge>{extra.coreVersion}</Badge>
+                    <Badge>{extra.jmx}</Badge>
                 </div>
             </div>
         )

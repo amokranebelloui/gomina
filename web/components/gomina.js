@@ -142,8 +142,8 @@ class StatusWrapper extends React.Component {
         const color =
             status == 'LIVE' ? 'green' :
                 status == 'LOADING' ? 'orange' :
-                    status == 'DOWN' ? 'gray' :
-                        'red';
+                    status == 'DOWN' ? 'red' :
+                        'lightgray';
         return (
             <div style={{padding: '2px', margin: this.props.margin, display: this.props.block ? null : 'inline-block',
                 backgroundColor: '#F8F8F8', border: '3px solid ' + color, borderRadius: '5px'}}>

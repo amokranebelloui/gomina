@@ -12,7 +12,7 @@ import {ProjectPipeline} from './pipeline';
 import {ProjectSummary, ScmLog} from './project';
 import {MyComponent, Toggle2, LoggingButton, Posts, WarningBanner} from './sandbox';
 
-import {allInstances, allProjects, sampleCommits} from './data'
+import { allProjects, sampleCommits} from './data'
 
 import C1 from './module.js';
 
@@ -110,7 +110,7 @@ class EnvApp extends React.Component {
     }
     render() {
         const instancesByEnv = groupBy(this.state.instances, 'env');
-        const instances = instancesByEnv[this.state.env];
+        const instances = instancesByEnv[this.state.env] || [];
         const envs = Object.keys(instancesByEnv);
         console.info('envs', envs);
 
@@ -132,7 +132,7 @@ class EnvApp extends React.Component {
 
 class PipelineApp extends React.Component {
     render() {
-        const instancesByProject = groupBy(allInstances, 'project');
+        const instancesByProject = groupBy(this.props.instances, 'project');
         console.info('instances by project', instancesByProject);
         const projects = allProjects;
         return (
@@ -162,7 +162,7 @@ class ProjectApp extends React.Component {
     render() {
         const project = allProjects[0];
         const commits = sampleCommits;
-        const instances = allInstances.filter(instance => instance.project == project.id);
+        const instances = this.props.instances.filter(instance => instance.project == project.id);
         const title = "Project '" + project.label + "'";
         return (
             <AppLayout title={title}>

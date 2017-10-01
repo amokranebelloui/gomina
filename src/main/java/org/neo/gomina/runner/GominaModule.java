@@ -5,6 +5,7 @@ import com.google.inject.Scopes;
 import org.neo.gomina.model.instances.InstanceRepository;
 import org.neo.gomina.model.inventory.InventoryRepository;
 import org.neo.gomina.model.monitoring.Monitoring;
+import org.neo.gomina.model.monitoring.MonitoringRepository;
 import org.neo.gomina.model.project.ProjectRepository;
 
 public class GominaModule extends AbstractModule {
@@ -17,6 +18,7 @@ public class GominaModule extends AbstractModule {
         bind(InventoryRepository.class).in(Scopes.SINGLETON);
         bind(ProjectRepository.class).in(Scopes.SINGLETON);
         bind(InstanceRepository.class).in(Scopes.SINGLETON);
+        bind(MonitoringRepository.class).in(Scopes.SINGLETON);
 
     }
 

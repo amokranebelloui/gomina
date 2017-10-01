@@ -99,7 +99,7 @@ public class WebVerticle extends AbstractVerticle {
                         .putHeader("content-type", "text/javascript")
                         .end(mapper.writeValueAsString(instanceRepository.getInstances()));
             }
-            catch (IOException e) {
+            catch (Exception e) {
                 logger.error("Cannot get instances", e);
                 ctx.fail(500);
             }

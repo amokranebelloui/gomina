@@ -7,11 +7,28 @@ import { Router, Switch, Route } from 'react-router'
 import { BrowserRouter, Link, NavLink } from 'react-router-dom'
 
 import {ArchiDiagramApp, EnvApp, PipelineApp, ProjectsApp, ProjectApp, SandboxApp, Index, About} from './components';
-import {allInstances, allProjects, sampleCommits, posts} from './data'
+import { posts } from './data'
+
+import axios from 'axios';
 
 const history = createBrowserHistory();
 
 class Blocker extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {instances: []};
+
+        const thisComponent = this;
+        axios.get('/data/instances')
+            .then(response => {
+                console.log("resp", response.data);
+                thisComponent.setState({instances: response.data});
+            })
+            .catch(function (error) {
+                console.log("error", error);
+            });
+
+    }
     render() {
         console.info('blocker');
         return (
@@ -32,10 +49,10 @@ class Blocker extends React.Component {
                 <Switch>
                     <Route exact path="/" component={Index}/>
                     <Route path="/archi" component={ArchiDiagramApp}/>
-                    <Route path="/envs" component={() => <EnvApp instances={allInstances}/>}/>
-                    <Route path="/pipeline" component={PipelineApp}/>
-                    <Route path="/projects" component={ProjectsApp}/>
-                    <Route path="/project" component={ProjectApp}/>
+                    <Route path="/envs" component={() => <EnvApp instances={this.state.instances} />}/>
+                    <Route path="/pipeline" component={() => <PipelineApp instances={this.state.instances} />}/>
+                    <Route path="/projects" component={() => <ProjectsApp />}/>
+                    <Route path="/project" component={() => <ProjectApp instances={this.state.instances} />}/>
                     <Route path="/about" component={About}/>
                     <Route path="/sandbox" component={() => <SandboxApp posts={posts}/>}/>
                     <Route path="*" component={() => <div>I don't know you man!!!</div>} />
