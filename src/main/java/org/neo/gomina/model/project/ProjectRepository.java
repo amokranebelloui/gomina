@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,5 +30,20 @@ public class ProjectRepository {
             logger.error("", e);
             return new ArrayList<>();
         }
+    }
+
+    public Project getProject(String projectId) {
+        try {
+            List<Project> data = mapper.readValue(new File("data/projects.yaml"), new TypeReference<List<Project>>() {});
+            for (Project datum : data) {
+                if (StringUtils.equals(datum.id, projectId)) {
+                    return datum;
+                }
+            }
+        }
+        catch (Exception e) {
+            logger.error("Cannot get project " + projectId, e);
+        }
+        return null;
     }
 }

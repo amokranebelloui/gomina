@@ -1,7 +1,6 @@
-
-import React from 'react';
-
-import {groupBy, Well, Version, Badge} from './gomina';
+import React from "react";
+import {Link} from "react-router-dom";
+import {groupBy, Well, Version, Badge} from "./gomina";
 
 class LinesOfCode extends React.Component {
     render() {
@@ -61,10 +60,12 @@ class ScmLink extends React.Component {
         const hasChanges = changesCount > 0;
         const backgroundColor = hasChanges ? '#EAA910' : '#F2E18F';
         return (
-            <a href={this.props.url} title={'svn url: ' + this.props.url}
-               style={{backgroundColor: backgroundColor, color: 'white', padding: 2, borderRadius: '3px', fontSize: 10}}>
-                {hasChanges ? 'svn (' + changesCount + ' chg)' : 'svn'}
-            </a>
+            <span title={'svn url: ' + this.props.url}
+                  style={{backgroundColor: backgroundColor, color: 'white', padding: 2, borderRadius: '3px', fontSize: 10}}>
+                <Link to={"/project/" + this.props.projectId}>
+                    {hasChanges ? 'svn (' + changesCount + ' chg)' : 'svn'}
+                </Link>
+            </span>
         )
     }
 }
@@ -89,7 +90,7 @@ class ProjectSummary extends React.Component {
                     </div>
                     <div style={{display: 'block'}}>
                         <BuildLink url={project.jenkins} /> (Build status)&nbsp;
-                        <ScmLink url={project.svn} changes={project.changes} />&nbsp;
+                        <ScmLink projectId={project.id} url={project.svn} changes={project.changes} />&nbsp;
                         <Version version={project.released} />&nbsp;
                         <Version version={project.latest} />
                     </div>

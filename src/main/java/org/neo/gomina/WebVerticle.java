@@ -16,6 +16,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSSocket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo.gomina.api.instances.InstanceRepository;
+import org.neo.gomina.api.projects.ProjectDetail;
 import org.neo.gomina.api.projects.ProjectDetailRepository;
 import org.neo.gomina.model.monitoring.Monitoring;
 import org.neo.gomina.runner.GominaModule;
@@ -85,6 +86,24 @@ public class WebVerticle extends AbstractVerticle {
             }
             catch (Exception e) {
                 logger.error("Cannot get projects", e);
+                ctx.fail(500);
+            }
+        });
+
+        router.route("/data/project/:projectId").handler(ctx -> {
+            try {
+                String projectId = ctx.request().getParam("projectId");
+                ProjectDetail project = projectRepository.getProject(projectId);
+                if (project != null) {
+                    ctx.response().putHeader("content-type", "text/javascript")
+                            .end(mapper.writeValueAsString(project));
+                }
+                else {
+                    ctx.fail(404);
+                }
+            }
+            catch (Exception e) {
+                logger.error("Cannot get project", e);
                 ctx.fail(500);
             }
         });

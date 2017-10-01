@@ -1,5 +1,7 @@
 package org.neo.gomina.api.projects;
 
+import java.util.List;
+
 public class ProjectDetail {
 
     public String id;
@@ -15,5 +17,7 @@ public class ProjectDetail {
 
     public Integer loc;
     public Double coverage;
+
+    public List<CommitLogEntry> commitLog;
 
 }

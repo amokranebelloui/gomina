@@ -42,7 +42,8 @@ class Blocker extends React.Component {
                 <Link to="/envs">envs</Link> -&nbsp;
                 <Link to="/pipeline">pipeline</Link> -&nbsp;
                 <Link to="/projects">projects</Link> -&nbsp;
-                <Link to="/project">project</Link> -&nbsp;
+                <Link to="/project/basket">project1</Link> -&nbsp;
+                <Link to="/project/order">project2</Link> -&nbsp;
                 <Link to="/about">about</Link> -&nbsp;
                 <Link to="/about/detail/amokrane">about amokrane</Link> -&nbsp;
                 <Link to="/about/detail/jim">about jim</Link> -&nbsp;
@@ -56,7 +57,7 @@ class Blocker extends React.Component {
                     <Route path="/envs" component={() => <EnvApp instances={this.state.instances} />}/>
                     <Route path="/pipeline" component={() => <PipelineApp instances={this.state.instances} projects={this.state.projects} />}/>
                     <Route path="/projects" component={() => <ProjectsApp projects={this.state.projects} />}/>
-                    <Route path="/project" component={() => <ProjectApp instances={this.state.instances} project={this.state.projects[0]} />}/>
+                    <Route path="/project/:id" component={props => <ProjectApp instances={this.state.instances} project={this.state.projects[0]} {...props} />}/>
                     <Route path="/about" component={About}/>
                     <Route path="/sandbox" component={() => <SandboxApp posts={posts}/>}/>
                     <Route path="*" component={() => <div>I don't know you man!!!</div>} />

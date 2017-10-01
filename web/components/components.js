@@ -10,6 +10,7 @@ import {ProjectSummary, ScmLog} from "./project";
 import {MyComponent, Toggle2, LoggingButton, Posts, WarningBanner} from "./sandbox";
 import {sampleCommits} from "./data";
 import C1 from "./module.js";
+import axios from "axios"
 
 var components = [
     {name: "referential", x:400, y:350},
@@ -154,9 +155,37 @@ class ProjectsApp extends React.Component {
 }
 
 class ProjectApp extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {project: {}};
+        this.retrieveProject = this.retrieveProject.bind(this);
+        console.info("!constructor ", this.props.match.params.id);
+    }
+    componentWillMount() {
+        console.info("!mount ", this.props.match.params.id);
+        this.retrieveProject(this.props.match.params.id);
+    }
+    /*
+    componentWillReceiveProps(nextProps) {
+        console.info("!props-chg ", this.props.match.params.id, nextProps.match.params.id);
+        this.retrieveProject(nextProps.match.params.id);
+    }
+    */
+    retrieveProject(projectId) {
+        const thisComponent = this;
+        axios.get('/data/project/' + projectId)
+            .then(response => {
+                console.log("project", response.data);
+                thisComponent.setState({project: response.data});
+            })
+            .catch(function (error) {
+                console.log("error", error);
+            });
+    }
     render() {
-        const project = this.props.project;
-        const commits = sampleCommits;
+        //console.info("!render ", this.props.match.params.id);
+        const project = this.state.project;
+        const commits = project.commitLog || [];
         const instances = this.props.instances.filter(instance => instance.project == project.id);
         const title = "Project '" + project.label + "'";
         return (
@@ -234,15 +263,23 @@ function About1(props) {
     );
 }
 
-function About2(props) {
-    console.info('about2', props.match);
-    return (
-        <div>
-            About2
-            <br />
-            {props.match.params.id}
-        </div>
-    );
+class About2 extends React.Component {
+    componentWillMount() {
+        console.info(">mount ", this.props.match.params.id)
+    }
+    componentWillReceiveProps(nextProps) {
+        console.info(">props-chg ", this.props.match.params.id, nextProps.match.params.id)
+    }
+    render() {
+        console.info('about2', this.props.match);
+        return (
+            <div>
+                About2
+                <br />
+                {this.props.match.params.id}
+            </div>
+        );
+    }
 }
 
 export {ArchiDiagramApp, EnvApp, PipelineApp, ProjectsApp, ProjectApp, SandboxApp, Index, About, About1, About2};

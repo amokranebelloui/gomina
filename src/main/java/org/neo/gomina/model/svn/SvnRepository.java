@@ -27,7 +27,7 @@ public class SvnRepository {
             }
         }
         catch (IOException e) {
-            logger.error("Error retrieving SVN data for {}" + projectId);
+            logger.error("Error retrieving SVN data for " + projectId, e);
         }
         return null;
     }
