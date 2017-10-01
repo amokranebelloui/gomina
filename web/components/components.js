@@ -165,12 +165,10 @@ class ProjectApp extends React.Component {
         console.info("!mount ", this.props.match.params.id);
         this.retrieveProject(this.props.match.params.id);
     }
-    /*
     componentWillReceiveProps(nextProps) {
         console.info("!props-chg ", this.props.match.params.id, nextProps.match.params.id);
         this.retrieveProject(nextProps.match.params.id);
     }
-    */
     retrieveProject(projectId) {
         const thisComponent = this;
         axios.get('/data/project/' + projectId)
@@ -244,10 +242,16 @@ function Index(props) {
 
 function About(props) {
     console.info('about');
+    const About2Comp = params => (<About2 {...params} />);
+
+    console.info("1", About2Comp);
+    console.info("1", About2);
+
+    //<Route path="/about/detail/:id" component={About2Comp}/>
     return (
         <AppLayout title='About'>
             <Switch>
-                <Route path="/about/detail/:id" component={About2}/>
+                <Route path="/about/detail/:id" render={About2Comp}/>
                 <Route path="/about" component={About1}/>
             </Switch>
         </AppLayout>
@@ -264,6 +268,10 @@ function About1(props) {
 }
 
 class About2 extends React.Component {
+    constructor(props) {
+        super(props);
+        console.info(">constructor ", this.props.match.params.id)
+    }
     componentWillMount() {
         console.info(">mount ", this.props.match.params.id)
     }
