@@ -1,28 +1,32 @@
-
-import React from 'react';
-import ReactDOM from 'react-dom';
-import {createBrowserHistory} from 'history';
-
-import { Router, Switch, Route } from 'react-router'
-import { BrowserRouter, Link, NavLink } from 'react-router-dom'
-
-import {ArchiDiagramApp, EnvApp, PipelineApp, ProjectsApp, ProjectApp, SandboxApp, Index, About} from './components';
-import { posts } from './data'
-
-import axios from 'axios';
+import React from "react";
+import ReactDOM from "react-dom";
+import {createBrowserHistory} from "history";
+import {Router, Switch, Route} from "react-router";
+import {BrowserRouter, Link, NavLink} from "react-router-dom";
+import {ArchiDiagramApp, EnvApp, PipelineApp, ProjectsApp, ProjectApp, SandboxApp, Index, About} from "./components";
+import {posts} from "./data";
+import axios from "axios";
 
 const history = createBrowserHistory();
 
 class Blocker extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {instances: []};
+        this.state = {instances: [], projects: []};
 
         const thisComponent = this;
         axios.get('/data/instances')
             .then(response => {
-                console.log("resp", response.data);
+                console.log("instances", response.data);
                 thisComponent.setState({instances: response.data});
+            })
+            .catch(function (error) {
+                console.log("error", error);
+            });
+        axios.get('/data/projects')
+            .then(response => {
+                console.log("projects", response.data);
+                thisComponent.setState({projects: response.data});
             })
             .catch(function (error) {
                 console.log("error", error);
@@ -50,9 +54,9 @@ class Blocker extends React.Component {
                     <Route exact path="/" component={Index}/>
                     <Route path="/archi" component={ArchiDiagramApp}/>
                     <Route path="/envs" component={() => <EnvApp instances={this.state.instances} />}/>
-                    <Route path="/pipeline" component={() => <PipelineApp instances={this.state.instances} />}/>
-                    <Route path="/projects" component={() => <ProjectsApp />}/>
-                    <Route path="/project" component={() => <ProjectApp instances={this.state.instances} />}/>
+                    <Route path="/pipeline" component={() => <PipelineApp instances={this.state.instances} projects={this.state.projects} />}/>
+                    <Route path="/projects" component={() => <ProjectsApp projects={this.state.projects} />}/>
+                    <Route path="/project" component={() => <ProjectApp instances={this.state.instances} project={this.state.projects[0]} />}/>
                     <Route path="/about" component={About}/>
                     <Route path="/sandbox" component={() => <SandboxApp posts={posts}/>}/>
                     <Route path="*" component={() => <div>I don't know you man!!!</div>} />

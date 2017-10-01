@@ -1,4 +1,4 @@
-package org.neo.gomina.model.instances;
+package org.neo.gomina.api.instances;
 
 import org.neo.gomina.model.inventory.Environment;
 import org.neo.gomina.model.inventory.InvInstance;

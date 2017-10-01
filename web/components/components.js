@@ -1,20 +1,15 @@
-
-import React from 'react';
-import { Router, Switch, Route } from 'react-router'
-
-import SockJS from 'sockjs-client';
-
-import {groupBy, Toggle} from './gomina';
-import {AppLayout} from './layout';
-import {Diagram} from './archi-diagram';
-import {EnvironmentLogical} from './env';
-import {ProjectPipeline} from './pipeline';
-import {ProjectSummary, ScmLog} from './project';
-import {MyComponent, Toggle2, LoggingButton, Posts, WarningBanner} from './sandbox';
-
-import { allProjects, sampleCommits} from './data'
-
-import C1 from './module.js';
+import React from "react";
+import {Router, Switch, Route} from "react-router";
+import SockJS from "sockjs-client";
+import {groupBy, Toggle} from "./gomina";
+import {AppLayout} from "./layout";
+import {Diagram} from "./archi-diagram";
+import {EnvironmentLogical} from "./env";
+import {ProjectPipeline} from "./pipeline";
+import {ProjectSummary, ScmLog} from "./project";
+import {MyComponent, Toggle2, LoggingButton, Posts, WarningBanner} from "./sandbox";
+import {sampleCommits} from "./data";
+import C1 from "./module.js";
 
 var components = [
     {name: "referential", x:400, y:350},
@@ -134,7 +129,7 @@ class PipelineApp extends React.Component {
     render() {
         const instancesByProject = groupBy(this.props.instances, 'project');
         console.info('instances by project', instancesByProject);
-        const projects = allProjects;
+        const projects = this.props.projects;
         return (
             <AppLayout title="Pipeline">
                 {projects.map(project =>
@@ -147,7 +142,7 @@ class PipelineApp extends React.Component {
 
 class ProjectsApp extends React.Component {
     render() {
-        const projects = allProjects;
+        const projects = this.props.projects;
         return (
             <AppLayout title="Projects">
                 {projects.map(project =>
@@ -160,7 +155,7 @@ class ProjectsApp extends React.Component {
 
 class ProjectApp extends React.Component {
     render() {
-        const project = allProjects[0];
+        const project = this.props.project;
         const commits = sampleCommits;
         const instances = this.props.instances.filter(instance => instance.project == project.id);
         const title = "Project '" + project.label + "'";

@@ -2,9 +2,6 @@ package org.neo.gomina;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Template;
-import com.github.jknack.handlebars.io.FileTemplateLoader;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.vertx.core.AbstractVerticle;
@@ -18,13 +15,12 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSSocket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.neo.gomina.model.instances.InstanceRepository;
+import org.neo.gomina.api.instances.InstanceRepository;
+import org.neo.gomina.api.projects.ProjectDetailRepository;
 import org.neo.gomina.model.monitoring.Monitoring;
-import org.neo.gomina.model.project.ProjectRepository;
 import org.neo.gomina.runner.GominaModule;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +38,7 @@ public class WebVerticle extends AbstractVerticle {
         Injector injector = Guice.createInjector(new GominaModule());
 
         Monitoring monitoring = injector.getInstance(Monitoring.class);
-        ProjectRepository projectRepository = injector.getInstance(ProjectRepository.class);
+        ProjectDetailRepository projectRepository = injector.getInstance(ProjectDetailRepository.class);
         InstanceRepository instanceRepository = injector.getInstance(InstanceRepository.class);
 
 
@@ -105,6 +101,7 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
 
+        /*
         final Handlebars handlebars = new Handlebars(new FileTemplateLoader("web"));
         router.route().pathRegex("/(.*)\\.hbs").handler(ctx -> {
             HttpServerResponse response = ctx.response();
@@ -119,6 +116,7 @@ public class WebVerticle extends AbstractVerticle {
                 e.printStackTrace();
             }
         });
+        */
 
         router.route("/*").pathRegex(".*\\.(js|ico|map)").handler(StaticHandler.create("dist").setCachingEnabled(false));
 
@@ -136,6 +134,7 @@ public class WebVerticle extends AbstractVerticle {
                 response.sendFile(filename);
             }
             catch (Exception e) {
+                logger.error("Error serving static data", e);
                 ctx.fail(404);
             }
         });

@@ -20,6 +20,7 @@ const allInstances = [
 ];
 */
 
+/*
 const allProjects = [
     {id:'kernel', label:'Kernel'        , type:'server', svn:'/svn/kernel' , mvn:'org.demo:kernel' , jenkins:'https://jenkins.io', changes: 0, latest:'2.3.0-SNAPSHOT', released:'2.2.0', loc:1903 , coverage:0.0 },
     {id:'basket', label:'Basket Manager', type:'server', svn:'/svn/basket' , mvn:'org.demo:basket' , jenkins:'https://jenkins.io', changes: 9, latest:'5.1.3-SNAPSHOT', released:'5.1.2', loc:6013 , coverage:22.0},
@@ -28,6 +29,7 @@ const allProjects = [
     {id:'libbus', label:'Bus Lib'       , type:'lib'   , svn:'/svn/lib/bus', mvn:'org.demo.lib:bus', jenkins:'https://jenkins.io', changes: 0, latest:'0.9.2-SNAPSHOT', released:'0.9.0', loc:null , coverage:null},
 
 ];
+*/
 
 const sampleCommits = [
     {revision: 35490, message:'refactor'},
@@ -48,4 +50,4 @@ const posts = [
 
 
 
-export { allProjects, sampleCommits, posts }
+export { sampleCommits, posts }

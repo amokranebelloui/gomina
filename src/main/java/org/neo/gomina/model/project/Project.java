@@ -5,6 +5,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 public class Project {
 
     public String id;
+    public String label;
     public String type;
     public String svnUrl;
     public String maven;
@@ -14,6 +15,7 @@ public class Project {
     public String toString() {
         return new ToStringBuilder(this)
                 .append("id", id)
+                .append("label", label)
                 .append("type", type)
                 .append("svnUrl", svnUrl)
                 .append("maven", maven)
