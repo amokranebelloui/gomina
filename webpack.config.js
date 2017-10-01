@@ -3,6 +3,7 @@ var path = require('path');
 
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
@@ -35,6 +36,7 @@ module.exports = {
             inject: 'body',
             filename: 'index.html'
         }),
+        new CopyWebpackPlugin([{from: "web/*.ico", to: "", flatten: true}]),
         new webpack.optimize.CommonsChunkPlugin({name: 'shared'}),
         /*
         new webpack.optimize.CommonsChunkPlugin({

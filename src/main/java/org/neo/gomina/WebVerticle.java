@@ -120,7 +120,7 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
 
-        router.route("/*").pathRegex(".*\\.js").handler(StaticHandler.create("dist").setCachingEnabled(false));
+        router.route("/*").pathRegex(".*\\.(js|ico|map)").handler(StaticHandler.create("dist").setCachingEnabled(false));
 
         router.route().pathRegex("/.*").handler(ctx -> {
         //router.route().pathRegex("/([^/.]*)/*.*").handler(ctx -> {
