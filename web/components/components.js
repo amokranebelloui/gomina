@@ -177,17 +177,29 @@ class ProjectApp extends React.Component {
             })
             .catch(function (error) {
                 console.log("error", error.response);
+                thisComponent.setState({project: {}});
             });
     }
     render() {
         //console.info("!render ", this.props.match.params.id);
+        const projects = this.props.projects;
         const project = this.state.project;
         const commits = project.commitLog || [];
         const instances = this.props.instances.filter(instance => instance.project == project.id);
         const title = "Project '" + project.label + "'";
+        const cellStyle = {display: 'inline'};
         return (
             <AppLayout title={title}>
-                <ScmLog key={project.id} project={project} commits={commits} instances={instances} />
+                <div style={{display: 'grid', gridGap: '2px', gridTemplateColumns: 'minmax(500px, 6fr) minmax(200px, 3fr)'}}>
+                    <div style={cellStyle}>
+                        {projects.map(project =>
+                            <ProjectSummary key={project.id} project={project} />
+                        )}
+                    </div>
+                    <div style={cellStyle}>
+                        <ScmLog key={project.id} project={project} commits={commits} instances={instances} />
+                    </div>
+                </div>
             </AppLayout>
         );
     }
@@ -247,55 +259,5 @@ function Index(props) {
     );
 }
 
-function About(props) {
-    console.info('about');
-    const About2Comp = params => (<About2 {...params} />);
-
-    console.info("1", About2Comp);
-    console.info("1", About2);
-
-    //<Route path="/about/detail/:id" component={About2Comp}/>
-    return (
-        <AppLayout title='About'>
-            <Switch>
-                <Route path="/about/detail/:id" render={About2Comp}/>
-                <Route path="/about" component={About1}/>
-            </Switch>
-        </AppLayout>
-    );
-}
-
-function About1(props) {
-    console.info('about1');
-    return (
-        <div>
-            About1
-        </div>
-    );
-}
-
-class About2 extends React.Component {
-    constructor(props) {
-        super(props);
-        console.info(">constructor ", this.props.match.params.id)
-    }
-    componentWillMount() {
-        console.info(">mount ", this.props.match.params.id)
-    }
-    componentWillReceiveProps(nextProps) {
-        console.info(">props-chg ", this.props.match.params.id, nextProps.match.params.id)
-    }
-    render() {
-        console.info('about2', this.props.match);
-        return (
-            <div>
-                About2
-                <br />
-                {this.props.match.params.id}
-            </div>
-        );
-    }
-}
-
-export {ArchiDiagramApp, EnvApp, PipelineApp, ProjectsApp, ProjectApp, SandboxApp, Index, About, About1, About2};
+export {ArchiDiagramApp, EnvApp, PipelineApp, ProjectsApp, ProjectApp, SandboxApp, Index};
 

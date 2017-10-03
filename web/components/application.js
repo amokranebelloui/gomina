@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import {createBrowserHistory} from "history";
 import {Router, Switch, Route} from "react-router";
 import {BrowserRouter, Link, NavLink} from "react-router-dom";
-import {ArchiDiagramApp, EnvApp, PipelineApp, ProjectsApp, ProjectApp, SandboxApp, Index, About} from "./components";
+import {ArchiDiagramApp, EnvApp, PipelineApp, ProjectsApp, ProjectApp, SandboxApp, Index} from "./components";
 import axios from "axios";
 
 const history = createBrowserHistory();
@@ -41,11 +41,6 @@ class Blocker extends React.Component {
                 <Link to="/envs">envs</Link> -&nbsp;
                 <Link to="/pipeline">pipeline</Link> -&nbsp;
                 <Link to="/projects">projects</Link> -&nbsp;
-                <Link to="/project/basket">project1</Link> -&nbsp;
-                <Link to="/project/order">project2</Link> -&nbsp;
-                <Link to="/about">about</Link> -&nbsp;
-                <Link to="/about/detail/amokrane">about amokrane</Link> -&nbsp;
-                <Link to="/about/detail/jim">about jim</Link> -&nbsp;
                 <Link to="/sandbox">sandbox</Link> -&nbsp;
                 <Link to="/unknown">unknown page</Link>&nbsp;
                 <br/>
@@ -55,9 +50,8 @@ class Blocker extends React.Component {
                     <Route path="/archi" component={ArchiDiagramApp}/>
                     <Route path="/envs" component={() => <EnvApp instances={this.state.instances} />}/>
                     <Route path="/pipeline" component={() => <PipelineApp instances={this.state.instances} projects={this.state.projects} />}/>
-                    <Route path="/projects" component={() => <ProjectsApp projects={this.state.projects} />}/>
-                    <Route path="/project/:id" render={props => <ProjectApp instances={this.state.instances} {...props} />}/>
-                    <Route path="/about" component={About}/>
+                    <Route path="/projects" render={props => <ProjectsApp projects={this.state.projects} {...props} />}/>
+                    <Route path="/project/:id" render={props => <ProjectApp projects={this.state.projects} instances={this.state.instances} {...props} />}/>
                     <Route path="/sandbox" component={() => <SandboxApp />}/>
                     <Route path="*" component={() => <div>I don't know you man!!!</div>} />
                 </Switch>
