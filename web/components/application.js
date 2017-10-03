@@ -4,7 +4,6 @@ import {createBrowserHistory} from "history";
 import {Router, Switch, Route} from "react-router";
 import {BrowserRouter, Link, NavLink} from "react-router-dom";
 import {ArchiDiagramApp, EnvApp, PipelineApp, ProjectsApp, ProjectApp, SandboxApp, Index, About} from "./components";
-import {posts} from "./data";
 import axios from "axios";
 
 const history = createBrowserHistory();
@@ -59,7 +58,7 @@ class Blocker extends React.Component {
                     <Route path="/projects" component={() => <ProjectsApp projects={this.state.projects} />}/>
                     <Route path="/project/:id" render={props => <ProjectApp instances={this.state.instances} {...props} />}/>
                     <Route path="/about" component={About}/>
-                    <Route path="/sandbox" component={() => <SandboxApp posts={posts}/>}/>
+                    <Route path="/sandbox" component={() => <SandboxApp />}/>
                     <Route path="*" component={() => <div>I don't know you man!!!</div>} />
                 </Switch>
                 <hr/>

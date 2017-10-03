@@ -8,7 +8,6 @@ import {EnvironmentLogical} from "./env";
 import {ProjectPipeline} from "./pipeline";
 import {ProjectSummary, ScmLog} from "./project";
 import {MyComponent, Toggle2, LoggingButton, Posts, WarningBanner} from "./sandbox";
-import {sampleCommits} from "./data";
 import C1 from "./module.js";
 import axios from "axios"
 
@@ -177,7 +176,7 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({project: response.data});
             })
             .catch(function (error) {
-                console.log("error", error);
+                console.log("error", error.response);
             });
     }
     render() {
@@ -194,12 +193,20 @@ class ProjectApp extends React.Component {
     }
 }
 
+const posts = [
+    {id: 1, title: 'Hello World 4', content: 'Welcome to learning React!'},
+    {id: 2, title: 'Installation', content: 'You can install React from npm.'},
+    {id: 3, title: 'Live Edit in Jetbrains, wo', content: 'You can live edit from Jetbrains IDE, wow!'},
+    {id: 4, title: 'Scorpions, Tokyo Tapes', content: 'Kojo No Tsuki'}
+];
+
 class SandboxApp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {logged: true, user: "amo"}
     }
     render() {
+
         let status;
         if (this.state.logged) {
             status = <span>Hello '{this.state.user}'</span>
@@ -223,7 +230,7 @@ class SandboxApp extends React.Component {
                 <WarningBanner warn="Something happened" />
                 <WarningBanner warn="" />
                 <br/>
-                <Posts posts={this.props.posts} />
+                <Posts posts={posts} />
                 <MyComponent label="hello world" highlighted={true} />
                 <MyComponent label="hello world" />
             </AppLayout>
