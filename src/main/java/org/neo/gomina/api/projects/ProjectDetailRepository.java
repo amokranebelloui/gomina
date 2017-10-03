@@ -5,14 +5,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo.gomina.model.project.Project;
 import org.neo.gomina.model.project.ProjectRepository;
+import org.neo.gomina.model.sonar.Sonar;
+import org.neo.gomina.model.sonar.SonarIndicators;
 import org.neo.gomina.model.svn.SvnDetails;
 import org.neo.gomina.model.svn.SvnRepository;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
+import java.util.Map;
 
 public class ProjectDetailRepository {
 
@@ -20,13 +21,16 @@ public class ProjectDetailRepository {
 
     @Inject private ProjectRepository projectRepository;
     @Inject private SvnRepository svnRepository;
+    @Inject private Sonar sonar;
 
     public List<ProjectDetail> getProjects() {
         List<ProjectDetail> result = new ArrayList<>();
+        Map<String, SonarIndicators> sonarIndicatorsMap = sonar.getMetrics();
         for (Project project : projectRepository.getProjects()) {
             SvnDetails svnDetails = svnRepository.getSvnDetails(project.id);
             svnDetails = svnDetails != null ? svnDetails : new SvnDetails(); // TODO Null object pattern
-            ProjectDetail projectDetail = build(project, svnDetails);
+            SonarIndicators sonarIndicators = sonarIndicatorsMap.get(project.maven);
+            ProjectDetail projectDetail = build(project, svnDetails, null, sonarIndicators);
             result.add(projectDetail);
         }
         return result;
@@ -36,12 +40,14 @@ public class ProjectDetailRepository {
         Project project = projectRepository.getProject(projectId);
         if (project != null) {
             SvnDetails svnDetails = svnRepository.getSvnDetails(projectId);
-            return build(project, svnDetails);
+            SonarIndicators sonarIndicators = sonar.getMetrics(project.maven).get(project.maven);
+            List<CommitLogEntry> commitLog = svnRepository.getCommitLog(project.id);
+            return build(project, svnDetails, commitLog, sonarIndicators);
         }
         return null;
     }
 
-    private ProjectDetail build(Project project, SvnDetails svnDetails) {
+    private ProjectDetail build(Project project, SvnDetails svnDetails, List<CommitLogEntry> commitLog, SonarIndicators sonarIndicators) {
         ProjectDetail projectDetail = new ProjectDetail();
 
         projectDetail.id = project.id;
@@ -53,41 +59,20 @@ public class ProjectDetailRepository {
         projectDetail.mvn = project.maven;
         projectDetail.jenkins = project.jenkinsJob;
 
-        projectDetail.changes = svnDetails.changes;
-        projectDetail.latest = svnDetails.latest;
-        projectDetail.released = svnDetails.released;
+        if (svnDetails != null) {
+            projectDetail.changes = svnDetails.changes;
+            projectDetail.latest = svnDetails.latest;
+            projectDetail.released = svnDetails.released;
+        }
 
-        Random random = new Random(); // FIXME Random ?? seriously
-        projectDetail.loc = random.nextInt(20000);
-        projectDetail.coverage = Math.round(random.nextDouble() * 6000.0) / 100.0;
+        if (sonarIndicators != null) {
+            projectDetail.loc = sonarIndicators.loc;
+            projectDetail.coverage = sonarIndicators.coverage;
+        }
 
-        projectDetail.commitLog = sampleCommitLog();
+        projectDetail.commitLog = commitLog;
 
         return projectDetail;
     }
 
-    private List<CommitLogEntry> sampleCommitLog() {
-        List<CommitLogEntry> result = new ArrayList<>();
-        // FIXME Sample Data
-
-        result.add(buildEntry("35490", new Date(), "amokrane", "refactor"));
-        result.add(buildEntry("35488", new Date(), "amokrane", "[JIRA-5409] feature 2"));
-        result.add(buildEntry("35487", new Date(), "amokrane", "feature1"));
-        result.add(buildEntry("35469", new Date(), "amokrane", "feature 0"));
-        result.add(buildEntry("34561", new Date(), "amokrane", "POC, lkhs sdpfousd sdfhpsmdnf sfspdh dk s kjf s jkhsdkjhdfos sjdfjs d sdkmfdf shjehkjdfksbdf  ukejhdkh sjd ksdhfjk qksjvkdv kbqsdbqk"));
-        result.add(buildEntry("34560", new Date(), "amokrane", "structure"));
-        result.add(buildEntry("33982", new Date(), "amokrane", "initial commit"));
-        return result;
-    }
-
-    private CommitLogEntry buildEntry(String revision, Date date, String author, String message) {
-        CommitLogEntry commitLogEntry = new CommitLogEntry();
-
-        commitLogEntry.revision = revision;
-        commitLogEntry.date = date;
-        commitLogEntry.author = author;
-        commitLogEntry.message = message;
-
-        return commitLogEntry;
-    }
 }

@@ -1,0 +1,19 @@
+- code: 'x.oms.kernel:tradex-kernel'
+  loc: 1903
+  coverage: 0.0
+
+- code: 'x.oms.vac:voms-basketmanager'
+  loc: 6013
+  coverage: 22.0
+
+- code: 'x.oms.vac:voms-ordermanager'
+  loc: 11764
+  coverage: 9.0
+
+- code: 'x.oms.vac:voms-fixin'
+  loc: 2375
+  coverage: 19.0
+
+- code: 'x.oms.vac:voms-bus'
+  loc: null
+  coverage: null

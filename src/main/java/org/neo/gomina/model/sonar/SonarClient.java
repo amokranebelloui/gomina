@@ -16,23 +16,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SonarClient {
+public class SonarClient implements Sonar {
 
     private static final Logger logger = LogManager.getLogger(SonarClient.class);
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    public static void main(String[] args) {
-        System.out.println(new SonarClient().getMetrics("http://localhost:9000", null));
-        System.out.println(new SonarClient().getMetrics("http://localhost:9000", "torkjell:torkjell"));
-        System.out.println(new SonarClient().getMetrics("http://localhost:9000", "torkjell:unknown"));
+    private String root = "http://localhost:9000";
+
+    @Override
+    public Map<String, SonarIndicators> getMetrics() {
+        return getMetrics(null);
     }
 
-    public Map<String, SonarIndicators> getMetrics(String root, String resource) {
+    @Override
+    public Map<String, SonarIndicators> getMetrics(String resource) {
         Map<String, SonarIndicators> map = new HashMap<>();
         try {
             CloseableHttpClient httpclient = HttpClients.createDefault();
-            //resource=x.oms.facilitation:tradex-facilitation&
             String resourceQuery = StringUtils.isNotBlank(resource) ? "resource=" + resource + "&" : "";
             HttpGet httpGet = new HttpGet(root + "/api/resources?" + resourceQuery + "metrics=ncloc,coverage");
             CloseableHttpResponse response1 = httpclient.execute(httpGet);
@@ -48,7 +49,7 @@ public class SonarClient {
                         Double ncloc = (Double)getMetric(msr, "ncloc");
                         Double coverage = (Double)getMetric(msr, "coverage");
                         logger.info("-> Data " + key + " " + ncloc + " " + coverage);
-                        map.put(key, new SonarIndicators(ncloc, coverage));
+                        map.put(key, new SonarIndicators(key, ncloc, coverage));
                     }
                     EntityUtils.consume(entity1);
                 }
@@ -63,7 +64,7 @@ public class SonarClient {
         return map;
     }
 
-    public Object getMetric(List<Map<String, String>> msr, String metric) {
+    private Object getMetric(List<Map<String, String>> msr, String metric) {
         if (msr != null) {
             for (Map<String, String> m : msr) {
                 if (metric != null && metric.equals(m.get("key"))) {

@@ -8,6 +8,8 @@ import org.neo.gomina.model.inventory.InventoryRepository;
 import org.neo.gomina.model.monitoring.Monitoring;
 import org.neo.gomina.model.monitoring.MonitoringRepository;
 import org.neo.gomina.model.project.ProjectRepository;
+import org.neo.gomina.model.sonar.Sonar;
+import org.neo.gomina.model.sonar.SonarDummyClient;
 import org.neo.gomina.model.svn.SvnRepository;
 
 public class GominaModule extends AbstractModule {
@@ -21,6 +23,7 @@ public class GominaModule extends AbstractModule {
         bind(ProjectRepository.class).in(Scopes.SINGLETON);
         bind(MonitoringRepository.class).in(Scopes.SINGLETON);
         bind(SvnRepository.class).in(Scopes.SINGLETON);
+        bind(Sonar.class).to(SonarDummyClient.class).in(Scopes.SINGLETON);
 
         bind(InstanceRepository.class).in(Scopes.SINGLETON);
         bind(ProjectDetailRepository.class).in(Scopes.SINGLETON);

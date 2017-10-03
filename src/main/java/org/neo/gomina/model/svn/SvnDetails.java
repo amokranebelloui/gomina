@@ -9,9 +9,6 @@ public class SvnDetails {
     public String latest;
     public String released;
 
-    public Integer loc; // FIXME Sonar data
-    public Double coverage;
-
     @Override
     public String toString() {
         return new ToStringBuilder(this)
@@ -19,8 +16,6 @@ public class SvnDetails {
                 .append("changes", changes)
                 .append("latest", latest)
                 .append("released", released)
-                .append("loc", loc)
-                .append("coverage", coverage)
                 .toString();
     }
 }

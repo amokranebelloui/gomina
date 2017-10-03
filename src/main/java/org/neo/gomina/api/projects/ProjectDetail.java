@@ -15,7 +15,7 @@ public class ProjectDetail {
     public String latest;
     public String released;
 
-    public Integer loc;
+    public Double loc;
     public Double coverage;
 
     public List<CommitLogEntry> commitLog;
