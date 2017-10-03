@@ -33,7 +33,7 @@ module.exports = {
         new HtmlWebpackPlugin({
             title: 'Gomina!',
             template: 'web/index.template.ejs',
-            inject: 'body',
+            inject: false,
             filename: 'index.html'
         }),
         new CopyWebpackPlugin([{from: "web/*.ico", to: "", flatten: true}]),
