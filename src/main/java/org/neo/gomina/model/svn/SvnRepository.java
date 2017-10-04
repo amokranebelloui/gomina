@@ -7,7 +7,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.neo.gomina.api.projects.CommitLogEntry;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +40,7 @@ public class SvnRepository {
         return null;
     }
 
-    public List<CommitLogEntry> getCommitLog(String projectId) {
+    public List<Commit> getCommitLog(String projectId) {
 
         try {
             List<Map<String, Object>> svnData = mapper.readValue(new File("data/projects.svn.yaml"), new TypeReference<List<Map<String, Object>>>() {});
@@ -57,8 +56,8 @@ public class SvnRepository {
         return new ArrayList<>();
     }
 
-    private List<CommitLogEntry> buildFrom(List<Map<String, Object>> list) {
-        List<CommitLogEntry> result = new ArrayList<>();
+    private List<Commit> buildFrom(List<Map<String, Object>> list) {
+        List<Commit> result = new ArrayList<>();
         if (list != null) {
             for (Map<String, Object> stringObjectMap : list) {
                 result.add(buildFrom(stringObjectMap));
@@ -67,8 +66,8 @@ public class SvnRepository {
         return result;
     }
 
-    private CommitLogEntry buildFrom(Map<String, Object> map) {
-        CommitLogEntry entry = new CommitLogEntry();
+    private Commit buildFrom(Map<String, Object> map) {
+        Commit entry = new Commit();
         entry.revision = (String)map.get("revision");
         entry.date = (Date)map.get("date");
         entry.author = (String)map.get("author");

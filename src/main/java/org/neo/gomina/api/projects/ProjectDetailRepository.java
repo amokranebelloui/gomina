@@ -7,6 +7,7 @@ import org.neo.gomina.model.project.Project;
 import org.neo.gomina.model.project.ProjectRepository;
 import org.neo.gomina.model.sonar.Sonar;
 import org.neo.gomina.model.sonar.SonarIndicators;
+import org.neo.gomina.model.svn.Commit;
 import org.neo.gomina.model.svn.SvnDetails;
 import org.neo.gomina.model.svn.SvnRepository;
 
@@ -41,10 +42,23 @@ public class ProjectDetailRepository {
         if (project != null) {
             SvnDetails svnDetails = svnRepository.getSvnDetails(projectId);
             SonarIndicators sonarIndicators = sonar.getMetrics(project.maven).get(project.maven);
-            List<CommitLogEntry> commitLog = svnRepository.getCommitLog(project.id);
+            List<CommitLogEntry> commitLog = map(svnRepository.getCommitLog(project.id));
             return build(project, svnDetails, commitLog, sonarIndicators);
         }
         return null;
+    }
+
+    private List<CommitLogEntry> map(List<Commit> commitLog) {
+        List<CommitLogEntry> result = new ArrayList<>();
+        for (Commit commit : commitLog) {
+            CommitLogEntry commitLogEntry = new CommitLogEntry();
+            commitLogEntry.revision = commit.revision;
+            commitLogEntry.date = commit.date;
+            commitLogEntry.author = commit.author;
+            commitLogEntry.message = commit.message;
+            result.add(commitLogEntry);
+        }
+        return result;
     }
 
     private ProjectDetail build(Project project, SvnDetails svnDetails, List<CommitLogEntry> commitLog, SonarIndicators sonarIndicators) {

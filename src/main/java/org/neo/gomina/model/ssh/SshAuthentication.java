@@ -14,6 +14,7 @@ public class SshAuthentication {
         try {
             //props.load(new FileInputStream(new File("pass.properties")));
 
+            // FIXME Authentication
             serversAuth.put("Amokranes-MacBook-Pro.local", new SshAuth("Amokrane", "", "Amokrane"));
         }
         catch (Exception e) {

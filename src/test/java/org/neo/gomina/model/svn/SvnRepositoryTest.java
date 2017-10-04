@@ -23,7 +23,7 @@ public class SvnRepositoryTest {
     @Test
     public void testCommitLog() throws Exception {
         SvnRepository svnRepository = new SvnRepository();
-        List<CommitLogEntry> commitLog = svnRepository.getCommitLog("basket");
+        List<Commit> commitLog = svnRepository.getCommitLog("basket");
         assertThat(commitLog).isNotNull();
         assertThat(commitLog.size()).isGreaterThan(5);
     }
