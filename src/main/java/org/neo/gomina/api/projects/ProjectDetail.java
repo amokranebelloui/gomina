@@ -7,6 +7,7 @@ public class ProjectDetail {
     public String id;
     public String label;
     public String type;
+    public String repo;
     public String svn;
     public String mvn;
     public String jenkins;

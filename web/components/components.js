@@ -6,10 +6,10 @@ import {AppLayout} from "./layout";
 import {Diagram} from "./archi-diagram";
 import {EnvironmentLogical} from "./env";
 import {ProjectPipeline} from "./pipeline";
-import {ProjectSummary, ScmLog} from "./project";
+import {ProjectSummary, ScmLog, LinesOfCode, Coverage} from "./project";
 import {MyComponent, Toggle2, LoggingButton, Posts, WarningBanner} from "./sandbox";
 import C1 from "./module.js";
-import axios from "axios"
+import axios from "axios";
 
 var components = [
     {name: "referential", x:400, y:350},
@@ -197,7 +197,21 @@ class ProjectApp extends React.Component {
                         )}
                     </div>
                     <div style={cellStyle}>
-                        <ScmLog key={project.id} project={project} commits={commits} instances={instances} />
+                        <div>
+                            <span title={project.id}>
+                                <b>{project.label}</b>
+                                <span style={{fontSize: 10, marginLeft: 2}}>({project.type})</span>
+                            </span>
+                            <br/>
+                            <span style={{fontSize: 11}}>{project.mvn}</span>
+                            <br/>
+                            <span style={{fontSize: 11}}>{project.repo + ':' + project.svn}</span>
+                            <br/>
+                            <LinesOfCode loc={project.loc} />&nbsp;
+                            <Coverage coverage={project.coverage} />&nbsp;
+                        </div>
+                        <br/>
+                        <ScmLog project={project} commits={commits} instances={instances} />
                     </div>
                 </div>
             </AppLayout>

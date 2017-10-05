@@ -60,7 +60,7 @@ class ScmLink extends React.Component {
         const hasChanges = changesCount > 0;
         const backgroundColor = hasChanges ? '#EAA910' : '#F2E18F';
         return (
-            <span title={'svn url: ' + this.props.url}
+            <span title={this.props.url}
                   style={{backgroundColor: backgroundColor, color: 'white', padding: 2, borderRadius: '3px', fontSize: 10}}>
                 <Link to={"/project/" + this.props.projectId}>
                     {hasChanges ? 'svn (' + changesCount + ' chg)' : 'svn'}
@@ -89,8 +89,8 @@ class ProjectSummary extends React.Component {
                         <Coverage coverage={project.coverage} />&nbsp;
                     </div>
                     <div style={{display: 'block'}}>
-                        <BuildLink url={project.jenkins} /> (Build status)&nbsp;
-                        <ScmLink projectId={project.id} url={project.svn} changes={project.changes} />&nbsp;
+                        <BuildLink url={project.jenkins} /> (BuildSt)&nbsp;
+                        <ScmLink projectId={project.id} url={project.repo + ':' + project.svn} changes={project.changes} />&nbsp;
                         <Version version={project.released} />&nbsp;
                         <Version version={project.latest} />
                     </div>
@@ -119,7 +119,7 @@ class ScmLog extends React.Component {
         });
         return (
             <div>
-                <span>SVN Log</span>
+                <b>SVN Log</b>
                 <br/>
                 {Object.keys(log).sort((a,b) => b-a).map(revision =>
                     <Well block key={revision}>
@@ -155,7 +155,7 @@ class ScmLog extends React.Component {
     }
 }
 
-export {BuildLink, ScmLog, ProjectSummary, ScmLink}
+export {BuildLink, ScmLog, ProjectSummary, ScmLink, LinesOfCode, Coverage}
 
 
 

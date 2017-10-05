@@ -69,6 +69,7 @@ public class ProjectDetailRepository {
                 ? project.label
                 : project.id;
         projectDetail.type = project.type;
+        projectDetail.repo = project.svnRepo;
         projectDetail.svn = project.svnUrl;
         projectDetail.mvn = project.maven;
         projectDetail.jenkins = project.jenkinsJob;
