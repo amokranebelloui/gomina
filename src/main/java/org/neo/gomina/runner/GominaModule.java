@@ -8,12 +8,10 @@ import org.neo.gomina.model.inventory.InventoryRepository;
 import org.neo.gomina.model.monitoring.Monitoring;
 import org.neo.gomina.model.monitoring.MonitoringRepository;
 import org.neo.gomina.model.project.ProjectRepository;
-import org.neo.gomina.model.scm.ScmClient;
 import org.neo.gomina.model.scm.ScmConnector;
+import org.neo.gomina.model.scm.ScmRepoRepository;
 import org.neo.gomina.model.scm.impl.CachedScmConnector;
 import org.neo.gomina.model.scm.impl.DefaultScmConnector;
-import org.neo.gomina.model.scm.impl.DummyScmClient;
-import org.neo.gomina.model.scm.impl.TmateSoftSvnClient;
 import org.neo.gomina.model.sonar.Sonar;
 import org.neo.gomina.model.sonar.SonarDummyClient;
 
@@ -28,9 +26,10 @@ public class GominaModule extends AbstractModule {
         bind(ProjectRepository.class).in(Scopes.SINGLETON);
         bind(MonitoringRepository.class).in(Scopes.SINGLETON);
 
-        bind(TmateSoftSvnClient.class).in(Scopes.SINGLETON);
-        bind(DummyScmClient.class).in(Scopes.SINGLETON);
-        bind(ScmClient.class).to(DummyScmClient.class).in(Scopes.SINGLETON); //
+        //bind(TmateSoftSvnClient.class).in(Scopes.SINGLETON);
+        //bind(DummyScmClient.class).in(Scopes.SINGLETON);
+        //bind(ScmClient.class).to(DummyScmClient.class).in(Scopes.SINGLETON); //
+        bind(ScmRepoRepository.class).in(Scopes.SINGLETON);
         bind(DefaultScmConnector.class).in(Scopes.SINGLETON);
         bind(CachedScmConnector.class).in(Scopes.SINGLETON);
         bind(ScmConnector.class).to(CachedScmConnector.class).in(Scopes.SINGLETON);

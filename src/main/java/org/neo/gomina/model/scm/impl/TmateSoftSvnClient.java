@@ -22,12 +22,12 @@ public class TmateSoftSvnClient implements ScmClient {
 
     private final static Logger logger = LogManager.getLogger(TmateSoftSvnClient.class);
 
-    //String url = "http://svn/actions/venteaction/vaction/Developpement/";
-    private String url = "file:////Users/Amokrane/Work/SvnRepo/svn-repo-demo";    // FIXME Configurable
+    private String url;
 
     private SVNRepository repository = null;
 
-    public TmateSoftSvnClient() throws SVNException {
+    public TmateSoftSvnClient(String url) throws SVNException {
+        this.url = url;
         DAVRepositoryFactory.setup();
         repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(url));
         /*
@@ -65,4 +65,8 @@ public class TmateSoftSvnClient implements ScmClient {
         return rev != null ? String.valueOf(rev) : null;
     }
 
+    @Override
+    public String toString() {
+        return String.format("TmateSoftSvnClient{url='%s'}", url);
+    }
 }

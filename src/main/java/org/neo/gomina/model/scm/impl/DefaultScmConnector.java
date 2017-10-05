@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.neo.gomina.model.maven.MavenUtils;
 import org.neo.gomina.model.scm.ScmClient;
 import org.neo.gomina.model.scm.ScmConnector;
+import org.neo.gomina.model.scm.ScmRepoRepository;
 import org.neo.gomina.model.scm.model.Commit;
 import org.neo.gomina.model.scm.model.ScmDetails;
 
@@ -17,16 +18,20 @@ public class DefaultScmConnector implements ScmConnector {
 
     private final static Logger logger = LogManager.getLogger(DefaultScmConnector.class);
 
-    private ScmClient scmClient;
+    private ScmRepoRepository scmRepoRepository;
+
+    String repo = "dummy"; // FIXME Configurable
 
     @Inject
-    public DefaultScmConnector(ScmClient scmClient) {
-        this.scmClient = scmClient;
+    public DefaultScmConnector(ScmRepoRepository scmRepoRepository) {
+        this.scmRepoRepository = scmRepoRepository;
     }
 
     @Override
     public ScmDetails getSvnDetails(String svnUrl) {
         logger.info("Svn Details for " + svnUrl);
+
+        ScmClient scmClient = scmRepoRepository.get(repo);
 
         ScmDetails scmDetails = null;
         try {
@@ -94,6 +99,7 @@ public class DefaultScmConnector implements ScmConnector {
 
     @Override
     public List<Commit> getCommitLog(String svnUrl) throws Exception {
+        ScmClient scmClient = scmRepoRepository.get(repo);
         return scmClient.getLog(svnUrl, "0", 100);
     }
 
