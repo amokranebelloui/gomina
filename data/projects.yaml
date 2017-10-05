@@ -1,6 +1,7 @@
 - id: tradex-core
   label: Core
   type: common
+  svnRepo: home
   svnUrl: svn-project1
   maven: x.oms.core:tradex-core
   jenkinsJob: 6.14 SERVER-SrvTradexCore
@@ -8,6 +9,7 @@
 - id: kernel
   label: Kernel
   type: server
+  svnRepo: dummy
   svnUrl: OMS/Server/tradex-kernel
   maven: x.oms.kernel:tradex-kernel
   jenkinsJob: https://jenkins.io/6.14 SERVER-SrvTradexKernel
@@ -15,6 +17,7 @@
 - id: tradex-viewkernel
   label: View Kernel
   type: server
+  svnRepo: dummy
   svnUrl: OMS/Server/tradex-viewkernel
   maven: x.oms.viewkernel:tradex-viewkernel
   jenkinsJob: 6.14 SERVER-SrvTradexViewKernel
@@ -22,6 +25,7 @@
 - id: tradex-referential
   label: Referential
   type: server
+  svnRepo: dummy
   svnUrl: OMS/Server/tradex-referential
   maven: x.oms.referential:tradex-referential
   jenkinsJob: 6.14 SERVER-SrvTradexReferential
@@ -29,6 +33,7 @@
 - id: basket
   label: Basket Manager
   type: server
+  svnRepo: dummy
   svnUrl: OMS/Server/tradex-basketmanager
   maven: x.oms.vac:voms-basketmanager
   jenkinsJob: 6.14 SERVER-SrvManagerBasket
@@ -36,6 +41,7 @@
 - id: order
   label: Order Manager
   type: server
+  svnRepo: dummy
   svnUrl: OMS/Server/tradex-ordermanager
   maven: x.oms.vac:voms-ordermanager
   jenkinsJob: 6.14 SERVER-SrvManagerOrder
@@ -43,6 +49,7 @@
 - id: market
   label: Market Manager
   type: server
+  svnRepo: dummy
   svnUrl: OMS/Server/tradex-marketmanager
   maven: x.oms.vac:voms-marketmanager
   jenkinsJob: 6.14 SERVER-SrvManagerMarket
@@ -50,6 +57,7 @@
 - id: fixin
   label: Fix In
   type: server
+  svnRepo: dummy
   svnUrl: OMS/Server/tradex-fixin
   maven: x.oms.vac:voms-fixin
   jenkinsJob: 6.14 SERVER-Srvfixin
@@ -57,6 +65,7 @@
 - id: libbus
   label: Bus Lib
   type: lib
+  svnRepo: home
   svnUrl: svn-project2
   maven: x.oms.vac:voms-bus
   jenkinsJob: 6.14 SERVER-LibBus

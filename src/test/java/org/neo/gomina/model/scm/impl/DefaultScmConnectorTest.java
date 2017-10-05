@@ -22,8 +22,8 @@ public class DefaultScmConnectorTest {
 
         DefaultScmConnector connector = new DefaultScmConnector(new ScmRepoRepositoryOverride());
 
-        connector.getSvnDetails("svn-project1");
-        connector.getSvnDetails("svn-project2");
+        connector.getSvnDetails("repo", "svn-project1");
+        connector.getSvnDetails("repo", "svn-project2");
 
     }
 

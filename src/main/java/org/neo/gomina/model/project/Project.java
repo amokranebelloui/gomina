@@ -7,6 +7,7 @@ public class Project {
     public String id;
     public String label;
     public String type;
+    public String svnRepo;
     public String svnUrl;
     public String maven;
     public String jenkinsJob;
@@ -17,6 +18,7 @@ public class Project {
                 .append("id", id)
                 .append("label", label)
                 .append("type", type)
+                .append("svnRepo", svnRepo)
                 .append("svnUrl", svnUrl)
                 .append("maven", maven)
                 .append("jenkinsJob", jenkinsJob)

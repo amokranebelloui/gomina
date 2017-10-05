@@ -20,19 +20,15 @@ public class DefaultScmConnector implements ScmConnector {
 
     private ScmRepoRepository scmRepoRepository;
 
-    String repo = "dummy"; // FIXME Configurable
-
     @Inject
     public DefaultScmConnector(ScmRepoRepository scmRepoRepository) {
         this.scmRepoRepository = scmRepoRepository;
     }
 
     @Override
-    public ScmDetails getSvnDetails(String svnUrl) {
+    public ScmDetails getSvnDetails(String svnRepo, String svnUrl) {
         logger.info("Svn Details for " + svnUrl);
-
-        ScmClient scmClient = scmRepoRepository.get(repo);
-
+        ScmClient scmClient = scmRepoRepository.get(svnRepo);
         ScmDetails scmDetails = null;
         try {
             String pom = scmClient.getFile(svnUrl + "/trunk/pom.xml", "-1");
@@ -49,8 +45,6 @@ public class DefaultScmConnector implements ScmConnector {
                 String lastReleasePom = scmClient.getFile(svnUrl + "/trunk/pom.xml", lastReleasePrepRev);
                 lastReleasedVersion = MavenUtils.extractVersion(lastReleasePom);
             }
-
-            //List<Commit> diff = getSvnLog(projectUrl, lastReleasedRev != null ? lastReleasedRev : 0, false);
 
             scmDetails = new ScmDetails();
             scmDetails.url = svnUrl;
@@ -98,8 +92,8 @@ public class DefaultScmConnector implements ScmConnector {
     }
 
     @Override
-    public List<Commit> getCommitLog(String svnUrl) throws Exception {
-        ScmClient scmClient = scmRepoRepository.get(repo);
+    public List<Commit> getCommitLog(String svnRepo, String svnUrl) throws Exception {
+        ScmClient scmClient = scmRepoRepository.get(svnRepo);
         return scmClient.getLog(svnUrl, "0", 100);
     }
 

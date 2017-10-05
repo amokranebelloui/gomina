@@ -25,14 +25,14 @@ public class CachedScmConnector implements ScmConnector {
     }
 
     @Override
-    public ScmDetails getSvnDetails(String svnUrl) {
+    public ScmDetails getSvnDetails(String svnRepo, String svnUrl) {
         ScmDetails scmDetails;
         if (cache.containsKey(svnUrl)) {
             scmDetails = cache.get(svnUrl);
             logger.info("SCM Detail Served from Cache");
         }
         else {
-            scmDetails = scmConnector.getSvnDetails(svnUrl);
+            scmDetails = scmConnector.getSvnDetails(svnRepo, svnUrl);
             cache.put(svnUrl, scmDetails);
             logger.info("SCM Detail Served from SCM");
         }
@@ -40,9 +40,9 @@ public class CachedScmConnector implements ScmConnector {
     }
 
     @Override
-    public List<Commit> getCommitLog(String svnUrl) throws Exception {
+    public List<Commit> getCommitLog(String svnRepo, String svnUrl) throws Exception {
         logger.info("Commit Log Served from SCM");
-        return scmConnector.getCommitLog(svnUrl);
+        return scmConnector.getCommitLog(svnRepo, svnUrl);
     }
 
 }

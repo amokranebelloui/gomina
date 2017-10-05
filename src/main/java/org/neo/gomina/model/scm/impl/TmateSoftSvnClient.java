@@ -24,6 +24,8 @@ public class TmateSoftSvnClient implements ScmClient {
 
     private String url;
 
+    // FIXME SVN Authentication
+
     private SVNRepository repository = null;
 
     public TmateSoftSvnClient(String url) throws SVNException {

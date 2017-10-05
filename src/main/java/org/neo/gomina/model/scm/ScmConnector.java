@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ScmConnector {
 
-    ScmDetails getSvnDetails(String svnUrl);
-    List<Commit> getCommitLog(String svnUrl) throws Exception;
+    ScmDetails getSvnDetails(String svnRepo, String svnUrl);
+    List<Commit> getCommitLog(String svnRepo, String svnUrl) throws Exception;
 
 }

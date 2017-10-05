@@ -30,9 +30,12 @@ public class GominaModule extends AbstractModule {
         //bind(DummyScmClient.class).in(Scopes.SINGLETON);
         //bind(ScmClient.class).to(DummyScmClient.class).in(Scopes.SINGLETON); //
         bind(ScmRepoRepository.class).in(Scopes.SINGLETON);
+
         bind(DefaultScmConnector.class).in(Scopes.SINGLETON);
         bind(CachedScmConnector.class).in(Scopes.SINGLETON);
-        bind(ScmConnector.class).to(CachedScmConnector.class).in(Scopes.SINGLETON);
+        //bind(ScmConnector.class).to(CachedScmConnector.class).in(Scopes.SINGLETON);
+        bind(ScmConnector.class).to(DefaultScmConnector.class).in(Scopes.SINGLETON);
+
         bind(Sonar.class).to(SonarDummyClient.class).in(Scopes.SINGLETON);
 
         bind(InstanceRepository.class).in(Scopes.SINGLETON);

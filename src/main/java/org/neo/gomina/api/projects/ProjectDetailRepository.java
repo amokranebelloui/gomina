@@ -5,11 +5,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo.gomina.model.project.Project;
 import org.neo.gomina.model.project.ProjectRepository;
-import org.neo.gomina.model.sonar.Sonar;
-import org.neo.gomina.model.sonar.SonarIndicators;
 import org.neo.gomina.model.scm.ScmConnector;
 import org.neo.gomina.model.scm.model.Commit;
 import org.neo.gomina.model.scm.model.ScmDetails;
+import org.neo.gomina.model.sonar.Sonar;
+import org.neo.gomina.model.sonar.SonarIndicators;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class ProjectDetailRepository {
         List<ProjectDetail> result = new ArrayList<>();
         Map<String, SonarIndicators> sonarIndicatorsMap = sonar.getMetrics();
         for (Project project : projectRepository.getProjects()) {
-            ScmDetails scmDetails = scmConnector.getSvnDetails(project.svnUrl);
+            ScmDetails scmDetails = scmConnector.getSvnDetails(project.svnRepo, project.svnUrl);
             scmDetails = scmDetails != null ? scmDetails : new ScmDetails(); // TODO Null object pattern
             SonarIndicators sonarIndicators = sonarIndicatorsMap.get(project.maven);
             ProjectDetail projectDetail = build(project, scmDetails, null, sonarIndicators);
@@ -40,9 +40,9 @@ public class ProjectDetailRepository {
     public ProjectDetail getProject(String projectId) throws Exception {
         Project project = projectRepository.getProject(projectId);
         if (project != null) {
-            ScmDetails scmDetails = scmConnector.getSvnDetails(project.svnUrl);
+            ScmDetails scmDetails = scmConnector.getSvnDetails(project.svnRepo, project.svnUrl);
             SonarIndicators sonarIndicators = sonar.getMetrics(project.maven).get(project.maven);
-            List<CommitLogEntry> commitLog = map(scmConnector.getCommitLog(project.svnUrl));
+            List<CommitLogEntry> commitLog = map(scmConnector.getCommitLog(project.svnRepo, project.svnUrl));
             return build(project, scmDetails, commitLog, sonarIndicators);
         }
         return null;
