@@ -1,28 +1,29 @@
-package org.neo.gomina.model.svn;
+package org.neo.gomina.model.scm.impl;
 
 import org.junit.Test;
-import org.neo.gomina.api.projects.CommitLogEntry;
+import org.neo.gomina.model.scm.model.Commit;
+import org.neo.gomina.model.scm.model.ScmDetails;
 
 import java.util.List;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class SvnRepositoryTest {
+public class DummyScmConnectorTest {
     @Test
     public void getSvnDetails() throws Exception {
-        SvnRepository svnRepository = new SvnRepository();
+        DummyScmConnector svnRepository = new DummyScmConnector();
 
-        SvnDetails detail = svnRepository.getSvnDetails("basket");
+        ScmDetails detail = svnRepository.getSvnDetails("basket");
         assertThat(detail).isNotNull();
         assertThat(detail.changes).isGreaterThan(2);
 
-        SvnDetails none = svnRepository.getSvnDetails("unknown");
+        ScmDetails none = svnRepository.getSvnDetails("unknown");
         assertThat(none).isNull();
     }
 
     @Test
     public void testCommitLog() throws Exception {
-        SvnRepository svnRepository = new SvnRepository();
+        DummyScmConnector svnRepository = new DummyScmConnector();
         List<Commit> commitLog = svnRepository.getCommitLog("basket");
         assertThat(commitLog).isNotNull();
         assertThat(commitLog.size()).isGreaterThan(5);

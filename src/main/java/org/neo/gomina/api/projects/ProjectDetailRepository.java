@@ -7,9 +7,9 @@ import org.neo.gomina.model.project.Project;
 import org.neo.gomina.model.project.ProjectRepository;
 import org.neo.gomina.model.sonar.Sonar;
 import org.neo.gomina.model.sonar.SonarIndicators;
-import org.neo.gomina.model.svn.Commit;
-import org.neo.gomina.model.svn.SvnDetails;
-import org.neo.gomina.model.svn.SvnRepository;
+import org.neo.gomina.model.scm.ScmConnector;
+import org.neo.gomina.model.scm.model.Commit;
+import org.neo.gomina.model.scm.model.ScmDetails;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -21,29 +21,29 @@ public class ProjectDetailRepository {
     private final static Logger logger = LogManager.getLogger(ProjectDetailRepository.class);
 
     @Inject private ProjectRepository projectRepository;
-    @Inject private SvnRepository svnRepository;
+    @Inject private ScmConnector scmConnector;
     @Inject private Sonar sonar;
 
     public List<ProjectDetail> getProjects() {
         List<ProjectDetail> result = new ArrayList<>();
         Map<String, SonarIndicators> sonarIndicatorsMap = sonar.getMetrics();
         for (Project project : projectRepository.getProjects()) {
-            SvnDetails svnDetails = svnRepository.getSvnDetails(project.id);
-            svnDetails = svnDetails != null ? svnDetails : new SvnDetails(); // TODO Null object pattern
+            ScmDetails scmDetails = scmConnector.getSvnDetails(project.svnUrl);
+            scmDetails = scmDetails != null ? scmDetails : new ScmDetails(); // TODO Null object pattern
             SonarIndicators sonarIndicators = sonarIndicatorsMap.get(project.maven);
-            ProjectDetail projectDetail = build(project, svnDetails, null, sonarIndicators);
+            ProjectDetail projectDetail = build(project, scmDetails, null, sonarIndicators);
             result.add(projectDetail);
         }
         return result;
     }
 
-    public ProjectDetail getProject(String projectId) {
+    public ProjectDetail getProject(String projectId) throws Exception {
         Project project = projectRepository.getProject(projectId);
         if (project != null) {
-            SvnDetails svnDetails = svnRepository.getSvnDetails(projectId);
+            ScmDetails scmDetails = scmConnector.getSvnDetails(project.svnUrl);
             SonarIndicators sonarIndicators = sonar.getMetrics(project.maven).get(project.maven);
-            List<CommitLogEntry> commitLog = map(svnRepository.getCommitLog(project.id));
-            return build(project, svnDetails, commitLog, sonarIndicators);
+            List<CommitLogEntry> commitLog = map(scmConnector.getCommitLog(project.svnUrl));
+            return build(project, scmDetails, commitLog, sonarIndicators);
         }
         return null;
     }
@@ -61,7 +61,7 @@ public class ProjectDetailRepository {
         return result;
     }
 
-    private ProjectDetail build(Project project, SvnDetails svnDetails, List<CommitLogEntry> commitLog, SonarIndicators sonarIndicators) {
+    private ProjectDetail build(Project project, ScmDetails scmDetails, List<CommitLogEntry> commitLog, SonarIndicators sonarIndicators) {
         ProjectDetail projectDetail = new ProjectDetail();
 
         projectDetail.id = project.id;
@@ -73,10 +73,10 @@ public class ProjectDetailRepository {
         projectDetail.mvn = project.maven;
         projectDetail.jenkins = project.jenkinsJob;
 
-        if (svnDetails != null) {
-            projectDetail.changes = svnDetails.changes;
-            projectDetail.latest = svnDetails.latest;
-            projectDetail.released = svnDetails.released;
+        if (scmDetails != null) {
+            projectDetail.changes = scmDetails.changes;
+            projectDetail.latest = scmDetails.latest;
+            projectDetail.released = scmDetails.released;
         }
 
         if (sonarIndicators != null) {

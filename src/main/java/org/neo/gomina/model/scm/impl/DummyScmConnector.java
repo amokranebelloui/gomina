@@ -1,4 +1,4 @@
-package org.neo.gomina.model.svn;
+package org.neo.gomina.model.scm.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -7,6 +7,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.neo.gomina.model.scm.ScmConnector;
+import org.neo.gomina.model.scm.model.Commit;
+import org.neo.gomina.model.scm.model.ScmDetails;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,43 +18,45 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class SvnRepository {
+public class DummyScmConnector implements ScmConnector {
 
-    private final static Logger logger = LogManager.getLogger(SvnRepository.class);
+    private final static Logger logger = LogManager.getLogger(DummyScmConnector.class);
 
     private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
-    public SvnRepository() {
+    public DummyScmConnector() {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    public SvnDetails getSvnDetails(String projectId) {
+    @Override
+    public ScmDetails getSvnDetails(String svnUrl) {
         try {
-            List<SvnDetails> svnData = mapper.readValue(new File("data/projects.svn.yaml"), new TypeReference<List<SvnDetails>>() {});
-            for (SvnDetails svnDatum : svnData) {
-                if (StringUtils.equals(svnDatum.id, projectId)) {
+            List<ScmDetails> svnData = mapper.readValue(new File("data/projects.svn.yaml"), new TypeReference<List<ScmDetails>>() {});
+            for (ScmDetails svnDatum : svnData) {
+                if (StringUtils.equals(svnDatum.url, svnUrl)) {
                     return svnDatum;
                 }
             }
         }
         catch (IOException e) {
-            logger.error("Error retrieving SVN data for " + projectId, e);
+            logger.error("Error retrieving SVN data for " + svnUrl, e);
         }
         return null;
     }
 
-    public List<Commit> getCommitLog(String projectId) {
+    @Override
+    public List<Commit> getCommitLog(String svnUrl) {
 
         try {
             List<Map<String, Object>> svnData = mapper.readValue(new File("data/projects.svn.yaml"), new TypeReference<List<Map<String, Object>>>() {});
             for (Map<String, Object> svnDatum : svnData) {
-                if (StringUtils.equals((String)svnDatum.get("id"), projectId)) {
+                if (StringUtils.equals((String)svnDatum.get("url"), svnUrl)) {
                     return buildFrom((List<Map<String, Object>>)svnDatum.get("log"));
                 }
             }
         }
         catch (IOException e) {
-            logger.error("Error retrieving SVN data for " + projectId, e);
+            logger.error("Error retrieving SVN data for " + svnUrl, e);
         }
         return new ArrayList<>();
     }

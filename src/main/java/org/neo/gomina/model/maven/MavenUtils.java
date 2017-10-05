@@ -1,4 +1,4 @@
-package org.neo.gomina.model.svn;
+package org.neo.gomina.model.maven;
 
 import org.w3c.dom.Document;
 
@@ -16,11 +16,9 @@ public class MavenUtils {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(new ByteArrayInputStream(pom.getBytes(StandardCharsets.UTF_8)));
-
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
         XPathExpression expr = xpath.compile("/project/version/text()");
-
         return expr.evaluate(doc);
     }
 

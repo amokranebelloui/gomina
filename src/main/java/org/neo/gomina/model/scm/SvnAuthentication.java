@@ -1,4 +1,4 @@
-package org.neo.gomina.model.svn;
+package org.neo.gomina.model.scm;
 
 public class SvnAuthentication {
 

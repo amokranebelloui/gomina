@@ -1,4 +1,4 @@
-package org.neo.gomina.model.svn;
+package org.neo.gomina.model.scm.model;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 

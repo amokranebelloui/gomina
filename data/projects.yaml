@@ -1,7 +1,7 @@
 - id: tradex-core
   label: Core
   type: common
-  svnUrl: OMS/Server/tradex-core
+  svnUrl: svn-project1
   maven: x.oms.core:tradex-core
   jenkinsJob: 6.14 SERVER-SrvTradexCore
 
@@ -57,6 +57,6 @@
 - id: libbus
   label: Bus Lib
   type: lib
-  svnUrl: OMS/Server/libbus
+  svnUrl: svn-project2
   maven: x.oms.vac:voms-bus
   jenkinsJob: 6.14 SERVER-LibBus
