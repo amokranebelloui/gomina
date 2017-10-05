@@ -39,10 +39,10 @@ public class TmateSoftSvnClient implements ScmClient {
     }
 
     @Override
-    public List<Commit> getLog(String url, long rev, int count) throws Exception {
+    public List<Commit> getLog(String url, String rev, int count) throws Exception {
         List<Commit> result = new ArrayList<>();
         final Collection<SVNLogEntry> logEntries = new ArrayList<>();
-        repository.log(new String[]{url + "/trunk"}, -1, rev, true, true, count, logEntries::add);
+        repository.log(new String[]{url + "/trunk"}, -1, Long.valueOf(rev), true, true, count, logEntries::add);
         for (SVNLogEntry logEntry : logEntries) {
             Commit svnLogItem = new Commit();
             svnLogItem.revision = revAsString(logEntry.getRevision());

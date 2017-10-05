@@ -33,7 +33,7 @@ public class DefaultScmConnector implements ScmConnector {
             String pom = scmClient.getFile(svnUrl + "/trunk/pom.xml", "-1");
             String currentVersion = MavenUtils.extractVersion(pom);
 
-            List<Commit> logEntries = scmClient.getLog(svnUrl, 0, 100);
+            List<Commit> logEntries = scmClient.getLog(svnUrl, "0", 100);
             Commit latestCommit = logEntries.get(0);
             String latestRevision = latestCommit != null ? latestCommit.revision : null;
 
@@ -94,7 +94,7 @@ public class DefaultScmConnector implements ScmConnector {
 
     @Override
     public List<Commit> getCommitLog(String svnUrl) throws Exception {
-        return scmClient.getLog(svnUrl, 0, 100);
+        return scmClient.getLog(svnUrl, "0", 100);
     }
 
 }

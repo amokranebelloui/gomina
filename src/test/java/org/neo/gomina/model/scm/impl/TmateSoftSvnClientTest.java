@@ -12,7 +12,7 @@ public class TmateSoftSvnClientTest {
     public void testSvn() throws Exception {
         TmateSoftSvnClient svnClient = new TmateSoftSvnClient();
 
-        List<Commit> svnLog = svnClient.getLog("svn-project2", 0, 100);
+        List<Commit> svnLog = svnClient.getLog("svn-project2", "0", 100);
         for (Commit commit : svnLog) {
             System.out.println(commit);
         }

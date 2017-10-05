@@ -1,7 +1,5 @@
 package org.neo.gomina.model.scm.model;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import java.util.Date;
 
 public class Commit {
@@ -13,11 +11,7 @@ public class Commit {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this)
-                .append("revision", revision)
-                .append("date", date)
-                .append("author", author)
-                .append("message", message)
-                .toString();
+        return String.format("Commit{rev='%s', date=%s, author='%s', msg='%s'}",
+                revision, date, author, message);
     }
 }
