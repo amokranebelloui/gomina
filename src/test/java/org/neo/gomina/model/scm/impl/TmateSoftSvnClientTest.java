@@ -1,7 +1,8 @@
 package org.neo.gomina.model.scm.impl;
 
 import org.junit.Test;
-import org.neo.gomina.model.scm.model.Commit;
+import org.neo.gomina.model.scm.Commit;
+import org.neo.gomina.model.scm.svn.TmateSoftSvnClient;
 
 import java.util.List;
 

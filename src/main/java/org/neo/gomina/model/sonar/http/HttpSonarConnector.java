@@ -1,4 +1,4 @@
-package org.neo.gomina.model.sonar;
+package org.neo.gomina.model.sonar.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -10,15 +10,17 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.neo.gomina.model.sonar.SonarConnector;
+import org.neo.gomina.model.sonar.SonarIndicators;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SonarClient implements Sonar {
+public class HttpSonarConnector implements SonarConnector {
 
-    private static final Logger logger = LogManager.getLogger(SonarClient.class);
+    private static final Logger logger = LogManager.getLogger(HttpSonarConnector.class);
 
     private ObjectMapper mapper = new ObjectMapper();
 

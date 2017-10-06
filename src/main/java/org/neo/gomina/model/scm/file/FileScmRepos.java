@@ -1,4 +1,4 @@
-package org.neo.gomina.model.scm;
+package org.neo.gomina.model.scm.file;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -6,21 +6,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.neo.gomina.model.scm.impl.DummyScmClient;
-import org.neo.gomina.model.scm.impl.TmateSoftSvnClient;
+import org.neo.gomina.model.scm.ScmClient;
+import org.neo.gomina.model.scm.ScmRepos;
+import org.neo.gomina.model.scm.dummy.DummyScmClient;
+import org.neo.gomina.model.scm.svn.TmateSoftSvnClient;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ScmRepoRepository {
+public class FileScmRepos implements ScmRepos {
 
-    private final static Logger logger = LogManager.getLogger(ScmRepoRepository.class);
+    private final static Logger logger = LogManager.getLogger(FileScmRepos.class);
 
     Map<String, ScmClient> clients = new HashMap<>();
 
-    public ScmRepoRepository() throws Exception {
+    public FileScmRepos() throws Exception {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -51,6 +53,7 @@ public class ScmRepoRepository {
         return null;
     }
 
+    @Override
     public ScmClient get(String id) {
         return clients.get(id);
     }

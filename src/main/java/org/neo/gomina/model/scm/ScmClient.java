@@ -1,7 +1,5 @@
 package org.neo.gomina.model.scm;
 
-import org.neo.gomina.model.scm.model.Commit;
-
 import java.util.List;
 
 public interface ScmClient {

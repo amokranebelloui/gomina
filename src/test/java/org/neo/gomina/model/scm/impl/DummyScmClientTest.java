@@ -3,7 +3,8 @@ package org.neo.gomina.model.scm.impl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
-import org.neo.gomina.model.scm.model.Commit;
+import org.neo.gomina.model.scm.dummy.DummyScmClient;
+import org.neo.gomina.model.scm.Commit;
 
 import java.util.List;
 

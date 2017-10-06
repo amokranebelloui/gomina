@@ -3,12 +3,12 @@ package org.neo.gomina.api.projects;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.neo.gomina.model.project.Projects;
 import org.neo.gomina.model.project.Project;
-import org.neo.gomina.model.project.ProjectRepository;
-import org.neo.gomina.model.scm.ScmConnector;
-import org.neo.gomina.model.scm.model.Commit;
-import org.neo.gomina.model.scm.model.ScmDetails;
-import org.neo.gomina.model.sonar.Sonar;
+import org.neo.gomina.model.scminfo.ScmConnector;
+import org.neo.gomina.model.scm.Commit;
+import org.neo.gomina.model.scminfo.ScmDetails;
+import org.neo.gomina.model.sonar.SonarConnector;
 import org.neo.gomina.model.sonar.SonarIndicators;
 
 import javax.inject.Inject;
@@ -16,18 +16,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ProjectDetailRepository {
+public class ProjectsBuilder {
 
-    private final static Logger logger = LogManager.getLogger(ProjectDetailRepository.class);
+    private final static Logger logger = LogManager.getLogger(ProjectsBuilder.class);
 
-    @Inject private ProjectRepository projectRepository;
+    @Inject private Projects projects;
     @Inject private ScmConnector scmConnector;
-    @Inject private Sonar sonar;
+    @Inject private SonarConnector sonarConnector;
 
     public List<ProjectDetail> getProjects() {
         List<ProjectDetail> result = new ArrayList<>();
-        Map<String, SonarIndicators> sonarIndicatorsMap = sonar.getMetrics();
-        for (Project project : projectRepository.getProjects()) {
+        Map<String, SonarIndicators> sonarIndicatorsMap = sonarConnector.getMetrics();
+        for (Project project : projects.getProjects()) {
             ScmDetails scmDetails = scmConnector.getSvnDetails(project.svnRepo, project.svnUrl);
             scmDetails = scmDetails != null ? scmDetails : new ScmDetails(); // TODO Null object pattern
             SonarIndicators sonarIndicators = sonarIndicatorsMap.get(project.maven);
@@ -38,10 +38,10 @@ public class ProjectDetailRepository {
     }
 
     public ProjectDetail getProject(String projectId) throws Exception {
-        Project project = projectRepository.getProject(projectId);
+        Project project = projects.getProject(projectId);
         if (project != null) {
             ScmDetails scmDetails = scmConnector.getSvnDetails(project.svnRepo, project.svnUrl);
-            SonarIndicators sonarIndicators = sonar.getMetrics(project.maven).get(project.maven);
+            SonarIndicators sonarIndicators = sonarConnector.getMetrics(project.maven).get(project.maven);
             List<CommitLogEntry> commitLog = map(scmConnector.getCommitLog(project.svnRepo, project.svnUrl));
             return build(project, scmDetails, commitLog, sonarIndicators);
         }

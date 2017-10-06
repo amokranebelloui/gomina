@@ -1,10 +1,10 @@
-package org.neo.gomina.model.scm.impl;
+package org.neo.gomina.model.scminfo.impl;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.neo.gomina.model.scm.ScmConnector;
-import org.neo.gomina.model.scm.model.Commit;
-import org.neo.gomina.model.scm.model.ScmDetails;
+import org.neo.gomina.model.scminfo.ScmConnector;
+import org.neo.gomina.model.scm.Commit;
+import org.neo.gomina.model.scminfo.ScmDetails;
 
 import javax.inject.Inject;
 import java.util.HashMap;

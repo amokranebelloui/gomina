@@ -4,6 +4,6 @@ import java.util.Map;
 
 public interface MonitoringListener {
 
-    void onPropertyChanged(String instanceId, Map<String, String> newValues);
+    void onPropertyChanged(String env, String instanceId, Map<String, Object> newValues);
 
 }

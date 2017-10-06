@@ -2,18 +2,23 @@ package org.neo.gomina.runner;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
-import org.neo.gomina.api.instances.InstanceRepository;
-import org.neo.gomina.api.projects.ProjectDetailRepository;
-import org.neo.gomina.model.inventory.InventoryRepository;
+import org.neo.gomina.api.instances.InstancesBuilder;
+import org.neo.gomina.api.projects.ProjectsBuilder;
+import org.neo.gomina.model.inventory.Inventory;
+import org.neo.gomina.model.inventory.file.FileInventory;
 import org.neo.gomina.model.monitoring.Monitoring;
-import org.neo.gomina.model.monitoring.MonitoringRepository;
-import org.neo.gomina.model.project.ProjectRepository;
-import org.neo.gomina.model.scm.ScmConnector;
-import org.neo.gomina.model.scm.ScmRepoRepository;
-import org.neo.gomina.model.scm.impl.CachedScmConnector;
-import org.neo.gomina.model.scm.impl.DefaultScmConnector;
-import org.neo.gomina.model.sonar.Sonar;
-import org.neo.gomina.model.sonar.SonarDummyClient;
+import org.neo.gomina.model.monitoring.dummy.DummyMonitor;
+import org.neo.gomina.model.monitoring.dummy.DummyMonitorData;
+import org.neo.gomina.model.monitoring.dummy.DummyMonitorThread;
+import org.neo.gomina.model.project.Projects;
+import org.neo.gomina.model.project.file.FileProjects;
+import org.neo.gomina.model.scminfo.ScmConnector;
+import org.neo.gomina.model.scm.file.FileScmRepos;
+import org.neo.gomina.model.scm.ScmRepos;
+import org.neo.gomina.model.scminfo.impl.CachedScmConnector;
+import org.neo.gomina.model.scminfo.impl.DefaultScmConnector;
+import org.neo.gomina.model.sonar.dummy.DummySonarConnector;
+import org.neo.gomina.model.sonar.SonarConnector;
 
 public class GominaModule extends AbstractModule {
 
@@ -22,24 +27,28 @@ public class GominaModule extends AbstractModule {
         binder().requireExplicitBindings();
 
         bind(Monitoring.class).in(Scopes.SINGLETON);
-        bind(InventoryRepository.class).in(Scopes.SINGLETON);
-        bind(ProjectRepository.class).in(Scopes.SINGLETON);
-        bind(MonitoringRepository.class).in(Scopes.SINGLETON);
+
+        bind(DummyMonitorData.class).in(Scopes.SINGLETON);
+        bind(DummyMonitorThread.class).asEagerSingleton();
+        bind(DummyMonitor.class).asEagerSingleton();
+
+        bind(Inventory.class).to(FileInventory.class).in(Scopes.SINGLETON);
+        bind(Projects.class).to(FileProjects.class).in(Scopes.SINGLETON);
 
         //bind(TmateSoftSvnClient.class).in(Scopes.SINGLETON);
         //bind(DummyScmClient.class).in(Scopes.SINGLETON);
         //bind(ScmClient.class).to(DummyScmClient.class).in(Scopes.SINGLETON); //
-        bind(ScmRepoRepository.class).in(Scopes.SINGLETON);
+        bind(ScmRepos.class).to(FileScmRepos.class).in(Scopes.SINGLETON);
 
         bind(DefaultScmConnector.class).in(Scopes.SINGLETON);
         bind(CachedScmConnector.class).in(Scopes.SINGLETON);
         //bind(ScmConnector.class).to(CachedScmConnector.class).in(Scopes.SINGLETON);
         bind(ScmConnector.class).to(DefaultScmConnector.class).in(Scopes.SINGLETON);
 
-        bind(Sonar.class).to(SonarDummyClient.class).in(Scopes.SINGLETON);
+        bind(SonarConnector.class).to(DummySonarConnector.class).in(Scopes.SINGLETON);
 
-        bind(InstanceRepository.class).in(Scopes.SINGLETON);
-        bind(ProjectDetailRepository.class).in(Scopes.SINGLETON);
+        bind(InstancesBuilder.class).in(Scopes.SINGLETON);
+        bind(ProjectsBuilder.class).in(Scopes.SINGLETON);
     }
 
 }

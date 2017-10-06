@@ -1,14 +1,14 @@
-package org.neo.gomina.model.scm.impl;
+package org.neo.gomina.model.scminfo.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo.gomina.model.maven.MavenUtils;
 import org.neo.gomina.model.scm.ScmClient;
-import org.neo.gomina.model.scm.ScmConnector;
-import org.neo.gomina.model.scm.ScmRepoRepository;
-import org.neo.gomina.model.scm.model.Commit;
-import org.neo.gomina.model.scm.model.ScmDetails;
+import org.neo.gomina.model.scminfo.ScmConnector;
+import org.neo.gomina.model.scm.ScmRepos;
+import org.neo.gomina.model.scm.Commit;
+import org.neo.gomina.model.scminfo.ScmDetails;
 
 import javax.inject.Inject;
 import java.util.Collection;
@@ -18,17 +18,17 @@ public class DefaultScmConnector implements ScmConnector {
 
     private final static Logger logger = LogManager.getLogger(DefaultScmConnector.class);
 
-    private ScmRepoRepository scmRepoRepository;
+    private ScmRepos scmRepos;
 
     @Inject
-    public DefaultScmConnector(ScmRepoRepository scmRepoRepository) {
-        this.scmRepoRepository = scmRepoRepository;
+    public DefaultScmConnector(ScmRepos scmRepos) {
+        this.scmRepos = scmRepos;
     }
 
     @Override
     public ScmDetails getSvnDetails(String svnRepo, String svnUrl) {
         logger.info("Svn Details for " + svnUrl);
-        ScmClient scmClient = scmRepoRepository.get(svnRepo);
+        ScmClient scmClient = scmRepos.get(svnRepo);
         ScmDetails scmDetails = null;
         try {
             String pom = scmClient.getFile(svnUrl + "/trunk/pom.xml", "-1");
@@ -93,7 +93,7 @@ public class DefaultScmConnector implements ScmConnector {
 
     @Override
     public List<Commit> getCommitLog(String svnRepo, String svnUrl) throws Exception {
-        ScmClient scmClient = scmRepoRepository.get(svnRepo);
+        ScmClient scmClient = scmRepos.get(svnRepo);
         return scmClient.getLog(svnUrl, "0", 100);
     }
 

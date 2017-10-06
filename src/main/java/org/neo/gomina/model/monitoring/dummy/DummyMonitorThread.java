@@ -1,33 +1,37 @@
-package org.neo.gomina.model.monitoring;
+package org.neo.gomina.model.monitoring.dummy;
 
+import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.InvInstance;
-import org.neo.gomina.model.inventory.InventoryRepository;
 import org.neo.gomina.model.inventory.Service;
+import org.neo.gomina.model.monitoring.Monitoring;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class MonitoringThread extends Thread {
+public class DummyMonitorThread extends Thread {
 
-    private InventoryRepository inventoryRepository;
-
-    private Monitoring monitoring;
-
-    public MonitoringThread(InventoryRepository inventoryRepository, Monitoring monitoring) {
-        this.inventoryRepository = inventoryRepository;
-        this.monitoring = monitoring;
-    }
+    @Inject private Inventory inventory;
+    @Inject private Monitoring monitoring;
+    @Inject private DummyMonitorData dummyMonitorData;
 
     private Random random = new Random();
 
     @Override
     public void run() {
+        for (String envName : inventory.getEnvs()) {
+            Map<String, Map<String, Object>> envMon = dummyMonitorData.getFor(envName);
+            for (Map.Entry<String, Map<String, Object>> entry : envMon.entrySet()) {
+                monitoring.notify(envName, entry.getKey(), entry.getValue());
+            }
+        }
+
         while (true) {
-            for (String env : inventoryRepository.getEnvs()) {
-                for (Service service : inventoryRepository.getEnvironment(env).services) {
+            for (String env : inventory.getEnvs()) {
+                for (Service service : inventory.getEnvironment(env).services) {
                     for (InvInstance instance : service.instances) {
-                        Map<String, String> map = new HashMap<>();
+                        Map<String, Object> map = new HashMap<>();
                         int i = random.nextInt(15);
                         String status =
                                 i == 0 ? "LIVE" :
@@ -35,7 +39,7 @@ public class MonitoringThread extends Thread {
                                 i == 2 ? "DOWN" : null;
                         if (status != null) {
                             map.put("status", status);
-                            monitoring.notify(instance.id, map);
+                            monitoring.notify(env, instance.id, map);
                         }
                     }
                 }

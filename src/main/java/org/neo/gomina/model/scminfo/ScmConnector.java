@@ -1,7 +1,6 @@
-package org.neo.gomina.model.scm;
+package org.neo.gomina.model.scminfo;
 
-import org.neo.gomina.model.scm.model.Commit;
-import org.neo.gomina.model.scm.model.ScmDetails;
+import org.neo.gomina.model.scm.Commit;
 
 import java.util.List;
 

@@ -2,16 +2,18 @@ package org.neo.gomina.model.scm.impl;
 
 import org.junit.Test;
 import org.neo.gomina.model.scm.ScmClient;
-import org.neo.gomina.model.scm.ScmRepoRepository;
+import org.neo.gomina.model.scm.file.FileScmRepos;
+import org.neo.gomina.model.scm.dummy.DummyScmClient;
+import org.neo.gomina.model.scminfo.impl.DefaultScmConnector;
 
 public class DefaultScmConnectorTest {
     @Test
     public void getSvnDetails() throws Exception {
         //DefaultScmConnector connector = new DefaultScmConnector(new TmateSoftSvnClient());
 
-        class ScmRepoRepositoryOverride extends ScmRepoRepository {
+        class FileScmReposOverride extends FileScmRepos {
 
-            public ScmRepoRepositoryOverride() throws Exception {
+            public FileScmReposOverride() throws Exception {
             }
 
             @Override
@@ -20,7 +22,7 @@ public class DefaultScmConnectorTest {
             }
         }
 
-        DefaultScmConnector connector = new DefaultScmConnector(new ScmRepoRepositoryOverride());
+        DefaultScmConnector connector = new DefaultScmConnector(new FileScmReposOverride());
 
         connector.getSvnDetails("repo", "svn-project1");
         connector.getSvnDetails("repo", "svn-project2");

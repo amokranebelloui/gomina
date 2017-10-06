@@ -1,10 +1,10 @@
-package org.neo.gomina.model.scm.impl;
+package org.neo.gomina.model.scm.svn;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo.gomina.model.scm.ScmClient;
-import org.neo.gomina.model.scm.model.Commit;
+import org.neo.gomina.model.scm.Commit;
 import org.tmatesoft.svn.core.SVNException;
 import org.tmatesoft.svn.core.SVNLogEntry;
 import org.tmatesoft.svn.core.SVNProperties;

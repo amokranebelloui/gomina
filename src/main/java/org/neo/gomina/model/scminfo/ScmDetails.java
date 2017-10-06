@@ -1,4 +1,4 @@
-package org.neo.gomina.model.scm.model;
+package org.neo.gomina.model.scminfo;
 
 public class ScmDetails {
 

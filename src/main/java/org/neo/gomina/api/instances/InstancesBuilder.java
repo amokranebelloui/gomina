@@ -1,11 +1,11 @@
 package org.neo.gomina.api.instances;
 
+import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.Environment;
 import org.neo.gomina.model.inventory.InvInstance;
-import org.neo.gomina.model.inventory.InventoryRepository;
 import org.neo.gomina.model.inventory.Service;
 import org.neo.gomina.model.monitoring.EnvMonitoring;
-import org.neo.gomina.model.monitoring.MonitoringRepository;
+import org.neo.gomina.model.monitoring.Monitoring;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -13,20 +13,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InstanceRepository {
+public class InstancesBuilder {
 
-    @Inject private InventoryRepository inventoryRepository;
-    @Inject private MonitoringRepository monitoringRepository;
+    @Inject private Inventory inventory;
+    @Inject private Monitoring monitoring;
 
     public List<Instance> getInstances() {
         List<Instance> instances = new ArrayList<>();
-        for (String envName : inventoryRepository.getEnvs()) {
-            Environment env = inventoryRepository.getEnvironment(envName);
-            EnvMonitoring monitoring = monitoringRepository.getFor(envName);
+        for (String envName : inventory.getEnvs()) {
+            Environment env = inventory.getEnvironment(envName);
+            EnvMonitoring envMonitoring = monitoring.getFor(envName);
             if (env.services != null) {
                 for (Service service : env.services) {
                     for (InvInstance envInstance : service.instances) {
-                        Map<String, Object> indicators = monitoring.getForInstance(envInstance.id);// FIXME corr
+                        Map<String, Object> indicators = envMonitoring.getForInstance(envInstance.id);// FIXME corr
                         indicators = indicators != null ? indicators : new HashMap<>();
                         instances.add(build(env, service, envInstance, indicators));
                     }

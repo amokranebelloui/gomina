@@ -15,9 +15,9 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSSocket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.neo.gomina.api.instances.InstanceRepository;
+import org.neo.gomina.api.instances.InstancesBuilder;
 import org.neo.gomina.api.projects.ProjectDetail;
-import org.neo.gomina.api.projects.ProjectDetailRepository;
+import org.neo.gomina.api.projects.ProjectsBuilder;
 import org.neo.gomina.model.monitoring.Monitoring;
 import org.neo.gomina.runner.GominaModule;
 
@@ -39,8 +39,8 @@ public class WebVerticle extends AbstractVerticle {
         Injector injector = Guice.createInjector(new GominaModule());
 
         Monitoring monitoring = injector.getInstance(Monitoring.class);
-        ProjectDetailRepository projectRepository = injector.getInstance(ProjectDetailRepository.class);
-        InstanceRepository instanceRepository = injector.getInstance(InstanceRepository.class);
+        ProjectsBuilder projectBuilder = injector.getInstance(ProjectsBuilder.class);
+        InstancesBuilder instancesBuilder = injector.getInstance(InstancesBuilder.class);
 
 
         SockJSHandlerOptions options = new SockJSHandlerOptions().setHeartbeatInterval(2000);
@@ -65,8 +65,9 @@ public class WebVerticle extends AbstractVerticle {
 
         final ObjectMapper mapper = new ObjectMapper();
 
-        monitoring.add((instanceId, newValues) -> {
-            Map<String, String> map = new HashMap<>();
+        monitoring.add((env, instanceId, newValues) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("env", env);
             map.put("id", instanceId);
             map.putAll(newValues);
             try {
@@ -82,7 +83,7 @@ public class WebVerticle extends AbstractVerticle {
         router.route("/data/projects").handler(ctx -> {
             try {
                 ctx.response().putHeader("content-type", "text/javascript")
-                        .end(mapper.writeValueAsString(projectRepository.getProjects()));
+                        .end(mapper.writeValueAsString(projectBuilder.getProjects()));
             }
             catch (Exception e) {
                 logger.error("Cannot get projects", e);
@@ -93,7 +94,7 @@ public class WebVerticle extends AbstractVerticle {
         router.route("/data/project/:projectId").handler(ctx -> {
             try {
                 String projectId = ctx.request().getParam("projectId");
-                ProjectDetail project = projectRepository.getProject(projectId);
+                ProjectDetail project = projectBuilder.getProject(projectId);
                 if (project != null) {
                     ctx.response().putHeader("content-type", "text/javascript")
                             .end(mapper.writeValueAsString(project));
@@ -112,7 +113,7 @@ public class WebVerticle extends AbstractVerticle {
             try {
                 ctx.response()
                         .putHeader("content-type", "text/javascript")
-                        .end(mapper.writeValueAsString(instanceRepository.getInstances()));
+                        .end(mapper.writeValueAsString(instancesBuilder.getInstances()));
             }
             catch (Exception e) {
                 logger.error("Cannot get instances", e);

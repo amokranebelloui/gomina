@@ -1,21 +1,22 @@
 package org.neo.gomina.model.inventory;
 
 import org.junit.Test;
+import org.neo.gomina.model.inventory.file.FileInventory;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-public class InventoryRepositoryTest {
+public class FileInventoryTest {
 
     @Test
     public void getEnvs() throws Exception {
-        InventoryRepository inventoryRepository = new InventoryRepository();
-        assertThat(inventoryRepository.getEnvs()).containsExactly("uat", "prod");
+        Inventory inventory = new FileInventory();
+        assertThat(inventory.getEnvs()).containsExactly("uat", "prod");
     }
 
     @Test
     public void getEnvironment() throws Exception {
-        InventoryRepository inventoryRepository = new InventoryRepository();
-        Environment env = inventoryRepository.getEnvironment("uat");
+        Inventory inventory = new FileInventory();
+        Environment env = inventory.getEnvironment("uat");
         assertThat(env.name).isEqualTo("tradex-uat");
         assertThat(env.services.size()).isGreaterThan(2);
     }
