@@ -1,4 +1,4 @@
-package org.neo.gomina.runner;
+package org.neo.gomina.module;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
@@ -27,8 +27,8 @@ import org.neo.gomina.model.ssh.SshClient;
 import org.neo.gomina.model.sshinfo.SshConfig;
 import org.neo.gomina.model.sshinfo.SshConnector;
 import org.neo.gomina.model.sshinfo.impl.OnDemandSshConnector;
-import org.neo.gomina.runner.config.Config;
-import org.neo.gomina.runner.config.ConfigLoader;
+import org.neo.gomina.module.config.Config;
+import org.neo.gomina.module.config.ConfigLoader;
 
 import java.io.File;
 

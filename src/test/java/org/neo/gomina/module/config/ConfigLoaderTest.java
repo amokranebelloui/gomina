@@ -1,4 +1,4 @@
-package org.neo.gomina.runner.config;
+package org.neo.gomina.module.config;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

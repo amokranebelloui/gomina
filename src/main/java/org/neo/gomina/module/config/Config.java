@@ -1,4 +1,4 @@
-package org.neo.gomina.runner.config;
+package org.neo.gomina.module.config;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;

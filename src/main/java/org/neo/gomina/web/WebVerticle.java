@@ -1,4 +1,4 @@
-package org.neo.gomina;
+package org.neo.gomina.web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +19,7 @@ import org.neo.gomina.api.instances.InstancesBuilder;
 import org.neo.gomina.api.projects.ProjectDetail;
 import org.neo.gomina.api.projects.ProjectsBuilder;
 import org.neo.gomina.model.monitoring.Monitoring;
-import org.neo.gomina.runner.GominaModule;
+import org.neo.gomina.module.GominaModule;
 
 import java.io.File;
 import java.util.ArrayList;

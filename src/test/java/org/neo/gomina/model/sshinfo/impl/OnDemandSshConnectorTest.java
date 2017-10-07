@@ -6,7 +6,7 @@ import org.neo.gomina.model.inventory.file.FileInventory;
 import org.neo.gomina.model.security.Passwords;
 import org.neo.gomina.model.ssh.SshClient;
 import org.neo.gomina.model.sshinfo.SshConfig;
-import org.neo.gomina.runner.config.ConfigLoader;
+import org.neo.gomina.module.config.ConfigLoader;
 
 import java.io.File;
 
