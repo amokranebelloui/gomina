@@ -18,7 +18,7 @@ public class Runner {
 
         Vertx vertx = Vertx.vertx();
 
-        vertx.deployVerticle(WebVerticle.class.getName(), new DeploymentOptions().setInstances(2), res -> {
+        vertx.deployVerticle(WebVerticle.class.getName(), new DeploymentOptions().setInstances(1), res -> {
             if (res.succeeded()) {
                 logger.info("Deployment id is: " + res.result());
             }

@@ -1,7 +1,7 @@
 package org.neo.gomina.model.monitoring.dummy;
 
-import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.InvInstance;
+import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.Service;
 import org.neo.gomina.model.monitoring.Monitoring;
 
@@ -12,11 +12,16 @@ import java.util.Random;
 
 public class DummyMonitorThread extends Thread {
 
-    @Inject private Inventory inventory;
     @Inject private Monitoring monitoring;
-    @Inject private DummyMonitorData dummyMonitorData;
 
+    @Inject private Inventory inventory;
+    @Inject private DummyMonitorData dummyMonitorData;
     private Random random = new Random();
+
+    @Inject
+    public void init() {
+        this.start();
+    }
 
     @Override
     public void run() {
