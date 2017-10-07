@@ -47,10 +47,16 @@ public class InstancesBuilder {
 
         instance.project = (String)indicators.get("project"); // FIXME ???
 
+        instance.pid = (String)indicators.get("pid");
+
+        // FIXME Both static/live values
         instance.host = (String)indicators.get("host");
-        instance.confCommited = (Boolean) indicators.get("confCommited");
         instance.version = (String)indicators.get("version");
         instance.revision = String.valueOf(indicators.get("revision"));
+
+        // FIXME From SSH
+        instance.confCommited = (Boolean) indicators.get("confCommited");
+        instance.confUpToDate = (Boolean) indicators.get("confUpToDate");
 
         instance.status = (String)indicators.get("status");
         instance.jmx = (Integer) indicators.get("jmx");

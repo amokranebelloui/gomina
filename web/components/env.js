@@ -70,8 +70,8 @@ class RedisInstance extends React.Component {
                 </span>
                 <br/>
 
-                <CopyButton value={instance.folder} />
-                <span style={{fontSize: 10}}>{instance.host} {instance.folder}</span>
+                <CopyButton value={instance.deployFolder} />
+                <span style={{fontSize: 10}}>{instance.host} {instance.deployFolder}</span>
                 <Version version={instance.version} revision={instance.revision}/>
             </div>
         )
@@ -99,11 +99,10 @@ class AppInstance extends React.Component {
                     <BuildLink url={instance.project} /> {/* // TODO Project Build URL */}
                 </div>
                 <div style={{display: 'flex', fontSize: 10}}>
-                    <span>{instance.host}</span>
-                    &nbsp;
-                    <CopyButton value={instance.folder} />
-                    &nbsp;
-                    <span>{instance.folder}</span>
+                    {instance.pid && <span>{instance.pid}@</span>}
+                    <span>{instance.host}</span>&nbsp;
+                    <CopyButton value={instance.deployFolder} />&nbsp;
+                    <span>{instance.deployFolder}</span>
                 </div>
                 <div>
                     <Badge>{extra.quickfixPersistence}</Badge>

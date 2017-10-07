@@ -5,6 +5,7 @@
   type: 'redis'
   project: 'redis'
   service: 'redis'
+  pid: '54637'
   host: '10.143.29.42'
   folder: '/home/svc/prod-redis'
   confCommited: false
@@ -37,6 +38,7 @@
   type: 'redis'
   project: 'redis'
   service: 'redis'
+  pid: '13467'
   host: '10.143.29.42'
   folder: '/home/svc/prod-redis'
   confCommited: true
@@ -101,6 +103,7 @@
   type: 'app'
   project: 'kernel'
   service: 'kernel'
+  pid: '65487'
   host: '10.143.29.42'
   folder: '/home/svc/prod-kernel'
   confCommited: true
@@ -119,6 +122,7 @@
   type: 'app'
   project: 'kernel'
   service: 'kernel'
+  pid: '88373'
   host: '10.143.29.41'
   folder: '/home/svc/prod-kernel'
   confCommited: false
@@ -137,6 +141,7 @@
   type: 'app'
   project: 'kernel'
   service: 'kernel'
+  pid: '98477'
   host: '10.143.29.41'
   folder: '/home/svc/prod-kernel'
   confCommited: false
@@ -155,6 +160,7 @@
   type: 'app'
   project: 'basket'
   service: 'basket'
+  pid: '48766'
   host: '10.143.3.58'
   folder: '/home/svc/prod-basket'
   confCommited: true
@@ -173,6 +179,7 @@
   type: 'app'
   project: 'basket'
   service: 'basket'
+  pid: '11098'
   host: '10.143.3.56'
   folder: '/home/svc/prod-basket'
   confCommited: true
@@ -207,6 +214,7 @@
   type: 'app'
   project: 'order'
   service: 'order'
+  pid: '18000'
   host: '10.143.3.56'
   folder: '/home/svc/prod-order'
   confCommited: true
