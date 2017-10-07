@@ -44,7 +44,7 @@ public class Monitoring {
         }
     }
 
-    public EnvMonitoring getFor(String envName) {
-        return topology.getOrDefault(envName, new EnvMonitoring());
+    public EnvMonitoring getFor(String env) {
+        return topology.getOrDefault(env, new EnvMonitoring());
     }
 }

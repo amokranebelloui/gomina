@@ -2,11 +2,16 @@ package org.neo.gomina.model.monitoring.zmq;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.monitoring.Monitoring;
 import org.zeromq.ZMQ;
 
 import javax.inject.Inject;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ZmqMonitorThread extends Thread {
 
@@ -15,12 +20,15 @@ public class ZmqMonitorThread extends Thread {
     private Monitoring monitoring;
 
     // FIXME Configurable
-    private List<String> envs = Arrays.asList("uat", "prod");
+    private List<String> envs;
     public String url = "tcp://localhost:7070";
 
     @Inject
-    public ZmqMonitorThread(Monitoring monitoring) {
+    public ZmqMonitorThread(Monitoring monitoring, Inventory inventory) {
         this.monitoring = monitoring;
+        envs = inventory.getEnvironments().stream()
+                .map(e -> e.id)
+                .collect(Collectors.toList());
     }
 
     @Inject
@@ -47,15 +55,15 @@ public class ZmqMonitorThread extends Thread {
                 int i = obj.indexOf(";");
                 String[] header = obj.substring(0, i).split("\\.");
                 String env = header[2];
-                String serverName = header[3];
+                String instanceId = header[3];
                 String body = obj.substring(i + 1);
                 Map<String, Object> indicators = mapBody(body);
 
                 indicators.put("TIMESTAMP", new Date());
                 indicators.put("STATUS", mapStatus((String)indicators.get("STATUS")));
-                monitoring.notify(env, serverName, indicators);
+                monitoring.notify(env, instanceId, indicators);
 
-                logger.trace(serverName + " " + env + " " + indicators);
+                logger.trace(instanceId + " " + env + " " + indicators);
             }
             catch (Exception e) {
                 logger.error("", e);

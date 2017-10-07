@@ -1,4 +1,4 @@
-package org.neo.gomina.model.scm.impl;
+package org.neo.gomina.model.scminfo;
 
 import org.junit.Test;
 import org.neo.gomina.model.scm.ScmClient;

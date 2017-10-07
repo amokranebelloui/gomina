@@ -1,8 +1,8 @@
 package org.neo.gomina.api.instances;
 
-import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.Environment;
 import org.neo.gomina.model.inventory.InvInstance;
+import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.Service;
 import org.neo.gomina.model.monitoring.EnvMonitoring;
 import org.neo.gomina.model.monitoring.Monitoring;
@@ -20,15 +20,14 @@ public class InstancesBuilder {
 
     public List<Instance> getInstances() {
         List<Instance> instances = new ArrayList<>();
-        for (String envName : inventory.getEnvs()) {
-            Environment env = inventory.getEnvironment(envName);
-            EnvMonitoring envMonitoring = monitoring.getFor(envName);
-            if (env.services != null) {
-                for (Service service : env.services) {
+        for (Environment environment : inventory.getEnvironments()) {
+            EnvMonitoring envMonitoring = monitoring.getFor(environment.id);
+            if (environment.services != null) {
+                for (Service service : environment.services) {
                     for (InvInstance envInstance : service.instances) {
-                        Map<String, Object> indicators = envMonitoring.getForInstance(envInstance.id);// FIXME corr
+                        Map<String, Object> indicators = envMonitoring.getForInstance(envInstance.id);
                         indicators = indicators != null ? indicators : new HashMap<>();
-                        instances.add(build(env, service, envInstance, indicators));
+                        instances.add(build(environment, service, envInstance, indicators));
                     }
                 }
             }
@@ -38,8 +37,8 @@ public class InstancesBuilder {
 
     private Instance build(Environment env, Service service, InvInstance envInstance, Map<String, Object> indicators) {
         Instance instance = new Instance();
-        instance.env = env.code;
-        instance.id = env.code + "-" + envInstance.id;
+        instance.env = env.id;
+        instance.id = env.id + "-" + envInstance.id;
         instance.type = service.type;
         instance.service = service.svc;
         instance.name = envInstance.id;

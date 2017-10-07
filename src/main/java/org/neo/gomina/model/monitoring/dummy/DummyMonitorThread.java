@@ -1,5 +1,6 @@
 package org.neo.gomina.model.monitoring.dummy;
 
+import org.neo.gomina.model.inventory.Environment;
 import org.neo.gomina.model.inventory.InvInstance;
 import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.Service;
@@ -25,16 +26,16 @@ public class DummyMonitorThread extends Thread {
 
     @Override
     public void run() {
-        for (String envName : inventory.getEnvs()) {
-            Map<String, Map<String, Object>> envMon = dummyMonitorData.getFor(envName);
+        for (Environment env : inventory.getEnvironments()) {
+            Map<String, Map<String, Object>> envMon = dummyMonitorData.getFor(env.id);
             for (Map.Entry<String, Map<String, Object>> entry : envMon.entrySet()) {
-                monitoring.notify(envName, entry.getKey(), entry.getValue());
+                monitoring.notify(env.id, entry.getKey(), entry.getValue());
             }
         }
 
         while (true) {
-            for (String env : inventory.getEnvs()) {
-                for (Service service : inventory.getEnvironment(env).services) {
+            for (Environment env : inventory.getEnvironments()) {
+                for (Service service : env.services) {
                     for (InvInstance instance : service.instances) {
                         Map<String, Object> map = new HashMap<>();
                         int i = random.nextInt(15);
@@ -44,7 +45,7 @@ public class DummyMonitorThread extends Thread {
                                 i == 2 ? "DOWN" : null;
                         if (status != null) {
                             map.put("status", status);
-                            monitoring.notify(env, instance.id, map);
+                            monitoring.notify(env.id, instance.id, map);
                         }
                     }
                 }

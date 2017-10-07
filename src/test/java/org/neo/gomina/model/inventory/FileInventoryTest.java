@@ -10,13 +10,13 @@ public class FileInventoryTest {
     @Test
     public void getEnvs() throws Exception {
         Inventory inventory = new FileInventory();
-        assertThat(inventory.getEnvs()).containsExactly("uat", "prod");
+        assertThat(inventory.getEnvironments()).onProperty("id").containsOnly("PROD", "UAT", "DEV");
     }
 
     @Test
     public void getEnvironment() throws Exception {
         Inventory inventory = new FileInventory();
-        Environment env = inventory.getEnvironment("uat");
+        Environment env = inventory.getEnvironment("UAT");
         assertThat(env.name).isEqualTo("tradex-uat");
         assertThat(env.services.size()).isGreaterThan(2);
     }
