@@ -1,11 +1,10 @@
 package org.neo.gomina.model.monitoring.zmq;
 
 import org.junit.Test;
-import org.neo.gomina.model.inventory.Inventory;
-import org.neo.gomina.model.inventory.file.FileInventory;
 import org.neo.gomina.model.monitoring.Monitoring;
 import org.zeromq.ZMQ;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.fest.assertions.Assertions.assertThat;
@@ -15,10 +14,9 @@ public class ZmqMonitorTest {
     @Test
     public void testZmq() throws Exception {
 
-        Inventory inventory = new FileInventory();
         Monitoring monitoring = new Monitoring();
         String url = "tcp://localhost:7070";
-        ZmqMonitorThread thread = new ZmqMonitorThread(monitoring, url, inventory);
+        ZmqMonitorThread thread = new ZmqMonitorThread(monitoring, url, Arrays.asList(""));
         thread.start();
 
         AtomicInteger counter = new AtomicInteger(0);

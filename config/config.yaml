@@ -3,9 +3,7 @@ name: 'My Governance Dashboard'
 
 zmqMonitoring:
   connections:
-    - type: 'SUB'
-      url: 'tcp://localhost:7070'
-      serializationClass: 'org.neo.gomina.model.monitoring.zmq.ZmqMonitorThread'
-    - type: 'SUB'
-      url: 'tcp://localhost:7071'
-      serializationClass: 'org.neo.gomina.model.monitoring.zmq.ZmqMonitorThread'
+    - url: 'tcp://localhost:7070'
+      #type: 'SUB'
+      #serializationClass: 'org.neo.gomina.model.monitoring.zmq.ZmqMonitorThread'
+    - url: 'tcp://localhost:7071'

@@ -9,7 +9,7 @@ import org.neo.gomina.model.inventory.file.FileInventory;
 import org.neo.gomina.model.monitoring.Monitoring;
 import org.neo.gomina.model.monitoring.dummy.DummyMonitorData;
 import org.neo.gomina.model.monitoring.dummy.DummyMonitorThread;
-import org.neo.gomina.model.monitoring.zmq.ZmqConfig;
+import org.neo.gomina.model.monitoring.zmq.ZmqMonitorConfig;
 import org.neo.gomina.model.monitoring.zmq.ZmqMonitorThreads;
 import org.neo.gomina.model.project.Projects;
 import org.neo.gomina.model.project.file.FileProjects;
@@ -46,7 +46,7 @@ public class GominaModule extends AbstractModule {
         bind(Monitoring.class).in(Scopes.SINGLETON);
         bind(DummyMonitorData.class).in(Scopes.SINGLETON);
         bind(DummyMonitorThread.class).asEagerSingleton();
-        bind(ZmqConfig.class).toInstance(config.zmqMonitoring);
+        bind(ZmqMonitorConfig.class).toInstance(config.zmqMonitoring);
         bind(ZmqMonitorThreads.class).asEagerSingleton();
 
         // SCM

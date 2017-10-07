@@ -2,16 +2,13 @@ package org.neo.gomina.model.monitoring.zmq;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.monitoring.Monitoring;
 import org.zeromq.ZMQ;
 
-import javax.inject.Inject;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ZmqMonitorThread extends Thread {
 
@@ -20,20 +17,12 @@ public class ZmqMonitorThread extends Thread {
     private Monitoring monitoring;
 
     private String url;
-    private List<String> envs;
+    private List<String> subscriptions;
 
-    public ZmqMonitorThread(Monitoring monitoring, String url, Inventory inventory) {
+    public ZmqMonitorThread(Monitoring monitoring, String url, List<String> subscriptions) {
         this.monitoring = monitoring;
         this.url = url;
-        envs = inventory.getEnvironments().stream()
-                .map(e -> e.id)
-                .collect(Collectors.toList());
-    }
-
-    @Inject
-    public void init() {
-        // Get conf
-        this.start();
+        this.subscriptions = subscriptions;
     }
 
     @Override
@@ -41,8 +30,8 @@ public class ZmqMonitorThread extends Thread {
         ZMQ.Context context = ZMQ.context(1);
         ZMQ.Socket subscriber = context.socket(ZMQ.SUB);
         subscriber.connect(url);
-        for (String env : envs) {
-            subscriber.subscribe((".#HB." + env + ".").getBytes());
+        for (String subscription : subscriptions) {
+            subscriber.subscribe(subscription.getBytes());
         }
         logger.info("Listening to " + url);
 
@@ -51,18 +40,13 @@ public class ZmqMonitorThread extends Thread {
             logger.trace("Received " + obj);
 
             try {
-                int i = obj.indexOf(";");
-                String[] header = obj.substring(0, i).split("\\.");
-                String env = header[2];
-                String instanceId = header[3];
-                String body = obj.substring(i + 1);
-                Map<String, Object> indicators = mapBody(body);
-
-                indicators.put("TIMESTAMP", new Date());
-                indicators.put("STATUS", mapStatus((String)indicators.get("STATUS")));
-                monitoring.notify(env, instanceId, indicators);
-
-                logger.trace(instanceId + " " + env + " " + indicators);
+                Map<String, Object> indicators = parse(obj);
+                enrich(indicators);
+                monitoring.notify(
+                        (String)indicators.get("@env"),
+                        (String)indicators.get("@instanceId"),
+                        indicators);
+                logger.trace(indicators);
             }
             catch (Exception e) {
                 logger.error("", e);
@@ -73,6 +57,27 @@ public class ZmqMonitorThread extends Thread {
         logger.info("closed");
     }
 
+    private void enrich(Map<String, Object> indicators) {
+        indicators.put("TIMESTAMP", new Date());
+        indicators.put("STATUS", mapStatus((String)indicators.get("STATUS")));
+    }
+
+    private String mapStatus(String status) {
+        return "SHUTDOWN".equals(status) ? "DOWN" : status;
+    }
+
+    private Map<String, Object> parse(String obj) {
+        int i = obj.indexOf(";");
+        String[] header = obj.substring(0, i).split("\\.");
+        String env = header[2];
+        String instanceId = header[3];
+        String body = obj.substring(i + 1);
+        Map<String, Object> indicators = mapBody(body);
+        indicators.put("@env", env);
+        indicators.put("@instanceId", instanceId);
+        return indicators;
+    }
+
     private Map<String, Object> mapBody(String body) {
         Map<String, Object> map = new HashMap<>();
         for (String keyValue : body.split(";")) {
@@ -80,10 +85,6 @@ public class ZmqMonitorThread extends Thread {
             map.put(keyValueSplit[0], keyValueSplit[1]);
         }
         return map;
-    }
-
-    private String mapStatus(String status) {
-        return "SHUTDOWN".equals(status) ? "DOWN" : status;
     }
 
 }

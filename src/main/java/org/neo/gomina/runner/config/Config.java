@@ -2,13 +2,13 @@ package org.neo.gomina.runner.config;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.neo.gomina.model.monitoring.zmq.ZmqConfig;
+import org.neo.gomina.model.monitoring.zmq.ZmqMonitorConfig;
 
 public class Config {
 
     public String name;
 
-    public ZmqConfig zmqMonitoring;
+    public ZmqMonitorConfig zmqMonitoring;
 
     @Override
     public String toString() {
