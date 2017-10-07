@@ -65,11 +65,6 @@ public class GominaModule extends AbstractModule {
         // Sonar
         bind(SonarConnector.class).to(DummySonarConnector.class).in(Scopes.SINGLETON);
 
-        // TODO Jenkins
-        // TODO Jiras
-        // TODO Releases
-        // TODO Dependencies
-
         // API
         bind(InstancesBuilder.class).in(Scopes.SINGLETON);
         bind(ProjectsBuilder.class).in(Scopes.SINGLETON);
