@@ -29,7 +29,7 @@ public class DummySonarConnector implements SonarConnector {
     public Map<String, SonarIndicators> getMetrics(String resource) {
         Map<String, SonarIndicators> indicators = new HashMap<>();
         try {
-            List<SonarIndicators> projects = mapper.readValue(new File("data/projects.sonar.yaml"), new TypeReference<List<SonarIndicators>>() {});
+            List<SonarIndicators> projects = mapper.readValue(new File("datadummy/projects.sonar.yaml"), new TypeReference<List<SonarIndicators>>() {});
             for (SonarIndicators project : projects) {
                 indicators.put(project.code, project);
             }

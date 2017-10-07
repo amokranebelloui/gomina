@@ -1,6 +1,18 @@
 
 name: 'My Governance Dashboard'
 
+scm:
+  repos:
+    - id: 'vac'
+      type: 'svn'
+      location: 'http://svn/actions/venteaction/vaction/Developpement/'
+    - id: 'home'
+      type: 'svn'
+      location: 'file:////Users/Amokrane/Work/SvnRepo/svn-repo-demo/'
+    - id: 'dummy'
+      type: 'dummy'
+      location: ''
+
 zmqMonitoring:
   connections:
     - url: 'tcp://localhost:7070'

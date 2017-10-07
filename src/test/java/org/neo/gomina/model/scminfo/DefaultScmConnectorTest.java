@@ -2,7 +2,7 @@ package org.neo.gomina.model.scminfo;
 
 import org.junit.Test;
 import org.neo.gomina.model.scm.ScmClient;
-import org.neo.gomina.model.scm.file.FileScmRepos;
+import org.neo.gomina.model.scm.ScmRepos;
 import org.neo.gomina.model.scm.dummy.DummyScmClient;
 import org.neo.gomina.model.scminfo.impl.DefaultScmConnector;
 
@@ -11,12 +11,7 @@ public class DefaultScmConnectorTest {
     public void getSvnDetails() throws Exception {
         //DefaultScmConnector connector = new DefaultScmConnector(new TmateSoftSvnClient());
 
-        class FileScmReposOverride extends FileScmRepos {
-
-            public FileScmReposOverride() throws Exception {
-            }
-
-            @Override
+        class FileScmReposOverride implements ScmRepos {
             public ScmClient get(String id) {
                 return new DummyScmClient();
             }
@@ -24,8 +19,8 @@ public class DefaultScmConnectorTest {
 
         DefaultScmConnector connector = new DefaultScmConnector(new FileScmReposOverride());
 
-        connector.getSvnDetails("repo", "svn-project1");
-        connector.getSvnDetails("repo", "svn-project2");
+        connector.getSvnDetails("repo", "OMS/Server/tradex-fixin");
+        connector.getSvnDetails("repo", "OMS/Server/tradex-basketmanager");
 
     }
 

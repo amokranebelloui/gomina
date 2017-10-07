@@ -83,7 +83,7 @@ public class DummyScmClient implements ScmClient {
     }
 
     private Map<String, Object> getProjectData(String url) throws java.io.IOException {
-        List<Map<String, Object>> svnData = mapper.readValue(new File("data/projects.svn.yaml"), new TypeReference<List<Map<String, Object>>>() {});
+        List<Map<String, Object>> svnData = mapper.readValue(new File("datadummy/projects.svn.yaml"), new TypeReference<List<Map<String, Object>>>() {});
         Map<String, Object> projectData = null;
         for (Map<String, Object> svnDatum : svnData) {
             if (StringUtils.equals((String)svnDatum.get("url"), url)) {

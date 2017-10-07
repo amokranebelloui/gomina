@@ -13,8 +13,9 @@ import org.neo.gomina.model.monitoring.zmq.ZmqMonitorConfig;
 import org.neo.gomina.model.monitoring.zmq.ZmqMonitorThreads;
 import org.neo.gomina.model.project.Projects;
 import org.neo.gomina.model.project.file.FileProjects;
+import org.neo.gomina.model.scm.ScmConfig;
 import org.neo.gomina.model.scm.ScmRepos;
-import org.neo.gomina.model.scm.file.FileScmRepos;
+import org.neo.gomina.model.scm.impl.ConfigScmRepos;
 import org.neo.gomina.model.scminfo.ScmConnector;
 import org.neo.gomina.model.scminfo.impl.CachedScmConnector;
 import org.neo.gomina.model.scminfo.impl.DefaultScmConnector;
@@ -50,7 +51,8 @@ public class GominaModule extends AbstractModule {
         bind(ZmqMonitorThreads.class).asEagerSingleton();
 
         // SCM
-        bind(ScmRepos.class).to(FileScmRepos.class).in(Scopes.SINGLETON);
+        bind(ScmConfig.class).toInstance(config.scm);
+        bind(ScmRepos.class).to(ConfigScmRepos.class).in(Scopes.SINGLETON);
         bind(DefaultScmConnector.class).in(Scopes.SINGLETON);
         bind(CachedScmConnector.class).in(Scopes.SINGLETON);
         //bind(ScmConnector.class).to(CachedScmConnector.class).in(Scopes.SINGLETON);

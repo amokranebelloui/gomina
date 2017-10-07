@@ -11,7 +11,7 @@
   coverage: 9.0
 
 - code: 'x.oms.vac:voms-fixin'
-  loc: 2375
+  loc: 2377
   coverage: 19.0
 
 - code: 'x.oms.vac:voms-bus'
