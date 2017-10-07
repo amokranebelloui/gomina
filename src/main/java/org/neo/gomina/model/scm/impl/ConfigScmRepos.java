@@ -7,6 +7,7 @@ import org.neo.gomina.model.scm.ScmConfig;
 import org.neo.gomina.model.scm.ScmRepos;
 import org.neo.gomina.model.scm.dummy.DummyScmClient;
 import org.neo.gomina.model.scm.svn.TmateSoftSvnClient;
+import org.neo.gomina.model.security.Passwords;
 
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -19,10 +20,10 @@ public class ConfigScmRepos implements ScmRepos {
     private Map<String, ScmClient> clients = new HashMap<>();
 
     @Inject
-    public ConfigScmRepos(ScmConfig config) {
+    public ConfigScmRepos(ScmConfig config, Passwords passwords) {
         for (ScmConfig.ScmRepo repo : config.repos) {
             try {
-                ScmClient client = buildScmClient(repo.type, repo.location);
+                ScmClient client = buildScmClient(repo, passwords);
                 clients.put(repo.id, client);
                 logger.info("Added {} {}", repo.id, client);
             }
@@ -37,10 +38,13 @@ public class ConfigScmRepos implements ScmRepos {
         return clients.get(id);
     }
 
-    private ScmClient buildScmClient(String type, String location) throws Exception {
-        switch (type) {
-            case "svn": return new TmateSoftSvnClient(location);
-            case "dummy": return new DummyScmClient();
+    private ScmClient buildScmClient(ScmConfig.ScmRepo repo, Passwords passwords) throws Exception {
+        switch (repo.type) {
+            case "svn":
+                return new TmateSoftSvnClient(repo.location,
+                    repo.username, passwords.getRealPassword(repo.passwordAlias));
+            case "dummy":
+                return new DummyScmClient();
         }
         return null;
     }

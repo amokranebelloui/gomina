@@ -9,6 +9,8 @@ scm:
     - id: 'home'
       type: 'svn'
       location: 'file:////Users/Amokrane/Work/SvnRepo/svn-repo-demo/'
+      username: 'amokrane'
+      passwordAlias: '@amokrane'
     - id: 'dummy'
       type: 'dummy'
       location: ''

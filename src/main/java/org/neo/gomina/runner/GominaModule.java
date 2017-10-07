@@ -19,6 +19,7 @@ import org.neo.gomina.model.scm.impl.ConfigScmRepos;
 import org.neo.gomina.model.scminfo.ScmConnector;
 import org.neo.gomina.model.scminfo.impl.CachedScmConnector;
 import org.neo.gomina.model.scminfo.impl.DefaultScmConnector;
+import org.neo.gomina.model.security.Passwords;
 import org.neo.gomina.model.sonar.SonarConnector;
 import org.neo.gomina.model.sonar.dummy.DummySonarConnector;
 import org.neo.gomina.runner.config.Config;
@@ -38,6 +39,9 @@ public class GominaModule extends AbstractModule {
         catch (Exception e) {
             throw new RuntimeException("Cannot load config", e);
         }
+
+        // Security
+        bind(Passwords.class).in(Scopes.SINGLETON);
 
         // Inventory
         bind(Inventory.class).to(FileInventory.class).in(Scopes.SINGLETON);

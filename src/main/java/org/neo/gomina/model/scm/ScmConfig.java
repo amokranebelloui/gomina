@@ -21,6 +21,8 @@ public class ScmConfig {
         public String id;
         public String type;
         public String location;
+        public String username;
+        public String passwordAlias;
 
         @Override
         public String toString() {
@@ -28,6 +30,8 @@ public class ScmConfig {
                     .append("id", id)
                     .append("type", type)
                     .append("location", location)
+                    .append("username", username)
+                    .append("passwordAlias", passwordAlias)
                     .toString();
         }
     }
