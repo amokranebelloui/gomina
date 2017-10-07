@@ -55,7 +55,7 @@ public class InstancesBuilder {
         instance.confCommited = sshDetails.confCommitted;
         instance.confUpToDate = sshDetails.confUpToDate;
 
-        instance.project = (String)indicators.get("project"); // FIXME ???
+        instance.project = service.project;
 
         instance.pid = (String)indicators.get("pid");
         instance.host = (String)indicators.get("host");

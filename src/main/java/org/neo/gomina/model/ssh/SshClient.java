@@ -26,40 +26,20 @@ public class SshClient {
         return session;
     }
 
-    public Boolean checkConfCommited(Session session, String applicationFolder, String prefix) {
-        if (StringUtils.isNotBlank(applicationFolder)) {
-            try {
-                String cmd = prefix + " svn status " + applicationFolder + "/config";
-                logger.info(session.getHost() + ": " + cmd);
-                String result = executeCommand(session, cmd);
-                logger.info(result);
-                return StringUtils.isBlank(result) ? Boolean.TRUE : (result.contains("is not a working copy") ? null : Boolean.FALSE);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
+    public Boolean checkConfCommited(Session session, String applicationFolder, String prefix) throws Exception {
+        String result = executeCommand(session, prefix + " svn status " + applicationFolder + "/config");
+        return StringUtils.isBlank(result) ? Boolean.TRUE : (result.contains("is not a working copy") ? null : Boolean.FALSE);
     }
 
-    public String deployedVersion(Session session, String applicationFolder, String prefix) {
-        if (StringUtils.isNotBlank(applicationFolder)) {
-            try {
-                //logger.info(session.getHost() + ": " + cmd);
-                String result = executeCommand(session, prefix + " cat " + applicationFolder + "/current/version.txt 2>/dev/null");
-                result = StringUtils.trim(result);
-                if (StringUtils.isBlank(result)) {
-                    result = executeCommand(session, prefix + " ls -ll " + applicationFolder + "/current");
-                    String pattern = ".*versions/.*-([0-9\\.]+(-SNAPSHOT)?)/";
-                    result = result.replaceAll(pattern, "$1").trim();
-                }
-                return result;
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
+    public String deployedVersion(Session session, String applicationFolder, String prefix) throws Exception {
+        String result = executeCommand(session, prefix + " cat " + applicationFolder + "/current/version.txt 2>/dev/null");
+        result = StringUtils.trim(result);
+        if (StringUtils.isBlank(result)) {
+            result = executeCommand(session, prefix + " ls -ll " + applicationFolder + "/current");
+            String pattern = ".*versions/.*-([0-9\\.]+(-SNAPSHOT)?)/";
+            result = result.replaceAll(pattern, "$1").trim();
         }
-        return null;
+        return result;
     }
 
     public void deploy(Session session, String applicationFolder, String version) throws Exception {
@@ -82,7 +62,7 @@ public class SshClient {
     }
 
     public String executeCommand(Session session, String cmd) throws Exception {
-        System.out.println("#CMD: " + cmd);
+        logger.info("#CMD[" + session.getHost() + "]: " + cmd);
         long start = System.nanoTime();
         ChannelExec channel = (ChannelExec)session.openChannel("exec");
         channel.setPty(true);
@@ -94,7 +74,7 @@ public class SshClient {
             Thread.sleep(2);
         }
         String res = new String(baos.toByteArray());
-        System.out.println("#RES: " + res + " in(" + (System.nanoTime() - start) + ")");
+        logger.info("#RES: " + res + " in(" + (System.nanoTime() - start) + ")");
         return res;
     }
 
