@@ -4,6 +4,7 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.neo.gomina.model.monitoring.zmq.ZmqMonitorConfig;
 import org.neo.gomina.model.scm.ScmConfig;
+import org.neo.gomina.model.sonar.SonarConfig;
 import org.neo.gomina.model.sshinfo.SshConfig;
 
 public class Config {
@@ -11,6 +12,7 @@ public class Config {
     public String name;
 
     public ScmConfig scm;
+    public SonarConfig sonar;
     public SshConfig ssh;
 
     public ZmqMonitorConfig zmqMonitoring;
@@ -20,6 +22,7 @@ public class Config {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("name", name)
                 .append("scm", scm)
+                .append("sonar", sonar)
                 .append("ssh", ssh)
                 .append("zmqMonitoring", zmqMonitoring)
                 .toString();

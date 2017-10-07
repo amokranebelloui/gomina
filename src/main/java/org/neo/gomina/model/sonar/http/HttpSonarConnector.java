@@ -13,6 +13,8 @@ import org.apache.logging.log4j.Logger;
 import org.neo.gomina.model.sonar.SonarConnector;
 import org.neo.gomina.model.sonar.SonarIndicators;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +26,12 @@ public class HttpSonarConnector implements SonarConnector {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-    private String root = "http://localhost:9000";
+    private String url;
+
+    @Inject
+    public HttpSonarConnector(@Named("sonar.url") String url) {
+        this.url = url;
+    }
 
     @Override
     public Map<String, SonarIndicators> getMetrics() {
@@ -37,7 +44,7 @@ public class HttpSonarConnector implements SonarConnector {
         try {
             CloseableHttpClient httpclient = HttpClients.createDefault();
             String resourceQuery = StringUtils.isNotBlank(resource) ? "resource=" + resource + "&" : "";
-            HttpGet httpGet = new HttpGet(root + "/api/resources?" + resourceQuery + "metrics=ncloc,coverage");
+            HttpGet httpGet = new HttpGet(url + "/api/resources?" + resourceQuery + "metrics=ncloc,coverage");
             CloseableHttpResponse response1 = httpclient.execute(httpGet);
             try {
                 logger.info("-> Result " + response1.getStatusLine());

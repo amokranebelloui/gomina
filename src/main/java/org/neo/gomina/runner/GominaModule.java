@@ -2,6 +2,7 @@ package org.neo.gomina.runner;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
+import com.google.inject.name.Names;
 import org.neo.gomina.api.instances.InstancesBuilder;
 import org.neo.gomina.api.projects.ProjectsBuilder;
 import org.neo.gomina.model.inventory.Inventory;
@@ -67,6 +68,7 @@ public class GominaModule extends AbstractModule {
         bind(ScmConnector.class).to(DefaultScmConnector.class).in(Scopes.SINGLETON);
 
         // Sonar
+        bind(String.class).annotatedWith(Names.named("sonar.url")).toInstance(config.sonar.url);
         bind(SonarConnector.class).to(DummySonarConnector.class).in(Scopes.SINGLETON);
 
         // SSH

@@ -7,9 +7,10 @@ public class HttpSonarConnectorTest {
 
     @Test
     public void getMetrics() throws Exception {
-        System.out.println(new HttpSonarConnector().getMetrics(null));
-        System.out.println(new HttpSonarConnector().getMetrics("torkjell:torkjell"));
-        System.out.println(new HttpSonarConnector().getMetrics("torkjell:unknown"));
+        HttpSonarConnector httpSonarConnector = new HttpSonarConnector("http://localhost:9000");
+        System.out.println(httpSonarConnector.getMetrics(null));
+        System.out.println(httpSonarConnector.getMetrics("torkjell:torkjell"));
+        System.out.println(httpSonarConnector.getMetrics("torkjell:unknown"));
     }
 
 }
