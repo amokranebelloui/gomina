@@ -1,8 +1,6 @@
-
-import React from 'react';
-
-import {groupBy, isSnapshot, Well, Badge, Status, StatusWrapper, CopyButton, Version} from './gomina';
-import {BuildLink} from './project';
+import React from "react";
+import {groupBy, isSnapshot, Badge, StatusWrapper, CopyButton, Version} from "./gomina";
+import {BuildLink} from "./project";
 
 class Instance extends React.Component {
     render() {
@@ -22,6 +20,17 @@ class Instance extends React.Component {
                 </StatusWrapper>
             </div>
         )
+    }
+}
+
+class ConfCommited extends React.Component {
+    render() {
+        const display = !(this.props.commited == true);
+        return (
+            display &&
+            <Badge title={'Config in not Committed'}
+                   backgroundColor='darkred' color='white'>{this.props.commited == false ? 'chg' : '?'}</Badge>
+        );
     }
 }
 
@@ -54,7 +63,7 @@ class RedisInstance extends React.Component {
                 </span>
                 &nbsp;
 
-                {!instance.confCommited && <Badge title={'Config in not Committed'} backgroundColor='darkred' color='white'>chg</Badge>}
+                <ConfCommited commited={instance.confCommited} />
 
                 <Badge title={'Persistence Mode ' + extra.redisMode} backgroundColor={persistenceModeColor} color='white'>
                     {extra.redisMode}
@@ -94,7 +103,7 @@ class AppInstance extends React.Component {
                     &nbsp;
                     <Version version={instance.version} revision={instance.revision}/>
                     &nbsp;
-                    {!instance.confCommited && <Badge title={'Config in not Committed'} backgroundColor='darkred' color='white'>chg</Badge>}
+                    <ConfCommited commited={instance.confCommited} />
 
                     <BuildLink url={instance.project} /> {/* // TODO Project Build URL */}
                 </div>

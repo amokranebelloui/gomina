@@ -22,6 +22,10 @@ import org.neo.gomina.model.scminfo.impl.DefaultScmConnector;
 import org.neo.gomina.model.security.Passwords;
 import org.neo.gomina.model.sonar.SonarConnector;
 import org.neo.gomina.model.sonar.dummy.DummySonarConnector;
+import org.neo.gomina.model.ssh.SshClient;
+import org.neo.gomina.model.sshinfo.SshConfig;
+import org.neo.gomina.model.sshinfo.SshConnector;
+import org.neo.gomina.model.sshinfo.impl.OnDemandSshConnector;
 import org.neo.gomina.runner.config.Config;
 import org.neo.gomina.runner.config.ConfigLoader;
 
@@ -64,6 +68,11 @@ public class GominaModule extends AbstractModule {
 
         // Sonar
         bind(SonarConnector.class).to(DummySonarConnector.class).in(Scopes.SINGLETON);
+
+        // SSH
+        bind(SshConfig.class).toInstance(config.ssh);
+        bind(SshClient.class).in(Scopes.SINGLETON);
+        bind(SshConnector.class).to(OnDemandSshConnector.class).in(Scopes.SINGLETON);
 
         // API
         bind(InstancesBuilder.class).in(Scopes.SINGLETON);

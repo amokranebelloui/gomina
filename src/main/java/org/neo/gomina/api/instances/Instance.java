@@ -15,6 +15,8 @@ public class Instance {
     public String project;
     public String deployHost;
     public String deployFolder;
+    public String deployVersion;
+    public String deployRevision;
     public Boolean confCommited;
     public Boolean confUpToDate;
     public String version;

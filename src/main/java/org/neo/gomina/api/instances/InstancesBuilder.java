@@ -6,6 +6,8 @@ import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.Service;
 import org.neo.gomina.model.monitoring.EnvMonitoring;
 import org.neo.gomina.model.monitoring.Monitoring;
+import org.neo.gomina.model.sshinfo.SshConnector;
+import org.neo.gomina.model.sshinfo.SshDetails;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -16,18 +18,21 @@ import java.util.Map;
 public class InstancesBuilder {
 
     @Inject private Inventory inventory;
+    @Inject private SshConnector sshConnector;
     @Inject private Monitoring monitoring;
 
     public List<Instance> getInstances() {
         List<Instance> instances = new ArrayList<>();
+        sshConnector.analyze();
         for (Environment environment : inventory.getEnvironments()) {
             EnvMonitoring envMonitoring = monitoring.getFor(environment.id);
             if (environment.services != null) {
                 for (Service service : environment.services) {
                     for (InvInstance envInstance : service.instances) {
                         Map<String, Object> indicators = envMonitoring.getForInstance(envInstance.id);
+                        SshDetails sshDetails = sshConnector.getDetails(envInstance.host, envInstance.folder);
                         indicators = indicators != null ? indicators : new HashMap<>();
-                        instances.add(build(environment, service, envInstance, indicators));
+                        instances.add(build(environment, service, envInstance, sshDetails, indicators));
                     }
                 }
             }
@@ -35,7 +40,7 @@ public class InstancesBuilder {
         return instances;
     }
 
-    private Instance build(Environment env, Service service, InvInstance envInstance, Map<String, Object> indicators) {
+    private Instance build(Environment env, Service service, InvInstance envInstance, SshDetails sshDetails, Map<String, Object> indicators) {
         Instance instance = new Instance();
         instance.env = env.id;
         instance.id = env.id + "-" + envInstance.id;
@@ -45,18 +50,17 @@ public class InstancesBuilder {
         instance.deployHost = envInstance.host;
         instance.deployFolder = envInstance.folder;
 
+        instance.deployVersion = sshDetails.deployedVersion;
+        instance.deployRevision = sshDetails.deployedRevision;
+        instance.confCommited = sshDetails.confCommitted;
+        instance.confUpToDate = sshDetails.confUpToDate;
+
         instance.project = (String)indicators.get("project"); // FIXME ???
 
         instance.pid = (String)indicators.get("pid");
-
-        // FIXME Both static/live values
         instance.host = (String)indicators.get("host");
         instance.version = (String)indicators.get("version");
         instance.revision = String.valueOf(indicators.get("revision"));
-
-        // FIXME From SSH
-        instance.confCommited = (Boolean) indicators.get("confCommited");
-        instance.confUpToDate = (Boolean) indicators.get("confUpToDate");
 
         instance.status = (String)indicators.get("status");
         instance.jmx = (Integer) indicators.get("jmx");
