@@ -19,13 +19,12 @@ public class ZmqMonitorThread extends Thread {
 
     private Monitoring monitoring;
 
-    // FIXME Configurable
+    private String url;
     private List<String> envs;
-    public String url = "tcp://localhost:7070";
 
-    @Inject
-    public ZmqMonitorThread(Monitoring monitoring, Inventory inventory) {
+    public ZmqMonitorThread(Monitoring monitoring, String url, Inventory inventory) {
         this.monitoring = monitoring;
+        this.url = url;
         envs = inventory.getEnvironments().stream()
                 .map(e -> e.id)
                 .collect(Collectors.toList());

@@ -17,7 +17,8 @@ public class ZmqMonitorTest {
 
         Inventory inventory = new FileInventory();
         Monitoring monitoring = new Monitoring();
-        ZmqMonitorThread thread = new ZmqMonitorThread(monitoring, inventory);
+        String url = "tcp://localhost:7070";
+        ZmqMonitorThread thread = new ZmqMonitorThread(monitoring, url, inventory);
         thread.start();
 
         AtomicInteger counter = new AtomicInteger(0);
@@ -32,7 +33,7 @@ public class ZmqMonitorTest {
 
         ZMQ.Context context = ZMQ.context(1);
         ZMQ.Socket subscriber = context.socket(ZMQ.PUB);
-        subscriber.bind(thread.url);
+        subscriber.bind(url);
         Thread.sleep(400); // Connection to be established
 
         subscriber.send(".#HB.UAT.kernel.*.0;status=DOWN;quickfixPersistence=ORACLE");

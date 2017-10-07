@@ -9,7 +9,8 @@ import org.neo.gomina.model.inventory.file.FileInventory;
 import org.neo.gomina.model.monitoring.Monitoring;
 import org.neo.gomina.model.monitoring.dummy.DummyMonitorData;
 import org.neo.gomina.model.monitoring.dummy.DummyMonitorThread;
-import org.neo.gomina.model.monitoring.zmq.ZmqMonitorThread;
+import org.neo.gomina.model.monitoring.zmq.ZmqConfig;
+import org.neo.gomina.model.monitoring.zmq.ZmqMonitorThreads;
 import org.neo.gomina.model.project.Projects;
 import org.neo.gomina.model.project.file.FileProjects;
 import org.neo.gomina.model.scm.ScmRepos;
@@ -19,12 +20,23 @@ import org.neo.gomina.model.scminfo.impl.CachedScmConnector;
 import org.neo.gomina.model.scminfo.impl.DefaultScmConnector;
 import org.neo.gomina.model.sonar.SonarConnector;
 import org.neo.gomina.model.sonar.dummy.DummySonarConnector;
+import org.neo.gomina.runner.config.Config;
+import org.neo.gomina.runner.config.ConfigLoader;
 
 public class GominaModule extends AbstractModule {
 
     @Override
     protected void configure() {
         binder().requireExplicitBindings();
+
+        Config config;
+        try {
+            ConfigLoader configLoader = new ConfigLoader();
+            config = configLoader.load();
+        }
+        catch (Exception e) {
+            throw new RuntimeException("Cannot load config", e);
+        }
 
         // Inventory
         bind(Inventory.class).to(FileInventory.class).in(Scopes.SINGLETON);
@@ -34,7 +46,8 @@ public class GominaModule extends AbstractModule {
         bind(Monitoring.class).in(Scopes.SINGLETON);
         bind(DummyMonitorData.class).in(Scopes.SINGLETON);
         bind(DummyMonitorThread.class).asEagerSingleton();
-        bind(ZmqMonitorThread.class).asEagerSingleton();
+        bind(ZmqConfig.class).toInstance(config.zmqMonitoring);
+        bind(ZmqMonitorThreads.class).asEagerSingleton();
 
         // SCM
         bind(ScmRepos.class).to(FileScmRepos.class).in(Scopes.SINGLETON);

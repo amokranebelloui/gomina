@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-// TODO Explore reactive streams
 public class Monitoring {
 
     private final static Logger logger = LogManager.getLogger(Monitoring.class);
