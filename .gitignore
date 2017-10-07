@@ -3,4 +3,4 @@
 .vertx/
 .node_modules/*
 *.iml
-
+config/pass.properties

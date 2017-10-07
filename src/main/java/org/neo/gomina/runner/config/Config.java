@@ -10,6 +10,7 @@ import org.neo.gomina.model.sshinfo.SshConfig;
 public class Config {
 
     public String name;
+    public String passwordsFile;
 
     public ScmConfig scm;
     public SonarConfig sonar;

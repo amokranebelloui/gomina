@@ -5,6 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,9 +18,12 @@ public class Passwords {
 
     Properties props = new Properties();
 
-    public Passwords() {
+    @Inject
+    public Passwords(@Named("passwords") File file) {
         try {
-            props.load(new FileInputStream(new File("config/passwords.properties")));
+            logger.info("Passwords from {}", file);
+            props.load(new FileInputStream(file));
+            logger.info("{} passwords loaded", props.size());
         }
         catch (IOException e) {
             logger.error("Cannot load passwords");

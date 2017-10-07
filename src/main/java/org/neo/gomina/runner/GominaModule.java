@@ -30,6 +30,8 @@ import org.neo.gomina.model.sshinfo.impl.OnDemandSshConnector;
 import org.neo.gomina.runner.config.Config;
 import org.neo.gomina.runner.config.ConfigLoader;
 
+import java.io.File;
+
 public class GominaModule extends AbstractModule {
 
     @Override
@@ -46,6 +48,7 @@ public class GominaModule extends AbstractModule {
         }
 
         // Security
+        bind(File.class).annotatedWith(Names.named("passwords")).toInstance(new File(config.passwordsFile));
         bind(Passwords.class).in(Scopes.SINGLETON);
 
         // Inventory

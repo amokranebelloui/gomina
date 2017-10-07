@@ -1,5 +1,6 @@
 
 name: 'My Governance Dashboard'
+passwordsFile: 'config/pass.properties'
 
 scm:
   repos:
