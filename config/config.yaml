@@ -15,6 +15,13 @@ scm:
       type: 'dummy'
       location: ''
 
+ssh:
+  hosts:
+    - host: 'localhost'
+      username: 'test'
+      passwordAlias: '@test'
+      sudo: ''
+
 zmqMonitoring:
   connections:
     - url: 'tcp://localhost:7070'
