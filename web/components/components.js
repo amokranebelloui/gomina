@@ -97,6 +97,15 @@ class EnvApp extends React.Component {
             }
         }
     }
+    reload() {
+        axios.post('/data/instances/reload')
+            .then(response => {
+                console.log("reloaded", response.data);
+            })
+            .catch(function (error) {
+                console.log("reload error", error.response);
+            });
+    }
     componentDidMount() {
         //this.connect();
     }
@@ -112,6 +121,9 @@ class EnvApp extends React.Component {
         return (
             <AppLayout title={"Environment '" + this.state.env + "'"}>
                 <div style={{float: 'right'}}>
+                    <button onClick={e => this.reload()}>
+                        RELOAD
+                    </button>
                     <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
                     <div ref={node => this.eventsList = node}></div>
                 </div>

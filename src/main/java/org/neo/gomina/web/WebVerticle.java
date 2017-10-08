@@ -80,7 +80,7 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
 
-        router.route("/data/projects").handler(ctx -> {
+        router.get("/data/projects").handler(ctx -> {
             try {
                 ctx.response().putHeader("content-type", "text/javascript")
                         .end(mapper.writeValueAsString(projectBuilder.getProjects()));
@@ -91,7 +91,7 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
 
-        router.route("/data/project/:projectId").handler(ctx -> {
+        router.get("/data/project/:projectId").handler(ctx -> {
             try {
                 String projectId = ctx.request().getParam("projectId");
                 ProjectDetail project = projectBuilder.getProject(projectId);
@@ -109,11 +109,23 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
 
-        router.route("/data/instances").handler(ctx -> {
+        router.get("/data/instances").handler(ctx -> {
             try {
                 ctx.response()
                         .putHeader("content-type", "text/javascript")
                         .end(mapper.writeValueAsString(instancesBuilder.getInstances()));
+            }
+            catch (Exception e) {
+                logger.error("Cannot get instances", e);
+                ctx.fail(500);
+            }
+        });
+
+        router.post("/data/instances/reload").handler(ctx -> {
+            try {
+                logger.info("Reloading ...");
+                // FIXME Reload
+                ctx.response().putHeader("content-type", "text/javascript").end();
             }
             catch (Exception e) {
                 logger.error("Cannot get instances", e);
@@ -138,7 +150,7 @@ public class WebVerticle extends AbstractVerticle {
         });
         */
 
-        router.route("/*").pathRegex(".*\\.(js|ico|map)").handler(StaticHandler.create("dist").setCachingEnabled(false));
+        router.get("/*").pathRegex(".*\\.(js|ico|map)").handler(StaticHandler.create("dist").setCachingEnabled(false));
 
         router.route().pathRegex("/.*").handler(ctx -> {
         //router.route().pathRegex("/([^/.]*)/*.*").handler(ctx -> {
