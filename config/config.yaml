@@ -22,8 +22,8 @@ sonar:
 ssh:
   hosts:
     - host: 'localhost'
-      username: 'test'
-      passwordAlias: '@test'
+      username: 'Amokrane'
+      passwordAlias: '@amokrane'
       sudo: ''
 
 zmqMonitoring:

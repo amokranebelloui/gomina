@@ -1,5 +1,6 @@
 package org.neo.gomina.model.sshinfo.impl;
 
+import com.jcraft.jsch.Session;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +16,6 @@ import org.neo.gomina.model.sshinfo.SshDetails;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -45,7 +45,7 @@ public class OnDemandSshConnector implements SshConnector {
         Map<String, List<InvInstance>> instancesByHost = inventory.getEnvironments().stream()
                 .flatMap(env -> env.services.stream())
                 .flatMap(svc -> svc.instances.stream()
-                        .filter(this::valid)
+                        .filter(ins -> StringUtils.isNotBlank(ins.host) && StringUtils.isNotBlank(ins.folder))
                 )
                 .collect(Collectors.groupingBy(ins -> ins.host, Collectors.toList()));
 
@@ -57,29 +57,27 @@ public class OnDemandSshConnector implements SshConnector {
                 String password = passwords.getRealPassword(config.passwordAlias);
                 String sudo = config.sudo;
                 try {
-                    SshAuth auth = new SshAuth(username, password, sudo);
-                    ///Session session = sshClient.getSession(host, auth);
-                    ///session.connect(1000);
-
                     List<InvInstance> instances = entry.getValue();
                     logger.info("Analyze instances {} on '{}' using {}/***{} {}",
                             instances.size(), host, username, StringUtils.length(password), sudo);
 
-                    for (InvInstance instance : instances) {
-                        // FIXME get info
-                        Random random = new Random();
-                        Boolean commited = random.nextBoolean() ? (random.nextBoolean() ? null : Boolean.FALSE) : Boolean.TRUE;
-                        SshDetails sshDetails = getOrCreate(host, instance.folder);
-                        sshDetails.analyzed = true;
-                        //sshDetails.deployedVersion = ;
-                        //sshDetails.deployedRevision = ;
-                        sshDetails.confCommitted = commited;
-                        //sshDetails.confUpToDate = ;
-                        logger.info("Analyzed {} {} {}", host, instance.folder, sshDetails);
+                    SshAuth auth = new SshAuth(username, password, sudo);
+                    Session session = sshClient.getSession(host, auth);
+                    session.connect(1000);
+                    String prefix = StringUtils.isNotBlank(sudo) ? "sudo -u " + sudo : "";
 
-                        ///sshClient.executeCommand(session, "whoami");
+                    for (InvInstance instance : instances) {
+                        Map<String, SshDetails> servers = map.computeIfAbsent(host, h -> new ConcurrentHashMap<>());
+                        SshDetails sshDetails = servers.computeIfAbsent(instance.folder, f -> new SshDetails());
+
+                        sshDetails.analyzed = true;
+                        sshDetails.deployedVersion = deployedVersion(session, instance.folder, prefix);
+                        sshDetails.deployedRevision = null;
+                        sshDetails.confCommitted = checkConfCommited(session, instance.folder, prefix);
+                        sshDetails.confUpToDate = null;
+                        logger.info("Analyzed {} {} {}", host, instance.folder, sshDetails);
                     }
-                    ///session.disconnect();
+                    session.disconnect();
                 }
                 catch (Exception e) {
                     logger.error("", e);
@@ -91,13 +89,20 @@ public class OnDemandSshConnector implements SshConnector {
         }
     }
 
-    private boolean valid(InvInstance ins) {
-        return StringUtils.isNotBlank(ins.host) && StringUtils.isNotBlank(ins.folder);
+    public Boolean checkConfCommited(Session session, String applicationFolder, String prefix) throws Exception {
+        String result = sshClient.executeCommand(session, prefix + " svn status " + applicationFolder + "/config");
+        return StringUtils.isBlank(result) ? Boolean.TRUE : (result.contains("is not a working copy") ? null : Boolean.FALSE);
     }
 
-    public SshDetails getOrCreate(String host, String folder) {
-        Map<String, SshDetails> servers = map.computeIfAbsent(host, h -> new ConcurrentHashMap<>());
-        return servers.computeIfAbsent(folder, f -> new SshDetails());
+    public String deployedVersion(Session session, String applicationFolder, String prefix) throws Exception {
+        String result = sshClient.executeCommand(session, prefix + " cat " + applicationFolder + "/current/version.txt 2>/dev/null");
+        result = StringUtils.trim(result);
+        if (StringUtils.isBlank(result)) {
+            result = sshClient.executeCommand(session, prefix + " ls -ll " + applicationFolder + "/current");
+            String pattern = ".*versions/.*-([0-9\\.]+(-SNAPSHOT)?)/";
+            result = result.replaceAll(pattern, "$1").trim();
+        }
+        return result;
     }
 
     @Override

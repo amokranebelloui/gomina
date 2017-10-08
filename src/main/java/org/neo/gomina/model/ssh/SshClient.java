@@ -26,22 +26,6 @@ public class SshClient {
         return session;
     }
 
-    public Boolean checkConfCommited(Session session, String applicationFolder, String prefix) throws Exception {
-        String result = executeCommand(session, prefix + " svn status " + applicationFolder + "/config");
-        return StringUtils.isBlank(result) ? Boolean.TRUE : (result.contains("is not a working copy") ? null : Boolean.FALSE);
-    }
-
-    public String deployedVersion(Session session, String applicationFolder, String prefix) throws Exception {
-        String result = executeCommand(session, prefix + " cat " + applicationFolder + "/current/version.txt 2>/dev/null");
-        result = StringUtils.trim(result);
-        if (StringUtils.isBlank(result)) {
-            result = executeCommand(session, prefix + " ls -ll " + applicationFolder + "/current");
-            String pattern = ".*versions/.*-([0-9\\.]+(-SNAPSHOT)?)/";
-            result = result.replaceAll(pattern, "$1").trim();
-        }
-        return result;
-    }
-
     public void deploy(Session session, String applicationFolder, String version) throws Exception {
         String cmd = "sudo -u svc-ed-int /srv/ed/apps/" + applicationFolder + "/ops/release.sh " + version;
         String result = executeCommand(session, cmd);
