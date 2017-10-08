@@ -31,8 +31,10 @@ public class DummyScmClient implements ScmClient {
     public List<Commit> getLog(String url, String rev, int count) throws Exception {
         try {
             Map<String, Object> projectData = getProjectData(url);
-            List<Map<String, Object>> log = (List<Map<String, Object>>) projectData.get("log");
-            return buildFrom(log);
+            if (projectData != null) {
+                List<Map<String, Object>> log = (List<Map<String, Object>>) projectData.get("log");
+                return buildFrom(log);
+            }
         }
         catch (Exception e) {
             logger.error("Error retrieving SVN data for " + url, e);
@@ -43,11 +45,14 @@ public class DummyScmClient implements ScmClient {
     @Override
     public String getFile(String url, String rev) throws IOException {
         Map<String, Object> projectData = getProjectData(url.replace("/trunk/pom.xml", ""));
-        List<Map<String, Object>> log = (List<Map<String, Object>>) projectData.get("log");
-        Map<String, Object> commit = StringUtils.equals(rev, "-1")
-                ? log !=null && log.size()>0 ? log.get(0) : null
-                : findRevision(log, rev);
-        return commit != null ? sampleFile((String)commit.get("version")) : null;
+        if (projectData != null) {
+            List<Map<String, Object>> log = (List<Map<String, Object>>) projectData.get("log");
+            Map<String, Object> commit = StringUtils.equals(rev, "-1")
+                    ? log !=null && log.size()>0 ? log.get(0) : null
+                    : findRevision(log, rev);
+            return commit != null ? sampleFile((String)commit.get("version")) : null;
+        }
+        return null;
     }
 
     private String sampleFile(String version) {

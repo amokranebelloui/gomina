@@ -2,8 +2,8 @@ package org.neo.gomina.model.scminfo.impl;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.neo.gomina.model.scminfo.ScmConnector;
 import org.neo.gomina.model.scm.Commit;
+import org.neo.gomina.model.scminfo.ScmConnector;
 import org.neo.gomina.model.scminfo.ScmDetails;
 
 import javax.inject.Inject;
@@ -36,7 +36,7 @@ public class CachedScmConnector implements ScmConnector {
             cache.put(svnUrl, scmDetails);
             logger.info("SCM Detail Served from SCM");
         }
-        return scmDetails;
+        return scmDetails != null ? scmDetails : new ScmDetails();
     }
 
     @Override

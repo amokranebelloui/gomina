@@ -1,5 +1,6 @@
 package org.neo.gomina.model.maven;
 
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -13,13 +14,16 @@ import java.nio.charset.StandardCharsets;
 public class MavenUtils {
 
     public static String extractVersion(String pom) throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc = builder.parse(new ByteArrayInputStream(pom.getBytes(StandardCharsets.UTF_8)));
-        XPathFactory xPathfactory = XPathFactory.newInstance();
-        XPath xpath = xPathfactory.newXPath();
-        XPathExpression expr = xpath.compile("/project/version/text()");
-        return expr.evaluate(doc);
+        if (StringUtils.isNotBlank(pom)) {
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(new ByteArrayInputStream(pom.getBytes(StandardCharsets.UTF_8)));
+            XPathFactory xPathfactory = XPathFactory.newInstance();
+            XPath xpath = xPathfactory.newXPath();
+            XPathExpression expr = xpath.compile("/project/version/text()");
+            return expr.evaluate(doc);
+        }
+        return null;
     }
 
 }

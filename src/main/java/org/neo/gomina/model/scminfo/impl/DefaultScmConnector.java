@@ -4,10 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo.gomina.model.maven.MavenUtils;
-import org.neo.gomina.model.scm.ScmClient;
-import org.neo.gomina.model.scminfo.ScmConnector;
-import org.neo.gomina.model.scm.ScmRepos;
 import org.neo.gomina.model.scm.Commit;
+import org.neo.gomina.model.scm.ScmClient;
+import org.neo.gomina.model.scm.ScmRepos;
+import org.neo.gomina.model.scminfo.ScmConnector;
 import org.neo.gomina.model.scminfo.ScmDetails;
 
 import javax.inject.Inject;
@@ -29,13 +29,13 @@ public class DefaultScmConnector implements ScmConnector {
     public ScmDetails getSvnDetails(String svnRepo, String svnUrl) {
         logger.info("Svn Details for " + svnUrl);
         ScmClient scmClient = scmRepos.get(svnRepo);
-        ScmDetails scmDetails = null;
+        ScmDetails scmDetails = new ScmDetails();
         try {
             String pom = scmClient.getFile(svnUrl + "/trunk/pom.xml", "-1");
             String currentVersion = MavenUtils.extractVersion(pom);
 
             List<Commit> logEntries = scmClient.getLog(svnUrl, "0", 100);
-            Commit latestCommit = logEntries.get(0);
+            Commit latestCommit = logEntries.size() > 0 ? logEntries.get(0) : null;
             String latestRevision = latestCommit != null ? latestCommit.revision : null;
 
             String lastReleasedRev = getLastReleaseRev(logEntries);
@@ -46,7 +46,6 @@ public class DefaultScmConnector implements ScmConnector {
                 lastReleasedVersion = MavenUtils.extractVersion(lastReleasePom);
             }
 
-            scmDetails = new ScmDetails();
             scmDetails.url = svnUrl;
             scmDetails.latest = currentVersion;
             scmDetails.latestRevision = latestRevision;

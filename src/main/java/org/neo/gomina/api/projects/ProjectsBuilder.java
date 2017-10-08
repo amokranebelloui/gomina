@@ -3,10 +3,10 @@ package org.neo.gomina.api.projects;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.neo.gomina.model.project.Projects;
 import org.neo.gomina.model.project.Project;
-import org.neo.gomina.model.scminfo.ScmConnector;
+import org.neo.gomina.model.project.Projects;
 import org.neo.gomina.model.scm.Commit;
+import org.neo.gomina.model.scminfo.ScmConnector;
 import org.neo.gomina.model.scminfo.ScmDetails;
 import org.neo.gomina.model.sonar.SonarConnector;
 import org.neo.gomina.model.sonar.SonarIndicators;
@@ -29,7 +29,6 @@ public class ProjectsBuilder {
         Map<String, SonarIndicators> sonarIndicatorsMap = sonarConnector.getMetrics();
         for (Project project : projects.getProjects()) {
             ScmDetails scmDetails = scmConnector.getSvnDetails(project.svnRepo, project.svnUrl);
-            scmDetails = scmDetails != null ? scmDetails : new ScmDetails(); // TODO Null object pattern
             SonarIndicators sonarIndicators = sonarIndicatorsMap.get(project.maven);
             ProjectDetail projectDetail = build(project, scmDetails, null, sonarIndicators);
             result.add(projectDetail);
