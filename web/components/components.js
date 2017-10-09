@@ -27,14 +27,15 @@ var components = [
     {name: "mis", x:200, y:350},
 ];
 var dependencies = [
-    {from:1, to:2}, // basket, order
-    {from:3, to:1}, // market, order
+    {from: 'basket', to: 'order'},
+    {from: 'market', to: 'order'},
 ];
 var dependencies2 = [
-    {from:3, to:1},
-    {from:3, to:4},
-    {from:3, to:5},
-    {from:3, to:6},
+    {from: 'market', to: 'cross'},
+    {from: 'market', to: 'fixout'},
+    {from: 'market', to: 'emma'},
+    {from: 'market', to: 'order'},
+    {from: 'audit', to: 'mis'},
 ];
 
 class ArchiDiagramApp extends React.Component {

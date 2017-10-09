@@ -3,6 +3,13 @@ import * as d3 from "d3";
 import {Toggle} from "./gomina";
 import "./archi-diagram.css";
 
+function index(list) {
+    return list.reduce((result, obj) => {
+        result[obj['name']] = obj;
+        return result;
+    }, {});
+}
+
 class Diagram extends React.Component {
     constructor(props){
         super(props);
@@ -42,8 +49,10 @@ class Diagram extends React.Component {
             .style("opacity", "0")
             .remove();
 
+        let indexedComponents = index(this.props.components);
+
         const line = dependencies.enter().append("line")
-            .call(this.dependency, this.props.components)
+            .call(this.dependency, indexedComponents);
         if (init) {
             line.attr("stroke", "orange");
         }
@@ -56,7 +65,7 @@ class Diagram extends React.Component {
                 .style("opacity", "1");
         }
 
-        dependencies.call(this.dependency, this.props.components)
+        dependencies.call(this.dependency, indexedComponents)
             .attr("stroke", "orange");
     };
     dragStarted(d, comp) {
