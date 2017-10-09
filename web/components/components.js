@@ -30,15 +30,39 @@ var dependencies = [
     {from:1, to:2}, // basket, order
     {from:3, to:1}, // market, order
 ];
+var dependencies2 = [
+    {from:3, to:1},
+    {from:3, to:4},
+    {from:3, to:5},
+    {from:3, to:6},
+];
 
 class ArchiDiagramApp extends React.Component {
     constructor(props) {
         super(props);
+        this.state = {components: components, dependencies: dependencies};
+        this.addData = this.addData.bind(this);
+        this.removeData = this.removeData.bind(this);
+    }
+    addData() {
+        //const a = Math.floor((Math.random() * 10));
+        //const b = Math.floor((Math.random() * 10));
+        //const newDeps = [].concat(this.state.dependencies, [{from: a, to: b}]);
+        this.setState({dependencies: dependencies});
+        console.info("Reload: add");
+    }
+    removeData() {
+        //this.state.dependencies.pop();
+        //const newDeps = this.state.dependencies;
+        this.setState({dependencies: dependencies2});
+        console.info("Reload: rem");
     }
     render() {
         return (
             <AppLayout title="Architecture Diagram">
-                <Diagram components={components} dependencies={dependencies} />
+                <button onClick={this.addData}>Add</button>
+                <button onClick={this.removeData}>Remove</button>
+                <Diagram components={this.state.components} dependencies={this.state.dependencies} />
             </AppLayout>
         );
     }
