@@ -7,6 +7,9 @@ public class Diagram {
     public List<Component> components;
     public List<Dependency> dependencies;
 
+    public Diagram() {
+    }
+
     public Diagram(List<Component> components, List<Dependency> dependencies) {
         this.components = components;
         this.dependencies = dependencies;

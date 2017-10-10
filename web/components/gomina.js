@@ -172,7 +172,7 @@ class CopyButton extends React.Component {
                 <span style={{padding: 1, verticalAlign: 'top', align: 'middle'}}>
                     &gt;<input type="text" readOnly
                                ref={node => this.textEdit = node}
-                               value={this.props.value}
+                               value={this.props.value || ''}
                                style={{opacity: 0, backgroundColor: 'red', width: 1, height: 1, border: 0}} />
                     &gt;
                 </span>

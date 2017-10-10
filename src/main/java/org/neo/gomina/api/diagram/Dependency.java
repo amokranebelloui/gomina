@@ -5,6 +5,9 @@ public class Dependency {
     public String from;
     public String to;
 
+    public Dependency() {
+    }
+
     public Dependency(String from, String to) {
         this.from = from;
         this.to = to;
