@@ -13,21 +13,24 @@ function index(list) {
 class Diagram extends React.Component {
     constructor(props){
         super(props);
-        this.createDiagram = this.createDiagram.bind(this)
-        this.redrawLines = this.redrawLines.bind(this)
+        this.createDiagram = this.createDiagram.bind(this);
+        this.redrawLines = this.redrawLines.bind(this);
+        this.onLinkSelected = this.onLinkSelected.bind(this);
+        //this.onComponentMoved = this.onComponentMoved.bind(this)
         this.state = {active: true}
     }
     componentDidMount() {
-        this.createDiagram()
+        this.createDiagram();
         //console.info("did mount", this.createDiagram)
     }
     componentDidUpdate() {
+        this.createDiagram(); // FIXME Moyen update existing
         // update ?
         //console.info("diagram prop updated", this.createDiagram)
         this.redrawLines(false);
     }
     componentWillUnmount() {
-        var el = this.node;
+        const el = this.node;
         console.info(el);
         //d3.destroy(el); // Doesn't work
         //d3.select("svg").remove(); // Is it necessary?
@@ -39,7 +42,10 @@ class Diagram extends React.Component {
             .attr("y2", function (d) { return positions[d.to].y; })
             .attr("stroke-width", 3);
     }
+
     redrawLines(init) {
+        const this_ = this;
+        let indexedComponents = index(this.props.components);
         const svg = d3.select(this.node);
         const dependencies = svg.select("#links").selectAll("line").data(this.props.dependencies, d => {return d.from+'|'+d.to});
 
@@ -49,10 +55,12 @@ class Diagram extends React.Component {
             .style("opacity", "0")
             .remove();
 
-        let indexedComponents = index(this.props.components);
-
         const line = dependencies.enter().append("line")
-            .call(this.dependency, indexedComponents);
+            .call(this.dependency, indexedComponents)
+            .on("click", function(d) {
+                console.info("selected dependency", d);
+                this_.onLinkSelected(d)
+            });
         if (init) {
             line.attr("stroke", "orange");
         }
@@ -69,14 +77,14 @@ class Diagram extends React.Component {
             .attr("stroke", "orange");
     };
     dragStarted(d, comp) {
-        console.info("drag start", d, this);
+        //console.info("drag start", d, this);
         d.dragging = true;
         d3.select(comp).select("circle").attr("fill", "#8cccef");
         d3.select(comp).interrupt().raise().classed("active", true);
         d3.event.sourceEvent.stopPropagation();
     }
     dragged(d, comp) {
-        console.info("drag", this);
+        //console.info("drag", this);
         d.x = d3.event.x;
         d.y = d3.event.y;
         this.redrawLines();
@@ -89,23 +97,31 @@ class Diagram extends React.Component {
         d.dragging = false;
         d3.select(comp).classed("active", false);
         d3.select(comp).select("circle").attr("fill", "lightblue");
+        this.onComponentMoved(d)
+    }
+    onComponentMoved(d) {
+        this.props.onComponentMoved && this.props.onComponentMoved(d)
+    }
+    onLinkSelected(d) {
+        this.props.onLinkSelected && this.props.onLinkSelected(d)
     }
     createDiagram() {
         const this_ = this;
         const positions = this.props.components;
+        console.info('$$$$2', positions);
         var svg = d3.select(this.node);
 
-        svg.append("g").attr("id", "links");
-        svg.append("g").attr("id", "nodes");
+        //svg.append("g").attr("id", "links");
+        //svg.append("g").attr("id", "nodes");
 
         this.redrawLines(true);
-
-        var comps = svg.select("#nodes").selectAll("g node-group").data(positions);
 
         var div = d3.select(this.container).append("div")
             .attr("class", "tooltip")
             .style("position", "absolute")
             .style("opacity", 0);
+
+        var comps = svg.select("#nodes").selectAll("g node-group").data(positions, d => {return d.name});
 
         var comp = comps.enter()
             .append("g")
@@ -151,7 +167,10 @@ class Diagram extends React.Component {
                 <Toggle toggled={this.state.active} onToggleChanged={value => {this.setState({active: value})}} />
                 <br/>
                 <div ref={node => this.container = node} style={{position: 'relative'}}>
-                    <svg ref={node => this.node = node} width="960" height="450"></svg>
+                    <svg ref={node => this.node = node} width="960" height="450">
+                        <g id="links"></g>
+                        <g id="nodes"></g>
+                    </svg>
                 </div>
             </div>
         );

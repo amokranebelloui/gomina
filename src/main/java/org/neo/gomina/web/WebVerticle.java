@@ -8,13 +8,17 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSSocket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.neo.gomina.api.diagram.DiagramBuilder;
 import org.neo.gomina.api.instances.InstancesBuilder;
 import org.neo.gomina.api.projects.ProjectDetail;
 import org.neo.gomina.api.projects.ProjectsBuilder;
@@ -62,6 +66,8 @@ public class WebVerticle extends AbstractVerticle {
             });
         });
         router.route("/realtime/*").handler(sockJSHandler);
+
+        router.route().handler(BodyHandler.create());
 
         final ObjectMapper mapper = new ObjectMapper();
 
@@ -126,6 +132,31 @@ public class WebVerticle extends AbstractVerticle {
                 logger.info("Reloading ...");
                 // FIXME Reload
                 ctx.response().putHeader("content-type", "text/javascript").end();
+            }
+            catch (Exception e) {
+                logger.error("Cannot get instances", e);
+                ctx.fail(500);
+            }
+        });
+
+        DiagramBuilder diagramBuilder = new DiagramBuilder();
+
+        router.post("/data/diagram/update").handler(ctx -> {
+            try {
+                JsonObject json = ctx.getBodyAsJson();
+                logger.info("Update ... " + json);
+                diagramBuilder.updateComponent(json.getString("name"), json.getInteger("x"), json.getInteger("y"));
+                ctx.response().putHeader("content-type", "text/javascript").end();
+            }
+            catch (Exception e) {
+                logger.error("Cannot get instances", e);
+                ctx.fail(500);
+            }
+        });
+
+        router.get("/data/diagram/data").handler(ctx -> {
+            try {
+                ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(diagramBuilder.getDiagram()));
             }
             catch (Exception e) {
                 logger.error("Cannot get instances", e);
