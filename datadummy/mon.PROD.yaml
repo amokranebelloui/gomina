@@ -14,7 +14,7 @@
   busVersion: "2.0"
   coreVersion: "1.1"
   quickfixPersistence: null
-  redisHost: 'vil'
+  redisHost: '10.143.29.42'
   redisPort: 2345
   redisMasterHost: ''
   redisMasterPort: null
@@ -36,7 +36,7 @@
   type: 'redis'
   service: 'redis'
   pid: '13467'
-  host: '10.143.29.42'
+  host: '10.143.29.43'
   folder: '/home/svc/prod-redis'
   version: '1.0.0'
   revision: 34560
@@ -45,9 +45,9 @@
   busVersion: "2.0"
   coreVersion: "1.1"
   quickfixPersistence:
-  redisHost: 'bak'
+  redisHost: '10.143.29.43'
   redisPort: 2346
-  redisMasterHost: 'vil'
+  redisMasterHost: '10.143.29.42'
   redisMasterPort: 2345
   redisMasterLink: false
   redisMasterLinkDownSince: '342'
@@ -75,9 +75,9 @@
   busVersion: "1.9.9"
   coreVersion: "1.1"
   quickfixPersistence:
-  redisHost: 'bak'
+  redisHost: '10.143.29.45'
   redisPort: 2346
-  redisMasterHost: 'vil'
+  redisMasterHost: '10.143.29.42'
   redisMasterPort: 2345
   redisMasterLink: true
   redisMasterLinkDownSince: '0'

@@ -34,6 +34,39 @@ class ConfCommited extends React.Component {
     }
 }
 
+class RedisLink extends React.Component {
+    render() {
+        const status = this.props.status;
+        const color = status == true ? 'green' : status == false ? 'red' : null;
+        const title = status == false ? 'Link down since ' + this.props.since : 'Link Up';
+        return (
+            <Badge title={title} backgroundColor={color} color='white'>
+                <b>&rarr;</b>
+            </Badge>
+        );
+    }
+}
+
+class Host extends React.Component {
+    render() {
+        const unexpected = this.props.expected && this.props.expected != this.props.host;
+        return (
+            <span>
+                <span style={{userSelect: 'all'}}>{this.props.host}</span>
+                {unexpected && <span title="Expected" style={{userSelect: 'all', textDecoration: 'line-through', marginLeft: '2px'}}>{this.props.expected}</span>}
+            </span>
+        )
+    }
+}
+
+class Port extends React.Component {
+    render() {
+        return (
+            <span style={{userSelect: 'all'}}>{this.props.port}</span>
+        )
+    }
+}
+
 class RedisInstance extends React.Component {
     render() {
         const instance = this.props.instance;
@@ -45,22 +78,18 @@ class RedisInstance extends React.Component {
         /*<Status status={instance.status} />&nbsp;*/
         return (
             <div>
-                <span>{instance.name}</span>&nbsp;
-                {extra.redisMaster && <Badge title={'Master in ServiceRegistry'} backgroundColor='#FFD21C' color='white'>***</Badge>}
+                <span style={{padding: "3px"}}><b>{instance.name}</b></span>
                 &nbsp;
 
-                {isSlave && (extra.redisMasterLink
-                    ? <Badge title={'Link Up'} backgroundColor='#FCF6D4' color='white'>OK</Badge>
-                    : <Badge title={'Link Down Since ' + extra.redisMasterLinkDownSince} backgroundColor='#FF2929' color='white'>KO</Badge>)
-                }
-                &nbsp;
                 {extra.redisRW == 'rw' && <Badge backgroundColor='#969696' color='white' title="Read/Write">RW</Badge>}
                 {extra.redisRW == 'ro' && <Badge backgroundColor='#DBDBDB' color='white' title="Read Only">RO</Badge>}
                 &nbsp;
 
-                <span title={'Role ' + extra.redisRole + ' ' + extra.redisSlaveCount + ' slaves'}>
+                <Badge title={'Role ' + extra.redisRole + ' ' + extra.redisSlaveCount + ' slaves'}>
                     {extra.redisRole} {extra.redisSlaveCount}
-                </span>
+                </Badge>
+                &nbsp;
+                <Badge title={extra.redisClientCount + ' clients'}>{extra.redisClientCount}</Badge>
                 &nbsp;
 
                 <ConfCommited commited={instance.confCommited} />
@@ -69,18 +98,39 @@ class RedisInstance extends React.Component {
                     {extra.redisMode}
                 </Badge>
 
-                <span title={extra.redisClientCount + ' clients'}>
-                    {extra.redisClientCount}
-                </span>
-                <br/>
-                {extra.redisHost}:{extra.redisPort} -> {extra.redisMasterHost}:{extra.redisMasterPort}
-                <span title="Offset (Diff)" style={{fontSize: 9, color: 'gray'}}>
-                    {extra.redisOffset} {isSlave && ('(' + extra.redisOffsetDiff + ')')}
-                </span>
                 <br/>
 
-                <CopyButton value={instance.deployFolder} />
-                <span style={{fontSize: 10}}>{instance.host} {instance.deployFolder}</span>
+                <div style={{display: 'inline-block', marginTop: '3px'}}>
+                    <span style={{display: 'inline-block', fontSize: 11, lineHeight: '10px', verticalAlign: 'middle'}}>
+                        <span><Host host={extra.redisHost} expected={instance.deployHost} />:<Port port={extra.redisPort} /></span>
+                        <br/>
+                        <span style={{fontSize: 9, color: 'gray'}}>{extra.redisOffset}</span>
+                    </span>
+                    <span style={{display: 'inline-block', verticalAlign: 'middle', margin: '-4px 3px'}}>
+                        {extra.redisMaster &&
+                            <Badge title={'Master in ServiceRegistry'}
+                                   backgroundColor='#FFD21C'
+                                   color='white'>***</Badge>
+                        }
+                        {isSlave &&
+                            <RedisLink status={extra.redisMasterLink} since={extra.redisMasterLinkDownSince}/>
+                        }
+                    </span>
+                    {isSlave &&
+                    <span style={{display: 'inline-block', fontSize: 11, lineHeight: '10px', verticalAlign: 'middle'}}>
+                        <span>{extra.redisMasterHost}:{extra.redisMasterPort}</span><br/>
+                        <span title="Offset (Diff)" style={{fontSize: 9, color: 'gray'}}>
+                            {isSlave && ('(' + extra.redisOffsetDiff + ')')}
+                        </span>
+                    </span>
+                    }
+                </div>
+
+                <br/>
+
+                <span style={{userSelect: 'all', fontSize: 10}}>{instance.host}</span>&nbsp;
+                <span style={{userSelect: 'all', fontSize: 10}}>{instance.deployFolder}</span>&nbsp;
+                <CopyButton value={instance.deployFolder} />&nbsp;
                 <Version version={instance.version} revision={instance.revision}/>
             </div>
         )

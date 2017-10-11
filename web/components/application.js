@@ -35,7 +35,7 @@ class Blocker extends React.Component {
     render() {
         console.info('blocker');
         return (
-            <div>
+            <div style={{fontFamily: 'Garamond'}}>
                 <Link to="/">index</Link> -&nbsp;
                 <Link to="/archi">archi</Link> -&nbsp;
                 <Link to="/envs">envs</Link> -&nbsp;
