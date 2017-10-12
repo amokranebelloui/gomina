@@ -9,32 +9,6 @@ function groupBy(list, property) {
     }, {});
 };
 
-function isSnapshot(version) {
-    return version ? version.includes("-SNAPSHOT") : false;
-}
-
-
-function compareVersions (a, b) {
-    var res = compareVersions2(a.replace("-SNAPSHOT", ""), b.replace("-SNAPSHOT", ""));
-    return res != 0 ? res : a.includes("-SNAPSHOT") ? 0 : 1 - b.includes("-SNAPSHOT") ? 0 : 1;
-}
-
-function compareVersions2 (a, b) {
-    var i, diff;
-    var regExStrip0 = /(\.0+)+$/;
-    var segmentsA = a.replace(regExStrip0, '').split('.');
-    var segmentsB = b.replace(regExStrip0, '').split('.');
-    var l = Math.min(segmentsA.length, segmentsB.length);
-
-    for (i = 0; i < l; i++) {
-        diff = parseInt(segmentsA[i], 10) - parseInt(segmentsB[i], 10);
-        if (diff) {
-            return diff;
-        }
-    }
-    return segmentsA.length - segmentsB.length;
-}
-
 class Toggle extends React.Component {
     constructor(props) {
         super(props);
@@ -90,27 +64,6 @@ class Well extends React.Component {
             </div>
         )
     }
-}
-
-function Version(props) {
-    const simplifiedVersion = props.version
-        ? props.version.replace("-SNAPSHOT", "-S")
-        : "unknown";
-
-    const defaultStylingFunction = (version => isSnapshot(version) ? {color: 'white', backgroundColor: '#c30014'} : null);
-    const stylingFunction = props.styling || defaultStylingFunction;
-    const style = stylingFunction(props.version) || {color: 'black', backgroundColor: 'lightgray'}
-
-    //const color = isSnapshot(props.version) ? "white" : "black";
-    //const backgroundColor = isSnapshot(props.version) ? "#c30014" : "lightgray";
-    const revision = props.revision ? props.revision : "*";
-    return (
-        <Badge color={style.color} backgroundColor={style.backgroundColor}>
-            <span title={revision}>{simplifiedVersion}</span>
-            &nbsp;
-            {isSnapshot && <span style={{fontSize: "9px"}}>({revision})</span>}
-        </Badge>
-    )
 }
 
 class Status extends React.Component {
@@ -181,4 +134,4 @@ class CopyButton extends React.Component {
     }
 }
 
-export {Toggle, Badge, Well, Status, StatusWrapper, CopyButton, Version, groupBy, isSnapshot, compareVersions}
+export {Toggle, Badge, Well, Status, StatusWrapper, CopyButton, groupBy}

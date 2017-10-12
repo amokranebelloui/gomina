@@ -22,6 +22,12 @@ public class Instance {
     public String version;
     public String revision;
 
+    public String latestVersion;
+    public String latestRevision;
+
+    public String releasedVersion;
+    public String releasedRevision;
+
     public Integer jmx = null;
     public String busVersion;
     public String coreVersion;

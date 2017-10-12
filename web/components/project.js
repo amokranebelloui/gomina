@@ -1,6 +1,7 @@
 import React from "react";
 import {Link} from "react-router-dom";
-import {groupBy, Well, Version, Badge} from "./gomina";
+import {groupBy, Well, Badge} from "./gomina";
+import {Version} from "./common/version";
 
 class LinesOfCode extends React.Component {
     render() {

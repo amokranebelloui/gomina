@@ -6,6 +6,10 @@ import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.Service;
 import org.neo.gomina.model.monitoring.EnvMonitoring;
 import org.neo.gomina.model.monitoring.Monitoring;
+import org.neo.gomina.model.project.Project;
+import org.neo.gomina.model.project.Projects;
+import org.neo.gomina.model.scminfo.ScmConnector;
+import org.neo.gomina.model.scminfo.ScmDetails;
 import org.neo.gomina.model.sshinfo.SshConnector;
 import org.neo.gomina.model.sshinfo.SshDetails;
 
@@ -21,6 +25,9 @@ public class InstancesBuilder {
     @Inject private SshConnector sshConnector;
     @Inject private Monitoring monitoring;
 
+    @Inject private Projects projects;
+    @Inject private ScmConnector scmConnector;
+
     public List<Instance> getInstances() {
         List<Instance> instances = new ArrayList<>();
         sshConnector.analyze();
@@ -32,7 +39,11 @@ public class InstancesBuilder {
                         Map<String, Object> indicators = envMonitoring.getForInstance(envInstance.id);
                         SshDetails sshDetails = sshConnector.getDetails(envInstance.host, envInstance.folder);
                         indicators = indicators != null ? indicators : new HashMap<>();
-                        instances.add(build(environment, service, envInstance, sshDetails, indicators));
+
+                        Project project = projects.getProject(service.project);
+                        ScmDetails scmDetails = project != null ? scmConnector.getSvnDetails(project.svnRepo, project.svnUrl) : new ScmDetails();
+
+                        instances.add(build(environment, service, envInstance, sshDetails, indicators, project, scmDetails));
                     }
                 }
             }
@@ -40,7 +51,7 @@ public class InstancesBuilder {
         return instances;
     }
 
-    private Instance build(Environment env, Service service, InvInstance envInstance, SshDetails sshDetails, Map<String, Object> indicators) {
+    private Instance build(Environment env, Service service, InvInstance envInstance, SshDetails sshDetails, Map<String, Object> indicators, Project project, ScmDetails scmDetails) {
         Instance instance = new Instance();
         instance.env = env.id;
         instance.id = env.id + "-" + envInstance.id;
@@ -56,6 +67,11 @@ public class InstancesBuilder {
         instance.confUpToDate = sshDetails.confUpToDate;
 
         instance.project = service.project;
+
+        instance.latestVersion = scmDetails.latest;
+        instance.latestRevision = scmDetails.latestRevision;
+        instance.releasedVersion = scmDetails.released;
+        instance.releasedRevision = scmDetails.releasedRevision;
 
         instance.pid = (String)indicators.get("pid");
         instance.host = (String)indicators.get("host");

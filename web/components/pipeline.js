@@ -1,7 +1,8 @@
 
 import React from 'react';
 
-import {groupBy, compareVersions, Well, Version} from './gomina';
+import {groupBy, Well} from './gomina';
+import {compareVersions, Version} from "./common/version";
 
 class ProjectPipeline extends React.Component {
     render() {
