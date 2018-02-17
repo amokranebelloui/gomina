@@ -35,6 +35,17 @@ class ConfCommited extends React.Component {
     }
 }
 
+class Expected extends React.Component {
+    render() {
+        const display = !(this.props.expected == true);
+        return (
+            display &&
+            <Badge title={'Unexpected'}
+                   backgroundColor='gray' color='white'>'???'</Badge>
+        );
+    }
+}
+
 class RedisLink extends React.Component {
     render() {
         const status = this.props.status;
@@ -53,8 +64,8 @@ class Host extends React.Component {
         const unexpected = this.props.expected && this.props.expected != this.props.host;
         return (
             <span>
-                <span style={{userSelect: 'all'}}>{this.props.host}</span>
-                {unexpected && <span title="Expected" style={{userSelect: 'all', textDecoration: 'line-through', marginLeft: '2px'}}>{this.props.expected}</span>}
+                <span title="Running on host" style={{userSelect: 'all'}}>{this.props.host}</span>
+                {unexpected && <span title="Expected host" style={{userSelect: 'all', textDecoration: 'line-through', marginLeft: '2px'}}>{this.props.expected}</span>}
             </span>
         )
     }
@@ -122,6 +133,7 @@ class RedisInstance extends React.Component {
                 &nbsp;
 
                 <ConfCommited commited={instance.confCommited} />
+                <Expected expected={!instance.unexpected} />
 
                 <Badge title={'Persistence Mode ' + extra.redisMode} backgroundColor={persistenceModeColor} color='white'>
                     {extra.redisMode}
@@ -183,6 +195,7 @@ class AppInstance extends React.Component {
                     <Versions instance={instance} />
                     &nbsp;
                     <ConfCommited commited={instance.confCommited} />
+                    <Expected expected={!instance.unexpected} />
 
                     <BuildLink url={instance.project} /> {/* // TODO Project Build URL */}
                 </div>
