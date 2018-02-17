@@ -3,6 +3,7 @@ package org.neo.gomina.module;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
 import com.google.inject.name.Names;
+import org.neo.gomina.api.envs.EnvBuilder;
 import org.neo.gomina.api.instances.InstancesBuilder;
 import org.neo.gomina.api.projects.ProjectsBuilder;
 import org.neo.gomina.model.inventory.Inventory;
@@ -80,6 +81,7 @@ public class GominaModule extends AbstractModule {
         bind(SshConnector.class).to(OnDemandSshConnector.class).in(Scopes.SINGLETON);
 
         // API
+        bind(EnvBuilder.class).in(Scopes.SINGLETON);
         bind(InstancesBuilder.class).in(Scopes.SINGLETON);
         bind(ProjectsBuilder.class).in(Scopes.SINGLETON);
     }

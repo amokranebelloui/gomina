@@ -19,6 +19,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSSocket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo.gomina.api.diagram.DiagramBuilder;
+import org.neo.gomina.api.envs.EnvBuilder;
 import org.neo.gomina.api.instances.InstancesBuilder;
 import org.neo.gomina.api.projects.ProjectDetail;
 import org.neo.gomina.api.projects.ProjectsBuilder;
@@ -44,6 +45,7 @@ public class WebVerticle extends AbstractVerticle {
 
         Monitoring monitoring = injector.getInstance(Monitoring.class);
         ProjectsBuilder projectBuilder = injector.getInstance(ProjectsBuilder.class);
+        EnvBuilder envBuilder = injector.getInstance(EnvBuilder.class);
         InstancesBuilder instancesBuilder = injector.getInstance(InstancesBuilder.class);
 
 
@@ -83,6 +85,17 @@ public class WebVerticle extends AbstractVerticle {
             }
             catch (JsonProcessingException e) {
                 e.printStackTrace();
+            }
+        });
+
+        router.get("/data/envs").handler(ctx -> {
+            try {
+                ctx.response().putHeader("content-type", "text/javascript")
+                        .end(mapper.writeValueAsString(envBuilder.getEnvs()));
+            }
+            catch (Exception e) {
+                logger.error("Cannot get projects", e);
+                ctx.fail(500);
             }
         });
 
