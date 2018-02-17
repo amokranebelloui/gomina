@@ -10,4 +10,8 @@ public class EnvMonitoring {
     public Map<String, Object> getForInstance(String name) {
         return map.computeIfAbsent(name, (k) -> new ConcurrentHashMap<>());
     }
+
+    public Map<String, Map<String, Object>> getAll() {
+        return map;
+    }
 }

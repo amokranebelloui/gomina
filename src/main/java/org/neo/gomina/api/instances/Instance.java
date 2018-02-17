@@ -8,6 +8,9 @@ public class Instance {
     public String service; // Z Partitioning
     public String type; // Y Functional
 
+    public boolean unexpected;
+    public boolean unexpectedHost;
+
     public String pid;
     public String host;
     public String status;

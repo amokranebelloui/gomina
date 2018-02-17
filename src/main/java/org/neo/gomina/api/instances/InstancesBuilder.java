@@ -1,5 +1,6 @@
 package org.neo.gomina.api.instances;
 
+import org.apache.commons.lang3.StringUtils;
 import org.neo.gomina.model.inventory.Environment;
 import org.neo.gomina.model.inventory.InvInstance;
 import org.neo.gomina.model.inventory.Inventory;
@@ -29,35 +30,64 @@ public class InstancesBuilder {
     @Inject private ScmConnector scmConnector;
 
     public List<Instance> getInstances() {
-        List<Instance> instances = new ArrayList<>();
+        Map<String, Instance> instances = new HashMap<>();
         sshConnector.analyze();
         for (Environment environment : inventory.getEnvironments()) {
-            EnvMonitoring envMonitoring = monitoring.getFor(environment.id);
+            //EnvMonitoring envMonitoring = monitoring.getFor(environment.id);
             if (environment.services != null) {
                 for (Service service : environment.services) {
                     for (InvInstance envInstance : service.instances) {
-                        Map<String, Object> indicators = envMonitoring.getForInstance(envInstance.id);
+                        //Map<String, Object> indicators = envMonitoring.getForInstance(envInstance.id);
+                        //indicators = indicators != null ? indicators : new HashMap<>();
                         SshDetails sshDetails = sshConnector.getDetails(envInstance.host, envInstance.folder);
-                        indicators = indicators != null ? indicators : new HashMap<>();
 
                         Project project = projects.getProject(service.project);
                         ScmDetails scmDetails = project != null ? scmConnector.getSvnDetails(project.svnRepo, project.svnUrl) : new ScmDetails();
 
-                        instances.add(build(environment, service, envInstance, sshDetails, indicators, project, scmDetails));
+                        String id = environment.id + "-" + envInstance.id;
+                        Instance instance = build(id, environment, service, envInstance, sshDetails);
+                        //applyMonitoring(instance, indicators);
+                        applyScm(instance, scmDetails);
+                        // apply project
+                        instances.put(id, instance);
                     }
                 }
             }
         }
-        return instances;
+
+        for (Environment environment : inventory.getEnvironments()) {
+            EnvMonitoring monitoring = this.monitoring.getFor(environment.getId());
+            for (Map.Entry<String, Map<String, Object>> entry : monitoring.getAll().entrySet()) {
+                String instanceId = entry.getKey();
+                Map<String, Object> indicators = entry.getValue();
+                String id = environment.id + "-" + instanceId;
+                Instance instance = instances.get(id);
+                if (instance == null) {
+                    instance = new Instance();
+                    instance.env = environment.id;
+                    instance.id = id;
+                    instance.name = instanceId;
+                    instance.unexpected = true;
+                    instances.put(id, instance);
+                }
+                applyMonitoring(instance, indicators);
+                if (StringUtils.isNotBlank(instance.deployHost) && !StringUtils.equals(instance.deployHost, instance.host)) {
+                    instance.unexpectedHost = true;
+                }
+            }
+        }
+        return new ArrayList<>(instances.values());
     }
 
-    private Instance build(Environment env, Service service, InvInstance envInstance, SshDetails sshDetails, Map<String, Object> indicators, Project project, ScmDetails scmDetails) {
+    private Instance build(String id, Environment env, Service service, InvInstance envInstance, SshDetails sshDetails) {
         Instance instance = new Instance();
         instance.env = env.id;
-        instance.id = env.id + "-" + envInstance.id;
+        instance.id = id;
+        instance.name = envInstance.id;
         instance.type = service.type;
         instance.service = service.svc;
-        instance.name = envInstance.id;
+        instance.project = service.project;
+
         instance.deployHost = envInstance.host;
         instance.deployFolder = envInstance.folder;
 
@@ -66,13 +96,17 @@ public class InstancesBuilder {
         instance.confCommited = sshDetails.confCommitted;
         instance.confUpToDate = sshDetails.confUpToDate;
 
-        instance.project = service.project;
+        return instance;
+    }
 
+    private void applyScm(Instance instance, ScmDetails scmDetails) {
         instance.latestVersion = scmDetails.latest;
         instance.latestRevision = scmDetails.latestRevision;
         instance.releasedVersion = scmDetails.released;
         instance.releasedRevision = scmDetails.releasedRevision;
+    }
 
+    private void applyMonitoring(Instance instance, Map<String, Object> indicators) {
         instance.pid = (String)indicators.get("pid");
         instance.host = (String)indicators.get("host");
         instance.version = (String)indicators.get("version");
@@ -98,8 +132,6 @@ public class InstancesBuilder {
         instance.redisStatus = (String)indicators.get("redisStatus");
         instance.redisSlaveCount = (Integer) indicators.get("redisSlaveCount");
         instance.redisClientCount = (Integer) indicators.get("redisClientCount");
-
-        return instance;
     }
 
 }

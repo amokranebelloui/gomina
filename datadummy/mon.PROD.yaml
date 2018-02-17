@@ -207,3 +207,20 @@
   coreVersion: "1.1"
   quickfixPersistence: 'REDIS'
 
+
+- id: 7
+  env: 'PROD'
+  name: 'unexpected2'
+  type: 'app'
+  service: 'order'
+  pid: '33070'
+  host: '10.0.0.99'
+  folder: '/home/svc/prod-order'
+  version: '5.1.3-SNAPSHOT'
+  revision: 35002
+  status: 'DOWN'
+
+  jmx: 7700
+  busVersion: "2.0"
+  coreVersion: "1.1"
+  quickfixPersistence: 'REDIS'

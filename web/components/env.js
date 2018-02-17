@@ -188,7 +188,7 @@ class AppInstance extends React.Component {
                 </div>
                 <div style={{display: 'flex', fontSize: 10}}>
                     {instance.pid && <span>{instance.pid}@</span>}
-                    <span>{instance.host}</span>&nbsp;
+                    <span><Host host={extra.host} expected={instance.deployHost} /></span>&nbsp;
                     <CopyButton value={instance.deployFolder} />&nbsp;
                     <span>{instance.deployFolder}</span>
                 </div>
@@ -276,6 +276,10 @@ class EnvironmentLogical extends React.Component {
                                onSelectionChanged={e => this.changeSelected('snapshots', instance => isSnapshot(instance.version))} />
                     <Selection id='released' label='RELEASED' selected={this.state.id}
                                onSelectionChanged={e => this.changeSelected('released', instance => !isSnapshot(instance.version))} />
+                    <Selection id='unexpected' label='UNEXPECTED' selected={this.state.id}
+                               onSelectionChanged={e => this.changeSelected('unexpected', instance => instance.unexpected)} />
+                    <Selection id='unexpectedHost' label='WRONG HOST' selected={this.state.id}
+                               onSelectionChanged={e => this.changeSelected('unexpectedHost', instance => instance.unexpectedHost)} />
                 </div>
 
                 <span>&nbsp;&nbsp;&nbsp;</span>
