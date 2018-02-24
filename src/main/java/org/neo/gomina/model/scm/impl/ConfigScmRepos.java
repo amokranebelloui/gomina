@@ -35,7 +35,7 @@ public class ConfigScmRepos implements ScmRepos {
 
     @Override
     public ScmClient get(String id) {
-        return clients.get(id);
+        return clients.get(id != null ? id : "");
     }
 
     private ScmClient buildScmClient(ScmConfig.ScmRepo repo, Passwords passwords) throws Exception {
