@@ -1,0 +1,74 @@
+{
+  "components" : [ {
+    "name" : "basket",
+    "x" : 197,
+    "y" : 120
+  }, {
+    "name" : "fidessa",
+    "x" : 200,
+    "y" : 281
+  }, {
+    "name" : "cross",
+    "x" : 397,
+    "y" : 55
+  }, {
+    "name" : "pie",
+    "x" : 50,
+    "y" : 90
+  }, {
+    "name" : "market",
+    "x" : 295,
+    "y" : 121
+  }, {
+    "name" : "pita",
+    "x" : 118,
+    "y" : 47
+  }, {
+    "name" : "emma",
+    "x" : 397,
+    "y" : 185
+  }, {
+    "name" : "fixin",
+    "x" : 49,
+    "y" : 181
+  }, {
+    "name" : "audit",
+    "x" : 388,
+    "y" : 386
+  }, {
+    "name" : "mis",
+    "x" : 485,
+    "y" : 386
+  }, {
+    "name" : "fixout",
+    "x" : 434,
+    "y" : 118
+  }, {
+    "name" : "referential",
+    "x" : 280,
+    "y" : 389
+  }, {
+    "name" : "order",
+    "x" : 197,
+    "y" : 203
+  } ],
+  "dependencies" : [ {
+    "from" : "basket",
+    "to" : "order"
+  }, {
+    "from" : "market",
+    "to" : "cross"
+  }, {
+    "from" : "market",
+    "to" : "fixout"
+  }, {
+    "from" : "market",
+    "to" : "emma"
+  }, {
+    "from" : "market",
+    "to" : "order"
+  }, {
+    "from" : "audit",
+    "to" : "mis"
+  } ]
+}
