@@ -3,6 +3,7 @@ package org.neo.gomina.module;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
 import com.google.inject.name.Names;
+import org.apache.commons.lang3.StringUtils;
 import org.neo.gomina.api.envs.EnvBuilder;
 import org.neo.gomina.api.instances.InstancesBuilder;
 import org.neo.gomina.api.projects.ProjectsBuilder;
@@ -24,6 +25,7 @@ import org.neo.gomina.model.scminfo.impl.DefaultScmConnector;
 import org.neo.gomina.model.security.Passwords;
 import org.neo.gomina.model.sonar.SonarConnector;
 import org.neo.gomina.model.sonar.dummy.DummySonarConnector;
+import org.neo.gomina.model.sonar.http.HttpSonarConnector;
 import org.neo.gomina.model.ssh.SshClient;
 import org.neo.gomina.model.sshinfo.SshConfig;
 import org.neo.gomina.model.sshinfo.SshConnector;
@@ -80,7 +82,10 @@ public class GominaModule extends AbstractModule {
 
         // Sonar
         bind(String.class).annotatedWith(Names.named("sonar.url")).toInstance(config.sonar.url);
-        bind(SonarConnector.class).to(DummySonarConnector.class).in(Scopes.SINGLETON);
+        Class<? extends SonarConnector> sonarConnector = StringUtils.equals(config.sonar.mode, "dummy")
+                ? DummySonarConnector.class
+                : HttpSonarConnector.class;
+        bind(SonarConnector.class).to(sonarConnector).in(Scopes.SINGLETON);
 
         // SSH
         bind(SshConfig.class).toInstance(config.ssh);

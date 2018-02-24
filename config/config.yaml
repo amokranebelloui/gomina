@@ -24,6 +24,8 @@ scm:
       location: ''
 
 sonar:
+  mode: 'dummy'
+  #mode: 'sonar'
   url: 'http://localhost:9000'
 
 ssh:
