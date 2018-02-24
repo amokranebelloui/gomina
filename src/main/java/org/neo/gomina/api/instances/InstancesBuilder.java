@@ -32,7 +32,8 @@ public class InstancesBuilder {
     @Inject private ScmConnector scmConnector;
 
     public List<Instance> getInstances() {
-        Map<String, Instance> instances = new HashMap<>();
+        Map<String, Instance> instancesMap = new HashMap<>();
+        List<Instance> instancesList = new ArrayList<>();
         sshConnector.analyze();
         for (Environment environment : inventory.getEnvironments()) {
             //EnvMonitoring envMonitoring = monitoring.getFor(environment.id);
@@ -57,7 +58,8 @@ public class InstancesBuilder {
 
                         SshDetails sshDetails = sshConnector.getDetails(envInstance.getHost(), envInstance.getFolder());
                         applySsh(instance, sshDetails);
-                        instances.put(id, instance);
+                        instancesMap.put(id, instance);
+                        instancesList.add(instance);
                     }
                 }
             }
@@ -69,7 +71,7 @@ public class InstancesBuilder {
                 String instanceId = entry.getKey();
                 Map<String, Object> indicators = entry.getValue();
                 String id = environment.getId() + "-" + instanceId;
-                Instance instance = instances.get(id);
+                Instance instance = instancesMap.get(id);
                 if (instance == null) {
                     instance = new Instance();
                     instance.id = id;
@@ -78,7 +80,8 @@ public class InstancesBuilder {
                     instance.service = (String)indicators.get("service");
                     instance.name = instanceId;
                     instance.unexpected = true;
-                    instances.put(id, instance);
+                    instancesMap.put(id, instance);
+                    instancesList.add(instance);
                 }
                 applyMonitoring(instance, indicators);
                 if (StringUtils.isNotBlank(instance.deployHost) && !StringUtils.equals(instance.deployHost, instance.host)) {
@@ -86,7 +89,7 @@ public class InstancesBuilder {
                 }
             }
         }
-        return new ArrayList<>(instances.values());
+        return instancesList;
     }
 
     private void applyInventory(Instance instance, Service service, InvInstance envInstance) {
