@@ -11,6 +11,7 @@ import org.neo.gomina.model.scminfo.ScmConnector;
 import org.neo.gomina.model.scminfo.ScmDetails;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -92,8 +93,14 @@ public class DefaultScmConnector implements ScmConnector {
 
     @Override
     public List<Commit> getCommitLog(String svnRepo, String svnUrl) throws Exception {
-        ScmClient scmClient = scmRepos.get(svnRepo);
-        return scmClient.getLog(svnUrl, "0", 100);
+        try {
+            ScmClient scmClient = scmRepos.get(svnRepo);
+            return scmClient.getLog(svnUrl, "0", 100);
+        }
+        catch (Exception e) {
+            logger.error("Cannot get commit log: " + svnRepo + " " + svnUrl);
+            return new ArrayList<>();
+        }
     }
 
 }

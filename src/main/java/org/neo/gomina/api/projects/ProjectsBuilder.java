@@ -28,8 +28,8 @@ public class ProjectsBuilder {
         List<ProjectDetail> result = new ArrayList<>();
         Map<String, SonarIndicators> sonarIndicatorsMap = sonarConnector.getMetrics();
         for (Project project : projects.getProjects()) {
-            ScmDetails scmDetails = scmConnector.getSvnDetails(project.svnRepo, project.svnUrl);
-            SonarIndicators sonarIndicators = sonarIndicatorsMap.get(project.maven);
+            ScmDetails scmDetails = scmConnector.getSvnDetails(project.getSvnRepo(), project.getSvnUrl());
+            SonarIndicators sonarIndicators = sonarIndicatorsMap.get(project.getMaven());
             ProjectDetail projectDetail = build(project, scmDetails, null, sonarIndicators);
             result.add(projectDetail);
         }
@@ -39,9 +39,9 @@ public class ProjectsBuilder {
     public ProjectDetail getProject(String projectId) throws Exception {
         Project project = projects.getProject(projectId);
         if (project != null) {
-            ScmDetails scmDetails = scmConnector.getSvnDetails(project.svnRepo, project.svnUrl);
-            SonarIndicators sonarIndicators = sonarConnector.getMetrics(project.maven).get(project.maven);
-            List<CommitLogEntry> commitLog = map(scmConnector.getCommitLog(project.svnRepo, project.svnUrl));
+            ScmDetails scmDetails = scmConnector.getSvnDetails(project.getSvnRepo(), project.getSvnUrl());
+            SonarIndicators sonarIndicators = sonarConnector.getMetrics(project.getMaven()).get(project.getMaven());
+            List<CommitLogEntry> commitLog = map(scmConnector.getCommitLog(project.getSvnRepo(), project.getSvnUrl()));
             return build(project, scmDetails, commitLog, sonarIndicators);
         }
         return null;
@@ -63,15 +63,15 @@ public class ProjectsBuilder {
     private ProjectDetail build(Project project, ScmDetails scmDetails, List<CommitLogEntry> commitLog, SonarIndicators sonarIndicators) {
         ProjectDetail projectDetail = new ProjectDetail();
 
-        projectDetail.id = project.id;
-        projectDetail.label = StringUtils.isNotBlank(project.label)
-                ? project.label
-                : project.id;
-        projectDetail.type = project.type;
-        projectDetail.repo = project.svnRepo;
-        projectDetail.svn = project.svnUrl;
-        projectDetail.mvn = project.maven;
-        projectDetail.jenkins = project.jenkinsJob;
+        projectDetail.id = project.getId();
+        projectDetail.label = StringUtils.isNotBlank(project.getLabel())
+                ? project.getLabel()
+                : project.getId();
+        projectDetail.type = project.getType();
+        projectDetail.repo = project.getSvnRepo();
+        projectDetail.svn = project.getSvnUrl();
+        projectDetail.mvn = project.getMaven();
+        projectDetail.jenkins = project.getJenkinsJob();
 
         if (scmDetails != null) {
             projectDetail.changes = scmDetails.changes;

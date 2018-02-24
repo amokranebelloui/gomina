@@ -1,0 +1,28 @@
+package org.neo.gomina.model.project
+
+import org.fest.assertions.Assertions.assertThat
+import org.junit.Test
+import java.io.File
+import kotlin.test.assertFailsWith
+
+class ProjectsTest {
+
+    @Test fun testYaml() {
+        val projects = ProjectsReader().read(File("data/projects.yaml"))
+        projects.forEach { println(it) }
+        assertThat(projects.size).isGreaterThan(0)
+    }
+
+    @Test fun testJson() {
+        val projects = ProjectsReader().read(File("data/projects.json"))
+        projects.forEach { println(it) }
+        assertThat(projects.size).isGreaterThan(0)
+    }
+
+    @Test fun testException() {
+        assertFailsWith(RuntimeException::class) {
+            ProjectsReader().read(File("data/projects.txt"))
+        }
+    }
+}
+

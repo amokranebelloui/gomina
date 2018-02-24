@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <kotlin.version>1.0.5</kotlin.version>
+        <kotlin.version>1.2.0</kotlin.version>
         <jackson.version>2.8.8</jackson.version>
     </properties>
 
@@ -37,6 +37,13 @@
             <artifactId>kotlin-stdlib</artifactId>
             <version>${kotlin.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-test-junit</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
