@@ -46,6 +46,26 @@ class Expected extends React.Component {
     }
 }
 
+function Leader(props) {
+    const leader = props.leader == true;
+    const participating = props.participating == true;
+    const cluster = props.cluster == true;
+
+    let title;
+    if (cluster) {
+        title = leader ? 'Elected Leader' : participating ? 'Contending for Leadership' : 'Standby instance'
+    }
+    else {
+        title = leader ? 'Leader' : 'Not leader'
+    }
+    return (
+        <Badge title={title}
+               backgroundColor={leader ? '#ff9a22' : participating ? 'gray' : 'lightgray'}
+               border={cluster ? 'green' : undefined}
+               color='white'>{leader ? '***' : '-'}</Badge>
+    )
+}
+
 class RedisLink extends React.Component {
     render() {
         const status = this.props.status;
@@ -149,9 +169,11 @@ class RedisInstance extends React.Component {
                     </span>
                     <span style={{display: 'inline-block', verticalAlign: 'middle', margin: '-4px 3px'}}>
                         {extra.redisMaster &&
+                            /*
                             <Badge title={'Master in ServiceRegistry'}
                                    backgroundColor='#FFD21C'
-                                   color='white'>***</Badge>
+                                   color='white'>***</Badge>*/
+                            <Leader cluster={true} participating={true} leader={extra.redisMaster} />
                         }
                         {isSlave &&
                             <RedisLink status={extra.redisMasterLink} since={extra.redisMasterLinkDownSince}/>
@@ -190,6 +212,7 @@ class AppInstance extends React.Component {
                 <div>
                     <span>{instance.name}</span>
                     &nbsp;
+                    <Leader leader={instance.leader} participating={instance.participating} cluster={instance.cluster} />
 
                     &nbsp;
                     <Versions instance={instance} />

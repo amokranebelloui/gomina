@@ -1,6 +1,8 @@
 package org.neo.gomina.api.instances;
 
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
 import org.neo.gomina.model.inventory.Environment;
 import org.neo.gomina.model.inventory.InvInstance;
 import org.neo.gomina.model.inventory.Inventory;
@@ -114,6 +116,10 @@ public class InstancesBuilder {
         instance.version = (String)indicators.get("version");
         instance.revision = String.valueOf(indicators.get("revision"));
 
+        instance.cluster = defaultTo((Boolean)indicators.get("cluster"), false);
+        instance.participating = defaultTo((Boolean)indicators.get("participating"), false);
+        instance.leader = defaultTo((Boolean)indicators.get("leader"), isLive(indicators));
+
         instance.status = (String)indicators.get("status");
         instance.jmx = (Integer) indicators.get("jmx");
         instance.busVersion = (String)indicators.get("busVersion");
@@ -134,6 +140,17 @@ public class InstancesBuilder {
         instance.redisStatus = (String)indicators.get("redisStatus");
         instance.redisSlaveCount = (Integer) indicators.get("redisSlaveCount");
         instance.redisClientCount = (Integer) indicators.get("redisClientCount");
+    }
+
+    // FIXME Easier to have it on the UI level
+    private boolean isLive(Map<String, Object> indicators) {
+        LocalDateTime timestamp = (LocalDateTime) indicators.get("timestamp");
+        boolean delayed = timestamp != null ? new LocalDateTime(DateTimeZone.UTC).minusSeconds(1).isAfter(timestamp): true;
+        return delayed;
+    }
+
+    private boolean defaultTo(Boolean cluster, boolean defaultVal) {
+        return cluster != null ? cluster : defaultVal;
     }
 
 }

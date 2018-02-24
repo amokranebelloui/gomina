@@ -11,6 +11,10 @@ public class Instance {
     public boolean unexpected;
     public boolean unexpectedHost;
 
+    public boolean cluster;
+    public boolean participating;
+    public boolean leader;
+
     public String pid;
     public String host;
     public String status;

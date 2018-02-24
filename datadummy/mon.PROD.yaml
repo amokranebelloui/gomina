@@ -10,6 +10,9 @@
   version: '1.0.0'
   revision: 34560
   status: 'LIVE'
+  cluster: true
+  participating: true
+  leader: true
 
   busVersion: "2.0"
   coreVersion: "1.1"
@@ -41,6 +44,9 @@
   version: '1.0.0'
   revision: 34560
   status: 'LIVE'
+  cluster: true
+  participating: true
+  leader: false
 
   busVersion: "2.0"
   coreVersion: "1.1"
@@ -71,6 +77,9 @@
   version: '1.0.0'
   revision: 34560
   status: 'LIVE'
+  cluster: true
+  participating: false
+  leader: false
 
   busVersion: "1.9.9"
   coreVersion: "1.1"
@@ -102,6 +111,9 @@
   version: '2.2.0'
   revision: 34560
   status: 'LIVE'
+  cluster: true
+  participating: true
+  leader: true
 
   jmx: 4040
   busVersion: "2.0"
@@ -119,6 +131,9 @@
   version: '2.1.0'
   revision: 33982
   status: 'LOADING'
+  cluster: true
+  participating: true
+  leader: false
 
   jmx: 4041
   busVersion: "2.0"
@@ -136,6 +151,9 @@
   version: '2.1.0'
   revision:
   status: 'LOADING'
+  cluster: true
+  participating: false
+  leader: false
 
   jmx: 4042
   busVersion: "2.0"

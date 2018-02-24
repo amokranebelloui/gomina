@@ -1,5 +1,7 @@
 package org.neo.gomina.model.monitoring.dummy;
 
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDateTime;
 import org.neo.gomina.model.inventory.Environment;
 import org.neo.gomina.model.inventory.InvInstance;
 import org.neo.gomina.model.inventory.Inventory;
@@ -44,6 +46,7 @@ public class DummyMonitorThread extends Thread {
                                 i == 1 ? "LOADING" :
                                 i == 2 ? "DOWN" : null;
                         if (status != null) {
+                            map.put("timestamp", new LocalDateTime(DateTimeZone.UTC));
                             map.put("status", status);
                             monitoring.notify(env.id, instance.id, map);
                         }
