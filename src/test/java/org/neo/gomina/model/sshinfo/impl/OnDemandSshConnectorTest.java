@@ -14,7 +14,7 @@ public class OnDemandSshConnectorTest {
 
     @Test
     public void testAnalyze() throws Exception {
-        Inventory inventory = new FileInventory();
+        Inventory inventory = new FileInventory("data");
         SshConfig sshConfig = new ConfigLoader().load().ssh;
         Passwords passwords = new Passwords(new File("config/pass.properties"));
         SshClient sshClient = new SshClient();

@@ -54,7 +54,12 @@ public class GominaModule extends AbstractModule {
 
         // Inventory
         bind(File.class).annotatedWith(Names.named("projects.file"))
-                .toInstance(new File(config.projects.get("file"))); // FIXME Type
+                .toInstance(new File(config.inventory.get("projectsFile")));
+        bind(String.class).annotatedWith(Names.named("inventory.dir"))
+                .toInstance(config.inventory.get("inventoryDir"));
+        bind(String.class).annotatedWith(Names.named("inventory.filter"))
+                .toInstance(config.inventory.get("inventoryFilter"));
+        // FIXME Type
         bind(Projects.class).to(FileProjects.class).in(Scopes.SINGLETON);
         bind(Inventory.class).to(FileInventory.class).in(Scopes.SINGLETON);
 

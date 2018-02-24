@@ -14,7 +14,7 @@ public class Config {
     public String name;
     public String passwordsFile;
 
-    public Map<String, String> projects;
+    public Map<String, String> inventory;
 
     public ScmConfig scm;
     public SonarConfig sonar;
@@ -27,7 +27,7 @@ public class Config {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("name", name)
                 .append("passwordsFile", passwordsFile)
-                .append("projects", projects)
+                .append("inventory", inventory)
                 .append("scm", scm)
                 .append("sonar", sonar)
                 .append("ssh", ssh)

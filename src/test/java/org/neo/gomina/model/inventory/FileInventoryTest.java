@@ -12,7 +12,7 @@ public class FileInventoryTest {
 
     @Test
     public void getEnvs() throws Exception {
-        Inventory inventory = new FileInventory();
+        Inventory inventory = new FileInventory("data");
         Collection<Environment> environments = inventory.getEnvironments();
         System.out.println(environments);
         assertThat(environments).onProperty("id").containsOnly("PROD", "UAT", "DEV");
@@ -20,7 +20,7 @@ public class FileInventoryTest {
 
     @Test
     public void getEnvironment() throws Exception {
-        Inventory inventory = new FileInventory();
+        Inventory inventory = new FileInventory("data");
         Environment env = inventory.getEnvironment("UAT");
         System.out.println(env);
         assertThat(env.getName()).isEqualTo("tradex-uat");

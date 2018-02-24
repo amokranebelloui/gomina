@@ -2,8 +2,11 @@
 name: 'My Governance Dashboard'
 passwordsFile: 'config/pass.properties'
 
-projects:
-  file: 'data/projects.json'
+inventory:
+  projectsFile: 'data/projects.json'
+  inventoryDir: 'data'
+  inventoryFilter: 'env\.(.*?)\.yaml'
+  #inventoryFilter: 'env\.(.*i.*?)\.yaml'
 
 scm:
   repos:
