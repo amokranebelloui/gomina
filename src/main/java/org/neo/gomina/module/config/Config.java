@@ -7,10 +7,14 @@ import org.neo.gomina.model.scm.ScmConfig;
 import org.neo.gomina.model.sonar.SonarConfig;
 import org.neo.gomina.model.sshinfo.SshConfig;
 
+import java.util.Map;
+
 public class Config {
 
     public String name;
     public String passwordsFile;
+
+    public Map<String, String> projects;
 
     public ScmConfig scm;
     public SonarConfig sonar;
@@ -22,6 +26,8 @@ public class Config {
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
                 .append("name", name)
+                .append("passwordsFile", passwordsFile)
+                .append("projects", projects)
                 .append("scm", scm)
                 .append("sonar", sonar)
                 .append("ssh", ssh)

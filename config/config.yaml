@@ -2,6 +2,9 @@
 name: 'My Governance Dashboard'
 passwordsFile: 'config/pass.properties'
 
+projects:
+  file: 'data/projects.json'
+
 scm:
   repos:
     - id: 'vac'
