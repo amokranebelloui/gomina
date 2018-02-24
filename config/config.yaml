@@ -5,7 +5,8 @@ passwordsFile: 'config/pass.properties'
 inventory:
   projectsFile: 'data/projects.json'
   inventoryDir: 'data'
-  inventoryFilter: 'env\.(.*?)\.yaml'
+  inventoryFilter: 'env\.(.*?)\..*'
+  #inventoryFilter: 'env\.(.*?)\.yaml'
   #inventoryFilter: 'env\.(.*i.*?)\.yaml'
 
 scm:

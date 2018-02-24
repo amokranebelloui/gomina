@@ -3,6 +3,7 @@ package org.neo.gomina.model.inventory;
 import org.junit.Test;
 import org.neo.gomina.model.inventory.file.FileInventory;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
@@ -27,4 +28,11 @@ public class FileInventoryTest {
         assertThat(env.getServices().size()).isGreaterThan(2);
     }
 
+    @Test
+    public void testReadOldModel() {
+        FileInventory inventory = new FileInventory("data");
+        //Environment environment = inventory.readEnv(new File("env.monitorx-stg.json"));
+        Environment environment = inventory.readEnv(new File("env.tradex-uat.json"));
+        System.out.println(environment);
+    }
 }
