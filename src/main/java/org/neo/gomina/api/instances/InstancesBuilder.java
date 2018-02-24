@@ -36,26 +36,26 @@ public class InstancesBuilder {
         sshConnector.analyze();
         for (Environment environment : inventory.getEnvironments()) {
             //EnvMonitoring envMonitoring = monitoring.getFor(environment.id);
-            if (environment.services != null) {
-                for (Service service : environment.services) {
-                    for (InvInstance envInstance : service.instances) {
-                        String id = environment.id + "-" + envInstance.id;
+            if (environment.getServices() != null) {
+                for (Service service : environment.getServices()) {
+                    for (InvInstance envInstance : service.getInstances()) {
+                        String id = environment.getId() + "-" + envInstance.getId();
                         Instance instance = new Instance();
                         instance.id = id;
-                        instance.env = environment.id;
-                        instance.type = service.type;
-                        instance.service = service.svc;
-                        instance.name = envInstance.id;
+                        instance.env = environment.getId();
+                        instance.type = service.getType();
+                        instance.service = service.getSvc();
+                        instance.name = envInstance.getId();
 
                         applyInventory(instance, service, envInstance);
 
-                        Project project = projects.getProject(service.project);
+                        Project project = projects.getProject(service.getProject());
                         ScmDetails scmDetails = project != null ? scmConnector.getSvnDetails(project.getSvnRepo(), project.getSvnUrl()) : new ScmDetails();
                         applyScm(instance, scmDetails);
 
                         // apply project
 
-                        SshDetails sshDetails = sshConnector.getDetails(envInstance.host, envInstance.folder);
+                        SshDetails sshDetails = sshConnector.getDetails(envInstance.getHost(), envInstance.getFolder());
                         applySsh(instance, sshDetails);
                         instances.put(id, instance);
                     }
@@ -68,12 +68,12 @@ public class InstancesBuilder {
             for (Map.Entry<String, Map<String, Object>> entry : monitoring.getAll().entrySet()) {
                 String instanceId = entry.getKey();
                 Map<String, Object> indicators = entry.getValue();
-                String id = environment.id + "-" + instanceId;
+                String id = environment.getId() + "-" + instanceId;
                 Instance instance = instances.get(id);
                 if (instance == null) {
                     instance = new Instance();
                     instance.id = id;
-                    instance.env = environment.id;
+                    instance.env = environment.getId();
                     instance.type = (String)indicators.get("type");
                     instance.service = (String)indicators.get("service");
                     instance.name = instanceId;
@@ -90,10 +90,10 @@ public class InstancesBuilder {
     }
 
     private void applyInventory(Instance instance, Service service, InvInstance envInstance) {
-        instance.project = service.project;
+        instance.project = service.getProject();
 
-        instance.deployHost = envInstance.host;
-        instance.deployFolder = envInstance.folder;
+        instance.deployHost = envInstance.getHost();
+        instance.deployFolder = envInstance.getFolder();
     }
 
     private void applySsh(Instance instance, SshDetails sshDetails) {

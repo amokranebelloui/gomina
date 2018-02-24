@@ -4,7 +4,7 @@ import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.monitoring.Monitoring;
 
 import javax.inject.Inject;
-import java.util.List;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 public class ZmqMonitorThreads {
@@ -12,8 +12,8 @@ public class ZmqMonitorThreads {
     @Inject
     public ZmqMonitorThreads(ZmqMonitorConfig config, Monitoring monitoring, Inventory inventory) {
         if (config.connections != null) {
-            List<String> subscriptions = inventory.getEnvironments().stream()
-                    .map(e -> ".#HB." + e.id + ".")
+            Collection<String> subscriptions = inventory.getEnvironments().stream()
+                    .map(e -> ".#HB." + e.getId() + ".")
                     .collect(Collectors.toList());
 
             for (ZmqMonitorConfig.Connection connection : config.connections) {

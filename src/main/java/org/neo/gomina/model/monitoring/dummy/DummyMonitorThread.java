@@ -29,16 +29,16 @@ public class DummyMonitorThread extends Thread {
     @Override
     public void run() {
         for (Environment env : inventory.getEnvironments()) {
-            Map<String, Map<String, Object>> envMon = dummyMonitorData.getFor(env.id);
+            Map<String, Map<String, Object>> envMon = dummyMonitorData.getFor(env.getId());
             for (Map.Entry<String, Map<String, Object>> entry : envMon.entrySet()) {
-                monitoring.notify(env.id, entry.getKey(), entry.getValue());
+                monitoring.notify(env.getId(), entry.getKey(), entry.getValue());
             }
         }
 
         while (true) {
             for (Environment env : inventory.getEnvironments()) {
-                for (Service service : env.services) {
-                    for (InvInstance instance : service.instances) {
+                for (Service service : env.getServices()) {
+                    for (InvInstance instance : service.getInstances()) {
                         Map<String, Object> map = new HashMap<>();
                         int i = random.nextInt(15);
                         String status =
@@ -48,7 +48,7 @@ public class DummyMonitorThread extends Thread {
                         if (status != null) {
                             map.put("timestamp", new LocalDateTime(DateTimeZone.UTC));
                             map.put("status", status);
-                            monitoring.notify(env.id, instance.id, map);
+                            monitoring.notify(env.getId(), instance.getId(), map);
                         }
                     }
                 }

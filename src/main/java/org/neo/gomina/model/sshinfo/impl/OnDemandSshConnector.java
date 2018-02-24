@@ -43,11 +43,11 @@ public class OnDemandSshConnector implements SshConnector {
     @Override
     public void analyze() {
         Map<String, List<InvInstance>> instancesByHost = inventory.getEnvironments().stream()
-                .flatMap(env -> env.services.stream())
-                .flatMap(svc -> svc.instances.stream()
-                        .filter(ins -> StringUtils.isNotBlank(ins.host) && StringUtils.isNotBlank(ins.folder))
+                .flatMap(env -> env.getServices().stream())
+                .flatMap(svc -> svc.getInstances().stream()
+                        .filter(ins -> StringUtils.isNotBlank(ins.getHost()) && StringUtils.isNotBlank(ins.getFolder()))
                 )
-                .collect(Collectors.groupingBy(ins -> ins.host, Collectors.toList()));
+                .collect(Collectors.groupingBy(ins -> ins.getHost(), Collectors.toList()));
 
         for (Map.Entry<String, List<InvInstance>> entry : instancesByHost.entrySet()) {
             String host = entry.getKey();
@@ -68,14 +68,14 @@ public class OnDemandSshConnector implements SshConnector {
 
                     for (InvInstance instance : instances) {
                         Map<String, SshDetails> servers = map.computeIfAbsent(host, h -> new ConcurrentHashMap<>());
-                        SshDetails sshDetails = servers.computeIfAbsent(instance.folder, f -> new SshDetails());
+                        SshDetails sshDetails = servers.computeIfAbsent(instance.getFolder(), f -> new SshDetails());
 
                         sshDetails.analyzed = true;
-                        sshDetails.deployedVersion = deployedVersion(session, instance.folder, prefix);
+                        sshDetails.deployedVersion = deployedVersion(session, instance.getFolder(), prefix);
                         sshDetails.deployedRevision = null;
-                        sshDetails.confCommitted = checkConfCommited(session, instance.folder, prefix);
+                        sshDetails.confCommitted = checkConfCommited(session, instance.getFolder(), prefix);
                         sshDetails.confUpToDate = null;
-                        logger.info("Analyzed {} {} {}", host, instance.folder, sshDetails);
+                        logger.info("Analyzed {} {} {}", host, instance.getFolder(), sshDetails);
                     }
                     session.disconnect();
                 }

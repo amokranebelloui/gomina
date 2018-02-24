@@ -5,9 +5,9 @@ import org.apache.logging.log4j.Logger;
 import org.neo.gomina.model.monitoring.Monitoring;
 import org.zeromq.ZMQ;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ZmqMonitorThread extends Thread {
@@ -17,9 +17,9 @@ public class ZmqMonitorThread extends Thread {
     private Monitoring monitoring;
 
     private String url;
-    private List<String> subscriptions;
+    private Collection<String> subscriptions;
 
-    public ZmqMonitorThread(Monitoring monitoring, String url, List<String> subscriptions) {
+    public ZmqMonitorThread(Monitoring monitoring, String url, Collection<String> subscriptions) {
         this.monitoring = monitoring;
         this.url = url;
         this.subscriptions = subscriptions;
