@@ -107,10 +107,10 @@ public class InstancesBuilder {
     }
 
     private void applyScm(Instance instance, ScmDetails scmDetails) {
-        instance.latestVersion = scmDetails.latest;
-        instance.latestRevision = scmDetails.latestRevision;
-        instance.releasedVersion = scmDetails.released;
-        instance.releasedRevision = scmDetails.releasedRevision;
+        instance.latestVersion = scmDetails.getLatest();
+        instance.latestRevision = scmDetails.getLatestRevision();
+        instance.releasedVersion = scmDetails.getReleased();
+        instance.releasedRevision = scmDetails.getReleasedRevision();
     }
 
     private void applyMonitoring(Instance instance, Map<String, Object> indicators) {

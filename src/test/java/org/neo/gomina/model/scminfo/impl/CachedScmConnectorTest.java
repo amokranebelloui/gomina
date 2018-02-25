@@ -15,7 +15,6 @@ public class CachedScmConnectorTest {
             }
         }
 
-        DefaultScmConnector defaultConnector = new DefaultScmConnector(new FileScmReposOverride());
         CachedScmConnector connector = new CachedScmConnector(new FileScmReposOverride());
 
         connector.getSvnDetails("repo", "OMS/Server/tradex-fixin");

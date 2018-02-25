@@ -82,9 +82,9 @@ public class ProjectsBuilder {
         projectDetail.jenkins = project.getJenkinsJob();
 
         if (scmDetails != null) {
-            projectDetail.changes = scmDetails.changes;
-            projectDetail.latest = scmDetails.latest;
-            projectDetail.released = scmDetails.released;
+            projectDetail.changes = scmDetails.getChanges();
+            projectDetail.latest = scmDetails.getLatest();
+            projectDetail.released = scmDetails.getReleased();
         }
 
         if (sonarIndicators != null) {

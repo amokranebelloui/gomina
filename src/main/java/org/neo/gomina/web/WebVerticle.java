@@ -16,6 +16,7 @@ import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSSocket;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo.gomina.api.diagram.DiagramBuilder;
@@ -152,7 +153,9 @@ public class WebVerticle extends AbstractVerticle {
                 // FIXME Reload
 
                 for (Project project : projects.getProjects()) {
-                    cachedScmConnector.refresh(project.getSvnRepo(), project.getSvnUrl());
+                    if (StringUtils.isNotBlank(project.getSvnUrl())) {
+                        cachedScmConnector.refresh(project.getSvnRepo(), project.getSvnUrl());
+                    }
                 }
 
                 ctx.response().putHeader("content-type", "text/javascript").end();
