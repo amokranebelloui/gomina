@@ -25,19 +25,13 @@ public class CachedScmConnector extends DefaultScmConnector implements ScmConnec
 
     private final static Logger logger = LogManager.getLogger(CachedScmConnector.class);
 
-    //private ScmConnector scmConnector;
-
     private Map<String, ScmDetails> cache = new HashMap<>();
 
     private XStream xStream = new XStream();
-    private File svnProjectsCache = new File("svnprojects.cache");
-
 
     @Inject
-    public CachedScmConnector(/*DefaultScmConnector scmConnector*/ScmRepos scmRepos) {
+    public CachedScmConnector(ScmRepos scmRepos) {
         super(scmRepos);
-        //this.scmConnector = scmConnector;
-
         File file = new File(".cache");
         if (!file.exists()) {
             boolean mkdir = file.mkdir();
@@ -57,7 +51,6 @@ public class CachedScmConnector extends DefaultScmConnector implements ScmConnec
 
     @Override
     public void refresh(String svnRepo, String svnUrl) {
-        // FIXME Refresh SCM
         getFromScmAndCache(svnRepo, svnUrl);
     }
 
