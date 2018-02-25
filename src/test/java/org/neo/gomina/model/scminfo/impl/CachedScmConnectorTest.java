@@ -19,5 +19,9 @@ public class CachedScmConnectorTest {
 
         connector.getSvnDetails("repo", "OMS/Server/tradex-fixin");
         connector.getSvnDetails("repo", "OMS/Server/tradex-fixin");
+
+        connector.getSvnDetails("repo", "OMS/Server/tradex-fixin");
+        connector.getSvnDetails("repo", "OMS/Server/tradex-basketmanager");
     }
+
 }

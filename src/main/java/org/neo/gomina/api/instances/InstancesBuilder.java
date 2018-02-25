@@ -51,8 +51,9 @@ public class InstancesBuilder {
                         applyInventory(instance, service, envInstance);
 
                         Project project = projects.getProject(service.getProject());
-                        ScmDetails scmDetails = project != null ? scmConnector.getSvnDetails(project.getSvnRepo(), project.getSvnUrl()) : new ScmDetails();
-                        applyScm(instance, scmDetails);
+                        if (project != null) {
+                            applyScm(instance, scmConnector.getSvnDetails(project.getSvnRepo(), project.getSvnUrl()));
+                        }
 
                         // apply project
 

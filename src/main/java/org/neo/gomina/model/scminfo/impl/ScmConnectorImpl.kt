@@ -16,102 +16,93 @@ import java.io.FileOutputStream
 import java.util.*
 import javax.inject.Inject
 
-open class DefaultScmConnector : ScmConnector {
+private fun commitCountTo(logEntries: List<Commit>, refRev: String?): Int? {
+    var count = 0
+    for ((revision) in logEntries) {
+        if (StringUtils.equals(revision, refRev)) {
+            return count
+        }
+        count++
+    }
+    return null
+}
+
+private class ScmCache {
 
     companion object {
-        private val logger = LogManager.getLogger(DefaultScmConnector::class.java)
+        private val logger = LogManager.getLogger(ScmCache::class.java)
     }
 
-    private val scmRepos: ScmRepos
+    private val xStream = XStream()
+    private val cache = HashMap<String, ScmDetails>()
 
-    @Inject
-    constructor(scmRepos: ScmRepos) {
-        this.scmRepos = scmRepos
-    }
+    fun getDetail(svnRepo: String, svnUrl: String): ScmDetails? {
+        val detailCacheFileName = svnRepo + "-" + svnUrl.replace("/".toRegex(), "-").replace("\\\\".toRegex(), "-")
+        val detailCacheFile = File(".cache/" + detailCacheFileName)
 
-    override fun refresh(svnRepo: String, svnUrl: String) {
-
-    }
-
-    override fun getSvnDetails(svnRepo: String, svnUrl: String): ScmDetails {
-        logger.info("Svn Details for " + svnUrl)
-        val scmClient = scmRepos.get(svnRepo)
-        val scmDetails = ScmDetails()
-        try {
-            val pom = scmClient!!.getFile(svnUrl + "/trunk/pom.xml", "-1")
-            val currentVersion = MavenUtils.extractVersion(pom)
-
-            val logEntries = getCommits(svnRepo, svnUrl, scmClient)
-
-            scmDetails.url = svnUrl
-            scmDetails.latest = currentVersion
-
-            val latestCommit = if (logEntries.size > 0) logEntries[0] else null
-            val latestRevision = latestCommit?.revision
-            scmDetails.latestRevision = latestRevision
-
-            val lastReleasedVersion = logEntries
-                    .filter { StringUtils.isNotBlank(it.release) }
-                    .firstOrNull()?.release
-            scmDetails.released = lastReleasedVersion
-
-            //String lastReleasedRev = getLastReleaseRev(logEntries);
-            val lastReleasedRev = logEntries
-                    .filter { StringUtils.isNotBlank(it.newVersion) }
-                    .firstOrNull()?.revision
-            scmDetails.releasedRevision = lastReleasedRev
-
-            scmDetails.changes = commitCountTo(logEntries, lastReleasedRev) //diff.size();
-        } catch (e: Exception) {
-            logger.error("Cannot get SVN information for " + svnUrl, e)
+        if (cache.containsKey(svnUrl)) {
+            val scmDetails = cache[svnUrl]
+            logger.info("SCM Detail Served from Memory Cache $scmDetails")
+            return scmDetails
         }
-
-        logger.info(scmDetails)
-        return scmDetails
-    }
-
-    @Throws(Exception::class)
-    open protected fun getCommits(svnRepo: String, svnUrl: String, scmClient: ScmClient): List<Commit> {
-        val mavenReleaseFlagger = MavenReleaseFlagger(scmClient, svnUrl)
-        return scmClient.getLog(svnUrl, "0", 100)
-                .map( { mavenReleaseFlagger.flag(it) })
-    }
-
-    private fun commitCountTo(logEntries: List<Commit>, refRev: String?): Int? {
-        var count = 0
-        for ((revision) in logEntries) {
-            if (StringUtils.equals(revision, refRev)) {
-                return count
+        else if (detailCacheFile.exists()) {
+            try {
+                val scmDetails = xStream.fromXML(detailCacheFile) as ScmDetails
+                cache.put(svnUrl, scmDetails)
+                logger.info("SCM Detail Served from File Cache $scmDetails")
+                return scmDetails
             }
-            count++
+            catch (e: Exception) {
+                logger.debug("Error loading Cache", e)
+                logger.info("Error loading Cache from File $detailCacheFile")
+            }
         }
         return null
     }
 
-    override fun getCommitLog(svnRepo: String, svnUrl: String): List<Commit> {
-        try {
-            val scmClient = scmRepos.get(svnRepo)
-            return scmClient!!.getLog(svnUrl, "0", 100)
-        } catch (e: Exception) {
-            logger.error("Cannot get commit log: $svnRepo $svnUrl")
-            return ArrayList()
-        }
+    fun cacheDetail(svnRepo: String, svnUrl: String, scmDetails: ScmDetails) {
+        val detailCacheFileName = svnRepo + "-" + svnUrl.replace("/".toRegex(), "-").replace("\\\\".toRegex(), "-")
+        val cacheFile = File(".cache/" + detailCacheFileName)
 
+        cache.put(svnUrl, scmDetails)
+        try {
+            xStream.toXML(scmDetails, FileOutputStream(cacheFile))
+        } catch (e: FileNotFoundException) {
+            logger.error("Saving cache for $cacheFile", e)
+        }
     }
+
+    fun getLog(svnRepo: String, svnUrl: String): List<Commit> {
+        val logCacheFileName = svnRepo + "-" + svnUrl.replace("/".toRegex(), "-").replace("\\\\".toRegex(), "-")
+        val cacheFile = File(".cache/$logCacheFileName.log")
+        return if (cacheFile.exists()) xStream.fromXML(cacheFile) as List<Commit> else emptyList()
+    }
+
+    fun cacheLog(svnRepo: String, svnUrl: String, result: List<Commit>) {
+        val logCacheFileName = svnRepo + "-" + svnUrl.replace("/".toRegex(), "-").replace("\\\\".toRegex(), "-")
+        val cacheFile = File(".cache/$logCacheFileName.log")
+
+        try {
+            xStream.toXML(result, FileOutputStream(cacheFile))
+        } catch (e: Exception) {
+            logger.error("Cannot save cache in $cacheFile")
+        }
+    }
+
 }
 
-
-class CachedScmConnector: DefaultScmConnector, ScmConnector {
+class CachedScmConnector: ScmConnector {
 
     companion object {
         private val logger = LogManager.getLogger(CachedScmConnector::class.java)
     }
 
-    private val xStream = XStream()
-    private val cache = HashMap<String, ScmDetails>()
-    
-    @com.google.inject.Inject
-    constructor(scmRepos: ScmRepos) : super(scmRepos) {
+    private val scmRepos: ScmRepos
+    private val scmCache = ScmCache()
+
+    @Inject
+    constructor(scmRepos: ScmRepos) {
+        this.scmRepos = scmRepos
         val file = File(".cache")
         if (!file.exists()) {
             val mkdir = file.mkdir()
@@ -119,80 +110,88 @@ class CachedScmConnector: DefaultScmConnector, ScmConnector {
         }
     }
 
-    private fun getDetailFileCache(svnRepo: String, svnUrl: String): File {
-        val fileName = svnRepo + "-" + svnUrl.replace("/".toRegex(), "-").replace("\\\\".toRegex(), "-")
-        return File(".cache/" + fileName)
-    }
-
-    private fun getLogCacheFile(svnRepo: String, svnUrl: String): File {
-        val fileName = svnRepo + "-" + svnUrl.replace("/".toRegex(), "-").replace("\\\\".toRegex(), "-")
-        return File(".cache/$fileName.log")
-    }
-
     override fun refresh(svnRepo: String, svnUrl: String) {
-        getFromScmAndCache(svnRepo, svnUrl)
+        if (svnUrl.isNotBlank()) {
+            val scmClient = scmRepos.get(svnRepo)
+            val logEntries = getCommits(svnRepo, svnUrl, scmClient, useCache = false)
+            val scmDetails = computeScmDetails(svnRepo, svnUrl, logEntries, scmClient)
+            scmCache.cacheLog(svnRepo, svnUrl, logEntries)
+            scmCache.cacheDetail(svnRepo, svnUrl, scmDetails)
+        }
     }
 
     override fun getSvnDetails(svnRepo: String, svnUrl: String): ScmDetails {
-        val cacheFile = getDetailFileCache(svnRepo, svnUrl)
-        var scmDetails: ScmDetails?
-        if (cache.containsKey(svnUrl)) {
-            scmDetails = cache[svnUrl]
-            logger.info("SCM Detail Served from Memory Cache " + scmDetails!!)
-        } else if (cacheFile.exists()) {
-            try {
-                scmDetails = xStream.fromXML(cacheFile) as ScmDetails
-                cache.put(svnUrl, scmDetails)
-                logger.info("SCM Detail Served from File Cache " + scmDetails)
-            } catch (e: Exception) {
-                logger.debug("Error loading cache", e)
-                logger.info("Corrupted file, try to refresh...")
-                scmDetails = getFromScmAndCache(svnRepo, svnUrl)
+        if (svnUrl.isNotBlank()) {
+            val detail = scmCache.getDetail(svnRepo, svnUrl)
+            return if (detail != null) detail
+            else {
+                val scmClient = scmRepos.get(svnRepo)
+                val logEntries = getCommits(svnRepo, svnUrl, scmClient, useCache = true)
+                val scmDetails = computeScmDetails(svnRepo, svnUrl, logEntries, scmClient)
+                scmCache.cacheDetail(svnRepo, svnUrl, scmDetails)
+                scmCache.cacheLog(svnRepo, svnUrl, logEntries)
+                logger.info("SCM Detail Served from SCM " + scmDetails)
+                scmDetails
             }
-
-        } else {
-            scmDetails = getFromScmAndCache(svnRepo, svnUrl)
-            logger.info("SCM Detail Served from SCM " + scmDetails)
         }
-        return scmDetails ?: ScmDetails()
+        else {
+            return ScmDetails()
+        }
     }
 
+    private fun computeScmDetails(svnRepo: String, svnUrl: String, logEntries: List<Commit>, scmClient: ScmClient): ScmDetails {
+        logger.info("Svn Details for " + svnUrl)
+        return try {
+            val lastReleasedRev = logEntries
+                    .filter { StringUtils.isNotBlank(it.newVersion) }
+                    .firstOrNull()?.revision
 
-    private fun getFromScmAndCache(svnRepo: String, svnUrl: String): ScmDetails {
-        val cacheFile = getDetailFileCache(svnRepo, svnUrl)
-        val scmDetails: ScmDetails
-        scmDetails = super.getSvnDetails(svnRepo, svnUrl)
-        cache.put(svnUrl, scmDetails)
-        try {
-            xStream.toXML(scmDetails, FileOutputStream(cacheFile))
-        } catch (e: FileNotFoundException) {
-            logger.error("Saving cache for $svnRepo $svnUrl", e)
+            val scmDetails = ScmDetails(
+                url = svnUrl,
+                latest = MavenUtils.extractVersion(scmClient.getFile(svnUrl + "/trunk/pom.xml", "-1")),
+                latestRevision = logEntries.firstOrNull()?.revision,
+                released = logEntries
+                        .filter { StringUtils.isNotBlank(it.release) }
+                        .firstOrNull()?.release,
+                releasedRevision = lastReleasedRev,
+                changes = commitCountTo(logEntries, lastReleasedRev)
+            )
+            logger.info(scmDetails)
+            scmDetails
         }
-
-        return scmDetails
+        catch (e: Exception) {
+            logger.error("Cannot get SVN information for " + svnUrl, e)
+            ScmDetails()
+        }
     }
 
-    @Throws(Exception::class)
-    override fun getCommits(svnRepo: String, svnUrl: String, scmClient: ScmClient): List<Commit> {
-        val cacheFile = getLogCacheFile(svnRepo, svnUrl)
-        val cached = if (cacheFile.exists()) xStream.fromXML(cacheFile) as List<Commit> else emptyList()
-        val lastKnown = cached.firstOrNull()?.revision ?: "0"
-
+    private fun getCommits(svnRepo: String, svnUrl: String, scmClient: ScmClient, useCache: Boolean): List<Commit> {
         val mavenReleaseFlagger = MavenReleaseFlagger(scmClient, svnUrl)
-        val commits = scmClient.getLog(svnUrl, lastKnown, 100)
-                .map { mavenReleaseFlagger.flag(it) }
-                .filter { it.revision != lastKnown }
+        return if (useCache) {
+            val cached = scmCache.getLog(svnRepo, svnUrl)
+            val lastKnown = cached.firstOrNull()?.revision ?: "0"
 
-        logger.info("Cached " + cached.size + " " + cached)
-        logger.info("Retrieved " + commits.size + " " + commits)
-        val result = commits + cached
-        xStream.toXML(result, FileOutputStream(cacheFile))
-        return result
+            val commits = scmClient.getLog(svnUrl, lastKnown, 100)
+                    .map { mavenReleaseFlagger.flag(it) }
+                    .filter { it.revision != lastKnown }
+
+            CachedScmConnector.logger.info("Get commits: cache=${cached.size} retrieved=${commits.size}")
+            commits + cached
+        }
+        else {
+            scmClient.getLog(svnUrl, "0", 100).map { mavenReleaseFlagger.flag(it) }
+        }
     }
 
     override fun getCommitLog(svnRepo: String, svnUrl: String): List<Commit> {
         logger.info("Commit Log Served from SCM")
-        return super.getCommitLog(svnRepo, svnUrl)
+        return try {
+            if (svnUrl.isNotBlank()) scmRepos.get(svnRepo).getLog(svnUrl, "0", 100) else emptyList()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get commit log: $svnRepo $svnUrl")
+            ArrayList()
+        }
     }
 
 }

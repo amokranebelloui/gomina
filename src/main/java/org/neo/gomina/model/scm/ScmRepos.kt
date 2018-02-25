@@ -13,8 +13,15 @@ data class ScmRepo(val id: String = "", val type: String = "", val location: Str
 
 // Repo
 interface ScmRepos {
-    fun get(id: String): ScmClient?
+    fun get(id: String): ScmClient
 }
+
+private class NoOpScmClient : ScmClient {
+    override fun getLog(url: String, rev: String, count: Int): List<Commit> = emptyList()
+    override fun getFile(url: String, rev: String): String? = null
+}
+
+private val noOpScmClient = NoOpScmClient()
 
 class ConfigScmRepos : ScmRepos {
 
@@ -39,8 +46,8 @@ class ConfigScmRepos : ScmRepos {
         }
     }
 
-    override fun get(id: String): ScmClient? {
-        return clients[id]
+    override fun get(id: String): ScmClient {
+        return clients[id] ?: noOpScmClient
     }
 
     private fun buildScmClient(repo: ScmRepo, passwords: Passwords): ScmClient? {

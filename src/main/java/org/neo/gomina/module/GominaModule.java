@@ -21,7 +21,6 @@ import org.neo.gomina.model.scm.ScmConfig;
 import org.neo.gomina.model.scm.ScmRepos;
 import org.neo.gomina.model.scminfo.ScmConnector;
 import org.neo.gomina.model.scminfo.impl.CachedScmConnector;
-import org.neo.gomina.model.scminfo.impl.DefaultScmConnector;
 import org.neo.gomina.model.security.Passwords;
 import org.neo.gomina.model.sonar.SonarConnector;
 import org.neo.gomina.model.sonar.dummy.DummySonarConnector;
@@ -75,7 +74,6 @@ public class GominaModule extends AbstractModule {
         // SCM
         bind(ScmConfig.class).toInstance(config.scm);
         bind(ScmRepos.class).to(ConfigScmRepos.class).in(Scopes.SINGLETON);
-        bind(DefaultScmConnector.class).in(Scopes.SINGLETON);
         bind(CachedScmConnector.class).in(Scopes.SINGLETON);
         bind(ScmConnector.class).to(CachedScmConnector.class).in(Scopes.SINGLETON);
 

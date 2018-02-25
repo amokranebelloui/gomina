@@ -126,8 +126,20 @@ public class WebVerticle extends AbstractVerticle {
                             .end(mapper.writeValueAsString(project));
                 }
                 else {
+                    logger.info("Cannot get project " + projectId);
                     ctx.fail(404);
                 }
+            }
+            catch (Exception e) {
+                logger.error("Cannot get project", e);
+                ctx.fail(500);
+            }
+        });
+        router.post("/data/project/:projectId/reload").handler(ctx -> {
+            try {
+                String projectId = ctx.request().getParam("projectId");
+                Project project = projects.getProject(projectId);
+                cachedScmConnector.refresh(project.getSvnRepo(), project.getSvnUrl());
             }
             catch (Exception e) {
                 logger.error("Cannot get project", e);

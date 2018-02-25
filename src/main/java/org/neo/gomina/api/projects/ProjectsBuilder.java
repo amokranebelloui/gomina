@@ -42,14 +42,8 @@ public class ProjectsBuilder {
             SonarIndicators sonarIndicators = sonarConnector.getMetrics(project.getMaven()).get(project.getMaven());
             List<CommitLogEntry> commitLog;
             ScmDetails scmDetails;
-            if (StringUtils.isNotBlank(project.getSvnUrl())) {
-                scmDetails = scmConnector.getSvnDetails(project.getSvnRepo(), project.getSvnUrl());
-                commitLog = map(scmConnector.getCommitLog(project.getSvnRepo(), project.getSvnUrl()));
-            }
-            else {
-                scmDetails = new ScmDetails();
-                commitLog = new ArrayList<>();
-            }
+            scmDetails = scmConnector.getSvnDetails(project.getSvnRepo(), project.getSvnUrl());
+            commitLog = map(scmConnector.getCommitLog(project.getSvnRepo(), project.getSvnUrl()));
             return build(project, scmDetails, commitLog, sonarIndicators);
         }
         return null;

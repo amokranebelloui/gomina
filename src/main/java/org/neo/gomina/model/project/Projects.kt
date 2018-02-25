@@ -9,12 +9,12 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.File
 
-data class Project(
+data class Project (
     var id: String,
     var label: String?,
     var type: String?,
     var svnRepo: String = "",
-    var svnUrl: String?,
+    var svnUrl: String = "",
     var maven: String?,
     var jenkinsJob: String?
 )
