@@ -2,7 +2,18 @@ package org.neo.gomina.model.scm
 
 import org.apache.commons.lang3.StringUtils
 import org.neo.gomina.model.maven.MavenUtils
+import java.util.*
 
+
+data class Commit (
+    var revision: String = "",
+    var date: Date? = null,
+    var author: String? = null,
+    var message: String? = null,
+
+    var release: String? = null, // new version: if the commit is a post release version change
+    var newVersion: String? = null // version: if the commit is a release
+)
 
 interface ScmClient {
 
@@ -12,7 +23,7 @@ interface ScmClient {
 
     /** get file for a revision, HEAD is -1 **/
     @Throws(Exception::class)
-    fun getFile(url: String, rev: String): String
+    fun getFile(url: String, rev: String): String?
 
 }
 

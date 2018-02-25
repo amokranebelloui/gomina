@@ -59,10 +59,10 @@ public class ProjectsBuilder {
         List<CommitLogEntry> result = new ArrayList<>();
         for (Commit commit : commitLog) {
             CommitLogEntry commitLogEntry = new CommitLogEntry();
-            commitLogEntry.revision = commit.revision;
-            commitLogEntry.date = commit.date;
-            commitLogEntry.author = commit.author;
-            commitLogEntry.message = commit.message;
+            commitLogEntry.revision = commit.getRevision();
+            commitLogEntry.date = commit.getDate();
+            commitLogEntry.author = commit.getAuthor();
+            commitLogEntry.message = commit.getMessage();
             result.add(commitLogEntry);
         }
         return result;

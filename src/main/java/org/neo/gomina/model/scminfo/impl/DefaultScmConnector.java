@@ -47,20 +47,20 @@ public class DefaultScmConnector implements ScmConnector {
             scmDetails.latest = currentVersion;
 
             Commit latestCommit = logEntries.size() > 0 ? logEntries.get(0) : null;
-            String latestRevision = latestCommit != null ? latestCommit.revision : null;
+            String latestRevision = latestCommit != null ? latestCommit.getRevision() : null;
             scmDetails.latestRevision = latestRevision;
 
             String lastReleasedVersion = logEntries.stream()
-                    .filter(commit1 -> StringUtils.isNotBlank(commit1.release))
+                    .filter(commit1 -> StringUtils.isNotBlank(commit1.getRelease()))
                     .findFirst()
-                    .map(commit -> commit.release).orElse(null);
+                    .map(commit -> commit.getRelease()).orElse(null);
             scmDetails.released = lastReleasedVersion;
 
             //String lastReleasedRev = getLastReleaseRev(logEntries);
             String lastReleasedRev = logEntries.stream()
-                    .filter(commit1 -> StringUtils.isNotBlank(commit1.newVersion))
+                    .filter(commit1 -> StringUtils.isNotBlank(commit1.getNewVersion()))
                     .findFirst()
-                    .map(commit -> commit.revision).orElse(null);
+                    .map(commit -> commit.getRevision()).orElse(null);
             scmDetails.releasedRevision = lastReleasedRev;
             
             scmDetails.changes = commitCountTo(logEntries, lastReleasedRev); //diff.size();
@@ -83,7 +83,7 @@ public class DefaultScmConnector implements ScmConnector {
     private Integer commitCountTo(List<Commit> logEntries, String refRev) {
         int count = 0;
         for (Commit logEntry : logEntries) {
-            if (StringUtils.equals(logEntry.revision, refRev)) {
+            if (StringUtils.equals(logEntry.getRevision(), refRev)) {
                 return count;
             }
             count++;

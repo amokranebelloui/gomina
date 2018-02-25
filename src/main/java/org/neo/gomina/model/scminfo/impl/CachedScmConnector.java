@@ -110,13 +110,13 @@ public class CachedScmConnector extends DefaultScmConnector implements ScmConnec
         if (cacheFile.exists()) {
             cached = (List<Commit>)xStream.fromXML(cacheFile);
         }
-        String lastKnown = cached.stream().findFirst().map(commit -> commit.revision).orElse("0");
+        String lastKnown = cached.stream().findFirst().map(commit -> commit.getRevision()).orElse("0");
 
         MavenReleaseFlagger mavenReleaseFlagger = new MavenReleaseFlagger(scmClient, svnUrl);
         List<Commit> commits = scmClient.getLog(svnUrl, lastKnown, 100).stream()
                 .map(mavenReleaseFlagger::flag)
                 .collect(Collectors.toList());
-        if (commits.size() > 0 && StringUtils.equals(commits.get(commits.size() - 1).revision, lastKnown)) {
+        if (commits.size() > 0 && StringUtils.equals(commits.get(commits.size() - 1).getRevision(), lastKnown)) {
             commits.remove(commits.size() - 1); // To avoid duplicate
         }
 

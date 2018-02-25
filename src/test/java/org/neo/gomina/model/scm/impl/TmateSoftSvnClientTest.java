@@ -7,8 +7,7 @@ import org.neo.gomina.model.scm.svn.TmateSoftSvnClient;
 import java.util.List;
 
 public class TmateSoftSvnClientTest {
-
-
+    
     @Test
     public void testSvn() throws Exception {
         TmateSoftSvnClient svnClient = new TmateSoftSvnClient("file:////Users/Amokrane/Work/SvnRepo/svn-repo-demo");
