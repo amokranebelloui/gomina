@@ -1,6 +1,7 @@
 .idea/*
 !.idea/runConfigurations/
 .vertx/
-.node_modules/*
+node_modules/*
+dist/
 *.iml
 config/pass.properties
