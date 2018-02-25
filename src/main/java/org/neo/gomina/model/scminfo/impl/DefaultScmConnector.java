@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo.gomina.model.maven.MavenUtils;
 import org.neo.gomina.model.scm.Commit;
+import org.neo.gomina.model.scm.MavenReleaseFlagger;
 import org.neo.gomina.model.scm.ScmClient;
 import org.neo.gomina.model.scm.ScmRepos;
 import org.neo.gomina.model.scminfo.ScmConnector;
@@ -12,8 +13,8 @@ import org.neo.gomina.model.scminfo.ScmDetails;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DefaultScmConnector implements ScmConnector {
 
@@ -40,23 +41,28 @@ public class DefaultScmConnector implements ScmConnector {
             String pom = scmClient.getFile(svnUrl + "/trunk/pom.xml", "-1");
             String currentVersion = MavenUtils.extractVersion(pom);
 
-            List<Commit> logEntries = scmClient.getLog(svnUrl, "0", 100);
-            Commit latestCommit = logEntries.size() > 0 ? logEntries.get(0) : null;
-            String latestRevision = latestCommit != null ? latestCommit.revision : null;
-
-            String lastReleasedRev = getLastReleaseRev(logEntries);
-            String lastReleasePrepRev = getLastReleasePrepRev(logEntries);
-            String lastReleasedVersion = null;
-            if (lastReleasePrepRev != null) {
-                String lastReleasePom = scmClient.getFile(svnUrl + "/trunk/pom.xml", lastReleasePrepRev);
-                lastReleasedVersion = MavenUtils.extractVersion(lastReleasePom);
-            }
+            List<Commit> logEntries = getCommits(svnRepo, svnUrl, scmClient);
 
             scmDetails.url = svnUrl;
             scmDetails.latest = currentVersion;
+
+            Commit latestCommit = logEntries.size() > 0 ? logEntries.get(0) : null;
+            String latestRevision = latestCommit != null ? latestCommit.revision : null;
             scmDetails.latestRevision = latestRevision;
+
+            String lastReleasedVersion = logEntries.stream()
+                    .filter(commit1 -> StringUtils.isNotBlank(commit1.release))
+                    .findFirst()
+                    .map(commit -> commit.release).orElse(null);
             scmDetails.released = lastReleasedVersion;
+
+            //String lastReleasedRev = getLastReleaseRev(logEntries);
+            String lastReleasedRev = logEntries.stream()
+                    .filter(commit1 -> StringUtils.isNotBlank(commit1.newVersion))
+                    .findFirst()
+                    .map(commit -> commit.revision).orElse(null);
             scmDetails.releasedRevision = lastReleasedRev;
+            
             scmDetails.changes = commitCountTo(logEntries, lastReleasedRev); //diff.size();
         }
         catch (Exception e) {
@@ -67,6 +73,13 @@ public class DefaultScmConnector implements ScmConnector {
         return scmDetails;
     }
 
+    protected List<Commit> getCommits(String svnRepo, String svnUrl, ScmClient scmClient) throws Exception {
+        MavenReleaseFlagger mavenReleaseFlagger = new MavenReleaseFlagger(scmClient, svnUrl);
+        return scmClient.getLog(svnUrl, "0", 100).stream()
+                .map(mavenReleaseFlagger::flag)
+                .collect(Collectors.toList());
+    }
+
     private Integer commitCountTo(List<Commit> logEntries, String refRev) {
         int count = 0;
         for (Commit logEntry : logEntries) {
@@ -74,24 +87,6 @@ public class DefaultScmConnector implements ScmConnector {
                 return count;
             }
             count++;
-        }
-        return null;
-    }
-
-    private String getLastReleaseRev(Collection<Commit> logEntries) throws Exception {
-        for (Commit logEntry : logEntries) {
-            if (StringUtils.startsWith(logEntry.message, "[maven-release-plugin]")) {
-                return logEntry.revision;
-            }
-        }
-        return null;
-    }
-
-    private String getLastReleasePrepRev(Collection<Commit> logEntries) {
-        for (Commit logEntry : logEntries) {
-            if (StringUtils.startsWith(logEntry.message, "[maven-release-plugin] prepare release")) {
-                return logEntry.revision;
-            }
         }
         return null;
     }

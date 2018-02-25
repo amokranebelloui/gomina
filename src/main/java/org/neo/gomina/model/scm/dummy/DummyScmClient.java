@@ -32,7 +32,13 @@ public class DummyScmClient implements ScmClient {
         try {
             Map<String, Object> projectData = getProjectData(url);
             if (projectData != null) {
-                List<Map<String, Object>> log = (List<Map<String, Object>>) projectData.get("log");
+                List<Map<String, Object>> log = new ArrayList<>();
+                for (Map<String, Object> commit : (List<Map<String, Object>>) projectData.get("log")) {
+                    log.add(commit);
+                    if (StringUtils.equals((String)commit.get("revision"), rev)) {
+                        break;
+                    }
+                }
                 return buildFrom(log);
             }
         }

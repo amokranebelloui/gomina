@@ -24,6 +24,9 @@ import org.neo.gomina.api.instances.InstancesBuilder;
 import org.neo.gomina.api.projects.ProjectDetail;
 import org.neo.gomina.api.projects.ProjectsBuilder;
 import org.neo.gomina.model.monitoring.Monitoring;
+import org.neo.gomina.model.project.Project;
+import org.neo.gomina.model.project.Projects;
+import org.neo.gomina.model.scminfo.impl.CachedScmConnector;
 import org.neo.gomina.module.GominaModule;
 
 import java.io.File;
@@ -47,6 +50,9 @@ public class WebVerticle extends AbstractVerticle {
         ProjectsBuilder projectBuilder = injector.getInstance(ProjectsBuilder.class);
         EnvBuilder envBuilder = injector.getInstance(EnvBuilder.class);
         InstancesBuilder instancesBuilder = injector.getInstance(InstancesBuilder.class);
+
+        CachedScmConnector cachedScmConnector = injector.getInstance(CachedScmConnector.class);
+        Projects projects = injector.getInstance(Projects.class);
 
 
         SockJSHandlerOptions options = new SockJSHandlerOptions().setHeartbeatInterval(2000);
@@ -144,6 +150,11 @@ public class WebVerticle extends AbstractVerticle {
             try {
                 logger.info("Reloading ...");
                 // FIXME Reload
+
+                for (Project project : projects.getProjects()) {
+                    cachedScmConnector.refresh(project.getSvnRepo(), project.getSvnUrl());
+                }
+
                 ctx.response().putHeader("content-type", "text/javascript").end();
             }
             catch (Exception e) {
