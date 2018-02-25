@@ -48,6 +48,7 @@ class Badge extends React.Component {
             <span title={this.props.title}
                 style={{padding: "3px", fontSize: '10px',
                 color: this.props.color, backgroundColor: this.props.backgroundColor,
+                border: this.props.border ? '1px solid ' + this.props.border : '',
                 borderRadius: "5px", display: "inline-block"}}>
                     {this.props.children}
                 </span>
@@ -97,9 +98,15 @@ class StatusWrapper extends React.Component {
                 status == 'LOADING' ? 'orange' :
                     status == 'DOWN' ? 'red' :
                         'lightgray';
+        const background =
+            status == 'LIVE' ? '#e8f4e9' :
+                status == 'LOADING' ? '#f9edcf' :
+                    status == 'DOWN' ? '#f8e8e3' :
+                        '#ededed';
+        //#F8F8F8
         return (
             <div style={{padding: '2px', margin: this.props.margin, display: this.props.block ? null : 'inline-block',
-                backgroundColor: '#F8F8F8', border: '3px solid ' + color, borderRadius: '5px'}}>
+                backgroundColor: background, border: '3px solid ' + color, borderRadius: '5px'}}>
                 {this.props.children}
             </div>
         )
