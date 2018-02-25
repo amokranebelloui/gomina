@@ -78,7 +78,7 @@ public class GominaModule extends AbstractModule {
         bind(DefaultScmConnector.class).in(Scopes.SINGLETON);
         bind(CachedScmConnector.class).in(Scopes.SINGLETON);
         //bind(ScmConnector.class).to(CachedScmConnector.class).in(Scopes.SINGLETON);
-        bind(ScmConnector.class).to(DefaultScmConnector.class).in(Scopes.SINGLETON);
+        bind(ScmConnector.class).to(CachedScmConnector.class).in(Scopes.SINGLETON);
 
         // Sonar
         bind(String.class).annotatedWith(Names.named("sonar.url")).toInstance(config.sonar.url);

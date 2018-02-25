@@ -1,10 +1,9 @@
-package org.neo.gomina.model.scminfo;
+package org.neo.gomina.model.scminfo.impl;
 
 import org.junit.Test;
 import org.neo.gomina.model.scm.ScmClient;
 import org.neo.gomina.model.scm.ScmRepos;
 import org.neo.gomina.model.scm.dummy.DummyScmClient;
-import org.neo.gomina.model.scminfo.impl.DefaultScmConnector;
 
 public class DefaultScmConnectorTest {
     @Test

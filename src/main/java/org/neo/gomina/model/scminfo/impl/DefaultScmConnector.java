@@ -27,6 +27,11 @@ public class DefaultScmConnector implements ScmConnector {
     }
 
     @Override
+    public void refresh(String svnRepo, String svnUrl) {
+
+    }
+
+    @Override
     public ScmDetails getSvnDetails(String svnRepo, String svnUrl) {
         logger.info("Svn Details for " + svnUrl);
         ScmClient scmClient = scmRepos.get(svnRepo);
