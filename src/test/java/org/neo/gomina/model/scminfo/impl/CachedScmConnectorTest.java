@@ -5,8 +5,6 @@ import org.neo.gomina.model.scm.ScmClient;
 import org.neo.gomina.model.scm.ScmRepos;
 import org.neo.gomina.model.scm.dummy.DummyScmClient;
 
-import static org.junit.Assert.*;
-
 public class CachedScmConnectorTest {
 
     @Test

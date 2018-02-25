@@ -13,7 +13,7 @@ data class Project(
     var id: String,
     var label: String?,
     var type: String?,
-    var svnRepo: String?,
+    var svnRepo: String = "",
     var svnUrl: String?,
     var maven: String?,
     var jenkinsJob: String?

@@ -7,8 +7,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.neo.gomina.model.scm.ScmClient;
 import org.neo.gomina.model.scm.Commit;
+import org.neo.gomina.model.scm.ScmClient;
 
 import java.io.File;
 import java.io.IOException;

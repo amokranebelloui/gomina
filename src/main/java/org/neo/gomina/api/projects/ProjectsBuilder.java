@@ -39,9 +39,17 @@ public class ProjectsBuilder {
     public ProjectDetail getProject(String projectId) throws Exception {
         Project project = projects.getProject(projectId);
         if (project != null) {
-            ScmDetails scmDetails = scmConnector.getSvnDetails(project.getSvnRepo(), project.getSvnUrl());
             SonarIndicators sonarIndicators = sonarConnector.getMetrics(project.getMaven()).get(project.getMaven());
-            List<CommitLogEntry> commitLog = map(scmConnector.getCommitLog(project.getSvnRepo(), project.getSvnUrl()));
+            List<CommitLogEntry> commitLog;
+            ScmDetails scmDetails;
+            if (StringUtils.isNotBlank(project.getSvnUrl())) {
+                scmDetails = scmConnector.getSvnDetails(project.getSvnRepo(), project.getSvnUrl());
+                commitLog = map(scmConnector.getCommitLog(project.getSvnRepo(), project.getSvnUrl()));
+            }
+            else {
+                scmDetails = new ScmDetails();
+                commitLog = new ArrayList<>();
+            }
             return build(project, scmDetails, commitLog, sonarIndicators);
         }
         return null;
