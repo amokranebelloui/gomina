@@ -61,7 +61,7 @@ function Leader(props) {
     return (
         <Badge title={title}
                backgroundColor={leader ? '#ff9a22' : participating ? 'gray' : 'lightgray'}
-               border={cluster ? 'green' : undefined}
+               border={cluster ? '#ff8f14' : undefined}
                color='white'>{leader ? '***' : '-'}</Badge>
     )
 }
