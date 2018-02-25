@@ -71,9 +71,12 @@ class ArchiDiagramApp extends React.Component {
 class EnvApp extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {env: 'PROD', realtime: false, instances: this.props.instances}
-        this.connect = this.connect.bind(this)
-        this.switch = this.switch.bind(this)
+        this.state = {env: 'PROD', envs: [], realtime: false, instances: this.props.instances};
+        this.connect = this.connect.bind(this);
+        this.switch = this.switch.bind(this);
+        this.retrieveEnvs = this.retrieveEnvs.bind(this);
+
+        console.info("envApp !constructor ", this.props.instances);
     }
     connect() {
         this.sock = new SockJS('/realtime');
@@ -121,6 +124,18 @@ class EnvApp extends React.Component {
             }
         }
     }
+    retrieveEnvs() {
+        const thisComponent = this;
+        axios.get('/data/envs')
+            .then(response => {
+                console.log("data envs", response.data);
+                thisComponent.setState({envs: response.data});
+            })
+            .catch(function (error) {
+                console.log("error envs", error.response);
+                thisComponent.setState({envs: []});
+            });
+    }
     reload() {
         axios.post('/data/instances/reload')
             .then(response => {
@@ -130,8 +145,17 @@ class EnvApp extends React.Component {
                 console.log("reload error", error.response);
             });
     }
+    componentWillMount() {
+        console.info("envApp !will-mount ");
+    }
+    componentWillReceiveProps(nextProps) {
+        console.info("envApp !props-chg ");
+        this.setState({instances: nextProps.instances});
+    }
     componentDidMount() {
+        console.info("envApp !mount ");
         //this.connect();
+        this.retrieveEnvs()
     }
     selectEnv(env) {
         this.setState({env: env});
@@ -139,8 +163,8 @@ class EnvApp extends React.Component {
     render() {
         const instancesByEnv = groupBy(this.state.instances, 'env');
         const instances = instancesByEnv[this.state.env] || [];
-        const envs = Object.keys(instancesByEnv);
-        console.info('envs', envs);
+        const envsByType = groupBy(this.state.envs, 'type');
+        console.info("envApp", this.state.instances, this.state.env, instances);
 
         return (
             <AppLayout title={"Environment '" + this.state.env + "'"}>
@@ -151,8 +175,15 @@ class EnvApp extends React.Component {
                     <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
                     <div ref={node => this.eventsList = node}></div>
                 </div>
-                {envs.map(env =>
-                    <button key={env} style={{color: this.state.env == env ? 'gray' : null}} onClick={e => this.selectEnv(env)}>{env}</button>
+
+                {Object.keys(envsByType).map(type =>
+                    <span key={type}>
+                        <span>{type} </span>
+                        {envsByType[type].map(env =>
+                            <button key={env.env} style={{color: this.state.env == env.env ? 'gray' : null}} onClick={e => this.selectEnv(env.env)}>{env.env}</button>
+                        )}
+                        <br />
+                    </span>
                 )}
                 <hr/>
                 <EnvironmentLogical instances={instances} />
