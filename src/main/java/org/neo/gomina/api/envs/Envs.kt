@@ -6,7 +6,11 @@ import javax.inject.Inject
 /**
  * type: PROD, TEST
  */
-data class Env(val env: String, val type:String, val app:String)
+data class Env(
+    val env: String,
+    val type:String,
+    val app:String
+)
 
 class EnvBuilder {
     @Inject private lateinit var inventory: Inventory
