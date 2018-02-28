@@ -171,7 +171,7 @@ class InstancesBuilder {
 
         instance.cluster = indicators["cluster"] as Boolean? ?: false
         instance.participating = indicators["participating"] as Boolean? ?: false
-        instance.leader = indicators["leader"] as Boolean? ?: isLive(indicators)
+        instance.leader = indicators["leader"] as Boolean? ?: true // Historically we didn't have this field
 
         instance.status = indicators["status"] as String?
         instance.jmx = indicators["jmx"] as Int?

@@ -11,6 +11,7 @@ import org.neo.gomina.api.instances.InstancesApi;
 import org.neo.gomina.api.instances.InstancesBuilder;
 import org.neo.gomina.api.projects.ProjectsApi;
 import org.neo.gomina.api.projects.ProjectsBuilder;
+import org.neo.gomina.api.realtime.NotificationsApi;
 import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.file.FileInventory;
 import org.neo.gomina.model.monitoring.Monitoring;
@@ -98,10 +99,12 @@ public class GominaModule extends AbstractModule {
         bind(InstancesBuilder.class).in(Scopes.SINGLETON);
         bind(ProjectsBuilder.class).in(Scopes.SINGLETON);
 
+        // Vertx API
         bind(EnvsApi.class).in(Scopes.SINGLETON);
         bind(ProjectsApi.class).in(Scopes.SINGLETON);
         bind(InstancesApi.class).in(Scopes.SINGLETON);
         bind(DiagramApi.class).in(Scopes.SINGLETON);
+        bind(NotificationsApi.class).in(Scopes.SINGLETON);
     }
 
 }
