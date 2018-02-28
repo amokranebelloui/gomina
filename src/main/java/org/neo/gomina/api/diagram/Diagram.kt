@@ -4,6 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.google.inject.Inject
+import io.vertx.core.Vertx
+import io.vertx.core.json.Json
+import io.vertx.ext.web.Router
+import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import java.io.File
 import java.io.IOException
@@ -51,4 +56,45 @@ class DiagramBuilder {
 
     fun getDiagram(): Diagram = Diagram(ArrayList(components.values), dependencies)
     
+}
+
+class DiagramApi {
+
+    companion object {
+        private val logger = LogManager.getLogger(DiagramApi::class.java)
+        val diagramBuilder = DiagramBuilder()
+    }
+
+    val router: Router
+
+    @Inject
+    constructor(vertx: Vertx) {
+        this.router = Router.router(vertx)
+
+        router.post("/update").handler(this::updateDiagram)
+        router.get("/data").handler(this::data)
+    }
+
+    fun data(ctx: RoutingContext) {
+        try {
+            logger.info("Get Diagram data")
+            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(diagramBuilder.getDiagram()))
+        } catch (e: Exception) {
+            logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+    }
+
+    fun updateDiagram(ctx: RoutingContext) {
+        try {
+            val json = ctx.bodyAsJson
+            logger.info("Update ... " + json)
+            diagramBuilder.updateComponent(json.getString("name"), json.getInteger("x")!!, json.getInteger("y")!!)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+    }
 }

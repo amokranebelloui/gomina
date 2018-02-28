@@ -2,14 +2,15 @@ package org.neo.gomina.web;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.util.Modules;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.StaticHandler;
@@ -19,7 +20,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSSocket;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.neo.gomina.api.diagram.DiagramBuilder;
+import org.neo.gomina.api.diagram.DiagramApi;
 import org.neo.gomina.api.envs.EnvBuilder;
 import org.neo.gomina.api.instances.InstancesBuilder;
 import org.neo.gomina.api.projects.ProjectDetail;
@@ -45,7 +46,12 @@ public class WebVerticle extends AbstractVerticle {
         logger.info("Starting...");
         Router router = Router.router(vertx);
 
-        Injector injector = Guice.createInjector(new GominaModule());
+        Injector injector = Guice.createInjector(Modules.combine(new GominaModule(), new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(Vertx.class).toInstance(vertx);
+            }
+        }));
 
         Monitoring monitoring = injector.getInstance(Monitoring.class);
         ProjectsBuilder projectBuilder = injector.getInstance(ProjectsBuilder.class);
@@ -54,6 +60,9 @@ public class WebVerticle extends AbstractVerticle {
 
         CachedScmConnector cachedScmConnector = injector.getInstance(CachedScmConnector.class);
         Projects projects = injector.getInstance(Projects.class);
+
+
+        DiagramApi diagramApi = injector.getInstance(DiagramApi.class);
 
 
         SockJSHandlerOptions options = new SockJSHandlerOptions().setHeartbeatInterval(2000);
@@ -178,30 +187,7 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
 
-        DiagramBuilder diagramBuilder = new DiagramBuilder();
-
-        router.post("/data/diagram/update").handler(ctx -> {
-            try {
-                JsonObject json = ctx.getBodyAsJson();
-                logger.info("Update ... " + json);
-                diagramBuilder.updateComponent(json.getString("name"), json.getInteger("x"), json.getInteger("y"));
-                ctx.response().putHeader("content-type", "text/javascript").end();
-            }
-            catch (Exception e) {
-                logger.error("Cannot get instances", e);
-                ctx.fail(500);
-            }
-        });
-
-        router.get("/data/diagram/data").handler(ctx -> {
-            try {
-                ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(diagramBuilder.getDiagram()));
-            }
-            catch (Exception e) {
-                logger.error("Cannot get instances", e);
-                ctx.fail(500);
-            }
-        });
+        router.mountSubRouter("/data/diagram", diagramApi.getRouter());
 
         /*
         final Handlebars handlebars = new Handlebars(new FileTemplateLoader("web"));
