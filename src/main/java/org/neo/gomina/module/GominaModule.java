@@ -15,8 +15,6 @@ import org.neo.gomina.api.realtime.NotificationsApi;
 import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.file.FileInventory;
 import org.neo.gomina.model.monitoring.Monitoring;
-import org.neo.gomina.model.monitoring.dummy.DummyMonitorData;
-import org.neo.gomina.model.monitoring.dummy.DummyMonitorThread;
 import org.neo.gomina.model.monitoring.zmq.ZmqMonitorConfig;
 import org.neo.gomina.model.monitoring.zmq.ZmqMonitorThreads;
 import org.neo.gomina.model.project.Projects;
@@ -66,13 +64,12 @@ public class GominaModule extends AbstractModule {
         bind(String.class).annotatedWith(Names.named("inventory.filter"))
                 .toInstance(config.inventory.get("inventoryFilter"));
         // FIXME Type
+        
         bind(Projects.class).to(FileProjects.class).in(Scopes.SINGLETON);
         bind(Inventory.class).to(FileInventory.class).in(Scopes.SINGLETON);
 
         // Monitoring
         bind(Monitoring.class).in(Scopes.SINGLETON);
-        bind(DummyMonitorData.class).in(Scopes.SINGLETON);
-        bind(DummyMonitorThread.class).asEagerSingleton();
         bind(ZmqMonitorConfig.class).toInstance(config.zmqMonitoring);
         bind(ZmqMonitorThreads.class).asEagerSingleton();
 

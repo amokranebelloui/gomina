@@ -1,4 +1,4 @@
-package org.neo.gomina.test
+package org.neo.gomina.model.monitoring.zmq.dummy
 
 import org.zeromq.ZMQ
 import kotlin.concurrent.thread

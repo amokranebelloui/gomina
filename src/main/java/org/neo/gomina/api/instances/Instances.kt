@@ -126,8 +126,8 @@ class InstancesBuilder {
                     instance = Instance(
                         id = id,
                         env = env.id,
-                        type = indicators["type"] as String,
-                        service = indicators["service"] as String,
+                        type = indicators["type"],
+                        service = indicators["service"],
                         name = instanceId,
                         unexpected = true
                     )
@@ -163,41 +163,41 @@ class InstancesBuilder {
         instance.releasedRevision = scmDetails.releasedRevision
     }
 
-    private fun applyMonitoring(instance: Instance, indicators: Map<String, Any>) {
-        instance.pid = indicators["pid"] as String?
-        instance.host = indicators["host"] as String?
-        instance.version = indicators["version"] as String?
-        instance.revision = indicators["revision"]?.toString()
+    private fun applyMonitoring(instance: Instance, indicators: Map<String, String>) {
+        instance.pid = indicators["pid"]
+        instance.host = indicators["host"]
+        instance.version = indicators["version"]
+        instance.revision = indicators["revision"]
 
-        instance.cluster = indicators["cluster"] as Boolean? ?: false
-        instance.participating = indicators["participating"] as Boolean? ?: false
-        instance.leader = indicators["leader"] as Boolean? ?: true // Historically we didn't have this field
+        instance.cluster = indicators["cluster"]?.toBoolean() ?: false
+        instance.participating = indicators["participating"]?.toBoolean() ?: false
+        instance.leader = indicators["leader"]?.toBoolean() ?: true // Historically we didn't have this field
 
-        instance.status = indicators["status"] as String?
-        instance.jmx = indicators["jmx"] as Int?
-        instance.busVersion = indicators["busVersion"] as String?
-        instance.coreVersion = indicators["coreVersion"] as String?
-        instance.quickfixPersistence = indicators["quickfixPersistence"] as String?
-        instance.redisHost = indicators["redisHost"] as String?
-        instance.redisPort = indicators["redisPort"] as Int?
-        instance.redisMasterHost = indicators["redisMasterHost"] as String?
-        instance.redisMasterPort = indicators["redisMasterPort"] as Int?
-        instance.redisMasterLink = indicators["redisMasterLink"] as Boolean?
-        instance.redisMasterLinkDownSince = indicators["redisMasterLinkDownSince"] as String?
-        instance.redisOffset = indicators["redisOffset"] as Int?
-        instance.redisOffsetDiff = indicators["redisOffsetDiff"] as Int?
-        instance.redisMaster = indicators["redisMaster"] as Boolean?
-        instance.redisRole = indicators["redisRole"] as String?
-        instance.redisRW = indicators["redisRW"] as String?
-        instance.redisMode = indicators["redisMode"] as String?
-        instance.redisStatus = indicators["redisStatus"] as String?
-        instance.redisSlaveCount = indicators["redisSlaveCount"] as Int?
-        instance.redisClientCount = indicators["redisClientCount"] as Int?
+        instance.status = indicators["status"]
+        instance.jmx = indicators["jmx"]?.toInt()
+        instance.busVersion = indicators["busVersion"]
+        instance.coreVersion = indicators["coreVersion"]
+        instance.quickfixPersistence = indicators["quickfixPersistence"]
+        instance.redisHost = indicators["redisHost"]
+        instance.redisPort = indicators["redisPort"]?.toInt()
+        instance.redisMasterHost = indicators["redisMasterHost"]
+        instance.redisMasterPort = indicators["redisMasterPort"]?.toInt()
+        instance.redisMasterLink = indicators["redisMasterLink"]?.toBoolean()
+        instance.redisMasterLinkDownSince = indicators["redisMasterLinkDownSince"]
+        instance.redisOffset = indicators["redisOffset"]?.toInt()
+        instance.redisOffsetDiff = indicators["redisOffsetDiff"]?.toInt()
+        instance.redisMaster = indicators["redisMaster"]?.toBoolean()
+        instance.redisRole = indicators["redisRole"]
+        instance.redisRW = indicators["redisRW"]
+        instance.redisMode = indicators["redisMode"]
+        instance.redisStatus = indicators["redisStatus"]
+        instance.redisSlaveCount = indicators["redisSlaveCount"]?.toInt()
+        instance.redisClientCount = indicators["redisClientCount"]?.toInt()
     }
 
     // FIXME Easier to have it on the UI level
     private fun isLive(indicators: Map<String, Any>): Boolean {
-        val timestamp = indicators["timestamp"] as LocalDateTime?
+        val timestamp = indicators["timestamp"] as LocalDateTime?  // FIXME Date format
         return if (timestamp != null) LocalDateTime(DateTimeZone.UTC).minusSeconds(1).isAfter(timestamp) else true
     }
 

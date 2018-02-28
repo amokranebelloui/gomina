@@ -94,11 +94,11 @@ class EnvApp extends React.Component {
             //var r = Math.floor((Math.random() * 3) + 1);
             //var fakeStatus = r == 1 ? 'LIVE' : r == 2 ? 'LOADING' : 'DOWN';
             let event = JSON.parse(e.data);
-            //console.log('message', event);
-            eventsDiv.innerHTML = eventsDiv.innerHTML + ' ' + e.data + '<br>';
+            console.log('real time event', event);
+            eventsDiv.innerHTML = eventsDiv.innerHTML + ' ' + event.env + ' ' + event.name + ' ' + event.status + '<br>';
 
             // FIXME review how to identify instances
-            const found = thisComponent.state.instances.find(instance => instance.name == event.id);
+            const found = thisComponent.state.instances.find(instance => instance.name == event.name);
 
             //console.info("found", found);
 

@@ -51,10 +51,11 @@ public class WebVerticle extends AbstractVerticle {
         Router router = Router.router(vertx);
         router.route().handler(BodyHandler.create());
 
+        // Relay monitoring callbacks to WebSockets (TODO should go through instance object)
         Monitoring monitoring = injector.getInstance(Monitoring.class);
         final ObjectMapper mapper = new ObjectMapper();
         monitoring.add((env, instanceId, newValues) -> {
-            Map<String, Object> map = new HashMap<>();
+            Map<String, String> map = new HashMap<>();
             map.put("env", env);
             map.put("id", instanceId);
             map.putAll(newValues);

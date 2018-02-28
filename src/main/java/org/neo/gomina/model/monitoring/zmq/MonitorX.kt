@@ -41,8 +41,8 @@ class ZmqMonitorThread(private val monitoring: Monitoring, private val url: Stri
                 val indicators = MessageParser.parse(obj)
                 enrich(indicators)
                 monitoring.notify(
-                        indicators["@env"] as String,
-                        indicators["@instanceId"] as String,
+                        indicators["@env"] ?: "-",
+                        indicators["@instanceId"] ?: "-", // FIXME Shouldnt happen, review design
                         indicators)
                 logger.trace(indicators)
             }
@@ -56,9 +56,9 @@ class ZmqMonitorThread(private val monitoring: Monitoring, private val url: Stri
         logger.info("closed")
     }
 
-    private fun enrich(indicators: MutableMap<String, Any>) {
-        indicators.put("TIMESTAMP", Date())
-        indicators.put("STATUS", mapStatus(indicators["STATUS"] as String? ?: "DOWN"))
+    private fun enrich(indicators: MutableMap<String, String>) {
+        indicators.put("TIMESTAMP", Date().toString()) // FIXME Date format
+        indicators.put("status", mapStatus(indicators["status"] ?: "DOWN"))
     }
 
     private fun mapStatus(status: String): String {
@@ -72,7 +72,7 @@ class ZmqMonitorThread(private val monitoring: Monitoring, private val url: Stri
 }
 
 object MessageParser {
-    fun parse(obj: String): MutableMap<String, Any> {
+    fun parse(obj: String): MutableMap<String, String> {
         val i = obj.indexOf(";")
         val (_, _, env, instanceId) = obj.substring(0, i).split(".")
         val indicators = mapBody(obj.substring(i + 1))
@@ -81,7 +81,7 @@ object MessageParser {
         return indicators
     }
 
-    private fun mapBody(body: String): MutableMap<String, Any> {
+    private fun mapBody(body: String): MutableMap<String, String> {
         return body.split(";")
                 .map { keyValue -> val (key, value) = keyValue.split("="); Pair(key, value) }
                 .toMap(mutableMapOf())

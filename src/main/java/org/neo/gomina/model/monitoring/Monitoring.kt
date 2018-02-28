@@ -8,11 +8,11 @@ import java.util.concurrent.CopyOnWriteArrayList
 class EnvMonitoring {
 
     // instance.id / indicators
-    private var map: MutableMap<String, MutableMap<String, Any>> = ConcurrentHashMap()
+    private var map: MutableMap<String, MutableMap<String, String>> = ConcurrentHashMap()
 
-    fun getAll(): Map<String, Map<String, Any>> = map
+    fun getAll(): Map<String, Map<String, String>> = map
 
-    fun getForInstance(name: String): MutableMap<String, Any> {
+    fun getForInstance(name: String): MutableMap<String, String> {
         return map.getOrPut(name) { ConcurrentHashMap() }
     }
 }
@@ -27,7 +27,7 @@ class Monitoring {
         this.listeners.add(listener)
     }
 
-    fun notify(env: String, instanceId: String, newValues: Map<String, Any>) {
+    fun notify(env: String, instanceId: String, newValues: Map<String, String>) {
         try {
             val envMonitoring = topology.getOrPut(env) { EnvMonitoring() }
             val indicators = envMonitoring.getForInstance(instanceId)
@@ -58,4 +58,4 @@ interface MonitoringListener {
 }
 */
 
-typealias MonitoringListener = (String, String, Map<String,Any>) -> Unit
+typealias MonitoringListener = (String, String, Map<String, String>) -> Unit
