@@ -1,6 +1,11 @@
 package org.neo.gomina.api.instances
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import io.vertx.core.Vertx
+import io.vertx.ext.web.Router
+import io.vertx.ext.web.RoutingContext
 import org.apache.commons.lang3.StringUtils
+import org.apache.logging.log4j.LogManager
 import org.joda.time.DateTimeZone
 import org.joda.time.LocalDateTime
 import org.neo.gomina.model.inventory.InvInstance
@@ -10,6 +15,7 @@ import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.scminfo.ScmConnector
 import org.neo.gomina.model.scminfo.ScmDetails
+import org.neo.gomina.model.scminfo.impl.CachedScmConnector
 import org.neo.gomina.model.sshinfo.SshConnector
 import org.neo.gomina.model.sshinfo.SshDetails
 import java.util.*
@@ -195,4 +201,57 @@ class InstancesBuilder {
         return if (timestamp != null) LocalDateTime(DateTimeZone.UTC).minusSeconds(1).isAfter(timestamp) else true
     }
 
+}
+
+class InstancesApi {
+
+    companion object {
+        private val logger = LogManager.getLogger(InstancesApi::class.java)
+    }
+
+    val router: Router
+
+    @Inject private lateinit var instancesBuilder: InstancesBuilder
+    @Inject private lateinit var cachedScmConnector: CachedScmConnector
+    @Inject private lateinit var projects: Projects
+    private val mapper = ObjectMapper()
+
+    @Inject
+    constructor(vertx: Vertx) {
+        this.router = Router.router(vertx)
+
+        router.get("/").handler(this::instances)
+        router.post("/reload").handler(this::reload)
+    }
+
+    fun instances(ctx: RoutingContext) {
+        try {
+            ctx.response()
+                    .putHeader("content-type", "text/javascript")
+                    .end(mapper.writeValueAsString(instancesBuilder.getInstances()))
+        } catch (e: Exception) {
+            logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+
+    }
+
+    fun reload(ctx: RoutingContext) {
+        try {
+            logger.info("Reloading ...")
+            // FIXME Reload
+
+            for (project in projects.getProjects()) {
+                if (StringUtils.isNotBlank(project.svnUrl)) {
+                    cachedScmConnector.refresh(project.svnRepo, project.svnUrl)
+                }
+            }
+
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        } catch (e: Exception) {
+            logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+
+    }
 }

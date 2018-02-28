@@ -17,17 +17,13 @@ import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.sockjs.SockJSHandler;
 import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions;
 import io.vertx.ext.web.handler.sockjs.SockJSSocket;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo.gomina.api.diagram.DiagramApi;
 import org.neo.gomina.api.envs.EnvsApi;
-import org.neo.gomina.api.instances.InstancesBuilder;
+import org.neo.gomina.api.instances.InstancesApi;
 import org.neo.gomina.api.projects.ProjectsApi;
 import org.neo.gomina.model.monitoring.Monitoring;
-import org.neo.gomina.model.project.Project;
-import org.neo.gomina.model.project.Projects;
-import org.neo.gomina.model.scminfo.impl.CachedScmConnector;
 import org.neo.gomina.module.GominaModule;
 
 import java.io.File;
@@ -53,14 +49,10 @@ public class WebVerticle extends AbstractVerticle {
         }));
 
         Monitoring monitoring = injector.getInstance(Monitoring.class);
-        InstancesBuilder instancesBuilder = injector.getInstance(InstancesBuilder.class);
-
-        CachedScmConnector cachedScmConnector = injector.getInstance(CachedScmConnector.class);
-        Projects projects = injector.getInstance(Projects.class);
-
 
         EnvsApi envsApi = injector.getInstance(EnvsApi.class);
         ProjectsApi projectsApi = injector.getInstance(ProjectsApi.class);
+        InstancesApi instancesApi = injector.getInstance(InstancesApi.class);
         DiagramApi diagramApi = injector.getInstance(DiagramApi.class);
 
 
@@ -104,41 +96,8 @@ public class WebVerticle extends AbstractVerticle {
         });
 
         router.mountSubRouter("/data/envs", envsApi.getRouter());
-
         router.mountSubRouter("/data/projects", projectsApi.getRouter());
-
-
-        router.get("/data/instances").handler(ctx -> {
-            try {
-                ctx.response()
-                        .putHeader("content-type", "text/javascript")
-                        .end(mapper.writeValueAsString(instancesBuilder.getInstances()));
-            }
-            catch (Exception e) {
-                logger.error("Cannot get instances", e);
-                ctx.fail(500);
-            }
-        });
-
-        router.post("/data/instances/reload").handler(ctx -> {
-            try {
-                logger.info("Reloading ...");
-                // FIXME Reload
-
-                for (Project project : projects.getProjects()) {
-                    if (StringUtils.isNotBlank(project.getSvnUrl())) {
-                        cachedScmConnector.refresh(project.getSvnRepo(), project.getSvnUrl());
-                    }
-                }
-
-                ctx.response().putHeader("content-type", "text/javascript").end();
-            }
-            catch (Exception e) {
-                logger.error("Cannot get instances", e);
-                ctx.fail(500);
-            }
-        });
-
+        router.mountSubRouter("/data/instances", instancesApi.getRouter());
         router.mountSubRouter("/data/diagram", diagramApi.getRouter());
 
         /*
