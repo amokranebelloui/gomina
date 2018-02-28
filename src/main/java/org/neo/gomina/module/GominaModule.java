@@ -6,7 +6,9 @@ import com.google.inject.name.Names;
 import org.apache.commons.lang3.StringUtils;
 import org.neo.gomina.api.diagram.DiagramApi;
 import org.neo.gomina.api.envs.EnvBuilder;
+import org.neo.gomina.api.envs.EnvsApi;
 import org.neo.gomina.api.instances.InstancesBuilder;
+import org.neo.gomina.api.projects.ProjectsApi;
 import org.neo.gomina.api.projects.ProjectsBuilder;
 import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.file.FileInventory;
@@ -95,6 +97,8 @@ public class GominaModule extends AbstractModule {
         bind(InstancesBuilder.class).in(Scopes.SINGLETON);
         bind(ProjectsBuilder.class).in(Scopes.SINGLETON);
 
+        bind(EnvsApi.class).in(Scopes.SINGLETON);
+        bind(ProjectsApi.class).in(Scopes.SINGLETON);
         bind(DiagramApi.class).in(Scopes.SINGLETON);
     }
 

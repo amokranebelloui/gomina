@@ -225,19 +225,20 @@ class ProjectApp extends React.Component {
         super(props);
         this.state = {project: {}};
         this.retrieveProject = this.retrieveProject.bind(this);
-        console.info("!constructor ", this.props.match.params.id);
+        this.reloadProject = this.reloadProject.bind(this);
+        console.info("projectApp !constructor ", this.props.match.params.id);
     }
     componentWillMount() {
-        console.info("!mount ", this.props.match.params.id);
-        this.retrieveProject(this.props.match.params.id);
+        console.info("projectApp !mount ", this.props.match.params.id);
+        //this.retrieveProject(this.props.match.params.id);
     }
     componentWillReceiveProps(nextProps) {
-        console.info("!props-chg ", this.props.match.params.id, nextProps.match.params.id);
+        console.info("projectApp !props-chg ", this.props.match.params.id, nextProps.match.params.id);
         this.retrieveProject(nextProps.match.params.id);
     }
     retrieveProject(projectId) {
         const thisComponent = this;
-        axios.get('/data/project/' + projectId)
+        axios.get('/data/projects/' + projectId)
             .then(response => {
                 console.log("project", response.data);
                 thisComponent.setState({project: response.data});
@@ -245,6 +246,15 @@ class ProjectApp extends React.Component {
             .catch(function (error) {
                 console.log("error", error.response);
                 thisComponent.setState({project: {}});
+            });
+    }
+    reloadProject(projectId) {
+        axios.post('/data/projects/' + projectId + '/reload')
+            .then(response => {
+                console.log("project reloaded", response.data);
+            })
+            .catch(function (error) {
+                console.log("project reload error", error.response);
             });
     }
     render() {
@@ -273,6 +283,7 @@ class ProjectApp extends React.Component {
                             <span style={{fontSize: 11}}>{project.mvn}</span>
                             <br/>
                             <span style={{fontSize: 11}}>{project.repo + ':' + project.svn}</span>
+                            <button onClick={e => this.reloadProject(project.id)}>RELOAD</button>
                             <br/>
                             <LinesOfCode loc={project.loc} />&nbsp;
                             <Coverage coverage={project.coverage} />&nbsp;

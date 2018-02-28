@@ -21,10 +21,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.neo.gomina.api.diagram.DiagramApi;
-import org.neo.gomina.api.envs.EnvBuilder;
+import org.neo.gomina.api.envs.EnvsApi;
 import org.neo.gomina.api.instances.InstancesBuilder;
-import org.neo.gomina.api.projects.ProjectDetail;
-import org.neo.gomina.api.projects.ProjectsBuilder;
+import org.neo.gomina.api.projects.ProjectsApi;
 import org.neo.gomina.model.monitoring.Monitoring;
 import org.neo.gomina.model.project.Project;
 import org.neo.gomina.model.project.Projects;
@@ -54,14 +53,14 @@ public class WebVerticle extends AbstractVerticle {
         }));
 
         Monitoring monitoring = injector.getInstance(Monitoring.class);
-        ProjectsBuilder projectBuilder = injector.getInstance(ProjectsBuilder.class);
-        EnvBuilder envBuilder = injector.getInstance(EnvBuilder.class);
         InstancesBuilder instancesBuilder = injector.getInstance(InstancesBuilder.class);
 
         CachedScmConnector cachedScmConnector = injector.getInstance(CachedScmConnector.class);
         Projects projects = injector.getInstance(Projects.class);
 
 
+        EnvsApi envsApi = injector.getInstance(EnvsApi.class);
+        ProjectsApi projectsApi = injector.getInstance(ProjectsApi.class);
         DiagramApi diagramApi = injector.getInstance(DiagramApi.class);
 
 
@@ -104,57 +103,10 @@ public class WebVerticle extends AbstractVerticle {
             }
         });
 
-        router.get("/data/envs").handler(ctx -> {
-            try {
-                ctx.response().putHeader("content-type", "text/javascript")
-                        .end(mapper.writeValueAsString(envBuilder.getEnvs()));
-            }
-            catch (Exception e) {
-                logger.error("Cannot get projects", e);
-                ctx.fail(500);
-            }
-        });
+        router.mountSubRouter("/data/envs", envsApi.getRouter());
 
-        router.get("/data/projects").handler(ctx -> {
-            try {
-                ctx.response().putHeader("content-type", "text/javascript")
-                        .end(mapper.writeValueAsString(projectBuilder.getProjects()));
-            }
-            catch (Exception e) {
-                logger.error("Cannot get projects", e);
-                ctx.fail(500);
-            }
-        });
+        router.mountSubRouter("/data/projects", projectsApi.getRouter());
 
-        router.get("/data/project/:projectId").handler(ctx -> {
-            try {
-                String projectId = ctx.request().getParam("projectId");
-                ProjectDetail project = projectBuilder.getProject(projectId);
-                if (project != null) {
-                    ctx.response().putHeader("content-type", "text/javascript")
-                            .end(mapper.writeValueAsString(project));
-                }
-                else {
-                    logger.info("Cannot get project " + projectId);
-                    ctx.fail(404);
-                }
-            }
-            catch (Exception e) {
-                logger.error("Cannot get project", e);
-                ctx.fail(500);
-            }
-        });
-        router.post("/data/project/:projectId/reload").handler(ctx -> {
-            try {
-                String projectId = ctx.request().getParam("projectId");
-                Project project = projects.getProject(projectId);
-                cachedScmConnector.refresh(project.getSvnRepo(), project.getSvnUrl());
-            }
-            catch (Exception e) {
-                logger.error("Cannot get project", e);
-                ctx.fail(500);
-            }
-        });
 
         router.get("/data/instances").handler(ctx -> {
             try {
