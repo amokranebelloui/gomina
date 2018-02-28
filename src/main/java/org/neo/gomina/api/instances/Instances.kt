@@ -119,7 +119,7 @@ class InstancesBuilder {
 
         for (env in inventory.getEnvironments()) {
             val monitoring = this.monitoring.getFor(env.id)
-            for ((instanceId, indicators) in monitoring.all) {
+            for ((instanceId, indicators) in monitoring.getAll()) {
                 val id = env.id + "-" + instanceId
                 var instance = instancesMap[id]
                 if (instance == null) {

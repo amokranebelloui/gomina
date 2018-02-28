@@ -66,6 +66,7 @@ public class WebVerticle extends AbstractVerticle {
             catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
+            return null;
         });
 
         router
