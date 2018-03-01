@@ -83,6 +83,7 @@ object MessageParser {
 
     private fun mapBody(body: String): MutableMap<String, String> {
         return body.split(";")
+                .filter { it.contains("=") }
                 .map { keyValue -> val (key, value) = keyValue.split("="); Pair(key, value) }
                 .toMap(mutableMapOf())
     }
