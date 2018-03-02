@@ -9,7 +9,6 @@ import org.neo.gomina.api.envs.EnvBuilder;
 import org.neo.gomina.api.envs.EnvsApi;
 import org.neo.gomina.api.instances.InstancesApi;
 import org.neo.gomina.api.projects.ProjectsApi;
-import org.neo.gomina.api.projects.ProjectsBuilder;
 import org.neo.gomina.api.realtime.NotificationsApi;
 import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.file.FileInventory;
@@ -27,9 +26,10 @@ import org.neo.gomina.plugins.inventory.InventoryPlugin;
 import org.neo.gomina.plugins.monitoring.Monitoring;
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig;
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThreads;
-import org.neo.gomina.plugins.scm.ScmConnector;
+import org.neo.gomina.plugins.project.ProjectPlugin;
+import org.neo.gomina.plugins.scm.ScmPlugin;
 import org.neo.gomina.plugins.scm.connectors.ConfigScmRepos;
-import org.neo.gomina.plugins.scm.impl.CachedScmConnector;
+import org.neo.gomina.plugins.sonar.SonarPlugin;
 import org.neo.gomina.plugins.ssh.DumbSshConnector;
 import org.neo.gomina.plugins.ssh.SshConfig;
 import org.neo.gomina.plugins.ssh.SshConnector;
@@ -69,6 +69,7 @@ public class GominaModule extends AbstractModule {
         bind(Projects.class).to(FileProjects.class).in(Scopes.SINGLETON);
         bind(Inventory.class).to(FileInventory.class).in(Scopes.SINGLETON);
         bind(InventoryPlugin.class).in(Scopes.SINGLETON);
+        bind(ProjectPlugin.class).in(Scopes.SINGLETON);
 
         // Monitoring
         bind(Monitoring.class).in(Scopes.SINGLETON);
@@ -78,8 +79,7 @@ public class GominaModule extends AbstractModule {
         // SCM
         bind(ScmConfig.class).toInstance(config.scm);
         bind(ScmRepos.class).to(ConfigScmRepos.class).in(Scopes.SINGLETON);
-        bind(CachedScmConnector.class).in(Scopes.SINGLETON);
-        bind(ScmConnector.class).to(CachedScmConnector.class).in(Scopes.SINGLETON);
+        bind(ScmPlugin.class).in(Scopes.SINGLETON);
 
         // Sonar
         bind(String.class).annotatedWith(Names.named("sonar.url")).toInstance(config.sonar.url);
@@ -87,6 +87,7 @@ public class GominaModule extends AbstractModule {
                 ? DummySonarConnector.class
                 : HttpSonarConnector.class;
         bind(SonarConnector.class).to(sonarConnector).in(Scopes.SINGLETON);
+        bind(SonarPlugin.class).in(Scopes.SINGLETON);
 
         // SSH
         bind(SshConfig.class).toInstance(config.ssh);
@@ -96,7 +97,6 @@ public class GominaModule extends AbstractModule {
 
         // API
         bind(EnvBuilder.class).in(Scopes.SINGLETON);
-        bind(ProjectsBuilder.class).in(Scopes.SINGLETON);
 
         // Vertx API
         bind(EnvsApi.class).in(Scopes.SINGLETON);

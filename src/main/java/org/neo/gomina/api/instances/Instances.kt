@@ -13,8 +13,7 @@ import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.monitoring.Monitoring
-import org.neo.gomina.plugins.scm.ScmConnector
-import org.neo.gomina.plugins.scm.impl.CachedScmConnector
+import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.ssh.DumbSshConnector
 import javax.inject.Inject
 
@@ -27,17 +26,16 @@ class InstancesApi {
     val router: Router
 
     @Inject private lateinit var inventory: Inventory
+    @Inject private lateinit var projects: Projects
 
     //@Inject private lateinit var plugins:List<InstancesExt>
 
     @Inject private lateinit var inventoryPlugin: InventoryPlugin
     @Inject private lateinit var monitoring: Monitoring
-    @Inject private lateinit var scmConnector: ScmConnector
     @Inject private lateinit var sshConnector: DumbSshConnector
 
-    @Inject private lateinit var cachedScmConnector: CachedScmConnector
-    @Inject private lateinit var projects: Projects
-    
+    @Inject private lateinit var scmPlugin: ScmPlugin
+
     private val mapper = ObjectMapper()
 
     @Inject
@@ -88,7 +86,7 @@ class InstancesApi {
 
     private fun buildInstances(env: Environment, instances: Instances) {
         inventoryPlugin.onGetInstances(env.id, instances)
-        scmConnector.onGetInstances(env.id, instances)
+        scmPlugin.onGetInstances(env.id, instances)
         sshConnector.onGetInstances(env.id, instances)
         monitoring.onGetInstances(env.id, instances)
     }
@@ -100,7 +98,7 @@ class InstancesApi {
 
             for (project in projects.getProjects()) {
                 if (StringUtils.isNotBlank(project.svnUrl)) {
-                    cachedScmConnector.refresh(project.svnRepo, project.svnUrl)
+                    scmPlugin.refresh(project.svnRepo, project.svnUrl)
                 }
             }
 

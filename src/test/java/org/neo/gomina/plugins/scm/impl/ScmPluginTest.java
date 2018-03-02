@@ -4,9 +4,9 @@ import org.junit.Test;
 import org.neo.gomina.model.scm.ScmClient;
 import org.neo.gomina.model.scm.ScmRepos;
 import org.neo.gomina.plugins.scm.connectors.DummyScmClient;
-import org.neo.gomina.plugins.scm.impl.CachedScmConnector;
+import org.neo.gomina.plugins.scm.ScmPlugin;
 
-public class CachedScmConnectorTest {
+public class ScmPluginTest {
 
     @Test
     public void getSvnDetails() {
@@ -16,7 +16,7 @@ public class CachedScmConnectorTest {
             }
         }
 
-        CachedScmConnector connector = new CachedScmConnector(new FileScmReposOverride());
+        ScmPlugin connector = new ScmPlugin(new FileScmReposOverride());
 
         connector.getSvnDetails("repo", "OMS/Server/tradex-fixin");
         connector.getSvnDetails("repo", "OMS/Server/tradex-fixin");
