@@ -1,4 +1,4 @@
-package org.neo.gomina.model.sshinfo.impl;
+package org.neo.gomina.plugins.ssh.impl;
 
 import com.jcraft.jsch.Session;
 import org.apache.commons.lang3.StringUtils;
@@ -8,10 +8,10 @@ import org.neo.gomina.model.inventory.InvInstance;
 import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.security.Passwords;
 import org.neo.gomina.model.ssh.SshAuth;
-import org.neo.gomina.model.ssh.SshClient;
-import org.neo.gomina.model.sshinfo.SshConfig;
-import org.neo.gomina.model.sshinfo.SshConnector;
-import org.neo.gomina.model.sshinfo.SshDetails;
+import org.neo.gomina.plugins.ssh.connector.SshClient;
+import org.neo.gomina.plugins.ssh.SshConfig;
+import org.neo.gomina.plugins.ssh.SshConnector;
+import org.neo.gomina.plugins.ssh.SshDetails;
 
 import javax.inject.Inject;
 import java.util.List;

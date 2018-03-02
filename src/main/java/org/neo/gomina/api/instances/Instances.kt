@@ -9,52 +9,31 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.instances.Instance
 import org.neo.gomina.model.instances.Instances
 import org.neo.gomina.model.inventory.Inventory
-import org.neo.gomina.model.monitoring.Monitoring
+import org.neo.gomina.plugins.monitoring.Monitoring
 import org.neo.gomina.model.project.Projects
+import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.scm.ScmConnector
 import org.neo.gomina.plugins.scm.impl.CachedScmConnector
-import org.neo.gomina.model.sshinfo.SshConnector
-import org.neo.gomina.plugins.monitoring.applyMonitoring
-import org.neo.gomina.plugins.scm.applyScm
-import org.neo.gomina.plugins.ssh.applyInventory
-import org.neo.gomina.plugins.ssh.applySsh
+import org.neo.gomina.plugins.ssh.DumbSshConnector
 import javax.inject.Inject
 
 
 class InstancesBuilder {
 
     @Inject private lateinit var inventory: Inventory
-    @Inject private lateinit var sshConnector: SshConnector
-    @Inject private lateinit var monitoring: Monitoring
 
-    @Inject private lateinit var projects: Projects
+    @Inject private lateinit var inventoryPlugin: InventoryPlugin
+    @Inject private lateinit var monitoring: Monitoring
     @Inject private lateinit var scmConnector: ScmConnector
+    @Inject private lateinit var sshConnector: DumbSshConnector
 
     fun getInstances(): List<Instance> {
         val instances = Instances()
-        sshConnector.analyze()
         for (env in inventory.getEnvironments()) {
-            for (service in env.services) {
-                for (envInstance in service.instances) {
-                    val id = env.id + "-" + envInstance.id
-                    var instance = instances.ensure(id, env.id, service.type, service.svc, envInstance.id)
-                    instance.applyInventory(service, envInstance)
-
-                    val project = if (service.project != null) projects.getProject(service.project) else null
-                    project?.let { instance.applyScm(scmConnector.getSvnDetails(project.svnRepo, project.svnUrl)) }
-
-                    instance.applySsh(sshConnector.getDetails(envInstance.host, envInstance.folder))
-                }
-            }
-        }
-
-        for (env in inventory.getEnvironments()) {
-            val monitoring = this.monitoring.getFor(env.id)
-            for ((instanceId, indicators) in monitoring.instances) {
-                val id = env.id + "-" + instanceId
-                var instance = instances.ensure(id, env.id, indicators["type"], indicators["service"], instanceId, expected = false)
-                instance.applyMonitoring(indicators)
-            }
+            inventoryPlugin.onGetInstances(env.id, instances)
+            scmConnector.onGetInstances(env.id, instances)
+            sshConnector.onGetInstances(env.id, instances)
+            monitoring.onGetInstances(env.id, instances)
         }
         return instances.list
     }

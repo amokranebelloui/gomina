@@ -1,6 +1,7 @@
-package org.neo.gomina.model.ssh;
+package org.neo.gomina.plugins.ssh.connector;
 
 import com.jcraft.jsch.Session;
+import org.neo.gomina.model.ssh.SshAuth;
 
 import java.util.Scanner;
 

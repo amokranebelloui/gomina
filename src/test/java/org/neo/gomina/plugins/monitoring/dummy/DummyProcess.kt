@@ -1,4 +1,4 @@
-package org.neo.gomina.model.monitoring.zmq.dummy
+package org.neo.gomina.plugins.monitoring.dummy
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory

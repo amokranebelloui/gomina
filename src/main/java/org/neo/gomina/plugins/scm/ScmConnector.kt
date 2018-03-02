@@ -1,5 +1,6 @@
 package org.neo.gomina.plugins.scm
 
+import org.neo.gomina.model.instances.InstancesExt
 import org.neo.gomina.model.scm.Commit
 
 data class ScmDetails (
@@ -11,7 +12,7 @@ data class ScmDetails (
     var changes: Int? = null
 )
 
-interface ScmConnector {
+interface ScmConnector : InstancesExt {
 
     fun refresh(svnRepo: String, svnUrl: String)
     fun getSvnDetails(svnRepo: String, svnUrl: String): ScmDetails

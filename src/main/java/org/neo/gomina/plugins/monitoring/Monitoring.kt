@@ -1,6 +1,8 @@
-package org.neo.gomina.model.monitoring
+package org.neo.gomina.plugins.monitoring
 
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.model.instances.Instances
+import org.neo.gomina.model.instances.InstancesExt
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -15,7 +17,7 @@ class EnvMonitoring {
 
 typealias MonitoringListener = (env: String, instanceId: String, indicators: Map<String, String>) -> Unit
 
-class Monitoring {
+class Monitoring : InstancesExt {
 
     private val topology = ConcurrentHashMap<String, EnvMonitoring>()
 
@@ -23,6 +25,15 @@ class Monitoring {
 
     fun add(listener: MonitoringListener) {
         this.listeners.add(listener)
+    }
+
+    override fun onGetInstances(env: String, instances: Instances) {
+        val monitoring = this.getFor(env)
+        for ((instanceId, indicators) in monitoring.instances) {
+            val id = env + "-" + instanceId // FIXME Only needed when returning all envs instances, simplify later
+            var instance = instances.ensure(id, env, indicators["type"], indicators["service"], instanceId, expected = false)
+            instance.applyMonitoring(indicators)
+        }
     }
 
     fun notify(env: String, instanceId: String, newValues: Map<String, String>) {

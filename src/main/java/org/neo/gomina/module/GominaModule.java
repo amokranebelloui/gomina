@@ -14,9 +14,9 @@ import org.neo.gomina.api.projects.ProjectsBuilder;
 import org.neo.gomina.api.realtime.NotificationsApi;
 import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.file.FileInventory;
-import org.neo.gomina.model.monitoring.Monitoring;
-import org.neo.gomina.model.monitoring.zmq.ZmqMonitorConfig;
-import org.neo.gomina.model.monitoring.zmq.ZmqMonitorThreads;
+import org.neo.gomina.plugins.monitoring.Monitoring;
+import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig;
+import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThreads;
 import org.neo.gomina.model.project.Projects;
 import org.neo.gomina.model.project.file.FileProjects;
 import org.neo.gomina.model.scm.ScmConfig;
@@ -25,12 +25,14 @@ import org.neo.gomina.model.security.Passwords;
 import org.neo.gomina.model.sonar.SonarConnector;
 import org.neo.gomina.model.sonar.dummy.DummySonarConnector;
 import org.neo.gomina.model.sonar.http.HttpSonarConnector;
-import org.neo.gomina.model.ssh.SshClient;
-import org.neo.gomina.model.sshinfo.SshConfig;
-import org.neo.gomina.model.sshinfo.SshConnector;
-import org.neo.gomina.model.sshinfo.impl.OnDemandSshConnector;
+import org.neo.gomina.plugins.ssh.connector.SshClient;
+import org.neo.gomina.plugins.ssh.DumbSshConnector;
+import org.neo.gomina.plugins.ssh.SshConfig;
+import org.neo.gomina.plugins.ssh.SshConnector;
+import org.neo.gomina.plugins.ssh.impl.OnDemandSshConnector;
 import org.neo.gomina.module.config.Config;
 import org.neo.gomina.module.config.ConfigLoader;
+import org.neo.gomina.plugins.inventory.InventoryPlugin;
 import org.neo.gomina.plugins.scm.ScmConnector;
 import org.neo.gomina.plugins.scm.connectors.ConfigScmRepos;
 import org.neo.gomina.plugins.scm.impl.CachedScmConnector;
@@ -67,6 +69,7 @@ public class GominaModule extends AbstractModule {
         
         bind(Projects.class).to(FileProjects.class).in(Scopes.SINGLETON);
         bind(Inventory.class).to(FileInventory.class).in(Scopes.SINGLETON);
+        bind(InventoryPlugin.class).in(Scopes.SINGLETON);
 
         // Monitoring
         bind(Monitoring.class).in(Scopes.SINGLETON);
@@ -90,6 +93,7 @@ public class GominaModule extends AbstractModule {
         bind(SshConfig.class).toInstance(config.ssh);
         bind(SshClient.class).in(Scopes.SINGLETON);
         bind(SshConnector.class).to(OnDemandSshConnector.class).in(Scopes.SINGLETON);
+        bind(DumbSshConnector.class).in(Scopes.SINGLETON);
 
         // API
         bind(EnvBuilder.class).in(Scopes.SINGLETON);

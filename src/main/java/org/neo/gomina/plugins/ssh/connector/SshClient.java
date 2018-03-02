@@ -1,4 +1,4 @@
-package org.neo.gomina.model.ssh;
+package org.neo.gomina.plugins.ssh.connector;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
@@ -7,6 +7,7 @@ import com.jcraft.jsch.Session;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.neo.gomina.model.ssh.SshAuth;
 
 import java.io.ByteArrayOutputStream;
 

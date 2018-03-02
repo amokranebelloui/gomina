@@ -1,4 +1,4 @@
-package org.neo.gomina.model.sshinfo;
+package org.neo.gomina.plugins.ssh;
 
 public interface SshConnector {
 

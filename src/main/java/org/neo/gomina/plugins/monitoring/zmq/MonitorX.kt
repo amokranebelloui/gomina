@@ -1,8 +1,8 @@
-package org.neo.gomina.model.monitoring.zmq
+package org.neo.gomina.plugins.monitoring.zmq
 
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.inventory.Inventory
-import org.neo.gomina.model.monitoring.Monitoring
+import org.neo.gomina.plugins.monitoring.Monitoring
 import org.zeromq.ZMQ
 import java.util.*
 import javax.inject.Inject

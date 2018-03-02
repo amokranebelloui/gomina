@@ -62,6 +62,8 @@ class Instances {
     val list = ArrayList<Instance>()
     private val index = HashMap<String, Instance>()
 
+    fun get(id: String) = index[id]
+
     fun ensure(id: String, envId: String, type: String?, service: String?, instanceId: String, expected: Boolean = true): Instance {
         var instance = index[id]
         if (instance == null) {

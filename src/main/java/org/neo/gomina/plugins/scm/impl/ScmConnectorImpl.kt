@@ -3,13 +3,18 @@ package org.neo.gomina.plugins.scm.impl
 import com.thoughtworks.xstream.XStream
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.model.instances.Instances
+import org.neo.gomina.model.instances.InstancesExt
+import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.maven.MavenUtils
+import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.MavenReleaseFlagger
 import org.neo.gomina.model.scm.ScmClient
 import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.plugins.scm.ScmConnector
 import org.neo.gomina.plugins.scm.ScmDetails
+import org.neo.gomina.plugins.scm.applyScm
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -91,7 +96,7 @@ private class ScmCache {
 
 }
 
-class CachedScmConnector: ScmConnector {
+class CachedScmConnector: ScmConnector, InstancesExt {
 
     companion object {
         private val logger = LogManager.getLogger(CachedScmConnector::class.java)
@@ -100,6 +105,9 @@ class CachedScmConnector: ScmConnector {
     private val scmRepos: ScmRepos
     private val scmCache = ScmCache()
 
+    @Inject private lateinit var inventory: Inventory
+    @Inject private lateinit var projects: Projects
+
     @Inject
     constructor(scmRepos: ScmRepos) {
         this.scmRepos = scmRepos
@@ -107,6 +115,19 @@ class CachedScmConnector: ScmConnector {
         if (!file.exists()) {
             val mkdir = file.mkdir()
             logger.info("Created $file $mkdir")
+        }
+    }
+
+    override fun onGetInstances(env: String, instances: Instances) {
+        for (env in inventory.getEnvironments()) {
+            for (service in env.services) {
+                for (envInstance in service.instances) {
+                    val id = env.id + "-" + envInstance.id
+                    val instance = instances.get(id)
+                    val project = if (service.project != null) projects.getProject(service.project) else null
+                    project?.let { instance?.applyScm(this.getSvnDetails(project.svnRepo, project.svnUrl)) }
+                }
+            }
         }
     }
 

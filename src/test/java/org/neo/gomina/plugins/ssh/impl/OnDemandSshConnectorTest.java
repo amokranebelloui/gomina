@@ -1,11 +1,11 @@
-package org.neo.gomina.model.sshinfo.impl;
+package org.neo.gomina.plugins.ssh.impl;
 
 import org.junit.Test;
 import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.file.FileInventory;
 import org.neo.gomina.model.security.Passwords;
-import org.neo.gomina.model.ssh.SshClient;
-import org.neo.gomina.model.sshinfo.SshConfig;
+import org.neo.gomina.plugins.ssh.connector.SshClient;
+import org.neo.gomina.plugins.ssh.SshConfig;
 import org.neo.gomina.module.config.ConfigLoader;
 
 import java.io.File;
