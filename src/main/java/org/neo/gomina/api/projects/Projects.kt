@@ -1,16 +1,16 @@
 package org.neo.gomina.api.projects
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.inject.name.Named
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.project.Projects
 import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.core.projects.ProjectSet
-import org.neo.gomina.plugins.project.ProjectPlugin
-import org.neo.gomina.plugins.scm.ScmPlugin
-import org.neo.gomina.plugins.sonar.SonarPlugin
+import org.neo.gomina.core.projects.ProjectsExt
+import org.neo.gomina.model.project.Projects
+import java.util.*
 import javax.inject.Inject
 
 class ProjectsApi {
@@ -23,9 +23,7 @@ class ProjectsApi {
 
     @Inject private lateinit var projects: Projects
 
-    @Inject private lateinit var projectPlugin: ProjectPlugin
-    @Inject private lateinit var sonarPlugin: SonarPlugin
-    @Inject private lateinit var scmPlugin: ScmPlugin
+    @Inject @Named("projects.plugins") lateinit var plugins: ArrayList<ProjectsExt>
 
     private val mapper = ObjectMapper()
 
@@ -67,18 +65,13 @@ class ProjectsApi {
 
     private fun getProjects(): List<ProjectDetail> {
         val projectSet = ProjectSet()
-        projectPlugin.onGetProjects(projectSet)
-        sonarPlugin.onGetProjects(projectSet)
-        scmPlugin.onGetProjects(projectSet)
+        plugins.forEach { it.onGetProjects(projectSet) }
         return projectSet.list
     }
 
     private fun getProject(projectId: String): ProjectDetail? {
-
         val projectDetail = ProjectDetail(projectId)
-        projectPlugin.onGetProject(projectId, projectDetail)
-        sonarPlugin.onGetProject(projectId, projectDetail)
-        scmPlugin.onGetProject(projectId, projectDetail)
+        plugins.forEach { it.onGetProject(projectId, projectDetail) }
         return projectDetail
     }
 
@@ -86,7 +79,8 @@ class ProjectsApi {
         try {
             val projectId = ctx.request().getParam("projectId")
             val project = projects.getProject(projectId)
-            scmPlugin.refresh(project?.svnRepo ?: "", project?.svnUrl ?: "")
+            //scmPlugin.refresh(project?.svnRepo ?: "", project?.svnUrl ?: "")
+            // FIXME Put back reload
         } catch (e: Exception) {
             logger.error("Cannot get project", e)
             ctx.fail(500)

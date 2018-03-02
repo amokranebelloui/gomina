@@ -1,6 +1,7 @@
 package org.neo.gomina.api.instances
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.inject.name.Named
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
@@ -8,13 +9,11 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.Instances
+import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.plugins.inventory.InventoryPlugin
-import org.neo.gomina.plugins.monitoring.Monitoring
-import org.neo.gomina.plugins.scm.ScmPlugin
-import org.neo.gomina.plugins.ssh.DumbSshConnector
+import java.util.*
 import javax.inject.Inject
 
 class InstancesApi {
@@ -27,14 +26,8 @@ class InstancesApi {
 
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var projects: Projects
-
-    //@Inject private lateinit var plugins:List<InstancesExt>
-
-    @Inject private lateinit var inventoryPlugin: InventoryPlugin
-    @Inject private lateinit var monitoring: Monitoring
-    @Inject private lateinit var sshConnector: DumbSshConnector
-
-    @Inject private lateinit var scmPlugin: ScmPlugin
+    
+    @Inject @Named("instances.plugins") lateinit var plugins: ArrayList<InstancesExt>
 
     private val mapper = ObjectMapper()
 
@@ -85,10 +78,7 @@ class InstancesApi {
     }
 
     private fun buildInstances(env: Environment, instances: Instances) {
-        inventoryPlugin.onGetInstances(env.id, instances)
-        scmPlugin.onGetInstances(env.id, instances)
-        sshConnector.onGetInstances(env.id, instances)
-        monitoring.onGetInstances(env.id, instances)
+        plugins.forEach { it.onGetInstances(env.id, instances) }
     }
 
     fun reload(ctx: RoutingContext) {
@@ -98,7 +88,8 @@ class InstancesApi {
 
             for (project in projects.getProjects()) {
                 if (StringUtils.isNotBlank(project.svnUrl)) {
-                    scmPlugin.refresh(project.svnRepo, project.svnUrl)
+                    // FIXME Put back reload
+                    //scmPlugin.refresh(project.svnRepo, project.svnUrl)
                 }
             }
 

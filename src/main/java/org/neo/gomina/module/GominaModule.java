@@ -1,7 +1,6 @@
 package org.neo.gomina.module;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Scopes;
+import com.google.inject.*;
 import com.google.inject.name.Names;
 import org.apache.commons.lang3.StringUtils;
 import org.neo.gomina.api.diagram.DiagramApi;
@@ -10,6 +9,8 @@ import org.neo.gomina.api.envs.EnvsApi;
 import org.neo.gomina.api.instances.InstancesApi;
 import org.neo.gomina.api.projects.ProjectsApi;
 import org.neo.gomina.api.realtime.NotificationsApi;
+import org.neo.gomina.core.instances.InstancesExt;
+import org.neo.gomina.core.projects.ProjectsExt;
 import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.file.FileInventory;
 import org.neo.gomina.model.project.Projects;
@@ -37,6 +38,9 @@ import org.neo.gomina.plugins.ssh.connector.SshClient;
 import org.neo.gomina.plugins.ssh.impl.OnDemandSshConnector;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class GominaModule extends AbstractModule {
 
@@ -97,6 +101,37 @@ public class GominaModule extends AbstractModule {
 
         // API
         bind(EnvBuilder.class).in(Scopes.SINGLETON);
+
+        bind(new TypeLiteral<ArrayList<ProjectsExt>>(){}).annotatedWith(Names.named("projects.plugins"))
+                .toProvider(new Provider<ArrayList<ProjectsExt>>() {
+            @Inject private ProjectPlugin projectPlugin;
+            @Inject private SonarPlugin sonarPlugin;
+            @Inject private ScmPlugin scmPlugin;
+            
+            @Override public ArrayList<ProjectsExt> get() {
+                return new ArrayList<>(Arrays.asList(
+                        projectPlugin,
+                        sonarPlugin,
+                        scmPlugin
+                ));
+            }
+        });
+        bind(new TypeLiteral<ArrayList<InstancesExt>>(){}).annotatedWith(Names.named("instances.plugins"))
+                .toProvider(new Provider<ArrayList<InstancesExt>>() {
+                    @Inject private InventoryPlugin inventoryPlugin;
+                    @Inject private ScmPlugin scmPlugin;
+                    @Inject private DumbSshConnector sshConnector;
+                    @Inject private Monitoring monitoring;
+
+                    @Override public ArrayList<InstancesExt> get() {
+                        return new ArrayList<>(Arrays.asList(
+                                inventoryPlugin,
+                                scmPlugin,
+                                sshConnector,
+                                monitoring
+                        ));
+                    }
+                });
 
         // Vertx API
         bind(EnvsApi.class).in(Scopes.SINGLETON);
