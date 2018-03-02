@@ -20,7 +20,7 @@ import org.neo.gomina.api.envs.EnvsApi;
 import org.neo.gomina.api.instances.InstancesApi;
 import org.neo.gomina.api.projects.ProjectsApi;
 import org.neo.gomina.api.realtime.NotificationsApi;
-import org.neo.gomina.model.monitoring.Monitoring;
+import org.neo.gomina.plugins.monitoring.Monitoring;
 import org.neo.gomina.module.GominaModule;
 
 import java.io.File;

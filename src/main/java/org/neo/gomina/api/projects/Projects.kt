@@ -8,9 +8,9 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.scm.Commit
-import org.neo.gomina.model.scminfo.ScmConnector
-import org.neo.gomina.model.scminfo.ScmDetails
-import org.neo.gomina.model.scminfo.impl.CachedScmConnector
+import org.neo.gomina.plugins.scm.ScmConnector
+import org.neo.gomina.plugins.scm.ScmDetails
+import org.neo.gomina.plugins.scm.impl.CachedScmConnector
 import org.neo.gomina.model.sonar.SonarConnector
 import org.neo.gomina.model.sonar.SonarIndicators
 import java.util.*
