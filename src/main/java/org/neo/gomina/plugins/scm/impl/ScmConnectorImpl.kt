@@ -1,4 +1,4 @@
-package org.neo.gomina.model.scminfo.impl
+package org.neo.gomina.plugins.scm.impl
 
 import com.thoughtworks.xstream.XStream
 import org.apache.commons.lang3.StringUtils
@@ -8,8 +8,8 @@ import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.MavenReleaseFlagger
 import org.neo.gomina.model.scm.ScmClient
 import org.neo.gomina.model.scm.ScmRepos
-import org.neo.gomina.model.scminfo.ScmConnector
-import org.neo.gomina.model.scminfo.ScmDetails
+import org.neo.gomina.plugins.scm.ScmConnector
+import org.neo.gomina.plugins.scm.ScmDetails
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -147,14 +147,14 @@ class CachedScmConnector: ScmConnector {
                     .firstOrNull()?.revision
 
             val scmDetails = ScmDetails(
-                url = svnUrl,
-                latest = MavenUtils.extractVersion(scmClient.getFile(svnUrl + "/trunk/pom.xml", "-1")),
-                latestRevision = logEntries.firstOrNull()?.revision,
-                released = logEntries
-                        .filter { StringUtils.isNotBlank(it.release) }
-                        .firstOrNull()?.release,
-                releasedRevision = lastReleasedRev,
-                changes = commitCountTo(logEntries, lastReleasedRev)
+                    url = svnUrl,
+                    latest = MavenUtils.extractVersion(scmClient.getFile(svnUrl + "/trunk/pom.xml", "-1")),
+                    latestRevision = logEntries.firstOrNull()?.revision,
+                    released = logEntries
+                            .filter { StringUtils.isNotBlank(it.release) }
+                            .firstOrNull()?.release,
+                    releasedRevision = lastReleasedRev,
+                    changes = commitCountTo(logEntries, lastReleasedRev)
             )
             logger.info(scmDetails)
             scmDetails
@@ -175,7 +175,7 @@ class CachedScmConnector: ScmConnector {
                     .map { mavenReleaseFlagger.flag(it) }
                     .filter { it.revision != lastKnown }
 
-            CachedScmConnector.logger.info("Get commits: cache=${cached.size} retrieved=${commits.size}")
+            logger.info("Get commits: cache=${cached.size} retrieved=${commits.size}")
             commits + cached
         }
         else {

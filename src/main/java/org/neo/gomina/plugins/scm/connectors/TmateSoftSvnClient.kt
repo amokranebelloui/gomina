@@ -1,4 +1,4 @@
-package org.neo.gomina.model.scm.svn
+package org.neo.gomina.plugins.scm.connectors
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager

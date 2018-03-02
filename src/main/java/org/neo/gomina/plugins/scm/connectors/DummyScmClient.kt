@@ -1,4 +1,4 @@
-package org.neo.gomina.model.scm.dummy
+package org.neo.gomina.plugins.scm.connectors
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper

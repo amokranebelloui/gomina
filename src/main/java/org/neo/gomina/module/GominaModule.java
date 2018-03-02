@@ -19,11 +19,8 @@ import org.neo.gomina.model.monitoring.zmq.ZmqMonitorConfig;
 import org.neo.gomina.model.monitoring.zmq.ZmqMonitorThreads;
 import org.neo.gomina.model.project.Projects;
 import org.neo.gomina.model.project.file.FileProjects;
-import org.neo.gomina.model.scm.ConfigScmRepos;
 import org.neo.gomina.model.scm.ScmConfig;
 import org.neo.gomina.model.scm.ScmRepos;
-import org.neo.gomina.model.scminfo.ScmConnector;
-import org.neo.gomina.model.scminfo.impl.CachedScmConnector;
 import org.neo.gomina.model.security.Passwords;
 import org.neo.gomina.model.sonar.SonarConnector;
 import org.neo.gomina.model.sonar.dummy.DummySonarConnector;
@@ -34,6 +31,9 @@ import org.neo.gomina.model.sshinfo.SshConnector;
 import org.neo.gomina.model.sshinfo.impl.OnDemandSshConnector;
 import org.neo.gomina.module.config.Config;
 import org.neo.gomina.module.config.ConfigLoader;
+import org.neo.gomina.plugins.scm.ScmConnector;
+import org.neo.gomina.plugins.scm.connectors.ConfigScmRepos;
+import org.neo.gomina.plugins.scm.impl.CachedScmConnector;
 
 import java.io.File;
 

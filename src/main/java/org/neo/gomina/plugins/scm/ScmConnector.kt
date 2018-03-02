@@ -1,4 +1,4 @@
-package org.neo.gomina.model.scminfo
+package org.neo.gomina.plugins.scm
 
 import org.neo.gomina.model.scm.Commit
 

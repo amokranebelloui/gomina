@@ -1,10 +1,9 @@
-package org.neo.gomina.model.scm.impl;
+package org.neo.gomina.plugins.scm.connectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.neo.gomina.model.scm.Commit;
-import org.neo.gomina.model.scm.dummy.DummyScmClient;
 
 import java.util.List;
 

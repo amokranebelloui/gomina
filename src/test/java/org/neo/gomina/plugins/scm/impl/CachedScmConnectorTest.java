@@ -1,9 +1,10 @@
-package org.neo.gomina.model.scminfo.impl;
+package org.neo.gomina.plugins.scm.impl;
 
 import org.junit.Test;
 import org.neo.gomina.model.scm.ScmClient;
 import org.neo.gomina.model.scm.ScmRepos;
-import org.neo.gomina.model.scm.dummy.DummyScmClient;
+import org.neo.gomina.plugins.scm.connectors.DummyScmClient;
+import org.neo.gomina.plugins.scm.impl.CachedScmConnector;
 
 public class CachedScmConnectorTest {
 
