@@ -8,15 +8,11 @@ import org.neo.gomina.api.diagram.DiagramApi;
 import org.neo.gomina.api.envs.EnvBuilder;
 import org.neo.gomina.api.envs.EnvsApi;
 import org.neo.gomina.api.instances.InstancesApi;
-import org.neo.gomina.api.instances.InstancesBuilder;
 import org.neo.gomina.api.projects.ProjectsApi;
 import org.neo.gomina.api.projects.ProjectsBuilder;
 import org.neo.gomina.api.realtime.NotificationsApi;
 import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.file.FileInventory;
-import org.neo.gomina.plugins.monitoring.Monitoring;
-import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig;
-import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThreads;
 import org.neo.gomina.model.project.Projects;
 import org.neo.gomina.model.project.file.FileProjects;
 import org.neo.gomina.model.scm.ScmConfig;
@@ -25,17 +21,20 @@ import org.neo.gomina.model.security.Passwords;
 import org.neo.gomina.model.sonar.SonarConnector;
 import org.neo.gomina.model.sonar.dummy.DummySonarConnector;
 import org.neo.gomina.model.sonar.http.HttpSonarConnector;
-import org.neo.gomina.plugins.ssh.connector.SshClient;
-import org.neo.gomina.plugins.ssh.DumbSshConnector;
-import org.neo.gomina.plugins.ssh.SshConfig;
-import org.neo.gomina.plugins.ssh.SshConnector;
-import org.neo.gomina.plugins.ssh.impl.OnDemandSshConnector;
 import org.neo.gomina.module.config.Config;
 import org.neo.gomina.module.config.ConfigLoader;
 import org.neo.gomina.plugins.inventory.InventoryPlugin;
+import org.neo.gomina.plugins.monitoring.Monitoring;
+import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig;
+import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThreads;
 import org.neo.gomina.plugins.scm.ScmConnector;
 import org.neo.gomina.plugins.scm.connectors.ConfigScmRepos;
 import org.neo.gomina.plugins.scm.impl.CachedScmConnector;
+import org.neo.gomina.plugins.ssh.DumbSshConnector;
+import org.neo.gomina.plugins.ssh.SshConfig;
+import org.neo.gomina.plugins.ssh.SshConnector;
+import org.neo.gomina.plugins.ssh.connector.SshClient;
+import org.neo.gomina.plugins.ssh.impl.OnDemandSshConnector;
 
 import java.io.File;
 
@@ -97,7 +96,6 @@ public class GominaModule extends AbstractModule {
 
         // API
         bind(EnvBuilder.class).in(Scopes.SINGLETON);
-        bind(InstancesBuilder.class).in(Scopes.SINGLETON);
         bind(ProjectsBuilder.class).in(Scopes.SINGLETON);
 
         // Vertx API

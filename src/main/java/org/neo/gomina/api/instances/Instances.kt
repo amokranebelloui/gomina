@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.instances.Instance
 import org.neo.gomina.model.instances.Instances
+import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.plugins.inventory.InventoryPlugin
@@ -44,6 +45,7 @@ class InstancesApi {
         this.router = Router.router(vertx)
 
         router.get("/").handler(this::instances)
+        router.get("/:envId").handler(this::forEnv)
         router.post("/reload").handler(this::reload)
     }
 
@@ -59,15 +61,36 @@ class InstancesApi {
 
     }
 
+    fun forEnv(ctx: RoutingContext) {
+        try {
+            val envId = ctx.request().getParam("envId")
+            ctx.response()
+                    .putHeader("content-type", "text/javascript")
+                    .end(mapper.writeValueAsString(buildInstances(envId)))
+        } catch (e: Exception) {
+            logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+    }
+
     private fun buildInstances(): List<Instance> {
         val instances = Instances()
-        for (env in inventory.getEnvironments()) {
-            inventoryPlugin.onGetInstances(env.id, instances)
-            scmConnector.onGetInstances(env.id, instances)
-            sshConnector.onGetInstances(env.id, instances)
-            monitoring.onGetInstances(env.id, instances)
-        }
+        inventory.getEnvironments().forEach { buildInstances(it, instances) }
         return instances.list
+    }
+
+    private fun buildInstances(envId: String): List<Instance> {
+        val instances = Instances()
+        val env = inventory.getEnvironment(envId)
+        env?.let { buildInstances(env, instances) }
+        return instances.list
+    }
+
+    private fun buildInstances(env: Environment, instances: Instances) {
+        inventoryPlugin.onGetInstances(env.id, instances)
+        scmConnector.onGetInstances(env.id, instances)
+        sshConnector.onGetInstances(env.id, instances)
+        monitoring.onGetInstances(env.id, instances)
     }
 
     fun reload(ctx: RoutingContext) {
