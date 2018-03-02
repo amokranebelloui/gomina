@@ -6,8 +6,8 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.model.projects.ProjectDetail
-import org.neo.gomina.model.projects.ProjectSet
+import org.neo.gomina.core.projects.ProjectDetail
+import org.neo.gomina.core.projects.ProjectSet
 import org.neo.gomina.plugins.project.ProjectPlugin
 import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.sonar.SonarPlugin

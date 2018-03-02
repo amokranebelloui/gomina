@@ -2,16 +2,16 @@ package org.neo.gomina.plugins.scm
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.instances.Instance
-import org.neo.gomina.model.instances.Instances
-import org.neo.gomina.model.instances.InstancesExt
+import org.neo.gomina.core.instances.Instance
+import org.neo.gomina.core.instances.Instances
+import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.maven.MavenUtils
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.model.projects.CommitLogEntry
-import org.neo.gomina.model.projects.ProjectDetail
-import org.neo.gomina.model.projects.ProjectSet
-import org.neo.gomina.model.projects.ProjectsExt
+import org.neo.gomina.core.projects.CommitLogEntry
+import org.neo.gomina.core.projects.ProjectDetail
+import org.neo.gomina.core.projects.ProjectSet
+import org.neo.gomina.core.projects.ProjectsExt
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.MavenReleaseFlagger
 import org.neo.gomina.model.scm.ScmClient

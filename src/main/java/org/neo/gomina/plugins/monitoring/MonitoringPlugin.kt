@@ -3,7 +3,7 @@ package org.neo.gomina.plugins.monitoring
 import org.apache.commons.lang3.StringUtils
 import org.joda.time.DateTimeZone
 import org.joda.time.LocalDateTime
-import org.neo.gomina.model.instances.Instance
+import org.neo.gomina.core.instances.Instance
 
 fun Instance.applyMonitoring(indicators: Indicators) {
     this.pid = indicators["pid"]

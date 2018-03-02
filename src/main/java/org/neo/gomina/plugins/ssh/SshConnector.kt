@@ -1,7 +1,7 @@
 package org.neo.gomina.plugins.ssh
 
-import org.neo.gomina.model.instances.Instances
-import org.neo.gomina.model.instances.InstancesExt
+import org.neo.gomina.core.instances.Instances
+import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.model.inventory.Inventory
 import javax.inject.Inject
 

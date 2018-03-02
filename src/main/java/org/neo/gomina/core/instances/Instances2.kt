@@ -1,4 +1,4 @@
-package org.neo.gomina.model.instances
+package org.neo.gomina.core.instances
 
 class Identification(
         var env: String? = null ,

@@ -1,9 +1,9 @@
 package org.neo.gomina.plugins.sonar
 
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.model.projects.ProjectDetail
-import org.neo.gomina.model.projects.ProjectSet
-import org.neo.gomina.model.projects.ProjectsExt
+import org.neo.gomina.core.projects.ProjectDetail
+import org.neo.gomina.core.projects.ProjectSet
+import org.neo.gomina.core.projects.ProjectsExt
 import org.neo.gomina.model.sonar.SonarConnector
 import org.neo.gomina.model.sonar.SonarIndicators
 import javax.inject.Inject

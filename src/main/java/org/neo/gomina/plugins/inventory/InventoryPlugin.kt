@@ -1,8 +1,8 @@
 package org.neo.gomina.plugins.inventory
 
-import org.neo.gomina.model.instances.Instance
-import org.neo.gomina.model.instances.Instances
-import org.neo.gomina.model.instances.InstancesExt
+import org.neo.gomina.core.instances.Instance
+import org.neo.gomina.core.instances.Instances
+import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.model.inventory.InvInstance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service

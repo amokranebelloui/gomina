@@ -1,8 +1,8 @@
 package org.neo.gomina.plugins.monitoring
 
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.instances.Instances
-import org.neo.gomina.model.instances.InstancesExt
+import org.neo.gomina.core.instances.Instances
+import org.neo.gomina.core.instances.InstancesExt
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 

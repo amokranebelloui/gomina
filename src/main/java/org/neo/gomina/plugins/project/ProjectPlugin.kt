@@ -2,9 +2,9 @@ package org.neo.gomina.plugins.project
 
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.model.projects.ProjectDetail
-import org.neo.gomina.model.projects.ProjectSet
-import org.neo.gomina.model.projects.ProjectsExt
+import org.neo.gomina.core.projects.ProjectDetail
+import org.neo.gomina.core.projects.ProjectSet
+import org.neo.gomina.core.projects.ProjectsExt
 import javax.inject.Inject
 
 class ProjectPlugin : ProjectsExt {
