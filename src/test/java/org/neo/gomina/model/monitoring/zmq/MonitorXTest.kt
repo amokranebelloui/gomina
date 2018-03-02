@@ -14,7 +14,9 @@ class MonitorXTest {
     fun testParser() {
         val parse = MessageParser.parse(".#HB.UAT.kernel.*.0;status=DOWN;quickfixPersistence=ORACLE")
         println(parse)
-        assertThat(parse).includes(entry("@env", "UAT"), entry("@instanceId", "kernel"), entry("status", "DOWN"))
+        assertThat(parse.env).isEqualTo("UAT")
+        assertThat(parse.instanceId).isEqualTo("kernel")
+        assertThat(parse.indicators).includes(entry("status", "DOWN"), entry("quickfixPersistence", "ORACLE"))
     }
 
     @Test

@@ -11,6 +11,7 @@ import org.joda.time.LocalDateTime
 import org.neo.gomina.model.inventory.InvInstance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
+import org.neo.gomina.model.monitoring.Indicators
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.scminfo.ScmConnector
@@ -102,15 +103,13 @@ class InstancesBuilder {
                         name = envInstance.id
                     )
 
-                    applyInventory(instance, service, envInstance)
+                    instance.applyInventory(service, envInstance)
 
                     val project = if (service.project != null) projects.getProject(service.project) else null
-                    if (project != null) {
-                        applyScm(instance, scmConnector.getSvnDetails(project.svnRepo, project.svnUrl))
-                    }
+                    project?.let { instance.applyScm(scmConnector.getSvnDetails(project.svnRepo, project.svnUrl)) }
 
-                    val sshDetails = sshConnector.getDetails(envInstance.host, envInstance.folder)
-                    applySsh(instance, sshDetails)
+                    instance.applySsh(sshConnector.getDetails(envInstance.host, envInstance.folder))
+                    
                     instancesMap.put(id, instance)
                     instancesList.add(instance)
                 }
@@ -119,7 +118,7 @@ class InstancesBuilder {
 
         for (env in inventory.getEnvironments()) {
             val monitoring = this.monitoring.getFor(env.id)
-            for ((instanceId, indicators) in monitoring.getAll()) {
+            for ((instanceId, indicators) in monitoring.instances) {
                 val id = env.id + "-" + instanceId
                 var instance = instancesMap[id]
                 if (instance == null) {
@@ -134,7 +133,7 @@ class InstancesBuilder {
                     instancesMap.put(id, instance)
                     instancesList.add(instance)
                 }
-                applyMonitoring(instance, indicators)
+                instance.apply(indicators)
                 if (StringUtils.isNotBlank(instance.deployHost) && instance.deployHost != instance.host) {
                     instance.unexpectedHost = true
                 }
@@ -143,56 +142,56 @@ class InstancesBuilder {
         return instancesList
     }
 
-    private fun applyInventory(instance: Instance, service: Service, envInstance: InvInstance) {
-        instance.project = service.project
-        instance.deployHost = envInstance.host
-        instance.deployFolder = envInstance.folder
+    private fun Instance.applyInventory(service: Service, envInstance: InvInstance) {
+        this.project = service.project
+        this.deployHost = envInstance.host
+        this.deployFolder = envInstance.folder
     }
 
-    private fun applySsh(instance: Instance, sshDetails: SshDetails) {
-        instance.deployVersion = sshDetails.deployedVersion
-        instance.deployRevision = sshDetails.deployedRevision
-        instance.confCommited = sshDetails.confCommitted
-        instance.confUpToDate = sshDetails.confUpToDate
+    private fun Instance.applySsh(sshDetails: SshDetails) {
+        this.deployVersion = sshDetails.deployedVersion
+        this.deployRevision = sshDetails.deployedRevision
+        this.confCommited = sshDetails.confCommitted
+        this.confUpToDate = sshDetails.confUpToDate
     }
 
-    private fun applyScm(instance: Instance, scmDetails: ScmDetails) {
-        instance.latestVersion = scmDetails.latest
-        instance.latestRevision = scmDetails.latestRevision
-        instance.releasedVersion = scmDetails.released
-        instance.releasedRevision = scmDetails.releasedRevision
+    private fun Instance.applyScm(scmDetails: ScmDetails) {
+        this.latestVersion = scmDetails.latest
+        this.latestRevision = scmDetails.latestRevision
+        this.releasedVersion = scmDetails.released
+        this.releasedRevision = scmDetails.releasedRevision
     }
 
-    private fun applyMonitoring(instance: Instance, indicators: Map<String, String>) {
-        instance.pid = indicators["pid"]
-        instance.host = indicators["host"]
-        instance.version = indicators["version"]
-        instance.revision = indicators["revision"]
+    private fun Instance.apply(indicators: Indicators) {
+        this.pid = indicators["pid"]
+        this.host = indicators["host"]
+        this.version = indicators["version"]
+        this.revision = indicators["revision"]
 
-        instance.cluster = indicators["cluster"]?.toBoolean() ?: false
-        instance.participating = indicators["participating"]?.toBoolean() ?: false
-        instance.leader = indicators["leader"]?.toBoolean() ?: true // Historically we didn't have this field
+        this.cluster = indicators["cluster"]?.toBoolean() ?: false
+        this.participating = indicators["participating"]?.toBoolean() ?: false
+        this.leader = indicators["leader"]?.toBoolean() ?: true // Historically we didn't have this field
 
-        instance.status = indicators["status"]
-        instance.jmx = indicators["jmx"]?.toInt()
-        instance.busVersion = indicators["busVersion"]
-        instance.coreVersion = indicators["coreVersion"]
-        instance.quickfixPersistence = indicators["quickfixPersistence"]
-        instance.redisHost = indicators["redisHost"]
-        instance.redisPort = indicators["redisPort"]?.toInt()
-        instance.redisMasterHost = indicators["redisMasterHost"]
-        instance.redisMasterPort = indicators["redisMasterPort"]?.toInt()
-        instance.redisMasterLink = indicators["redisMasterLink"]?.toBoolean()
-        instance.redisMasterLinkDownSince = indicators["redisMasterLinkDownSince"]
-        instance.redisOffset = indicators["redisOffset"]?.toInt()
-        instance.redisOffsetDiff = indicators["redisOffsetDiff"]?.toInt()
-        instance.redisMaster = indicators["redisMaster"]?.toBoolean()
-        instance.redisRole = indicators["redisRole"]
-        instance.redisRW = indicators["redisRW"]
-        instance.redisMode = indicators["redisMode"]
-        instance.redisStatus = indicators["redisStatus"]
-        instance.redisSlaveCount = indicators["redisSlaveCount"]?.toInt()
-        instance.redisClientCount = indicators["redisClientCount"]?.toInt()
+        this.status = indicators["status"]
+        this.jmx = indicators["jmx"]?.toInt()
+        this.busVersion = indicators["busVersion"]
+        this.coreVersion = indicators["coreVersion"]
+        this.quickfixPersistence = indicators["quickfixPersistence"]
+        this.redisHost = indicators["redisHost"]
+        this.redisPort = indicators["redisPort"]?.toInt()
+        this.redisMasterHost = indicators["redisMasterHost"]
+        this.redisMasterPort = indicators["redisMasterPort"]?.toInt()
+        this.redisMasterLink = indicators["redisMasterLink"]?.toBoolean()
+        this.redisMasterLinkDownSince = indicators["redisMasterLinkDownSince"]
+        this.redisOffset = indicators["redisOffset"]?.toInt()
+        this.redisOffsetDiff = indicators["redisOffsetDiff"]?.toInt()
+        this.redisMaster = indicators["redisMaster"]?.toBoolean()
+        this.redisRole = indicators["redisRole"]
+        this.redisRW = indicators["redisRW"]
+        this.redisMode = indicators["redisMode"]
+        this.redisStatus = indicators["redisStatus"]
+        this.redisSlaveCount = indicators["redisSlaveCount"]?.toInt()
+        this.redisClientCount = indicators["redisClientCount"]?.toInt()
     }
 
     // FIXME Easier to have it on the UI level

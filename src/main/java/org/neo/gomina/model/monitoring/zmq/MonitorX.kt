@@ -36,20 +36,15 @@ class ZmqMonitorThread(private val monitoring: Monitoring, private val url: Stri
         while (!Thread.currentThread().isInterrupted) {
             val obj = subscriber.recvStr(0)
             logger.trace("Received " + obj)
-
             try {
-                val indicators = MessageParser.parse(obj)
-                enrich(indicators)
-                monitoring.notify(
-                        indicators["@env"] ?: "-",
-                        indicators["@instanceId"] ?: "-", // FIXME Shouldnt happen, review design
-                        indicators)
-                logger.trace(indicators)
+                val message = MessageParser.parse(obj)
+                enrich(message.indicators)
+                monitoring.notify(message.env, message.instanceId, message.indicators)
+                logger.trace(message)
             }
             catch (e: Exception) {
                 logger.error("", e)
             }
-
         }
         subscriber.close()
         context.term()
@@ -58,12 +53,10 @@ class ZmqMonitorThread(private val monitoring: Monitoring, private val url: Stri
 
     private fun enrich(indicators: MutableMap<String, String>) {
         indicators.put("TIMESTAMP", Date().toString()) // FIXME Date format
-        indicators.put("status", mapStatus(indicators["status"] ?: "DOWN"))
+        indicators.put("status", mapStatus(indicators["status"]))
     }
 
-    private fun mapStatus(status: String): String {
-        return if ("SHUTDOWN" == status) "DOWN" else status
-    }
+    private fun mapStatus(status: String?) = if ("SHUTDOWN" == status) "DOWN" else status ?: "DOWN"
 
     companion object {
         private val logger = LogManager.getLogger(ZmqMonitorThread::class.java)
@@ -71,18 +64,18 @@ class ZmqMonitorThread(private val monitoring: Monitoring, private val url: Stri
 
 }
 
+data class Message(val env: String, val instanceId: String, val indicators: MutableMap<String, String>)
+
 object MessageParser {
-    fun parse(obj: String): MutableMap<String, String> {
+    fun parse(obj: String): Message {
         val i = obj.indexOf(";")
         val (_, _, env, instanceId) = obj.substring(0, i).split(".")
-        val indicators = mapBody(obj.substring(i + 1))
-        indicators.put("@env", env)
-        indicators.put("@instanceId", instanceId)
-        return indicators
+        return Message(env, instanceId, mapBody(obj.substring(i + 1)))
     }
 
     private fun mapBody(body: String): MutableMap<String, String> {
         return body.split(";")
+                .filter { it.contains("=") }
                 .map { keyValue -> val (key, value) = keyValue.split("="); Pair(key, value) }
                 .toMap(mutableMapOf())
     }

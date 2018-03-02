@@ -4,18 +4,16 @@ import org.apache.logging.log4j.LogManager
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
+class Indicators : ConcurrentHashMap<String, String>()
 
 class EnvMonitoring {
-
-    // instance.id / indicators
-    private var map: MutableMap<String, MutableMap<String, String>> = ConcurrentHashMap()
-
-    fun getAll(): Map<String, Map<String, String>> = map
-
+    val instances: MutableMap<String, Indicators> = ConcurrentHashMap()
     fun getForInstance(name: String): MutableMap<String, String> {
-        return map.getOrPut(name) { ConcurrentHashMap() }
+        return instances.getOrPut(name) { Indicators() }
     }
 }
+
+typealias MonitoringListener = (env: String, instanceId: String, indicators: Map<String, String>) -> Unit
 
 class Monitoring {
 
@@ -39,7 +37,7 @@ class Monitoring {
             listeners.forEach { it.invoke(env, instanceId, newValues) }
         }
         catch (e: Exception) {
-            logger.error("Cannot notify env={} instance={}", env, instanceId, e)
+            logger.error("Cannot notify env=$env instance=$instanceId", e)
         }
     }
 
@@ -51,11 +49,3 @@ class Monitoring {
         private val logger = LogManager.getLogger(Monitoring::class.java)
     }
 }
-
-/*
-interface MonitoringListener {
-    fun onPropertyChanged(env: String, instanceId: String, newValues: Map<String, Any>)
-}
-*/
-
-typealias MonitoringListener = (String, String, Map<String, String>) -> Unit
