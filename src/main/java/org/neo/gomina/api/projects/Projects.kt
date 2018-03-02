@@ -78,10 +78,9 @@ class ProjectsApi {
     fun reload(ctx: RoutingContext) {
         try {
             val projectId = ctx.request().getParam("projectId")
-            val project = projects.getProject(projectId)
-            //scmPlugin.refresh(project?.svnRepo ?: "", project?.svnUrl ?: "")
-            // FIXME Put back reload
-        } catch (e: Exception) {
+            plugins.forEach { it.onReloadProject(projectId) }
+        }
+        catch (e: Exception) {
             logger.error("Cannot get project", e)
             ctx.fail(500)
         }

@@ -5,7 +5,6 @@ import com.google.inject.name.Named
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
-import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.Instances
@@ -37,7 +36,7 @@ class InstancesApi {
 
         router.get("/").handler(this::instances)
         router.get("/:envId").handler(this::forEnv)
-        router.post("/reload").handler(this::reload)
+        router.post("/:envId/reload").handler(this::reload)
     }
 
     fun instances(ctx: RoutingContext) {
@@ -83,18 +82,12 @@ class InstancesApi {
 
     fun reload(ctx: RoutingContext) {
         try {
-            logger.info("Reloading ...")
-            // FIXME Reload
-
-            for (project in projects.getProjects()) {
-                if (StringUtils.isNotBlank(project.svnUrl)) {
-                    // FIXME Put back reload
-                    //scmPlugin.refresh(project.svnRepo, project.svnUrl)
-                }
-            }
-
+            val envId = ctx.request().getParam("envId")
+            logger.info("Reloading $envId ...")
+            plugins.forEach { it.onReloadInstances(envId) }
             ctx.response().putHeader("content-type", "text/javascript").end()
-        } catch (e: Exception) {
+        }
+        catch (e: Exception) {
             logger.error("Cannot get instances", e)
             ctx.fail(500)
         }

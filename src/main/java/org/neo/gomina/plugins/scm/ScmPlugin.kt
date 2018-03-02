@@ -5,13 +5,13 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.Instances
 import org.neo.gomina.core.instances.InstancesExt
-import org.neo.gomina.model.inventory.Inventory
-import org.neo.gomina.model.maven.MavenUtils
-import org.neo.gomina.model.project.Projects
 import org.neo.gomina.core.projects.CommitLogEntry
 import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.core.projects.ProjectSet
 import org.neo.gomina.core.projects.ProjectsExt
+import org.neo.gomina.model.inventory.Inventory
+import org.neo.gomina.model.maven.MavenUtils
+import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.MavenReleaseFlagger
 import org.neo.gomina.model.scm.ScmClient
@@ -45,9 +45,6 @@ class ScmPlugin : InstancesExt, ProjectsExt {
     override fun onGetProjects(projectSet: ProjectSet) {
         for (project in projects.getProjects()) {
             val projectDetail = projectSet.get(project.id)
-            //val sonarIndicators = sonarIndicatorsMap[project.maven]
-            //val projectDetail = build(project, scmDetails, emptyList(), sonarIndicators)
-
             if (projectDetail != null) {
                 val scmDetails = this.getSvnDetails(project.svnRepo, project.svnUrl)
                 apply(projectDetail, scmDetails)
@@ -72,6 +69,12 @@ class ScmPlugin : InstancesExt, ProjectsExt {
         projectDetail.released = scmDetails.released
     }
 
+    override fun onReloadInstances(env: String) {
+        projects.getProjects()
+                .filter { StringUtils.isNotBlank(it.svnUrl) }
+                .forEach { this.refresh(it.svnRepo, it.svnUrl) }
+    }
+
     private fun map(commitLog: List<Commit>): List<CommitLogEntry> {
         return commitLog.map { CommitLogEntry(
                 revision = it.revision,
@@ -92,6 +95,11 @@ class ScmPlugin : InstancesExt, ProjectsExt {
                 }
             }
         }
+    }
+
+    override fun onReloadProject(projectId: String) {
+        val project = projects.getProject(projectId)
+        this.refresh(project?.svnRepo ?: "", project?.svnUrl ?: "")
     }
 
     fun refresh(svnRepo: String, svnUrl: String) {

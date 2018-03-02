@@ -137,7 +137,7 @@ class EnvApp extends React.Component {
             });
     }
     reload() {
-        axios.post('/data/instances/reload')
+        axios.post('/data/instances/' + this.state.env + '/reload')
             .then(response => {
                 console.log("reloaded", response.data);
             })
