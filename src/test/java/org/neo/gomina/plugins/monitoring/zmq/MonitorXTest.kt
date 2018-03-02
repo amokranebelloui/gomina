@@ -1,11 +1,9 @@
-package org.neo.gomina.plugins.monitoring
+package org.neo.gomina.plugins.monitoring.zmq
 
 import org.fest.assertions.Assertions.assertThat
 import org.fest.assertions.MapAssert.entry
 import org.junit.Test
 import org.neo.gomina.plugins.monitoring.Monitoring
-import org.neo.gomina.plugins.monitoring.zmq.MessageParser
-import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThread
 import org.zeromq.ZMQ
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
