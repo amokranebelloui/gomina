@@ -1,10 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import {createBrowserHistory} from "history";
-import {Router, Switch, Route} from "react-router";
-import {BrowserRouter, Link, NavLink} from "react-router-dom";
-import {ArchiDiagramApp, EnvApp, PipelineApp, ProjectsApp, ProjectApp, SandboxApp, Index} from "./components";
+import {Route, Router, Switch} from "react-router";
+import {Link} from "react-router-dom";
+import {ArchiDiagramApp, Index, PipelineApp, ProjectApp, ProjectsApp, SandboxApp} from "./components";
 import axios from "axios";
+import {EnvApp} from "./app/env-app";
 
 const history = createBrowserHistory();
 
