@@ -4,16 +4,18 @@ import axios from "axios/index";
 import {groupBy, Toggle} from "../common/component-library";
 import {EnvironmentLogical} from "../environment/env";
 import {AppLayout} from "./common/layout";
+import {Link} from "react-router-dom";
 
 class EnvApp extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {env: 'PROD', envs: [], realtime: false, instances: this.props.instances};
+        this.state = {env: 'PROD', envs: [], realtime: false, instances: []};
         this.connect = this.connect.bind(this);
         this.switch = this.switch.bind(this);
         this.retrieveEnvs = this.retrieveEnvs.bind(this);
+        this.retrieveInstances = this.retrieveInstances.bind(this);
 
-        console.info("envApp !constructor ", this.props.instances);
+        console.info("envApp !constructor");
     }
     connect() {
         this.sock = new SockJS('/realtime');
@@ -68,12 +70,25 @@ class EnvApp extends React.Component {
         const thisComponent = this;
         axios.get('/data/envs')
             .then(response => {
-                console.log("data envs", response.data);
+                console.log("envApp data envs", response.data);
                 thisComponent.setState({envs: response.data});
             })
             .catch(function (error) {
-                console.log("error envs", error.response);
+                console.log("envApp error envs", error.response);
                 thisComponent.setState({envs: []});
+            });
+    }
+    retrieveInstances(env) {
+        console.log("Retr... " + env);
+        const thisComponent = this;
+        axios.get('/data/instances/' + env)
+            .then(response => {
+                console.log("envApp data instances", response.data);
+                thisComponent.setState({instances: response.data});
+            })
+            .catch(function (error) {
+                console.log("envApp error", error);
+                thisComponent.setState({instances: []});
             });
     }
     reload() {
@@ -89,13 +104,16 @@ class EnvApp extends React.Component {
         console.info("envApp !will-mount ");
     }
     componentWillReceiveProps(nextProps) {
-        console.info("envApp !props-chg ");
-        this.setState({instances: nextProps.instances});
+        const newEnv = nextProps.match.params.id;
+        console.info("envApp !props-chg ", this.props.match.params.id, newEnv);
+        this.setState({env: newEnv});
+        this.retrieveInstances(newEnv);
     }
     componentDidMount() {
         console.info("envApp !mount ");
         //this.connect();
-        this.retrieveEnvs()
+        this.retrieveEnvs();
+        //this.retrieveInstances(this.state.env);
     }
     selectEnv(env) {
         this.setState({env: env});
@@ -104,7 +122,8 @@ class EnvApp extends React.Component {
         const instancesByEnv = groupBy(this.state.instances, 'env');
         const instances = instancesByEnv[this.state.env] || [];
         const envsByType = groupBy(this.state.envs, 'type');
-        console.info("envApp", this.state.instances, this.state.env, instances);
+        //console.info("envApp", this.state.instances, this.state.env, instances);
+        console.info("envApp !render");
 
         return (
             <AppLayout title={"Environment '" + this.state.env + "'"}>
@@ -120,7 +139,9 @@ class EnvApp extends React.Component {
                     <span key={type}>
                         <span>{type} </span>
                         {envsByType[type].map(env =>
-                            <button key={env.env} style={{color: this.state.env == env.env ? 'gray' : null}} onClick={e => this.selectEnv(env.env)}>{env.env}</button>
+                            <Link key={env.env} to={"/envs/" + env.env}>
+                                <button style={{color: this.state.env == env.env ? 'gray' : null}} onClick={e => this.selectEnv(env.env)}>{env.env}</button>
+                            </Link>
                         )}
                         <br />
                     </span>

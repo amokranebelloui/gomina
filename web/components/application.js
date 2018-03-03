@@ -54,7 +54,8 @@ class Blocker extends React.Component {
                 <Switch>
                     <Route exact path="/" component={Index}/>
                     <Route path="/archi" component={ArchiDiagramApp}/>
-                    <Route path="/envs" render={props => <EnvApp instances={this.state.instances} {...props} />}/>
+                    <Route path="/envs/:id" render={props => <EnvApp {...props} />}/>
+                    <Route path="/envs" render={props => <EnvApp {...props} />}/>
                     <Route path="/pipeline" component={() => <PipelineApp instances={this.state.instances} projects={this.state.projects} />}/>
                     <Route path="/projects" render={props => <ProjectsApp projects={this.state.projects} {...props} />}/>
                     <Route path="/project/:id" render={props => <ProjectApp projects={this.state.projects} instances={this.state.instances} {...props} />}/>
