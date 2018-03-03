@@ -22,16 +22,8 @@ class SshClient {
         return session
     }
 
-    fun actions(session: Session, applicationFolder: String, version: String) {
-        val deploy = "sudo -u svc-ed-int /srv/ed/apps/$applicationFolder/ops/release.sh $version"
-        val run = "sudo -u svc-ed-int /srv/ed/apps/$applicationFolder/ops/run-all.sh"
-        val stop = "sudo -u svc-ed-int /srv/ed/apps/$applicationFolder/ops/stop-all.sh"
-        val whomia = "whoami"
-        //val result = executeCommand(session, cmd)
-    }
-
     fun executeCommand(session: Session, cmd: String): String {
-        logger.info("#CMD[" + session.host + "]: " + cmd)
+        logger.debug("#CMD[${session.host}]: $cmd")
         val start = System.nanoTime()
         val channel = session.openChannel("exec") as ChannelExec
         channel.setPty(true)
@@ -43,7 +35,7 @@ class SshClient {
             Thread.sleep(2)
         }
         val res = String(baos.toByteArray())
-        logger.info("#RES: " + res + " in(" + (System.nanoTime() - start) + ")")
+        logger.debug("#RES: $res in ${(System.nanoTime() - start)} nano")
         return res
     }
 

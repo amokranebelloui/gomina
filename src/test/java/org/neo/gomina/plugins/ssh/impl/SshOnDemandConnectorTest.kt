@@ -20,7 +20,7 @@ class SshOnDemandConnectorTest {
         sshConnector.passwords = passwords
         sshConnector.sshClient = sshClient
 
-        sshConnector.analyze()
+        inventory.getEnvironment("UAT") ?. let { sshConnector.analyze(it) }
     }
 
 }

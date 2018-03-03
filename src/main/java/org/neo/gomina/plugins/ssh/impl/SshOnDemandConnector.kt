@@ -3,7 +3,7 @@ package org.neo.gomina.plugins.ssh.impl
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.inventory.InvInstance
+import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.model.ssh.SshAuth
@@ -13,17 +13,29 @@ import org.neo.gomina.plugins.ssh.connector.SshClient
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
-class SshDetails {
-    var analyzed: Boolean = false
-    var deployedVersion: String? = null
-    var deployedRevision: String? = null
-    var confCommitted: Boolean? = null
+data class SshDetails (
+    var analyzed: Boolean = false,
+    var deployedVersion: String? = null,
+    var deployedRevision: String? = null,
+    var confCommitted: Boolean? = null,
     var confUpToDate: Boolean? = null
+)
+
+class EnvAnalysis(val map: ConcurrentHashMap<String, MutableMap<String, SshDetails>>) {
+    fun getFor(host: String?, folder: String?): SshDetails {
+        var sshDetails: SshDetails? = null
+        if (StringUtils.isNotBlank(host) && StringUtils.isNotBlank(folder)) {
+            val servers = map[host]
+            if (servers != null) {
+                sshDetails = servers[folder]
+            }
+        }
+        return if (sshDetails != null) sshDetails else SshDetails()
+    }
 }
 
 class SshOnDemandConnector {
 
-    private val map = ConcurrentHashMap<String, MutableMap<String, SshDetails>>()
     private val hosts: Map<String, Host>
 
     @Inject internal lateinit var inventory: Inventory
@@ -39,13 +51,14 @@ class SshOnDemandConnector {
         .toMap()
     }
 
-    fun analyze() {
-        val instancesByHost: Map<String, List<InvInstance>> = inventory.getEnvironments()
-                .flatMap { it.services }
+    fun analyze(env: Environment): EnvAnalysis {
+        logger.info("SSH Analysis for ${env.id}")
+        val instancesByHost = env.services
                 .flatMap { it.instances }
                 .filter { !it.host.isNullOrBlank() && !it.folder.isNullOrBlank() }
                 .groupBy { it.host!! }
 
+        val map = ConcurrentHashMap<String, MutableMap<String, SshDetails>>()
         for ((host, instances) in instancesByHost) {
             val config = hosts[host]
             if (config != null) {
@@ -81,8 +94,17 @@ class SshOnDemandConnector {
                 logger.warn("No SSH config for '{}'", host)
             }
         }
+        return EnvAnalysis(map)
     }
 
+    fun actions(session: Session, applicationFolder: String, version: String) {
+        val deploy = "sudo -u svc-ed-int /srv/ed/apps/$applicationFolder/ops/release.sh $version"
+        val run = "sudo -u svc-ed-int /srv/ed/apps/$applicationFolder/ops/run-all.sh"
+        val stop = "sudo -u svc-ed-int /srv/ed/apps/$applicationFolder/ops/stop-all.sh"
+        val whomia = "whoami"
+        //val result = executeCommand(session, cmd)
+    }
+    
     fun checkConfCommited(session: Session, applicationFolder: String?, prefix: String): Boolean? {
         val result = sshClient.executeCommand(session, "$prefix svn status $applicationFolder/config")
         return if (StringUtils.isBlank(result)) java.lang.Boolean.TRUE else if (result.contains("is not a working copy")) null else java.lang.Boolean.FALSE
@@ -97,17 +119,6 @@ class SshOnDemandConnector {
             result = result.replace(pattern.toRegex(), "$1").trim { it <= ' ' }
         }
         return result
-    }
-
-    fun getDetails(host: String?, folder: String?): SshDetails {
-        var sshDetails: SshDetails? = null
-        if (StringUtils.isNotBlank(host) && StringUtils.isNotBlank(folder)) {
-            val servers = map[host]
-            if (servers != null) {
-                sshDetails = servers[folder]
-            }
-        }
-        return if (sshDetails != null) sshDetails else SshDetails()
     }
 
     companion object {

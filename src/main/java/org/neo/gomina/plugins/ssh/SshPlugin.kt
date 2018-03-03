@@ -13,19 +13,17 @@ class SshPlugin : InstancesExt {
     @Inject private lateinit var sshConnector: SshOnDemandConnector
     @Inject private lateinit var inventory: Inventory
 
-    override fun onGetInstances(env: String, instances: Instances) {
-        sshConnector.analyze()
-        for (env in inventory.getEnvironments()) {
-            for (service in env.services) {
-                for (envInstance in service.instances) {
-                    val id = env.id + "-" + envInstance.id
-                    val instance = instances.get(id)
-                    instance?.applySsh(sshConnector.getDetails(envInstance.host, envInstance.folder))
+    override fun onGetInstances(envId: String, instances: Instances) {
+        inventory.getEnvironment(envId)?.let { env ->
+            val analysis = sshConnector.analyze(env)
+            env.services
+                .flatMap { it.instances }
+                .forEach {
+                    val id = env.id + "-" + it.id
+                    instances.get(id)?.applySsh(analysis.getFor(it.host, it.folder))
                 }
-            }
         }
     }
-
 }
 
 fun Instance.applySsh(sshDetails: SshDetails) {
