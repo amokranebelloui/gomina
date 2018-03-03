@@ -1,0 +1,54 @@
+package org.neo.gomina.plugins.ssh.connector
+
+import com.jcraft.jsch.ChannelExec
+import com.jcraft.jsch.JSch
+import com.jcraft.jsch.Session
+import org.apache.commons.lang3.StringUtils
+import org.apache.logging.log4j.LogManager
+import org.neo.gomina.model.ssh.SshAuth
+import java.io.ByteArrayOutputStream
+
+class SshClient {
+
+    private val jsch = JSch()
+    private val connectTimeout = 3000
+
+    fun getSession(host: String, auth: SshAuth): Session {
+        val session = jsch.getSession(auth.username, host, 22)
+        if (StringUtils.isNotBlank(auth.password)) {
+            session.setPassword(auth.password)
+        }
+        session.setConfig("StrictHostKeyChecking", "no")
+        return session
+    }
+
+    fun actions(session: Session, applicationFolder: String, version: String) {
+        val deploy = "sudo -u svc-ed-int /srv/ed/apps/$applicationFolder/ops/release.sh $version"
+        val run = "sudo -u svc-ed-int /srv/ed/apps/$applicationFolder/ops/run-all.sh"
+        val stop = "sudo -u svc-ed-int /srv/ed/apps/$applicationFolder/ops/stop-all.sh"
+        val whomia = "whoami"
+        //val result = executeCommand(session, cmd)
+    }
+
+    fun executeCommand(session: Session, cmd: String): String {
+        logger.info("#CMD[" + session.host + "]: " + cmd)
+        val start = System.nanoTime()
+        val channel = session.openChannel("exec") as ChannelExec
+        channel.setPty(true)
+        channel.setCommand(cmd)
+        val baos = ByteArrayOutputStream()
+        channel.outputStream = baos
+        channel.connect()
+        while (!channel.isClosed) {
+            Thread.sleep(2)
+        }
+        val res = String(baos.toByteArray())
+        logger.info("#RES: " + res + " in(" + (System.nanoTime() - start) + ")")
+        return res
+    }
+
+    companion object {
+        private val logger = LogManager.getLogger(SshClient::class.java)
+    }
+
+}

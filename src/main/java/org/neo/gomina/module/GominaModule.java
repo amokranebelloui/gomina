@@ -32,10 +32,9 @@ import org.neo.gomina.plugins.sonar.SonarPlugin;
 import org.neo.gomina.plugins.sonar.connectors.DummySonarConnector;
 import org.neo.gomina.plugins.sonar.connectors.HttpSonarConnector;
 import org.neo.gomina.plugins.ssh.SshConfig;
-import org.neo.gomina.plugins.ssh.SshConnector;
 import org.neo.gomina.plugins.ssh.SshPlugin;
 import org.neo.gomina.plugins.ssh.connector.SshClient;
-import org.neo.gomina.plugins.ssh.impl.OnDemandSshConnector;
+import org.neo.gomina.plugins.ssh.impl.SshOnDemandConnector;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -95,7 +94,7 @@ public class GominaModule extends AbstractModule {
         // SSH
         bind(SshConfig.class).toInstance(config.ssh);
         bind(SshClient.class).in(Scopes.SINGLETON);
-        bind(SshConnector.class).to(OnDemandSshConnector.class).in(Scopes.SINGLETON);
+        bind(SshOnDemandConnector.class).in(Scopes.SINGLETON);
         bind(SshPlugin.class).in(Scopes.SINGLETON);
 
         // API
