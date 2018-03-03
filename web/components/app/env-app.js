@@ -3,7 +3,7 @@ import SockJS from "sockjs-client";
 import axios from "axios/index";
 import {groupBy, Toggle} from "../common/component-library";
 import {EnvironmentLogical} from "../environment/env";
-import {AppLayout} from "../layout";
+import {AppLayout} from "./common/layout";
 
 class EnvApp extends React.Component {
     constructor(props) {

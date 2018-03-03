@@ -1,8 +1,8 @@
 import React from "react";
-import {LoggingButton, MyComponent, Posts, Toggle2, WarningBanner} from "../sandbox";
-import C1 from "../module";
+import {LoggingButton, MyComponent, Posts, Toggle2, WarningBanner} from "../sandbox/sandbox";
+import C1 from "../sandbox/module";
 import {Toggle} from "../common/component-library";
-import {AppLayout} from "../layout";
+import {AppLayout} from "./common/layout";
 
 class SandboxApp extends React.Component {
     constructor(props) {

@@ -1,6 +1,6 @@
 import React from "react";
 import {Badge, CopyButton} from "../common/component-library";
-import {BuildLink} from "../project";
+import {BuildLink} from "../project/project";
 import {ConfCommited, Expected, Host, Leader, Versions} from "./instance-common";
 
 class AppInstance extends React.Component {

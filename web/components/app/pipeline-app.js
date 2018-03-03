@@ -1,7 +1,7 @@
 import React from "react";
 import {groupBy} from "../common/component-library";
-import {AppLayout} from "../layout";
-import {ProjectPipeline} from "../pipeline";
+import {AppLayout} from "./common/layout";
+import {ProjectPipeline} from "../project/pipeline";
 
 class PipelineApp extends React.Component {
     render() {

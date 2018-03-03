@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios/index";
-import {AppLayout} from "../layout";
-import {Coverage, LinesOfCode, ProjectSummary, ScmLog} from "../project";
+import {AppLayout} from "./common/layout";
+import {Coverage, LinesOfCode, ProjectSummary, ScmLog} from "../project/project";
 
 class ProjectApp extends React.Component {
     

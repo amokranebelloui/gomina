@@ -1,5 +1,5 @@
 import React from "react";
-import {AppLayout} from "../layout";
+import {AppLayout} from "./common/layout";
 
 function Index(props) {
     console.info('index');
