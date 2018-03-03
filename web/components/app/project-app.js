@@ -7,22 +7,27 @@ class ProjectApp extends React.Component {
     
     constructor(props) {
         super(props);
-        this.state = {project: {}};
+        this.state = {projects: [], projectId: this.props.match.params.id, project: {}};
+        this.retrieveProjects = this.retrieveProjects.bind(this);
         this.retrieveProject = this.retrieveProject.bind(this);
+        //this.retrieveInstances= this.retrieveInstances.bind(this);
         this.reloadProject = this.reloadProject.bind(this);
         console.info("projectApp !constructor ", this.props.match.params.id);
     }
 
-    componentWillMount() {
-        console.info("projectApp !mount ", this.props.match.params.id);
-        //this.retrieveProject(this.props.match.params.id);
+    retrieveProjects() {
+        console.log("projectApp Retr Projects ... ");
+        const thisComponent = this;
+        axios.get('/data/projects')
+            .then(response => {
+                console.log("projectApp data projects", response.data);
+                thisComponent.setState({projects: response.data});
+            })
+            .catch(function (error) {
+                console.log("projectApp error", error);
+                thisComponent.setState({projects: []});
+            });
     }
-
-    componentWillReceiveProps(nextProps) {
-        console.info("projectApp !props-chg ", this.props.match.params.id, nextProps.match.params.id);
-        this.retrieveProject(nextProps.match.params.id);
-    }
-
     retrieveProject(projectId) {
         const thisComponent = this;
         axios.get('/data/projects/' + projectId)
@@ -35,7 +40,6 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({project: {}});
             });
     }
-
     reloadProject(projectId) {
         axios.post('/data/projects/' + projectId + '/reload')
             .then(response => {
@@ -46,9 +50,22 @@ class ProjectApp extends React.Component {
             });
     }
 
+    componentDidMount() {
+        console.info("projectApp !mount ", this.props.match.params.id);
+        this.retrieveProjects();
+        this.retrieveProject(this.state.projectId);
+    }
+    componentWillReceiveProps(nextProps) {
+        const newProject = nextProps.match.params.id;
+        console.info("projectApp !props-chg ", this.props.match.params.id, newProject);
+        this.setState({projectId: newProject});
+        if (this.props.match.params.id != newProject) {
+            this.retrieveProject(newProject);
+        }
+    }
     render() {
         //console.info("!render ", this.props.match.params.id);
-        const projects = this.props.projects;
+        const projects = this.state.projects;
         const project = this.state.project;
         const commits = project.commitLog || [];
         const instances = this.props.instances.filter(instance => instance.project == project.id);
