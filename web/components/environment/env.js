@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge, groupBy, StatusWrapper} from "../gomina";
+import {Badge, groupBy, StatusWrapper} from "../common/component-library";
 import {isSnapshot} from "../common/version";
 import {AppInstance} from "./instance-app";
 import {RedisInstance} from "./instance-redis";

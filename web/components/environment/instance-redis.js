@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge, CopyButton} from "../gomina";
+import {Badge, CopyButton} from "../common/component-library";
 import {ConfCommited, Expected, Host, Leader, Port, RedisLink, Versions} from "./instance-common";
 
 class RedisInstance extends React.Component {

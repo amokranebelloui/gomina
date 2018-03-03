@@ -1,7 +1,7 @@
 import React from "react";
 import {LoggingButton, MyComponent, Posts, Toggle2, WarningBanner} from "../sandbox";
 import C1 from "../module";
-import {Toggle} from "../gomina";
+import {Toggle} from "../common/component-library";
 import {AppLayout} from "../layout";
 
 class SandboxApp extends React.Component {

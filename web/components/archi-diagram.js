@@ -1,6 +1,6 @@
 import React from "react";
 import * as d3 from "d3";
-import {Toggle} from "./gomina";
+import {Toggle} from "./common/component-library";
 import "./archi-diagram.css";
 
 function index(list) {

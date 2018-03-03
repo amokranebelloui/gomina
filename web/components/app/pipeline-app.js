@@ -1,5 +1,5 @@
 import React from "react";
-import {groupBy} from "../gomina";
+import {groupBy} from "../common/component-library";
 import {AppLayout} from "../layout";
 import {ProjectPipeline} from "../pipeline";
 

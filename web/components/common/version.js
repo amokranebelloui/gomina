@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge} from "../gomina";
+import {Badge} from "./component-library";
 
 function isSnapshot(version) {
     return version ? version.includes("-SNAPSHOT") : false;

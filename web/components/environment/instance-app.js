@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge, CopyButton} from "../gomina";
+import {Badge, CopyButton} from "../common/component-library";
 import {BuildLink} from "../project";
 import {ConfCommited, Expected, Host, Leader, Versions} from "./instance-common";
 

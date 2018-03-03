@@ -1,7 +1,7 @@
 import React from "react";
 import SockJS from "sockjs-client";
 import axios from "axios/index";
-import {groupBy, Toggle} from "../gomina";
+import {groupBy, Toggle} from "../common/component-library";
 import {EnvironmentLogical} from "../environment/env";
 import {AppLayout} from "../layout";
 

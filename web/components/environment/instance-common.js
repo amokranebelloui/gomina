@@ -1,6 +1,6 @@
 import React from "react";
 import {compareVersions, compareVersionsRevisions, Version} from "../common/version";
-import {Badge} from "../gomina";
+import {Badge} from "../common/component-library";
 
 class ConfCommited extends React.Component {
     render() {
