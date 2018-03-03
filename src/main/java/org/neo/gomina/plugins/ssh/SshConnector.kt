@@ -5,7 +5,7 @@ import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.model.inventory.Inventory
 import javax.inject.Inject
 
-class DumbSshConnector : InstancesExt {
+class SshPlugin : InstancesExt {
 
     @Inject private lateinit var sshConnector: SshConnector
     @Inject private lateinit var inventory: Inventory

@@ -31,7 +31,7 @@ import org.neo.gomina.plugins.project.ProjectPlugin;
 import org.neo.gomina.plugins.scm.ScmPlugin;
 import org.neo.gomina.plugins.scm.connectors.ConfigScmRepos;
 import org.neo.gomina.plugins.sonar.SonarPlugin;
-import org.neo.gomina.plugins.ssh.DumbSshConnector;
+import org.neo.gomina.plugins.ssh.SshPlugin;
 import org.neo.gomina.plugins.ssh.SshConfig;
 import org.neo.gomina.plugins.ssh.SshConnector;
 import org.neo.gomina.plugins.ssh.connector.SshClient;
@@ -96,7 +96,7 @@ public class GominaModule extends AbstractModule {
         bind(SshConfig.class).toInstance(config.ssh);
         bind(SshClient.class).in(Scopes.SINGLETON);
         bind(SshConnector.class).to(OnDemandSshConnector.class).in(Scopes.SINGLETON);
-        bind(DumbSshConnector.class).in(Scopes.SINGLETON);
+        bind(SshPlugin.class).in(Scopes.SINGLETON);
 
         // API
         bind(EnvBuilder.class).in(Scopes.SINGLETON);
@@ -119,7 +119,7 @@ public class GominaModule extends AbstractModule {
                 .toProvider(new Provider<ArrayList<InstancesExt>>() {
                     @Inject private InventoryPlugin inventoryPlugin;
                     @Inject private ScmPlugin scmPlugin;
-                    @Inject private DumbSshConnector sshConnector;
+                    @Inject private SshPlugin sshConnector;
                     @Inject private MonitoringPlugin monitoringPlugin;
 
                     @Override public ArrayList<InstancesExt> get() {
