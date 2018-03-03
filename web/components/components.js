@@ -95,7 +95,8 @@ class EnvApp extends React.Component {
             //var fakeStatus = r == 1 ? 'LIVE' : r == 2 ? 'LOADING' : 'DOWN';
             let event = JSON.parse(e.data);
             console.log('real time event', event);
-            eventsDiv.innerHTML = eventsDiv.innerHTML + ' ' + event.env + ' ' + event.name + ' ' + event.status + '<br>';
+            eventsDiv.innerHTML = eventsDiv.innerHTML + ' ' + event.env + ' ' + event.name + ' ' +
+                event.status + ' ' + event.leader + ' ' + event.participating + '<br>';
 
             // FIXME review how to identify instances
             const found = thisComponent.state.instances.find(instance => instance.name == event.name);
@@ -104,6 +105,8 @@ class EnvApp extends React.Component {
 
             if (found) {
                 found.status = event.status;
+                found.leader = event.leader;
+                found.participating = event.participating;
                 thisComponent.setState({instances: thisComponent.state.instances});
             }
         };

@@ -1,8 +1,10 @@
 package org.neo.gomina.plugins.monitoring
 
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.core.instances.InstanceRealTime
 import org.neo.gomina.core.instances.Instances
 import org.neo.gomina.core.instances.InstancesExt
+import org.neo.gomina.core.instances.InstanceListener
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -15,15 +17,13 @@ class EnvMonitoring {
     }
 }
 
-typealias MonitoringListener = (env: String, instanceId: String, indicators: Map<String, String>) -> Unit
-
 class Monitoring : InstancesExt {
 
     private val topology = ConcurrentHashMap<String, EnvMonitoring>()
 
-    private val listeners = CopyOnWriteArrayList<MonitoringListener>()
+    private val listeners = CopyOnWriteArrayList<InstanceListener>()
 
-    fun add(listener: MonitoringListener) {
+    override fun onRegisterForInstanceUpdates(listener: InstanceListener) {
         this.listeners.add(listener)
     }
 
@@ -45,7 +45,16 @@ class Monitoring : InstancesExt {
                 if (value != null) indicators.put(key, value) else indicators.remove(key)
             }
 
-            listeners.forEach { it.invoke(env, instanceId, newValues) }
+            val instance = InstanceRealTime(
+                    env = env,
+                    id = instanceId,
+                    name = instanceId,
+                    participating = newValues["participating"]?.toBoolean() ?: false,
+                    leader = newValues["leader"]?.toBoolean() ?: true,
+                    status = newValues["status"]
+            )
+
+            listeners.forEach { it.invoke(instance) }
         }
         catch (e: Exception) {
             logger.error("Cannot notify env=$env instance=$instanceId", e)

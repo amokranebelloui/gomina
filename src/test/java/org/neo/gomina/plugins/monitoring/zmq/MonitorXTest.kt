@@ -23,17 +23,18 @@ class MonitorXTest {
     fun testZmq() {
 
         val monitoring = Monitoring()
-        val url = "tcp://localhost:7070"
+        val url = "tcp://localhost:7073"
         val thread = ZmqMonitorThread(monitoring, url, Arrays.asList(""))
         thread.start()
 
         val counter = AtomicInteger(0)
-        monitoring.add { env, instanceId, newValues ->
-            println("received " + newValues)
-            assertThat(env).isEqualTo("UAT")
-            assertThat(instanceId).isEqualTo("kernel")
-            assertThat(newValues.containsKey("status")).isTrue()
-            assertThat(newValues.containsKey("quickfixPersistence")).isTrue()
+        monitoring.onRegisterForInstanceUpdates { instance ->
+            println("received " + instance)
+            assertThat(instance.env).isEqualTo("UAT")
+            assertThat(instance.id).isEqualTo("kernel")
+            assertThat(instance.name).isEqualTo("kernel")
+            assertThat(instance.status).isNotEmpty
+            //assertThat(newValues.containsKey("quickfixPersistence")).isTrue()
             counter.incrementAndGet()
         }
 

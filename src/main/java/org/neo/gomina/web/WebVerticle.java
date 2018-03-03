@@ -1,14 +1,11 @@
 package org.neo.gomina.web;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.util.Modules;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -20,12 +17,9 @@ import org.neo.gomina.api.envs.EnvsApi;
 import org.neo.gomina.api.instances.InstancesApi;
 import org.neo.gomina.api.projects.ProjectsApi;
 import org.neo.gomina.api.realtime.NotificationsApi;
-import org.neo.gomina.plugins.monitoring.Monitoring;
 import org.neo.gomina.module.GominaModule;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 public class WebVerticle extends AbstractVerticle {
 
@@ -51,24 +45,7 @@ public class WebVerticle extends AbstractVerticle {
         Router router = Router.router(vertx);
         router.route().handler(BodyHandler.create());
 
-        // Relay monitoring callbacks to WebSockets (TODO should go through instance object)
-        Monitoring monitoring = injector.getInstance(Monitoring.class);
-        final ObjectMapper mapper = new ObjectMapper();
-        monitoring.add((env, instanceId, newValues) -> {
-            Map<String, String> map = new HashMap<>();
-            map.put("env", env);
-            map.put("id", instanceId);
-            map.putAll(newValues);
-            try {
-                String message = mapper.writeValueAsString(map);
-                Buffer buffer = Buffer.buffer(message);
-                notificationsApi.getSockets().forEach(socket -> socket.write(buffer));
-            }
-            catch (JsonProcessingException e) {
-                e.printStackTrace();
-            }
-            return null;
-        });
+        notificationsApi.start();
 
         router
                 .mountSubRouter("/data/envs", envsApi.getRouter())

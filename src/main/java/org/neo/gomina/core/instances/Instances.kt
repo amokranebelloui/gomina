@@ -58,6 +58,17 @@ class Instance (
         var redisClientCount: Int? = null
 )
 
+class InstanceRealTime (
+        var env: String? = null ,
+        var id: String? = null, // Unique by env
+        var name: String? = null ,// X Replication
+        var participating: Boolean = false,
+        var leader: Boolean = false,
+        var status: String? = null
+)
+
+typealias InstanceListener = (instance: InstanceRealTime) -> Unit
+
 class Instances {
     val list = ArrayList<Instance>()
     private val index = HashMap<String, Instance>()
