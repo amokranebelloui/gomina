@@ -79,6 +79,7 @@ class ProjectsApi {
         try {
             val projectId = ctx.request().getParam("projectId")
             plugins.forEach { it.onReloadProject(projectId) }
+            ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
             logger.error("Cannot get project", e)
