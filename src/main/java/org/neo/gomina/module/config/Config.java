@@ -3,8 +3,8 @@ package org.neo.gomina.module.config;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig;
-import org.neo.gomina.model.scm.ScmConfig;
-import org.neo.gomina.model.sonar.SonarConfig;
+import org.neo.gomina.plugins.scm.connectors.ScmConfig;
+import org.neo.gomina.plugins.sonar.SonarConfig;
 import org.neo.gomina.plugins.ssh.SshConfig;
 
 import java.util.Map;

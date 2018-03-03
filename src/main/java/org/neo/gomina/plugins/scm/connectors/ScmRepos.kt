@@ -13,6 +13,8 @@ private class NoOpScmClient : ScmClient {
 }
 private val noOpScmClient = NoOpScmClient()
 
+data class ScmConfig(val repos: List<ScmRepo> = ArrayList())
+
 class ConfigScmRepos : ScmRepos {
 
     companion object {

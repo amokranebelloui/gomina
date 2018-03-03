@@ -4,8 +4,6 @@ import org.neo.gomina.model.project.Projects
 import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.core.projects.ProjectSet
 import org.neo.gomina.core.projects.ProjectsExt
-import org.neo.gomina.model.sonar.SonarConnector
-import org.neo.gomina.model.sonar.SonarIndicators
 import javax.inject.Inject
 
 class SonarPlugin : ProjectsExt {
@@ -14,7 +12,7 @@ class SonarPlugin : ProjectsExt {
     @Inject private lateinit var sonarConnector: SonarConnector
 
     override fun onGetProjects(projectSet: ProjectSet) {
-        val sonarIndicatorsMap = sonarConnector.metrics
+        val sonarIndicatorsMap = sonarConnector.getMetrics()
 
         for (project in projects.getProjects()) {
             val sonarIndicators = sonarIndicatorsMap[project.maven]
@@ -28,7 +26,7 @@ class SonarPlugin : ProjectsExt {
 
     override fun onGetProject(projectId: String, projectDetail: ProjectDetail) {
         projects.getProject(projectId)
-                ?.let { sonarConnector.metrics[it.maven] }
+                ?.let { sonarConnector.getMetrics()[it.maven] }
                 ?.let { projectDetail.apply(it) }
     }
 

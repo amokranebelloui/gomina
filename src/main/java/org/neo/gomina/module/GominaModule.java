@@ -15,12 +15,8 @@ import org.neo.gomina.model.inventory.Inventory;
 import org.neo.gomina.model.inventory.file.FileInventory;
 import org.neo.gomina.model.project.Projects;
 import org.neo.gomina.model.project.file.FileProjects;
-import org.neo.gomina.model.scm.ScmConfig;
 import org.neo.gomina.model.scm.ScmRepos;
 import org.neo.gomina.model.security.Passwords;
-import org.neo.gomina.model.sonar.SonarConnector;
-import org.neo.gomina.model.sonar.dummy.DummySonarConnector;
-import org.neo.gomina.model.sonar.http.HttpSonarConnector;
 import org.neo.gomina.module.config.Config;
 import org.neo.gomina.module.config.ConfigLoader;
 import org.neo.gomina.plugins.inventory.InventoryPlugin;
@@ -30,10 +26,14 @@ import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThreads;
 import org.neo.gomina.plugins.project.ProjectPlugin;
 import org.neo.gomina.plugins.scm.ScmPlugin;
 import org.neo.gomina.plugins.scm.connectors.ConfigScmRepos;
+import org.neo.gomina.plugins.scm.connectors.ScmConfig;
+import org.neo.gomina.plugins.sonar.SonarConnector;
 import org.neo.gomina.plugins.sonar.SonarPlugin;
-import org.neo.gomina.plugins.ssh.SshPlugin;
+import org.neo.gomina.plugins.sonar.connectors.DummySonarConnector;
+import org.neo.gomina.plugins.sonar.connectors.HttpSonarConnector;
 import org.neo.gomina.plugins.ssh.SshConfig;
 import org.neo.gomina.plugins.ssh.SshConnector;
+import org.neo.gomina.plugins.ssh.SshPlugin;
 import org.neo.gomina.plugins.ssh.connector.SshClient;
 import org.neo.gomina.plugins.ssh.impl.OnDemandSshConnector;
 
@@ -85,8 +85,8 @@ public class GominaModule extends AbstractModule {
         bind(ScmPlugin.class).in(Scopes.SINGLETON);
 
         // Sonar
-        bind(String.class).annotatedWith(Names.named("sonar.url")).toInstance(config.sonar.url);
-        Class<? extends SonarConnector> sonarConnector = StringUtils.equals(config.sonar.mode, "dummy")
+        bind(String.class).annotatedWith(Names.named("sonar.url")).toInstance(config.sonar.getUrl());
+        Class<? extends SonarConnector> sonarConnector = StringUtils.equals(config.sonar.getMode(), "dummy")
                 ? DummySonarConnector.class
                 : HttpSonarConnector.class;
         bind(SonarConnector.class).to(sonarConnector).in(Scopes.SINGLETON);

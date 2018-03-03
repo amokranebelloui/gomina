@@ -69,3 +69,11 @@
   svnUrl: svn-project2
   maven: x.oms.vac:voms-bus
   jenkinsJob: 6.14 SERVER-LibBus
+
+- id: torkjell
+  label: Torkjell
+  type: server
+  svnRepo: ''
+  svnUrl: ''
+  maven: torkjell:torkjell
+  jenkinsJob: 
