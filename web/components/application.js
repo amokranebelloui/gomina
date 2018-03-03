@@ -4,7 +4,6 @@ import {createBrowserHistory} from "history";
 import {Route, Router, Switch} from "react-router";
 import {Link} from "react-router-dom";
 import {Index} from "./app/index-app";
-import axios from "axios";
 import {EnvApp} from "./app/env-app";
 import {ArchiDiagramApp} from "./app/archi-diagram-app";
 import {PipelineApp} from "./app/pipeline-app";
@@ -17,26 +16,6 @@ const history = createBrowserHistory();
 class Blocker extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {instances: [], projects: []};
-
-        const thisComponent = this;
-        axios.get('/data/instances')
-            .then(response => {
-                console.log("instances", response.data);
-                thisComponent.setState({instances: response.data});
-            })
-            .catch(function (error) {
-                console.log("error", error);
-            });
-        axios.get('/data/projects')
-            .then(response => {
-                console.log("projects", response.data);
-                thisComponent.setState({projects: response.data});
-            })
-            .catch(function (error) {
-                console.log("error", error);
-            });
-
     }
     render() {
         console.info('blocker');
@@ -58,7 +37,7 @@ class Blocker extends React.Component {
                     <Route path="/envs" render={props => <EnvApp {...props} />}/>
                     <Route path="/pipeline" render={props => <PipelineApp {...props} />}/>
                     <Route path="/projects" render={props => <ProjectsApp {...props} />}/>
-                    <Route path="/project/:id" render={props => <ProjectApp instances={this.state.instances} {...props} />}/>
+                    <Route path="/project/:id" render={props => <ProjectApp {...props} />}/>
                     <Route path="/sandbox" component={() => <SandboxApp />}/>
                     <Route path="*" component={() => <div>I don't know you man!!!</div>} />
                 </Switch>
@@ -81,6 +60,5 @@ class RouterApplication extends React.Component {
     }
 }
 
-console.info(document.getElementById('root'))
-
+//console.info(document.getElementById('root'))
 ReactDOM.render(<RouterApplication />, document.getElementById('root'));

@@ -7,10 +7,10 @@ class ProjectApp extends React.Component {
     
     constructor(props) {
         super(props);
-        this.state = {projects: [], projectId: this.props.match.params.id, project: {}};
+        this.state = {projects: [], projectId: this.props.match.params.id, project: {}, instances: []};
         this.retrieveProjects = this.retrieveProjects.bind(this);
         this.retrieveProject = this.retrieveProject.bind(this);
-        //this.retrieveInstances= this.retrieveInstances.bind(this);
+        this.retrieveInstances= this.retrieveInstances.bind(this);
         this.reloadProject = this.reloadProject.bind(this);
         console.info("projectApp !constructor ", this.props.match.params.id);
     }
@@ -49,11 +49,25 @@ class ProjectApp extends React.Component {
                 console.log("project reload error", error.response);
             });
     }
+    retrieveInstances(projectId) {
+        console.log("projectApp Retr Instances... " + projectId);
+        const thisComponent = this;
+        axios.get('/data/instances') // FIXME Retrieve only instances corresponding to project
+            .then(response => {
+                console.log("projectApp data instances", response.data);
+                thisComponent.setState({instances: response.data});
+            })
+            .catch(function (error) {
+                console.log("projectApp error", error);
+                thisComponent.setState({instances: []});
+            });
+    }
 
     componentDidMount() {
         console.info("projectApp !mount ", this.props.match.params.id);
         this.retrieveProjects();
         this.retrieveProject(this.state.projectId);
+        this.retrieveInstances(this.state.projectId);
     }
     componentWillReceiveProps(nextProps) {
         const newProject = nextProps.match.params.id;
@@ -61,6 +75,7 @@ class ProjectApp extends React.Component {
         this.setState({projectId: newProject});
         if (this.props.match.params.id != newProject) {
             this.retrieveProject(newProject);
+            this.retrieveInstances(newProject);
         }
     }
     render() {
@@ -68,7 +83,7 @@ class ProjectApp extends React.Component {
         const projects = this.state.projects;
         const project = this.state.project;
         const commits = project.commitLog || [];
-        const instances = this.props.instances.filter(instance => instance.project == project.id);
+        const instances = this.state.instances.filter(instance => instance.project == project.id);
         const title = "Project '" + project.label + "'";
         const cellStyle = {display: 'inline'};
         return (
