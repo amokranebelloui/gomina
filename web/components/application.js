@@ -3,9 +3,14 @@ import ReactDOM from "react-dom";
 import {createBrowserHistory} from "history";
 import {Route, Router, Switch} from "react-router";
 import {Link} from "react-router-dom";
-import {ArchiDiagramApp, Index, PipelineApp, ProjectApp, ProjectsApp, SandboxApp} from "./components";
+import {Index} from "./app/index-app";
 import axios from "axios";
 import {EnvApp} from "./app/env-app";
+import {ArchiDiagramApp} from "./app/archi-diagram-app";
+import {PipelineApp} from "./app/pipeline-app";
+import {ProjectsApp} from "./app/projects-app";
+import {ProjectApp} from "./app/project-app";
+import {SandboxApp} from "./app/sandbox-app";
 
 const history = createBrowserHistory();
 
