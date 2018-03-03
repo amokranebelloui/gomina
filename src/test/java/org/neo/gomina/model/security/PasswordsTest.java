@@ -19,7 +19,7 @@ public class PasswordsTest {
 
     @Test
     public void getRealPassword() throws Exception {
-        Passwords passwords = new Passwords(new File("config/passwords.properties"));
+        Passwords passwords = new Passwords(new File("config/pass.properties.sample"));
 
         assertThat(new String(Base64.encodeBase64("super$$sec".getBytes()))).isEqualTo("c3VwZXIkJHNlYw==");
         assertThat(passwords.getRealPassword("@amokrane")).isEqualTo("mysecret");
