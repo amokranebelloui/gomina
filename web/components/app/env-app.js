@@ -9,7 +9,7 @@ import {Link} from "react-router-dom";
 class EnvApp extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {env: 'PROD', envs: [], realtime: false, instances: []};
+        this.state = {env: props.match.params.id, envs: [], realtime: false, instances: []};
         this.connect = this.connect.bind(this);
         this.switch = this.switch.bind(this);
         this.retrieveEnvs = this.retrieveEnvs.bind(this);
@@ -107,13 +107,15 @@ class EnvApp extends React.Component {
         const newEnv = nextProps.match.params.id;
         console.info("envApp !props-chg ", this.props.match.params.id, newEnv);
         this.setState({env: newEnv});
-        this.retrieveInstances(newEnv);
+        if (this.props.match.params.id != newEnv) {
+            this.retrieveInstances(newEnv);
+        }
     }
     componentDidMount() {
         console.info("envApp !mount ");
         //this.connect();
         this.retrieveEnvs();
-        //this.retrieveInstances(this.state.env);
+        this.retrieveInstances(this.state.env);
     }
     selectEnv(env) {
         this.setState({env: env});
