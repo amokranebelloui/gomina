@@ -7,6 +7,7 @@ import org.neo.gomina.model.inventory.InvInstance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.model.ssh.SshAuth
+import org.neo.gomina.plugins.ssh.Host
 import org.neo.gomina.plugins.ssh.SshConfig
 import org.neo.gomina.plugins.ssh.connector.SshClient
 import java.util.concurrent.ConcurrentHashMap
@@ -23,7 +24,7 @@ class SshDetails {
 class SshOnDemandConnector {
 
     private val map = ConcurrentHashMap<String, MutableMap<String, SshDetails>>()
-    private val hosts: Map<String, SshConfig.Host>
+    private val hosts: Map<String, Host>
 
     @Inject internal lateinit var inventory: Inventory
     @Inject internal lateinit var passwords: Passwords
