@@ -17,7 +17,7 @@ class EnvMonitoring {
     }
 }
 
-class Monitoring : InstancesExt {
+class MonitoringPlugin : InstancesExt {
 
     private val topology = ConcurrentHashMap<String, EnvMonitoring>()
 
@@ -60,7 +60,7 @@ class Monitoring : InstancesExt {
     }
 
     companion object {
-        private val logger = LogManager.getLogger(Monitoring::class.java)
+        private val logger = LogManager.getLogger(MonitoringPlugin::class.java)
     }
 }
 

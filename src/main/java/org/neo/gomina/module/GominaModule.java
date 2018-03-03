@@ -24,7 +24,7 @@ import org.neo.gomina.model.sonar.http.HttpSonarConnector;
 import org.neo.gomina.module.config.Config;
 import org.neo.gomina.module.config.ConfigLoader;
 import org.neo.gomina.plugins.inventory.InventoryPlugin;
-import org.neo.gomina.plugins.monitoring.Monitoring;
+import org.neo.gomina.plugins.monitoring.MonitoringPlugin;
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig;
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThreads;
 import org.neo.gomina.plugins.project.ProjectPlugin;
@@ -40,7 +40,6 @@ import org.neo.gomina.plugins.ssh.impl.OnDemandSshConnector;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class GominaModule extends AbstractModule {
 
@@ -76,7 +75,7 @@ public class GominaModule extends AbstractModule {
         bind(ProjectPlugin.class).in(Scopes.SINGLETON);
 
         // Monitoring
-        bind(Monitoring.class).in(Scopes.SINGLETON);
+        bind(MonitoringPlugin.class).in(Scopes.SINGLETON);
         bind(ZmqMonitorConfig.class).toInstance(config.zmqMonitoring);
         bind(ZmqMonitorThreads.class).asEagerSingleton();
 
@@ -121,14 +120,14 @@ public class GominaModule extends AbstractModule {
                     @Inject private InventoryPlugin inventoryPlugin;
                     @Inject private ScmPlugin scmPlugin;
                     @Inject private DumbSshConnector sshConnector;
-                    @Inject private Monitoring monitoring;
+                    @Inject private MonitoringPlugin monitoringPlugin;
 
                     @Override public ArrayList<InstancesExt> get() {
                         return new ArrayList<>(Arrays.asList(
                                 inventoryPlugin,
                                 scmPlugin,
                                 sshConnector,
-                                monitoring
+                                monitoringPlugin
                         ));
                     }
                 });

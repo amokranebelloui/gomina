@@ -2,7 +2,7 @@ package org.neo.gomina.plugins.monitoring.zmq
 
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.inventory.Inventory
-import org.neo.gomina.plugins.monitoring.Monitoring
+import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.zeromq.ZMQ
 import java.util.*
 import javax.inject.Inject
@@ -12,17 +12,17 @@ data class Connection (var url: String)
 
 class ZmqMonitorThreads {
     @Inject
-    constructor(config: ZmqMonitorConfig, monitoring: Monitoring, inventory: Inventory) {
+    constructor(config: ZmqMonitorConfig, monitoringPlugin: MonitoringPlugin, inventory: Inventory) {
         if (config.connections != null) {
             val subscriptions = inventory.getEnvironments().map { ".#HB.${it.id}." }
             config.connections
-                    .map { ZmqMonitorThread(monitoring, it.url, subscriptions) }
+                    .map { ZmqMonitorThread(monitoringPlugin, it.url, subscriptions) }
                     .forEach { it.start() }
         }
     }
 }
 
-class ZmqMonitorThread(private val monitoring: Monitoring, private val url: String, private val subscriptions: Collection<String>) : Thread() {
+class ZmqMonitorThread(private val monitoringPlugin: MonitoringPlugin, private val url: String, private val subscriptions: Collection<String>) : Thread() {
 
     override fun run() {
         val context = ZMQ.context(1)
@@ -39,7 +39,7 @@ class ZmqMonitorThread(private val monitoring: Monitoring, private val url: Stri
             try {
                 val message = MessageParser.parse(obj)
                 enrich(message.indicators)
-                monitoring.notify(message.env, message.instanceId, message.indicators)
+                monitoringPlugin.notify(message.env, message.instanceId, message.indicators)
                 logger.trace(message)
             }
             catch (e: Exception) {
