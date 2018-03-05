@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 function groupBy(list, property) {
@@ -67,52 +66,6 @@ class Well extends React.Component {
     }
 }
 
-class Status extends React.Component {
-    render() {
-        const status = this.props.status;
-        const backgroundColor =
-            status == 'LIVE' ? 'green' :
-                status == 'LOADING' ? 'orange' :
-                    status == 'DOWN' ? 'gray' :
-                        'red';
-        const badge = <Badge color="white" backgroundColor={backgroundColor}>{status}</Badge>
-        /*
-         const badge = (
-         <span style={{padding: "3px",
-         color: 'white', backgroundColor: backgroundColor,
-         fontSize: '9px',
-         borderRadius: "5px", display: "inline-block"}}>
-         {status}
-         </span>
-         )
-         */
-        return badge;
-    }
-}
-
-class StatusWrapper extends React.Component {
-    render() {
-        const status = this.props.status;
-        const color =
-            status == 'LIVE' ? 'green' :
-                status == 'LOADING' ? 'orange' :
-                    status == 'DOWN' ? 'red' :
-                        'lightgray';
-        const background =
-            status == 'LIVE' ? '#e8f4e9' :
-                status == 'LOADING' ? '#f9edcf' :
-                    status == 'DOWN' ? '#f8e8e3' :
-                        '#ededed';
-        //#F8F8F8
-        return (
-            <div style={{padding: '2px', margin: this.props.margin, display: this.props.block ? null : 'inline-block',
-                backgroundColor: background, border: '3px solid ' + color, borderRadius: '5px'}}>
-                {this.props.children}
-            </div>
-        )
-    }
-}
-
 class CopyButton extends React.Component {
     copyToClipboard(text) {
         //event.originalTarget.parentNode.children[2].select()
@@ -141,4 +94,4 @@ class CopyButton extends React.Component {
     }
 }
 
-export {Toggle, Badge, Well, Status, StatusWrapper, CopyButton, groupBy}
+export {Toggle, Badge, Well, CopyButton, groupBy}

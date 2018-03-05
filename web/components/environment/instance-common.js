@@ -2,6 +2,65 @@ import React from "react";
 import {compareVersions, compareVersionsRevisions, Version} from "../common/version";
 import {Badge} from "../common/component-library";
 
+class StatusWrapper extends React.Component {
+    render() {
+        const status = this.props.status;
+        const color =
+            status == 'LIVE' ? 'green' :
+                status == 'LOADING' ? 'orange' :
+                    status == 'DOWN' ? 'red' :
+                        'lightgray';
+        const background =
+            status == 'LIVE' ? '#e8f4e9' :
+                status == 'LOADING' ? '#f9edcf' :
+                    status == 'DOWN' ? '#f8e8e3' :
+                        '#ededed';
+        //#F8F8F8
+        return (
+            <div style={{
+                padding: '2px', margin: this.props.margin, display: this.props.block ? null : 'inline-block',
+                backgroundColor: background, border: '3px solid ' + color, borderRadius: '5px'
+            }}>
+                {this.props.children}
+            </div>
+        )
+    }
+}
+
+class Status extends React.Component {
+    render() {
+        const status = this.props.status;
+        const leader = this.props.leader;
+        const participating = this.props.participating;
+        const backgroundColor =
+            status == 'LIVE' && leader ? '#00ad0e' :
+            status == 'LIVE' && participating ? '#69876f' :
+            status == 'LIVE' ? '#9aa89b' :
+            status == 'LOADING' && leader ? '#ff8600' :
+            status == 'LOADING' && participating ? '#ffdc92' :
+            status == 'LOADING' ? '#ebe5c5' :
+            status == 'DOWN' && leader ? 'red' :
+                        'lightgray';
+        /*
+         const badge = (
+         <span style={{padding: "3px",
+         color: 'white', backgroundColor: backgroundColor,
+         fontSize: '9px',
+         borderRadius: "5px", display: "inline-block"}}>
+         {status}
+         </span>
+         )
+         */
+        return (
+            <td style={{padding: "3px",
+                minWidth: '80px', textAlign: 'center',
+                backgroundColor: backgroundColor, color: 'white'}}>
+                {status} {status == 'LIVE' && leader && '(*)'}
+            </td>
+        );
+    }
+}
+
 class ConfCommited extends React.Component {
     render() {
         const display = !(this.props.commited == true);
@@ -104,4 +163,4 @@ class Versions extends React.Component {
     }
 }
 
-export { ConfCommited, Expected, Leader, RedisLink, Host, Port, Versions }
+export { ConfCommited, Expected, Status, Leader, RedisLink, Host, Port, Versions, StatusWrapper};

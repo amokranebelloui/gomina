@@ -23,7 +23,7 @@
   folder: '/home/svc/uat-kernel'
   version: '2.3.0-SNAPSHOT'
   revision: 34560
-  status: 'LOADING'
+  status: 'LIVE'
 
   busVersion: "2.0"
   coreVersion: "1.1"

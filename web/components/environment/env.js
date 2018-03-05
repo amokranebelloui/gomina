@@ -1,8 +1,9 @@
 import React from "react";
-import {Badge, groupBy, StatusWrapper} from "../common/component-library";
+import {Badge, groupBy} from "../common/component-library";
 import {isSnapshot} from "../common/version";
 import {AppInstance} from "./instance-app";
 import {RedisInstance} from "./instance-redis";
+import {Status} from "./instance-common";
 
 class Instance extends React.Component {
     render() {
@@ -15,11 +16,21 @@ class Instance extends React.Component {
         else {
             comp = <AppInstance instance={instance} />
         }
+        /*
+        <span style={{verticalAlign: 'top', display: 'inline-block'}}>
+
+                </span>
+                <StatusWrapper status={instance.status}>
+                            </StatusWrapper>
+         */
         return (
             <div style={{display: "inline-block", verticalAlign: 'top', opacity:opacity}}>
-                <StatusWrapper status={instance.status}>
-                    {comp}
-                </StatusWrapper>
+                <table>
+                    <tr>
+                        <Status status={instance.status} leader={instance.leader} participating={instance.participating} />
+                        <td>{comp}</td>
+                    </tr>
+                </table>
             </div>
         )
     }
@@ -41,19 +52,18 @@ class Service extends React.Component {
     render() {
         const instances = this.props.instances ? this.props.instances : [];
         const differentVersions = new Set(instances.map(instance => instance.version)).size > 1;
-        const highlightFunction = this.props.highlightFunction || (instance => true);
+        const liveInstances = instances.filter(instance => instance.status == 'LIVE' && instance.leader);
+        const multiple = liveInstances.length > 1;
+        console.log("-", multiple, liveInstances);
+        //const highlightFunction = this.props.highlightFunction || (instance => true);
         return (
             <div style={{padding: '2px'}}>
                 <div style={{width: '140px', display: 'inline-block', verticalAlign: 'top', marginRight: '2px'}}>
                     <span><b>{this.props.name}</b></span>
                     <br/>
-                    {differentVersions && <Badge backgroundColor="orange">versions?</Badge>}
+                    {differentVersions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
+                    {multiple && <Badge title="Multiple instances running" backgroundColor="orange" >multi?</Badge>}
                 </div>
-                {instances.map((instance) =>
-                    <span key={instance.id} style={{marginLeft: '2px', marginRight: '2px'}}>
-                            <Instance instance={instance} highlighted={highlightFunction(instance)}/>
-                        </span>
-                )}
             </div>
         )
     }
@@ -115,9 +125,21 @@ class EnvironmentLogical extends React.Component {
 
                 <br/>
 
+                <div style={{display: 'table'}}>
                 {Object.keys(services).map( service =>
-                    <Service key={service} name={service} instances={services[service]} highlightFunction={this.state.highlight} />
+                    <tr>
+                        <td>
+                            <Service key={service} name={service} instances={services[service]} highlightFunction={this.state.highlight} />
+                        </td>
+
+                        {services[service].map(instance =>
+                        <td key={instance.id} style={{marginLeft: '2px', marginRight: '2px'}}>
+                            <Instance instance={instance} highlighted={this.state.highlight(instance)}/>
+                        </td>
+                        )}
+                    </tr>
                 )}
+                </div>
             </div>
         )
     }
