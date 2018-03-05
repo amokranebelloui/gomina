@@ -4,8 +4,6 @@ import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.Instances
 import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.model.inventory.Inventory
-import org.neo.gomina.plugins.ssh.impl.SshDetails
-import org.neo.gomina.plugins.ssh.impl.SshOnDemandConnector
 import javax.inject.Inject
 
 class SshPlugin : InstancesExt {

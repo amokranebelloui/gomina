@@ -1,4 +1,4 @@
-package org.neo.gomina.plugins.ssh.impl
+package org.neo.gomina.plugins.ssh
 
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
@@ -7,8 +7,6 @@ import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.model.ssh.SshAuth
-import org.neo.gomina.plugins.ssh.Host
-import org.neo.gomina.plugins.ssh.SshConfig
 import org.neo.gomina.plugins.ssh.connector.SshClient
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject

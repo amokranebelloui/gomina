@@ -1,4 +1,4 @@
-package org.neo.gomina.plugins.ssh.impl
+package org.neo.gomina.plugins.ssh
 
 import org.junit.Test
 import org.neo.gomina.model.inventory.file.FileInventory

@@ -34,7 +34,7 @@ import org.neo.gomina.plugins.sonar.connectors.HttpSonarConnector;
 import org.neo.gomina.plugins.ssh.SshConfig;
 import org.neo.gomina.plugins.ssh.SshPlugin;
 import org.neo.gomina.plugins.ssh.connector.SshClient;
-import org.neo.gomina.plugins.ssh.impl.SshOnDemandConnector;
+import org.neo.gomina.plugins.ssh.SshOnDemandConnector;
 
 import java.io.File;
 import java.util.ArrayList;
