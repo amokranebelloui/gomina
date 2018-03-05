@@ -38,6 +38,7 @@ class TmateSoftSvnClient : ScmClient {
     constructor(url: String) : this(url, null, null)
 
     override fun getLog(url: String, rev: String, count: Int): List<Commit> {
+        logger.info("Retrieve SVN log from '$url' from rev '$rev' max:$count")
         val logEntries = ArrayList<SVNLogEntry>()
         repository.log(arrayOf(url + "/trunk"), -1, java.lang.Long.valueOf(rev), true, true, count.toLong(), ISVNLogEntryHandler { logEntries.add(it) })
         return logEntries.map {

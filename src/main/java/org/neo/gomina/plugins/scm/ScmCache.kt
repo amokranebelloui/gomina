@@ -25,14 +25,14 @@ class ScmCache {
 
         if (cache.containsKey(svnUrl)) {
             val scmDetails = cache[svnUrl]
-            logger.info("SCM Detail Served from Memory Cache $scmDetails")
+            logger.debug("SCM Detail Served from Memory Cache $scmDetails")
             return scmDetails
         }
         else if (detailCacheFile.exists()) {
             try {
                 val scmDetails = xStream.fromXML(detailCacheFile) as ScmDetails
                 cache.put(svnUrl, scmDetails)
-                logger.info("SCM Detail Served from File Cache $scmDetails")
+                logger.debug("SCM Detail Served from File Cache $scmDetails")
                 return scmDetails
             }
             catch (e: Exception) {

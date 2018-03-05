@@ -16,9 +16,11 @@ import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.MavenReleaseFlagger
 import org.neo.gomina.model.scm.ScmClient
 import org.neo.gomina.model.scm.ScmRepos
+import org.neo.gomina.plugins.scm.ScmRetrieveStrategy.*
 import java.io.File
-import java.util.*
 import javax.inject.Inject
+
+enum class ScmRetrieveStrategy { CACHE, SCM, SCM_DELTA, }
 
 class ScmPlugin : InstancesExt, ProjectsExt {
 
@@ -55,7 +57,8 @@ class ScmPlugin : InstancesExt, ProjectsExt {
     override fun onGetProject(projectId: String, projectDetail: ProjectDetail) {
         projects.getProject(projectId)
             ?. let {
-                Pair(getSvnDetails(it.svnRepo, it.svnUrl), getCommitLog(it.svnRepo, it.svnUrl))
+                val commitLog = getCommits(it.svnRepo, it.svnUrl, scmRepos.get(it.svnRepo), retrieve = SCM_DELTA)
+                Pair(getSvnDetails(it.svnRepo, it.svnUrl), commitLog)
             }
             ?. let { (svnDetail, commitLog) ->
                 apply(projectDetail, svnDetail)
@@ -105,7 +108,7 @@ class ScmPlugin : InstancesExt, ProjectsExt {
     fun refresh(svnRepo: String, svnUrl: String) {
         if (svnUrl.isNotBlank()) {
             val scmClient = scmRepos.get(svnRepo)
-            val logEntries = getCommits(svnRepo, svnUrl, scmClient, useCache = false)
+            val logEntries = getCommits(svnRepo, svnUrl, scmClient, retrieve = SCM)
             val scmDetails = computeScmDetails(svnRepo, svnUrl, logEntries, scmClient)
             scmCache.cacheLog(svnRepo, svnUrl, logEntries)
             scmCache.cacheDetail(svnRepo, svnUrl, scmDetails)
@@ -118,7 +121,7 @@ class ScmPlugin : InstancesExt, ProjectsExt {
             return if (detail != null) detail
             else {
                 val scmClient = scmRepos.get(svnRepo)
-                val logEntries = getCommits(svnRepo, svnUrl, scmClient, useCache = true)
+                val logEntries = getCommits(svnRepo, svnUrl, scmClient, retrieve = CACHE)
                 val scmDetails = computeScmDetails(svnRepo, svnUrl, logEntries, scmClient)
                 scmCache.cacheDetail(svnRepo, svnUrl, scmDetails)
                 scmCache.cacheLog(svnRepo, svnUrl, logEntries)
@@ -168,32 +171,24 @@ class ScmPlugin : InstancesExt, ProjectsExt {
         return null
     }
 
-    private fun getCommits(svnRepo: String, svnUrl: String, scmClient: ScmClient, useCache: Boolean): List<Commit> {
+    private fun getCommits(svnRepo: String, svnUrl: String, scmClient: ScmClient, retrieve: ScmRetrieveStrategy): List<Commit> {
         val mavenReleaseFlagger = MavenReleaseFlagger(scmClient, svnUrl)
-        return if (useCache) {
-            val cached = scmCache.getLog(svnRepo, svnUrl)
-            val lastKnown = cached.firstOrNull()?.revision ?: "0"
-
-            val commits = scmClient.getLog(svnUrl, lastKnown, 100)
-                    .map { mavenReleaseFlagger.flag(it) }
-                    .filter { it.revision != lastKnown }
-
-            logger.info("Get commits: cache=${cached.size} retrieved=${commits.size}")
-            commits + cached
-        }
-        else {
-            scmClient.getLog(svnUrl, "0", 100).map { mavenReleaseFlagger.flag(it) }
-        }
-    }
-
-    fun getCommitLog(svnRepo: String, svnUrl: String): List<Commit> {
-        logger.info("Commit Log Served from SCM")
-        return try {
-            if (svnUrl.isNotBlank()) scmRepos.get(svnRepo).getLog(svnUrl, "0", 100) else emptyList()
-        }
-        catch (e: Exception) {
-            logger.error("Cannot get commit log: $svnRepo $svnUrl")
-            ArrayList()
+        return when (retrieve) {
+            CACHE -> {
+                scmCache.getLog(svnRepo, svnUrl)
+            }
+            SCM -> {
+                scmClient.getLog(svnUrl, "0", 100).map { mavenReleaseFlagger.flag(it) }
+            }
+            SCM_DELTA -> {
+                val cached = scmCache.getLog(svnRepo, svnUrl)
+                val lastKnown = cached.firstOrNull()?.revision ?: "0"
+                val commits = scmClient.getLog(svnUrl, lastKnown, 100)
+                        .map { mavenReleaseFlagger.flag(it) }
+                        .filter { it.revision != lastKnown }
+                logger.info("Get commits: cache=${cached.size} retrieved=${commits.size}")
+                commits + cached
+            }
         }
     }
 
