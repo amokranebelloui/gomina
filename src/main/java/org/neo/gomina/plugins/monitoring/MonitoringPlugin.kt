@@ -31,7 +31,7 @@ class MonitoringPlugin : InstancesExt {
         val monitoring = this.getFor(env)
         for ((instanceId, indicators) in monitoring.instances) {
             val id = env + "-" + instanceId // FIXME Only needed when returning all envs instances, simplify later
-            var instance = instances.ensure(id, env, indicators["type"], indicators["service"], instanceId, expected = false)
+            var instance = instances.ensure(id, env, indicators["TYPE"], indicators["SERVICE"], instanceId, expected = false)
             instance.applyMonitoring(indicators)
         }
     }
@@ -66,7 +66,7 @@ class MonitoringPlugin : InstancesExt {
 
 fun Instance.applyMonitoring(indicators: Indicators) {
     this.pid = indicators["PID"]
-    this.host = indicators["HOST"]
+    this.host = indicators["IP"]
     this.version = indicators["VERSION"]
     this.revision = indicators["REVISION"]
 
