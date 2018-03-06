@@ -92,9 +92,9 @@ class DummyMonitorThread : Thread {
                     }
                     if (status != null) {
                         //indicators.put("timestamp", LocalDateTime(DateTimeZone.UTC)) // FIXME Too long
-                        indicators.put("status", status)
-                        indicators.put("participating", random.nextBoolean())
-                        indicators.put("leader", random.nextBoolean())
+                        indicators.put("STATUS", status)
+                        indicators.put("PARTICIPATING", random.nextBoolean())
+                        indicators.put("LEADER", random.nextBoolean())
                         send(env, instanceId, indicators)
                     }
                 }

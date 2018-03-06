@@ -4,226 +4,226 @@
   name: 'redis1'
   type: 'redis'
   service: 'redis'
-  pid: '54637'
-  host: '10.143.29.42'
   folder: '/home/svc/prod-redis'
-  version: '1.0.0'
-  revision: 34560
-  status: 'LIVE'
-  cluster: true
-  participating: true
-  leader: true
+  PID: '54637'
+  HOST: '10.143.29.42'
+  VERSION: '1.0.0'
+  REVISION: 34560
+  STATUS: 'LIVE'
+  ELECTION: true
+  PARTICIPATING: true
+  LEADER: true
 
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: null
-  redisHost: '10.143.29.42'
-  redisPort: 2345
-  redisMasterHost: ''
-  redisMasterPort: null
-  redisMasterLink: null
-  redisMasterLinkDownSince: null
-  redisOffset: 543445
-  redisOffsetDiff: 0
-  redisMaster: true
-  redisRole: 'MASTER'
-  redisRW: 'rw'
-  redisMode: 'AOF'
-  redisStatus: 'LIVE'
-  redisSlaveCount: 1
-  redisClientCount: 12
+  BUS: "2.0"
+  CORE: "1.1"
+  QUICKFIX_MODE: null
+  REDIS_HOST: '10.143.29.42'
+  REDIS_PORT: 2345
+  REDIS_MASTER_HOST: ''
+  REDIS_MASTER_PORT: null
+  REDIS_MASTER_LINK: null
+  REDIS_MASTER_LINK_DOWN_SINCE: null
+  REDIS_OFFSET: 543445
+  REDIS_OFFSET_DIFF: 0
+  REDIS_MASTER: true
+  REDIS_ROLE: 'MASTER'
+  REDIS_READONLY: 'no'
+  REDIS_AOF: '1'
+  REDIS_STATE: 'LIVE'
+  REDIS_SLAVES: 1
+  REDIS_CLIENTS: 12
 
 - id: -2
   env: 'PROD'
   name: 'redis2'
   type: 'redis'
   service: 'redis'
-  pid: '13467'
-  host: '10.143.29.43'
+  PID: '13467'
+  HOST: '10.143.29.43'
   folder: '/home/svc/prod-redis'
-  version: '1.0.0'
-  revision: 34560
-  status: 'LIVE'
-  cluster: true
-  participating: true
-  leader: false
+  VERSION: '1.0.0'
+  REVISION: 34560
+  STATUS: 'LIVE'
+  ELECTION: true
+  PARTICIPATING: true
+  LEADER: false
 
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence:
-  redisHost: '10.143.29.43'
-  redisPort: 2346
-  redisMasterHost: '10.143.29.42'
-  redisMasterPort: 2345
-  redisMasterLink: false
-  redisMasterLinkDownSince: '342'
-  redisOffset: 543445
-  redisOffsetDiff: 0
-  redisMaster: false
-  redisRole: 'SLAVE'
-  redisRW: 'ro'
-  redisMode: 'RDB'
-  redisStatus: 'LIVE'
-  redisSlaveCount: 0
-  redisClientCount: 9
+  BUS: "2.0"
+  CORE: "1.1"
+  QUICKFIX_MODE:
+  REDIS_HOST: '10.143.29.43'
+  REDIS_PORT: 2346
+  REDIS_MASTER_HOST: '10.143.29.42'
+  REDIS_MASTER_PORT: 2345
+  REDIS_MASTER_LINK: false
+  REDIS_MASTER_LINK_DOWN_SINCE: '342'
+  REDIS_OFFSET: 543445
+  REDIS_OFFSET_DIFF: 0
+  REDIS_MASTER: false
+  REDIS_ROLE: 'SLAVE'
+  REDIS_READONLY: 'yes'
+  REDIS_AOF: '0'
+  REDIS_STATE: 'LIVE'
+  REDIS_SLAVES: 0
+  REDIS_CLIENTS: 9
 
 - id: -3
   env: 'PROD'
   name: 'redis3'
   type: 'redis'
   service: 'redis'
-  host: '10.143.29.42'
+  HOST: '10.143.29.42'
   folder: '/home/svc/prod-redis'
-  version: '1.0.0'
-  revision: 34560
-  status: 'LIVE'
-  cluster: true
-  participating: false
-  leader: false
+  VERSION: '1.0.0'
+  REVISION: 34560
+  STATUS: 'LIVE'
+  ELECTION: true
+  PARTICIPATING: false
+  LEADER: false
 
-  busVersion: "1.9.9"
-  coreVersion: "1.1"
-  quickfixPersistence:
-  redisHost: '10.143.29.45'
-  redisPort: 2346
-  redisMasterHost: '10.143.29.42'
-  redisMasterPort: 2345
-  redisMasterLink: true
-  redisMasterLinkDownSince: '0'
-  redisOffset: 543445
-  redisOffsetDiff: 0
-  redisMaster: false
-  redisRole: 'SLAVE'
-  redisRW: 'ro'
-  redisMode: 'RDB'
-  redisStatus: 'LIVE'
-  redisSlaveCount: 0
-  redisClientCount: 9
+  BUS: "1.9.9"
+  CORE: "1.1"
+  QUICKFIX_MODE:
+  REDIS_HOST: '10.143.29.45'
+  REDIS_PORT: 2346
+  REDIS_MASTER_HOST: '10.143.29.42'
+  REDIS_MASTER_PORT: 2345
+  REDIS_MASTER_LINK: true
+  REDIS_MASTER_LINK_DOWN_SINCE: '0'
+  REDIS_OFFSET: 543445
+  REDIS_OFFSET_DIFF: 0
+  REDIS_MASTER: false
+  REDIS_ROLE: 'SLAVE'
+  REDIS_READONLY: 'yes'
+  REDIS_AOF: '0'
+  REDIS_STATE: 'LIVE'
+  REDIS_SLAVES: 0
+  REDIS_CLIENTS: 9
 
 - id: 1
   env: 'PROD'
   name: 'kernel'
   type: 'app'
   service: 'kernel'
-  pid: '65487'
-  host: '10.143.29.42'
+  PID: '65487'
+  HOST: '10.143.29.42'
   folder: '/home/svc/prod-kernel'
-  version: '2.2.0'
-  revision: 34560
-  status: 'LIVE'
-  cluster: true
-  participating: true
-  leader: true
+  VERSION: '2.2.0'
+  REVISION: 34560
+  STATUS: 'LIVE'
+  ELECTION: true
+  PARTICIPATING: true
+  LEADER: true
 
-  jmx: 4040
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence:
+  JMX: 4040
+  BUS: "2.0"
+  CORE: "1.1"
+  QUICKFIX_MODE:
 
 - id: 2
   env: 'PROD'
   name: 'kernel2'
   type: 'app'
   service: 'kernel'
-  pid: '88373'
-  host: '10.143.29.41'
+  PID: '88373'
+  HOST: '10.143.29.41'
   folder: '/home/svc/prod-kernel'
-  version: '2.1.0'
-  revision: 33982
-  status: 'LOADING'
-  cluster: true
-  participating: true
-  leader: false
+  VERSION: '2.1.0'
+  REVISION: 33982
+  STATUS: 'LOADING'
+  ELECTION: true
+  PARTICIPATING: true
+  LEADER: false
 
-  jmx: 4041
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence:
+  JMX: 4041
+  BUS: "2.0"
+  CORE: "1.1"
+  QUICKFIX_MODE:
 
 - id: 22
   env: 'PROD'
   name: 'kernel3'
   type: 'app'
   service: 'kernel'
-  pid: '98477'
-  host: '10.143.29.41'
+  PID: '98477'
+  HOST: '10.143.29.41'
   folder: '/home/svc/prod-kernel'
-  version: '2.1.0'
-  revision:
-  status: 'LOADING'
-  cluster: true
-  participating: false
-  leader: false
+  VERSION: '2.1.0'
+  REVISION:
+  STATUS: 'LOADING'
+  ELECTION: true
+  PARTICIPATING: false
+  LEADER: false
 
-  jmx: 4042
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: 'FILE'
+  JMX: 4042
+  BUS: "2.0"
+  CORE: "1.1"
+  QUICKFIX_MODE: 'FILE'
 
 - id: 3
   env: 'PROD'
   name: 'basket'
   type: 'app'
   service: 'basket'
-  pid: '48766'
-  host: '10.143.3.58'
+  PID: '48766'
+  HOST: '10.143.3.58'
   folder: '/home/svc/prod-basket'
-  version: '5.1.3-SNAPSHOT'
-  revision: 34433
-  status: 'LIVE'
+  VERSION: '5.1.3-SNAPSHOT'
+  REVISION: 34433
+  STATUS: 'LIVE'
 
-  jmx: 7800
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: 'REDIS'
+  JMX: 7800
+  BUS: "2.0"
+  CORE: "1.1"
+  QUICKFIX_MODE: 'REDIS'
 
 - id: 4
   env: 'PROD'
   name: 'basket2'
   type: 'app'
   service: 'basket'
-  pid: '11098'
-  host: '10.143.3.56'
+  PID: '11098'
+  HOST: '10.143.3.56'
   folder: '/home/svc/prod-basket'
-  version: '5.1.3-SNAPSHOT'
-  revision: 35002
-  status: 'DOWN'
+  VERSION: '5.1.3-SNAPSHOT'
+  REVISION: 35002
+  STATUS: 'DOWN'
 
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: 'REDIS'
+  BUS: "2.0"
+  CORE: "1.1"
+  QUICKFIX_MODE: 'REDIS'
 
 - id: 5
   env: 'PROD'
   name: 'order1'
   type: 'app'
   service: 'order'
-  host: '10.143.3.58'
+  HOST: '10.143.3.58'
   folder: '/home/svc/prod-order'
-  version: '5.1.3'
-  revision: 35002
-  status: 'LIVE'
+  VERSION: '5.1.3'
+  REVISION: 35002
+  STATUS: 'LIVE'
 
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: 'FILE'
+  BUS: "2.0"
+  CORE: "1.1"
+  QUICKFIX_MODE: 'FILE'
 
 - id: 6
   env: 'PROD'
   name: 'order2'
   type: 'app'
   service: 'order'
-  pid: '18000'
-  host: '10.143.3.56'
+  PID: '18000'
+  HOST: '10.143.3.56'
   folder: '/home/svc/prod-order'
-  version: '5.1.3-SNAPSHOT'
-  revision: 35002
-  status: 'DOWN'
+  VERSION: '5.1.3-SNAPSHOT'
+  REVISION: 35002
+  STATUS: 'DOWN'
 
-  jmx: 7700
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: 'REDIS'
+  JMX: 7700
+  BUS: "2.0"
+  CORE: "1.1"
+  QUICKFIX_MODE: 'REDIS'
 
 
 - id: 7
@@ -231,14 +231,14 @@
   name: 'unexpected2'
   type: 'app'
   service: 'order'
-  pid: '33070'
-  host: '10.0.0.99'
+  PID: '33070'
+  HOST: '10.0.0.99'
   folder: '/home/svc/prod-order'
-  version: '5.1.3-SNAPSHOT'
-  revision: 35002
-  status: 'DOWN'
+  VERSION: '5.1.3-SNAPSHOT'
+  REVISION: 35002
+  STATUS: 'DOWN'
 
-  jmx: 7700
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: 'REDIS'
+  JMX: 7700
+  BUS: "2.0"
+  CORE: "1.1"
+  QUICKFIX_MODE: 'REDIS'

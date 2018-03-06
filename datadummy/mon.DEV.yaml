@@ -4,14 +4,14 @@
   name: 'fixinfid1'
   type: 'app'
   service: 'fixinfid'
-  pid: '45643'
-  host: '10.2.3.56'
   folder: '/home/svc/uat-fixinfid'
-  version: '0.9.1-SNAPSHOT'
-  revision: 35014
-  status: 'DOWN'
+  PID: '45643'
+  HOST: '10.2.3.56'
+  VERSION: '0.9.1-SNAPSHOT'
+  REVISION: 35014
+  STATUS: 'DOWN'
 
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: 'REDIS'
+  BUS: "2.0"
+  CORE: "1.1"
+  QUCIKFIX_MODE: 'REDIS'
 

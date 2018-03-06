@@ -4,74 +4,74 @@
   name: 'kernel'
   type: 'app'
   service: 'kernel'
-  host: '10.2.29.42'
+  HOST: '10.2.29.42'
   folder: '/home/svc/uat-kernel'
-  version: '2.3.0-SNAPSHOT'
-  revision: 34561
-  status: 'LIVE'
+  VERSION: '2.3.0-SNAPSHOT'
+  REVISION: 34561
+  STATUS: 'LIVE'
 
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: 'FILE'
+  BUS: "2.0"
+  CORE: "1.1"
+  QUCKIFIX_MODE: 'FILE'
 
 - id: 8
   env: 'UAT'
   name: 'kernel2'
   type: 'app'
   service: 'kernel'
-  host: '10.2.29.41'
+  HOST: '10.2.29.41'
   folder: '/home/svc/uat-kernel'
-  version: '2.3.0-SNAPSHOT'
-  revision: 34560
-  status: 'LIVE'
+  VERSION: '2.3.0-SNAPSHOT'
+  REVISION: 34560
+  STATUS: 'LIVE'
 
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: 'REDIS'
+  BUS: "2.0"
+  CORE: "1.1"
+  QUCKIFIX_MODE: 'REDIS'
 
 - id: 9
   env: 'UAT'
   name: 'basket'
   type: 'app'
   service: 'basket'
-  host: '10.2.3.58'
+  HOST: '10.2.3.58'
   folder: '/home/svc/uat-basket'
-  version: '5.1.3-SNAPSHOT'
-  revision: 34433
-  status: 'LIVE'
+  VERSION: '5.1.3-SNAPSHOT'
+  REVISION: 34433
+  STATUS: 'LIVE'
 
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: 'REDIS'
+  BUS: "2.0"
+  CORE: "1.1"
+  QUCKIFIX_MODE: 'REDIS'
 
 - id: 10
   env: 'UAT'
   name: 'basket2'
   type: 'app'
   service: 'basket'
-  host: '10.2.3.56'
+  HOST: '10.2.3.56'
   folder: '/home/svc/uat-basket'
-  version: '5.1.3-SNAPSHOT'
-  revision: 35014
-  status: 'DOWN'
+  VERSION: '5.1.3-SNAPSHOT'
+  REVISION: 35014
+  STATUS: 'DOWN'
 
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: 'REDIS'
+  BUS: "2.0"
+  CORE: "1.1"
+  QUCKIFIX_MODE: 'REDIS'
 
 - id: 11
   env: 'UAT'
   name: 'fixintbx1'
   type: 'app'
   service: 'fixintbx'
-  host: '10.2.3.58'
+  HOST: '10.2.3.58'
   folder: '/home/svc/uat-fixintbx'
-  version: '0.9.0-SNAPSHOT'
-  revision: 34433
-  status: 'LIVE'
+  VERSION: '0.9.0-SNAPSHOT'
+  REVISION: 34433
+  STATUS: 'LIVE'
 
-  busVersion: "2.0"
-  coreVersion: "1.1"
-  quickfixPersistence: 'REDIS'
+  BUS: "2.0"
+  CORE: "1.1"
+  QUCKIFIX_MODE: 'REDIS'
 
 
