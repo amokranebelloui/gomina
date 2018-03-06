@@ -63,9 +63,6 @@ public class WebVerticle extends AbstractVerticle {
                 String root = ctx.request().getParam("param0");
                 logger.info("root " + root);
                 String filename = "dist/index.html";
-                if (!new File(filename).exists()) {
-                    throw new Exception("App " + root + " doesn't exist");
-                }
                 response.sendFile(filename);
             }
             catch (Exception e) {
