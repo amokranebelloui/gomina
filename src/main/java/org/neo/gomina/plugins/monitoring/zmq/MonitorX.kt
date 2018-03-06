@@ -38,8 +38,10 @@ class ZmqMonitorThread(private val monitoringPlugin: MonitoringPlugin, private v
             logger.trace("Received " + obj)
             try {
                 val message = MessageParser.parse(obj)
-                enrich(message.indicators)
-                monitoringPlugin.notify(message.env, message.instanceId, message.indicators)
+                if (message.indicators["STATUS"] != null && message.indicators["VERSION"] != null) {
+                    enrich(message.indicators)
+                    monitoringPlugin.notify(message.env, message.instanceId, message.indicators)
+                }
                 logger.trace(message)
             }
             catch (e: Exception) {
@@ -53,7 +55,7 @@ class ZmqMonitorThread(private val monitoringPlugin: MonitoringPlugin, private v
 
     private fun enrich(indicators: MutableMap<String, String>) {
         indicators.put("TIMESTAMP", Date().toString()) // FIXME Date format
-        indicators.put("status", mapStatus(indicators["status"]))
+        indicators.put("STATUS", mapStatus(indicators["STATUS"]))
     }
 
     private fun mapStatus(status: String?) = if ("SHUTDOWN" == status) "DOWN" else status ?: "DOWN"

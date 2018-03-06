@@ -65,18 +65,18 @@ class MonitoringPlugin : InstancesExt {
 }
 
 fun Instance.applyMonitoring(indicators: Indicators) {
-    this.pid = indicators["pid"]
-    this.host = indicators["host"]
-    this.version = indicators["version"]
-    this.revision = indicators["revision"]
+    this.pid = indicators["PID"]
+    this.host = indicators["HOST"]
+    this.version = indicators["VERSION"]
+    this.revision = indicators["REVISION"]
 
     applyCluster(indicators)
 
-    this.status = indicators["status"]
-    this.jmx = indicators["jmx"]?.toInt()
-    this.busVersion = indicators["busVersion"]
-    this.coreVersion = indicators["coreVersion"]
-    this.quickfixPersistence = indicators["quickfixPersistence"]
+    this.status = indicators["STATUS"]
+    this.jmx = indicators["JMX"].clean()?.toInt()
+    this.busVersion = indicators["BUS"]
+    this.coreVersion = indicators["CORE"]
+    this.quickfixPersistence = indicators["QUICKFIX_MODE"]
 
     applyRedis(indicators)
 
@@ -85,35 +85,37 @@ fun Instance.applyMonitoring(indicators: Indicators) {
     }
 }
 
+fun String?.clean() = if (this == "null") null else this
+
 private fun Instance.applyCluster(indicators: Indicators) {
-    this.cluster = indicators["cluster"]?.toBoolean() ?: false
-    this.participating = indicators["participating"]?.toBoolean() ?: false
-    this.leader = indicators["leader"]?.toBoolean() ?: true // Historically we didn't have this field
+    this.cluster = indicators["ELECTION"]?.toBoolean() ?: false
+    this.participating = indicators["PARTICIPATING"]?.toBoolean() ?: false
+    this.leader = indicators["LEADER"]?.toBoolean() ?: true // Historically we didn't have this field
 }
 
 private fun InstanceRealTime.applyRealTime(newValues: Map<String, String>) {
-    this.participating = newValues["participating"]?.toBoolean() ?: false
-    this.leader = newValues["leader"]?.toBoolean() ?: true
-    this.status = newValues["status"]
+    this.participating = newValues["PARTICIPATING"]?.toBoolean() ?: false
+    this.leader = newValues["LEADER"]?.toBoolean() ?: true
+    this.status = newValues["STATUS"]
 }
 
 
 private fun Instance.applyRedis(indicators: Indicators) {
-    this.redisHost = indicators["redisHost"]
-    this.redisPort = indicators["redisPort"]?.toInt()
-    this.redisMasterHost = indicators["redisMasterHost"]
-    this.redisMasterPort = indicators["redisMasterPort"]?.toInt()
-    this.redisMasterLink = indicators["redisMasterLink"]?.toBoolean()
-    this.redisMasterLinkDownSince = indicators["redisMasterLinkDownSince"]
-    this.redisOffset = indicators["redisOffset"]?.toInt()
-    this.redisOffsetDiff = indicators["redisOffsetDiff"]?.toInt()
-    this.redisMaster = indicators["redisMaster"]?.toBoolean()
-    this.redisRole = indicators["redisRole"]
-    this.redisRW = indicators["redisRW"]
-    this.redisMode = indicators["redisMode"]
-    this.redisStatus = indicators["redisStatus"]
-    this.redisSlaveCount = indicators["redisSlaveCount"]?.toInt()
-    this.redisClientCount = indicators["redisClientCount"]?.toInt()
+    this.redisHost = indicators["REDIS_HOST"]
+    this.redisPort = indicators["REDIS_PORT"].clean()?.toInt()
+    this.redisMasterHost = indicators["REDIS_MASTER_HOST"]
+    this.redisMasterPort = indicators["REDIS_MASTER_PORT"].clean()?.toInt()
+    this.redisMasterLink = "up" == indicators["REDIS_MASTER_LINK"]
+    this.redisMasterLinkDownSince = indicators["REDIS_MASTER_LINK_DOWN_SINCE"]
+    this.redisOffset = indicators["REDIS_OFFSET"].clean()?.toLong()
+    this.redisOffsetDiff = indicators["REDIS_OFFSET_DIFF"].clean()?.toLong()
+    this.redisMaster = indicators["REDIS_MASTER"]?.toBoolean()
+    this.redisRole = indicators["REDIS_ROLE"]
+    this.redisRW = if ("yes".equals(indicators["REDIS_READONLY"], ignoreCase = true)) "ro" else "rw"
+    this.redisMode = if ("1" == indicators["REDIS_AOF"]) "AOF" else "RDB"
+    this.redisStatus = indicators["REDIS_STATE"]
+    this.redisSlaveCount = indicators["REDIS_SLAVES"].clean()?.toInt()
+    this.redisClientCount = indicators["REDIS_CLIENTS"].clean()?.toInt()
 }
 
 // FIXME Easier to have it on the UI level
