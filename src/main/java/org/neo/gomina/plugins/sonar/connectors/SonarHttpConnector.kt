@@ -39,7 +39,7 @@ class HttpSonarConnector : SonarConnector {
                     val data = mapper.readValue<List<Map<String, Object>>>(entity1.content)
                     for (project in data) {
                         val key = project.get("key") as String
-                        val msr = project.get("msr") as List<Map<String, String>>
+                        val msr = project.get("msr") as List<Map<String, String>>?
                         val ncloc = getMetric(msr, "ncloc") as Double?
                         val coverage = getMetric(msr, "coverage") as Double?
                         logger.info("-> Data $key $ncloc $coverage")
