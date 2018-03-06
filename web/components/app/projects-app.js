@@ -35,9 +35,11 @@ class ProjectsApp extends React.Component {
         const projects = this.state.projects;
         return (
             <AppLayout title="Projects">
-                {projects.map(project =>
-                    <ProjectSummary key={project.id} project={project}/>
-                )}
+                <table style={{padding: '5px'}}>
+                    {projects.map(project =>
+                        <ProjectSummary key={project.id} project={project}/>
+                    )}
+                </table>
             </AppLayout>
         );
     }

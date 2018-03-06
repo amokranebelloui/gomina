@@ -2,6 +2,7 @@ import React from "react";
 import axios from "axios/index";
 import {AppLayout} from "./common/layout";
 import {Coverage, LinesOfCode, ProjectSummary, ScmLog} from "../project/project";
+import {Well} from "../common/component-library";
 
 class ProjectApp extends React.Component {
     
@@ -91,13 +92,16 @@ class ProjectApp extends React.Component {
                 <div style={{
                     display: 'grid',
                     gridGap: '2px',
-                    gridTemplateColumns: 'minmax(500px, 6fr) minmax(200px, 3fr)'
+                    gridTemplateColumns: 'minmax(350px, 4fr) minmax(200px, 3fr)'
                 }}>
                     <div style={cellStyle}>
+                        <table>
                         {projects.map(project =>
                             <ProjectSummary key={project.id} project={project}/>
                         )}
+                        </table>
                     </div>
+                    <Well block padding="10px 10px" margin="2px">
                     <div style={cellStyle}>
                         <div>
                             <span title={project.id}>
@@ -116,6 +120,7 @@ class ProjectApp extends React.Component {
                         <br/>
                         <ScmLog project={project} commits={commits} instances={instances}/>
                     </div>
+                    </Well>
                 </div>
             </AppLayout>
         );

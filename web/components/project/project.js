@@ -74,30 +74,34 @@ class ScmLink extends React.Component {
 class ProjectSummary extends React.Component {
     render() {
         const project = this.props.project;
+        let cellStyle = {padding: '8px 0px 8px 0px'};
         return (
-            <Well block margin="0 0 2px 0">
-                <div style={{display: 'block', verticalAlign: 'top', overflow:'auto'}}>
-                    <div style={{display: 'block', float: 'left', marginRight: 2}}>
-                            <span title={project.id}>
-                                <b>{project.label}</b>
-                                <span style={{fontSize: 10, marginLeft: 2}}>({project.type})</span>
-                            </span>
-                        <br/>
-                        <span style={{fontSize: 11}}>{project.mvn}</span>
-                    </div>
-                    <div style={{display: 'block', float: 'right', verticalAlign: 'top'}}>
-                        <LinesOfCode loc={project.loc} />&nbsp;
-                        <Coverage coverage={project.coverage} />&nbsp;
-                    </div>
-                    <div style={{display: 'block'}}>
-                        <BuildLink url={project.jenkins} /> (BuildSt)&nbsp;
-                        <ScmLink projectId={project.id} url={project.repo + ':' + project.svn} changes={project.changes} />&nbsp;
-                        <Version version={project.released} />&nbsp;
-                        <Version version={project.latest} />
-                    </div>
+            <tr>
+                <td style={cellStyle}>
+                    <div style={{minWidth: '350px', display: 'block', verticalAlign: 'top', overflow:'auto'}}>
+                        <div style={{display: 'block', float: 'left', marginRight: 2}}>
+                                <span title={project.id}>
+                                    <b>{project.label}</b>
+                                    <span style={{fontSize: 10, marginLeft: 2}}>({project.type})</span>
+                                </span>
+                            <br/>
+                            <span style={{fontSize: 11}}>{project.mvn}</span>
+                        </div>
+                        <div style={{display: 'block', float: 'right', verticalAlign: 'top'}}>
 
-                </div>
-            </Well>
+                        </div>
+                        <div style={{display: 'block'}}>
+                            <BuildLink url={project.jenkins} /> (BuildSt)&nbsp;
+                            <ScmLink projectId={project.id} url={project.repo + ':' + project.svn} changes={project.changes} />&nbsp;
+                        </div>
+
+                    </div>
+                </td>
+                <td style={cellStyle}><Version version={project.released} />&nbsp;</td>
+                <td style={cellStyle}><Version version={project.latest} /></td>
+                <td style={cellStyle}><LinesOfCode loc={project.loc} />&nbsp;</td>
+                <td style={cellStyle}><Coverage coverage={project.coverage} />&nbsp;</td>
+            </tr>
         )
     }
 }
