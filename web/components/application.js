@@ -10,6 +10,7 @@ import {PipelineApp} from "./app/pipeline-app";
 import {ProjectsApp} from "./app/projects-app";
 import {ProjectApp} from "./app/project-app";
 import {SandboxApp} from "./app/sandbox-app";
+import "./application.css"
 
 const history = createBrowserHistory();
 
@@ -19,31 +20,19 @@ class Blocker extends React.Component {
     }
     render() {
         console.info('blocker');
+        //this.props.location.pathname
         return (
-            <div style={{fontFamily: 'Garamond'}}>
-                <Link to="/">index</Link> -&nbsp;
-                <Link to="/archi">archi</Link> -&nbsp;
-                <Link to="/envs">envs</Link> -&nbsp;
-                <Link to="/pipeline">pipeline</Link> -&nbsp;
-                <Link to="/projects">projects</Link> -&nbsp;
-                <Link to="/sandbox">sandbox</Link> -&nbsp;
-                <Link to="/unknown">unknown page</Link>&nbsp;
-                <br/>
-
-                <Switch>
-                    <Route exact path="/" component={Index}/>
-                    <Route path="/archi" component={ArchiDiagramApp}/>
-                    <Route path="/envs/:id" render={props => <EnvApp {...props} />}/>
-                    <Route path="/envs" render={props => <EnvApp {...props} />}/>
-                    <Route path="/pipeline" render={props => <PipelineApp {...props} />}/>
-                    <Route path="/projects" render={props => <ProjectsApp {...props} />}/>
-                    <Route path="/project/:id" render={props => <ProjectApp {...props} />}/>
-                    <Route path="/sandbox" component={() => <SandboxApp />}/>
-                    <Route path="*" component={() => <div>I don't know you man!!!</div>} />
-                </Switch>
-                <hr/>
-                {this.props.location.pathname}
-            </div>
+            <Switch>
+                <Route exact path="/" component={Index}/>
+                <Route path="/archi" component={ArchiDiagramApp}/>
+                <Route path="/envs/:id" render={props => <EnvApp {...props} />}/>
+                <Route path="/envs" render={props => <EnvApp {...props} />}/>
+                <Route path="/pipeline" render={props => <PipelineApp {...props} />}/>
+                <Route path="/projects" render={props => <ProjectsApp {...props} />}/>
+                <Route path="/project/:id" render={props => <ProjectApp {...props} />}/>
+                <Route path="/sandbox" component={() => <SandboxApp />}/>
+                <Route path="*" component={() => <div>I don't know you man!!!</div>} />
+            </Switch>
         );
     }
 }

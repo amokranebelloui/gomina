@@ -48,6 +48,16 @@ class SandboxApp extends React.Component {
                 <Posts posts={posts}/>
                 <MyComponent label="hello world" highlighted={true}/>
                 <MyComponent label="hello world"/>
+
+                <hr/>
+
+                <div style={{height: '100px', display: 'table', border: '1px red solid'}}>
+                    <span style={{display: 'table-cell', verticalAlign: 'middle'}}>ooh text ::
+                    <br/>
+                    something else
+                    </span>
+                </div>
+
             </AppLayout>
         );
     }
