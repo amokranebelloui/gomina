@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios/index";
 import {AppLayout} from "./common/layout";
-import {Diagram} from "./archidiagram/archi-diagram";
+import {Diagram} from "../archidiagram/archi-diagram";
 
 class ArchiDiagramApp extends React.Component {
     constructor(props) {
