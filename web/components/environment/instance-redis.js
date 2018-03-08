@@ -17,7 +17,7 @@ class RedisInstance extends React.Component {
             <div className="instance">
 
                 <div className="line">
-                    <li><span style={{padding: "3px"}}><b>{instance.name}</b></span></li>
+                    <li><Badge><b>{instance.name}</b></Badge></li>
                     <li>
                         {extra.redisRW == 'rw' && <Badge backgroundColor='#969696' color='white' title="Read/Write">RW</Badge>}
                         {extra.redisRW == 'ro' && <Badge backgroundColor='#DBDBDB' color='white' title="Read Only">RO</Badge>}

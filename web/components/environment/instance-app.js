@@ -14,7 +14,7 @@ class AppInstance extends React.Component {
         return (
             <div className="instance">
                 <div className="line">
-                    <li><Badge>{instance.name}</Badge></li>
+                    <li><Badge><b>{instance.name}</b></Badge></li>
                     <li><Leader leader={instance.leader} participating={instance.participating} cluster={instance.cluster}/></li>
                     <li><Versions instance={instance}/></li>
                     <li><ConfCommited commited={instance.confCommited}/></li>
