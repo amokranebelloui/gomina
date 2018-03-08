@@ -127,16 +127,11 @@ class EnvApp extends React.Component {
         //console.info("envApp", this.state.instances, this.state.env, instances);
         console.info("envApp !render");
 
-        return (
-            <AppLayout title={"Environment '" + this.state.env + "'"}>
-                <div style={{float: 'right'}}>
-                    <button onClick={e => this.reload()}>
-                        RELOAD
-                    </button>
-                    <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
-                    <div ref={node => this.eventsList = node}></div>
-                </div>
-
+        // {this.state.env}
+        const title = (
+            <span>
+                Environment
+                &nbsp;&nbsp;&nbsp;
                 {Object.keys(envsByType).map(type =>
                     <span key={type}>
                         <span>{type} </span>
@@ -145,11 +140,26 @@ class EnvApp extends React.Component {
                                 <button style={{color: this.state.env == env.env ? 'gray' : null}} onClick={e => this.selectEnv(env.env)}>{env.env}</button>
                             </Link>
                         )}
-                        <br />
+                        &nbsp;
                     </span>
                 )}
-                <hr/>
-                <EnvironmentLogical instances={instances} />
+            </span>
+        );
+
+        return (
+            <AppLayout title={title}>
+                <div style={{display: 'table', width: '100%'}}>
+                    <div style={{display: 'table-cell'}}>
+                        <EnvironmentLogical instances={instances} />
+                    </div>
+                    <div style={{display: 'table-cell', width: '150px', height: '100%'}}>
+                        <button onClick={e => this.reload()}>
+                            RELOAD
+                        </button>
+                        <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
+                        <div ref={node => this.eventsList = node}></div>
+                    </div>
+                </div>
             </AppLayout>
         );
     }
