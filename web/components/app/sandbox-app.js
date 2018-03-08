@@ -58,6 +58,13 @@ class SandboxApp extends React.Component {
                     </span>
                 </div>
 
+
+                <div style={{border: 'red 1px solid'}}>
+                        sdsfd<br/>
+                        sqdf<br/>
+                    <span style={{lineHeight: '1.8', verticalAlign: 'top'}}>ksdhdg</span>
+                    </div>
+
             </AppLayout>
         );
     }

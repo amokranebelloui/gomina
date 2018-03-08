@@ -2,6 +2,7 @@ import React from "react";
 import {Badge, CopyButton} from "../common/component-library";
 import {BuildLink} from "../project/project";
 import {ConfCommited, Expected, Host, Leader, Versions} from "./instance-common";
+import './instance.css'
 
 class AppInstance extends React.Component {
     render() {
@@ -11,31 +12,30 @@ class AppInstance extends React.Component {
         //, alignItems: 'top', justifyContent: 'center'
         /*<Status status={instance.status} />*/
         return (
-            <div>
-                <div>
-                    <span>{instance.name}</span>
-                    &nbsp;
-                    <Leader leader={instance.leader} participating={instance.participating} cluster={instance.cluster}/>
-
-                    &nbsp;
-                    <Versions instance={instance}/>
-                    &nbsp;
-                    <ConfCommited commited={instance.confCommited}/>
-                    <Expected expected={!instance.unexpected}/>
-
-                    <BuildLink url={instance.project}/> {/* // TODO Project Build URL */}
+            <div className="instance">
+                <div className="line">
+                    <li><Badge>{instance.name}</Badge></li>
+                    <li><Leader leader={instance.leader} participating={instance.participating} cluster={instance.cluster}/></li>
+                    <li><Versions instance={instance}/></li>
+                    <li><ConfCommited commited={instance.confCommited}/></li>
+                    <li><Expected expected={!instance.unexpected}/></li>
+                    <li><BuildLink url={instance.project}/></li> {/* // TODO Project Build URL */}
                 </div>
-                <div style={{display: 'flex', fontSize: 10}}>
-                    {instance.pid && <span>{instance.pid}@</span>}
-                    <span><Host host={extra.host} expected={instance.deployHost}/></span>&nbsp;
-                    <CopyButton value={instance.deployFolder}/>&nbsp;
-                    <span>{instance.deployFolder}</span>
+                <div className="line">
+                    <li>
+                        <Badge>
+                            {instance.pid && <span>{instance.pid}@</span>}
+                            <Host host={extra.host} expected={instance.deployHost}/>
+                        </Badge>
+                    </li>
+                    {instance.deployFolder && <li><Badge>{instance.deployFolder}</Badge></li>}
+                    {instance.deployFolder && <li><CopyButton value={instance.deployFolder}/></li>}
                 </div>
-                <div>
-                    <Badge>{extra.quickfixPersistence}</Badge>
-                    <Badge>{extra.busVersion}</Badge>
-                    <Badge>{extra.coreVersion}</Badge>
-                    <Badge>{extra.jmx}</Badge>
+                <div className="line">
+                    {extra.quickfixPersistence && <li><Badge>{extra.quickfixPersistence}</Badge></li>}
+                    {extra.busVersion && <li><Badge>{extra.busVersion}</Badge></li>}
+                    {extra.coreVersion && <li><Badge>{extra.coreVersion}</Badge></li>}
+                    {extra.jmx && <li><Badge>{extra.jmx}</Badge></li>}
                 </div>
             </div>
         )

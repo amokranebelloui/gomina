@@ -1,0 +1,42 @@
+
+.instance {
+
+}
+
+.instance > .line {
+    margin-top: 0px;
+    margin-bottom: 1px;
+    display: table;
+    border-collapse: collapse;
+    padding: 0px;
+    /*
+    border: blue 1px solid;
+    height: 80px;
+    */
+}
+
+.instance > .line:first-child {
+    /*margin-top: 0px;*/
+}
+
+.instance > .line:last-child {
+    margin-bottom: 0px;
+}
+
+.instance > .line > li {
+    padding-left: 1px;
+    padding-right: 1px;
+    display: table-cell;
+    vertical-align: middle;
+    /*
+    border: #ff3465 1px solid;
+    */
+}
+
+.instance > .line > li:first-child {
+    padding-left: 0px;
+}
+
+.instance > .line > li:last-child {
+    padding-right: 0px;
+}

@@ -122,7 +122,7 @@ class Host extends React.Component {
         return (
             <span>
                 <span title="Running on host" style={{userSelect: 'all'}}>{this.props.host}</span>
-                {unexpected && <span title="Expected host" style={{userSelect: 'all', textDecoration: 'line-through', marginLeft: '2px'}}>{this.props.expected}</span>}
+                {unexpected && <span title="Expected host" style={{userSelect: 'all', textDecoration: 'line-through'}}>{this.props.expected}</span>}
             </span>
         )
     }
