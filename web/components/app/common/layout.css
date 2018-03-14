@@ -70,3 +70,58 @@
     */
 
 }
+
+.main-content {
+    display: table;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    table-layout: fixed;
+    border-spacing: 0px 0px
+}
+
+.principal-content {
+    display: table-cell;
+    width: 80%;
+    height: 100%;
+    box-sizing: border-box;
+    vertical-align: top;
+    overflow: hidden;
+    padding: 4px
+}
+
+.side-content {
+    display: table-cell;
+    width: 20%;
+    height: 100%;
+    box-sizing: border-box;
+    vertical-align: top;
+    overflow: hidden;
+    padding: 4px
+}
+
+.side-content-wrapper {
+    display: table;
+    width: 100%;
+    height: 100%;
+    overflow: hidden
+}
+
+.side-primary {
+    display: table-row;
+    width: 100%;
+    box-sizing: border-box;
+    vertical-align: top;
+    overflow: hidden;
+    padding: 4px
+}
+
+.side-secondary {
+    display: table-row;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    vertical-align: top;
+    overflow: hidden;
+    padding: 4px
+}

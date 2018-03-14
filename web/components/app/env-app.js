@@ -156,22 +156,29 @@ class EnvApp extends React.Component {
 
         return (
             <AppLayout title={title}>
-                <div style={{display: 'table', width: '100%', height: '100%', boxSizing: 'border-box', tableLayout: 'fixed', borderSpacing: '0px 0px'}}>
-                    <div style={{display: 'table-cell', width: '80%', height: '100%', boxSizing: 'border-box', verticalAlign: 'top', overflow: 'hidden', padding: '4px'}}>
+                <div className='main-content'>
+                    <div className='principal-content'>
                         <Container>
                             <EnvironmentLogical instances={instances} highlight={this.state.highlight} />
                         </Container>
                     </div>
-                    <div style={{display: 'table-cell', width: '20%', height: '100%', boxSizing: 'border-box', verticalAlign: 'top', overflow: 'hidden', padding: '4px'}}>
-                        <Container>
-                            <InstanceFilter id={this.state.filterId} hosts={hosts} onFilterChanged={(e, hf) => this.changeSelected(e, hf)} />
-                            <button onClick={e => this.reload()}>
-                                RELOAD
-                            </button>
-                            <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
-                            <div ref={node => this.eventsList = node}></div>
-                        </Container>
+                    <div className='side-content'>
+                        <div className='side-content-wrapper'>
+                            <div className='side-primary'>
+                                <InstanceFilter id={this.state.filterId} hosts={hosts} onFilterChanged={(e, hf) => this.changeSelected(e, hf)} />
+                                <button onClick={e => this.reload()}>
+                                    RELOAD
+                                </button>
+                                <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
+                            </div>
+                            <div className='side-secondary'>
+                                <Container>
+                                    <div ref={node => this.eventsList = node}></div>
+                                </Container>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
             </AppLayout>
         );
