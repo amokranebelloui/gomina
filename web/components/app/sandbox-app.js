@@ -65,6 +65,23 @@ class SandboxApp extends React.Component {
                     <span style={{lineHeight: '1.8', verticalAlign: 'top'}}>ksdhdg</span>
                     </div>
 
+                <div>
+                    <span>
+                        <span style={{display: 'block'}}>Main text</span>
+                        <span style={{fontSize: 7, color: 'gray', lineHeight: '40%'}}>Tagline</span>
+                    </span>
+                </div>
+
+                <div>
+
+                    <div style={{display: 'table-cell', height: '200px', width: '300px', border: '1px solid red'}}>
+                        <div style={{display: 'block-table', height: '100%', backgroundColor: 'yellow'}}>
+                            hello world
+                        </div>
+                    </div>
+
+                </div>
+
             </AppLayout>
         );
     }

@@ -2,6 +2,10 @@ import React from "react";
 import {compareVersions, compareVersionsRevisions, Version} from "../common/version";
 import {Badge} from "../common/component-library";
 
+function isRunning(status) {
+    return status == 'LIVE' || status == 'LOADING';
+}
+
 class StatusWrapper extends React.Component {
     render() {
         const status = this.props.status;
@@ -32,6 +36,7 @@ class Status extends React.Component {
         const status = this.props.status;
         const leader = this.props.leader;
         const participating = this.props.participating;
+        const cluster = this.props.cluster;
         const backgroundColor =
             status == 'LIVE' && leader ? '#00ad0e' :
             status == 'LIVE' && participating ? '#69876f' :
@@ -50,13 +55,51 @@ class Status extends React.Component {
          {status}
          </span>
          )
+
+         <span style={{float: 'left'}}>
+                    {this.props.children}
+                </span>
          */
+
+        let role = {text: '-', title: 'No information', opacity: 0.3};
+        if (isRunning(status)) {
+            if (cluster) {
+                if (leader) {
+                    role = {text: 'LEADER', title: 'Elected Leader', opacity: 0.9}
+                }
+                else if (participating) {
+                    role = {text: 'PARTICIP', title: 'Contending for Leadership', opacity: 0.7}
+                }
+                else {
+                    role = {text: 'STANDBY', title: 'Standby instance', opacity: 0.3}
+                }
+            }
+            else {
+                if (leader) {
+                    role = {text: 'LEADER', title: 'Leader', opacity: 0.9, fontStyle: 'italic'}
+                }
+                else {
+                    role = {text: 'NONE', title: 'Not leader', opacity: 0.3}
+                }
+            }
+        }
         return (
-            <td style={{padding: "3px",
-                minWidth: '80px', textAlign: 'center',
-                backgroundColor: backgroundColor, color: 'white'}}>
-                {status} {status == 'LIVE' && leader && '(*)'}
-            </td>
+            <div className='status' style={Object.assign(this.props.style, {backgroundColor: backgroundColor, color: 'white'})}>
+                <div style={{display: 'table', width: '100%', boxSizing: 'border-box', padding: '3px'}}>
+
+                    <div style={{display: 'table-row'}}>
+                        <div style={{display: 'table-cell', textAlign: 'left'}}>{status}</div>
+                    </div>
+                    <div style={{display: 'table-row'}}>
+                        <div style={{display: 'table-cell', textAlign: 'right'}}>
+                            <span title={role.title} style={{fontSize: '7px', fontStyle: role.fontStyle, opacity: role.opacity}}>
+                                {role.text}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         );
     }
 }
@@ -122,7 +165,7 @@ class Host extends React.Component {
         return (
             <span>
                 <span title="Running on host" style={{userSelect: 'all'}}>{this.props.host}</span>
-                {unexpected && <span title="Expected host" style={{userSelect: 'all', textDecoration: 'line-through'}}>{this.props.expected}</span>}
+                {unexpected && <span title="Expected host" style={{marginLeft: '2px', userSelect: 'all', textDecoration: 'line-through'}}>{this.props.expected}</span>}
             </span>
         )
     }

@@ -4,6 +4,7 @@ import {isSnapshot} from "../common/version";
 import {AppInstance} from "./instance-app";
 import {RedisInstance} from "./instance-redis";
 import {Status} from "./instance-common";
+import './env.css'
 
 class Instance extends React.Component {
     render() {
@@ -22,17 +23,13 @@ class Instance extends React.Component {
                 </span>
                 <StatusWrapper status={instance.status}>
                             </StatusWrapper>
+
+
          */
-        return (
-            <div style={{display: "inline-block", verticalAlign: 'top', opacity:opacity}}>
-                <table>
-                    <tr>
-                        <Status status={instance.status} leader={instance.leader} participating={instance.participating} />
-                        <td>{comp}</td>
-                    </tr>
-                </table>
-            </div>
-        )
+        return ([
+            <Status status={instance.status} leader={instance.leader} participating={instance.participating} cluster={instance.cluster} style={{opacity: opacity}} />,
+            <div className='instance-badge' style={{display: 'table-cell', opacity:opacity}}>{comp}</div>
+        ])
     }
 }
 
@@ -57,13 +54,10 @@ class Service extends React.Component {
         console.log("-", multiple, liveInstances);
         //const highlightFunction = this.props.highlightFunction || (instance => true);
         return (
-            <div style={{padding: '2px'}}>
-                <div style={{width: '140px', display: 'inline-block', verticalAlign: 'top', marginRight: '2px'}}>
-                    <span><b>{this.props.name}</b></span>
-                    <br/>
-                    {differentVersions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
-                    {multiple && <Badge title="Multiple instances running" backgroundColor="orange" >multi?</Badge>}
-                </div>
+            <div className="service">
+                <span><b>{this.props.name}</b></span>
+                {differentVersions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
+                {multiple && <Badge title="Multiple instances running" backgroundColor="orange" >multi?</Badge>}
             </div>
         )
     }
@@ -125,19 +119,14 @@ class EnvironmentLogical extends React.Component {
 
                 <br/>
 
-                <div style={{display: 'table'}}>
+                <div className='env-table'>
                 {Object.keys(services).map( service =>
-                    <tr>
-                        <td>
-                            <Service key={service} name={service} instances={services[service]} highlightFunction={this.state.highlight} />
-                        </td>
-
+                    <div className='env-row'>
+                        <Service key={service} name={service} instances={services[service]} highlightFunction={this.state.highlight} />
                         {services[service].map(instance =>
-                        <td key={instance.id} style={{marginLeft: '2px', marginRight: '2px'}}>
-                            <Instance instance={instance} highlighted={this.state.highlight(instance)}/>
-                        </td>
+                            <Instance instance={instance} highlighted={this.state.highlight(instance)} />
                         )}
-                    </tr>
+                    </div>
                 )}
                 </div>
             </div>
