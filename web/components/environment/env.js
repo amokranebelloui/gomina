@@ -119,16 +119,19 @@ class EnvironmentLogical extends React.Component {
 
                 <br/>
 
-                <div className='env-table'>
-                {Object.keys(services).map( service =>
-                    <div className='env-row'>
-                        <Service key={service} name={service} instances={services[service]} highlightFunction={this.state.highlight} />
-                        {services[service].map(instance =>
-                            <Instance instance={instance} highlighted={this.state.highlight(instance)} />
-                        )}
+                <div className='env-wrapper'>
+                    <div className='env-table'>
+                    {Object.keys(services).map( service =>
+                        <div className='env-row'>
+                            <Service key={service} name={service} instances={services[service]} highlightFunction={this.state.highlight} />
+                            {services[service].map(instance =>
+                                <Instance instance={instance} highlighted={this.state.highlight(instance)} />
+                            )}
+                        </div>
+                    )}
                     </div>
-                )}
                 </div>
+
             </div>
         )
     }

@@ -82,6 +82,13 @@ class SandboxApp extends React.Component {
 
                 </div>
 
+                <div>
+                    <div style={{display: 'table', width: '100px', border: '1px solid blue'}}>
+                        <div style={{display: 'inline-block', backgroundColor: 'orange', width: '500px'}}> Something</div>
+
+                    </div>
+                </div>
+
             </AppLayout>
         );
     }

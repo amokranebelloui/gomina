@@ -148,11 +148,11 @@ class EnvApp extends React.Component {
 
         return (
             <AppLayout title={title}>
-                <div style={{display: 'table', width: '100%'}}>
-                    <div style={{display: 'table-cell'}}>
+                <div style={{display: 'table', width: '100%', tableLayout: 'fixed'}}>
+                    <div style={{display: 'table-cell', width: '80%'}}>
                         <EnvironmentLogical instances={instances} />
                     </div>
-                    <div style={{display: 'table-cell', width: '150px', height: '100%'}}>
+                    <div style={{display: 'table-cell', width: '20%', height: '100%'}}>
                         <button onClick={e => this.reload()}>
                             RELOAD
                         </button>
