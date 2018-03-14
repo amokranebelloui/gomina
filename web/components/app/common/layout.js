@@ -34,25 +34,29 @@ class Clock extends React.Component {
 class AppLayout extends React.Component {
     render() {
         return (
-            <div style={{height: '100%'}}>
-                <div className="menu">
-                    <h3 className="title">
-                        {this.props.title}
-                    </h3>
-                    <span>
-                        <Link to="/">index</Link> -&nbsp;
-                        <Link to="/archi">archi</Link> -&nbsp;
-                        <Link to="/envs">envs</Link> -&nbsp;
-                        <Link to="/pipeline">pipeline</Link> -&nbsp;
-                        <Link to="/projects">projects</Link> -&nbsp;
-                        <Link to="/sandbox">sandbox</Link> -&nbsp;
-                        <Link to="/unknown">unknown page</Link>&nbsp;
-                        <br/>
-                    </span>
-                    <span className="clock"><Clock /></span>
+            <div className="container">
+                <div className="header">
+                    <div className="menu">
+                        <h3 className="title">
+                            {this.props.title}
+                        </h3>
+                        <span>
+                            <Link to="/">index</Link> -&nbsp;
+                            <Link to="/archi">archi</Link> -&nbsp;
+                            <Link to="/envs">envs</Link> -&nbsp;
+                            <Link to="/pipeline">pipeline</Link> -&nbsp;
+                            <Link to="/projects">projects</Link> -&nbsp;
+                            <Link to="/sandbox">sandbox</Link> -&nbsp;
+                            <Link to="/unknown">unknown page</Link>&nbsp;
+                            <br/>
+                        </span>
+                        <span className="clock"><Clock /></span>
+                    </div>
                 </div>
                 <div className="content">
-                    {this.props.children}
+                    <div className="content-wrapper">
+                        {this.props.children}
+                    </div>
                 </div>
                 <div className="footer">
                     Gomina!

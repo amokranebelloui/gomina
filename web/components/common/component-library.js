@@ -55,6 +55,16 @@ class Badge extends React.Component {
     }
 }
 
+class Container extends React.Component {
+    render() {
+        return (
+            <div style={{display: 'block', height: '100%', width: '100%', boxSizing: 'border-box', overflow: 'scroll'}}>
+                {this.props.children}
+            </div>
+        )
+    }
+}
+
 class Well extends React.Component {
     render() {
         let margin = this.props.margin;
@@ -96,4 +106,4 @@ class CopyButton extends React.Component {
     }
 }
 
-export {Toggle, Badge, Well, CopyButton, groupBy}
+export {Toggle, Badge, Well, CopyButton, Container, groupBy}
