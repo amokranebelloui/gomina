@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge, groupBy} from "../common/component-library";
+import {Badge, Container, groupBy, Well} from "../common/component-library";
 import {isSnapshot} from "../common/version";
 import {AppInstance} from "./instance-app";
 import {RedisInstance} from "./instance-redis";
@@ -33,18 +33,6 @@ class Instance extends React.Component {
     }
 }
 
-class Selection extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-    render() {
-        return (
-            <button style={{color: this.props.id == this.props.selected ? 'gray' : null}}
-                    onClick={this.props.onSelectionChanged && this.props.onSelectionChanged}>{this.props.label}</button>
-        )
-    }
-}
-
 class Service extends React.Component {
     render() {
         const instances = this.props.instances ? this.props.instances : [];
@@ -63,78 +51,86 @@ class Service extends React.Component {
     }
 }
 
-class EnvironmentLogical extends React.Component {
+class Selection extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {id: 'all', highlight: instance => true}
-    }
-    changeSelected(id, highlightFunction) {
-        console.log('this is:', id, highlightFunction);
-        this.setState({id: id, highlight: highlightFunction})
     }
     render() {
-        const instances = this.props.instances;
-        const services = groupBy(instances, 'service');
-        const iterable = instances.map(instance => instance.host);
-        const hosts = Array.from(new Set(iterable)).sort();
-
         return (
-            <div>
+            <button style={{color: this.props.id == this.props.selected ? 'gray' : null}}
+                    onClick={this.props.onSelectionChanged && this.props.onSelectionChanged}>{this.props.label}</button>
+        )
+    }
+}
 
-                <Selection id='all' label='ALL' selected={this.state.id}
+class InstanceFilter extends React.Component {
+    changeSelected(id, highlightFunction) {
+        console.log('filter change:', id, highlightFunction);
+        //this.setState({id: id, highlight: highlightFunction});
+        this.props.onFilterChanged && this.props.onFilterChanged(id, highlightFunction);
+    }
+    render() {
+        return (
+            <Well>
+                <h4>Filters</h4>
+                <Selection id='all' label='ALL' selected={this.props.id}
                            onSelectionChanged={e => this.changeSelected('all', instance => true)} />
-
-                <span>&nbsp;&nbsp;&nbsp;</span>
+                <br/>
 
                 <div style={{display: 'inline-block'}}>
-                    <Selection id='loading' label='LOADING' selected={this.state.id}
+                    <Selection id='loading' label='LOADING' selected={this.props.id}
                                onSelectionChanged={e => this.changeSelected('loading', instance => instance.status == 'LOADING')} />
-                    <Selection id='down' label='DOWN' selected={this.state.id}
+                    <Selection id='down' label='DOWN' selected={this.props.id}
                                onSelectionChanged={e => this.changeSelected('down', instance => instance.status == 'DOWN')} />
-                    <Selection id='running' label='RUNNING' selected={this.state.id}
+                    <Selection id='running' label='RUNNING' selected={this.props.id}
                                onSelectionChanged={e => this.changeSelected('running', instance => instance.status == 'LIVE')} />
                 </div>
-
-                <span>&nbsp;&nbsp;&nbsp;</span>
+                <br/>
 
                 <div style={{display: 'inline-block'}}>
-                    <Selection id='snapshots' label='SNAPSHOTS' selected={this.state.id}
+                    <Selection id='snapshots' label='SNAPSHOTS' selected={this.props.id}
                                onSelectionChanged={e => this.changeSelected('snapshots', instance => isSnapshot(instance.version))} />
-                    <Selection id='released' label='RELEASED' selected={this.state.id}
+                    <Selection id='released' label='RELEASED' selected={this.props.id}
                                onSelectionChanged={e => this.changeSelected('released', instance => !isSnapshot(instance.version))} />
-                    <Selection id='unexpected' label='UNEXPECTED' selected={this.state.id}
+                    <Selection id='unexpected' label='UNEXPECTED' selected={this.props.id}
                                onSelectionChanged={e => this.changeSelected('unexpected', instance => instance.unexpected)} />
-                    <Selection id='unexpectedHost' label='WRONG HOST' selected={this.state.id}
+                    <Selection id='unexpectedHost' label='WRONG HOST' selected={this.props.id}
                                onSelectionChanged={e => this.changeSelected('unexpectedHost', instance => instance.unexpectedHost)} />
                 </div>
-
-                <span>&nbsp;&nbsp;&nbsp;</span>
+                <br/>
 
                 <div style={{display: 'inline-block'}}>
-                    {hosts.map(host =>
-                        <Selection key={host} id={host} label={host} selected={this.state.id}
+                    {this.props.hosts.map(host =>
+                        <Selection key={host} id={host} label={host} selected={this.props.id}
                                    onSelectionChanged={e => this.changeSelected(host, instance => instance.host == host)} />
                     )}
                 </div>
 
-                <br/>
+            </Well>
+        )
+    }
+}
 
-                <div className='env-wrapper'>
-                    <div className='env-table'>
-                    {Object.keys(services).map( service =>
-                        <div className='env-row'>
-                            <Service key={service} name={service} instances={services[service]} highlightFunction={this.state.highlight} />
-                            {services[service].map(instance =>
-                                <Instance instance={instance} highlighted={this.state.highlight(instance)} />
-                            )}
-                        </div>
-                    )}
+class EnvironmentLogical extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        const instances = this.props.instances;
+        const services = groupBy(instances, 'service');
+        return (
+            <div className='env-table'>
+                {Object.keys(services).map( service =>
+                    <div className='env-row'>
+                        <Service key={service} name={service} instances={services[service]} highlightFunction={this.props.highlight} />
+                        {services[service].map(instance =>
+                            <Instance instance={instance} highlighted={this.props.highlight(instance)} />
+                        )}
                     </div>
-                </div>
-
+                )}
             </div>
         )
     }
 }
 
-export {EnvironmentLogical}
+export {InstanceFilter, EnvironmentLogical}

@@ -1,15 +1,15 @@
 import React from "react";
 import SockJS from "sockjs-client";
 import axios from "axios/index";
-import {groupBy, Toggle} from "../common/component-library";
-import {EnvironmentLogical} from "../environment/env";
+import {Container, groupBy, Toggle} from "../common/component-library";
+import {EnvironmentLogical, InstanceFilter} from "../environment/env";
 import {AppLayout} from "./common/layout";
 import {Link} from "react-router-dom";
 
 class EnvApp extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {env: props.match.params.id, envs: [], realtime: false, instances: []};
+        this.state = {env: props.match.params.id, envs: [], realtime: false, instances: [], filterId: 'all', highlight: instance => true};
         this.connect = this.connect.bind(this);
         this.switch = this.switch.bind(this);
         this.retrieveEnvs = this.retrieveEnvs.bind(this);
@@ -120,11 +120,19 @@ class EnvApp extends React.Component {
     selectEnv(env) {
         this.setState({env: env});
     }
+    changeSelected(filterId, highlightFunction) {
+        console.log('this is:', filterId, highlightFunction);
+        this.setState({filterId: filterId, highlight: highlightFunction})
+    }
     render() {
         const instancesByEnv = groupBy(this.state.instances, 'env');
         const instances = instancesByEnv[this.state.env] || [];
         const envsByType = groupBy(this.state.envs, 'type');
         //console.info("envApp", this.state.instances, this.state.env, instances);
+
+        const iterable = instances.map(instance => instance.host);
+        const hosts = Array.from(new Set(iterable)).sort();
+
         console.info("envApp !render");
 
         // {this.state.env}
@@ -148,16 +156,21 @@ class EnvApp extends React.Component {
 
         return (
             <AppLayout title={title}>
-                <div style={{display: 'table', width: '100%', tableLayout: 'fixed'}}>
-                    <div style={{display: 'table-cell', width: '80%'}}>
-                        <EnvironmentLogical instances={instances} />
+                <div style={{display: 'table', width: '100%', height: '100%', boxSizing: 'border-box', tableLayout: 'fixed', borderSpacing: '0px 0px'}}>
+                    <div style={{display: 'table-cell', width: '80%', height: '100%', boxSizing: 'border-box', verticalAlign: 'top', overflow: 'hidden', padding: '4px'}}>
+                        <Container>
+                            <EnvironmentLogical instances={instances} highlight={this.state.highlight} />
+                        </Container>
                     </div>
-                    <div style={{display: 'table-cell', width: '20%', height: '100%'}}>
-                        <button onClick={e => this.reload()}>
-                            RELOAD
-                        </button>
-                        <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
-                        <div ref={node => this.eventsList = node}></div>
+                    <div style={{display: 'table-cell', width: '20%', height: '100%', boxSizing: 'border-box', verticalAlign: 'top', overflow: 'hidden', padding: '4px'}}>
+                        <Container>
+                            <InstanceFilter id={this.state.filterId} hosts={hosts} onFilterChanged={(e, hf) => this.changeSelected(e, hf)} />
+                            <button onClick={e => this.reload()}>
+                                RELOAD
+                            </button>
+                            <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
+                            <div ref={node => this.eventsList = node}></div>
+                        </Container>
                     </div>
                 </div>
             </AppLayout>
