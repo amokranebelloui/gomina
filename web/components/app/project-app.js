@@ -67,14 +67,16 @@ class ProjectApp extends React.Component {
     componentDidMount() {
         console.info("projectApp !mount ", this.props.match.params.id);
         this.retrieveProjects();
-        this.retrieveProject(this.state.projectId);
-        this.retrieveInstances(this.state.projectId);
+        if (this.state.projectId) {
+            this.retrieveProject(this.state.projectId);
+            this.retrieveInstances(this.state.projectId);
+        }
     }
     componentWillReceiveProps(nextProps) {
         const newProject = nextProps.match.params.id;
         console.info("projectApp !props-chg ", this.props.match.params.id, newProject);
         this.setState({projectId: newProject});
-        if (this.props.match.params.id != newProject) {
+        if (this.props.match.params.id != newProject && newProject) {
             this.retrieveProject(newProject);
             this.retrieveInstances(newProject);
         }
@@ -103,21 +105,8 @@ class ProjectApp extends React.Component {
                             }
                         </table>
                     </Container>
-                    <Well>
-                        <div>
-                            <span title={project.id}>
-                                <b>{project.label}</b>
-                                <span style={{fontSize: 10, marginLeft: 2}}>({project.type})</span>
-                            </span>
-                            <br/>
-                            <span style={{fontSize: 11}}>{project.mvn}</span>
-                            <br/>
-                            <span style={{fontSize: 11}}>{project.repo + ':' + project.svn}</span>
-                            <button onClick={e => this.reloadProject(project.id)}>RELOAD</button>
-                            <br/>
-                            <LinesOfCode loc={project.loc}/>&nbsp;
-                            <Coverage coverage={project.coverage}/>&nbsp;
-                        </div>
+                    <Well block>
+                        <ProjectBadge project={project} onReloadProject={id => this.reloadProject(id)} />
                     </Well>
                     <Container>
                         <ScmLog project={project} commits={commits} instances={instances}/>
@@ -131,6 +120,31 @@ class ProjectApp extends React.Component {
     matchesSearch(project) {
         return project.label && project.label.match(new RegExp(this.state.search, "i"));
         //return project.label && project.label.indexOf(this.state.search) !== -1;
+    }
+}
+
+function ProjectBadge(props) {
+    const project = props.project
+    if (project && project.id) {
+        return (
+            <div>
+                <span title={project.id}>
+                    <b>{project.label}</b>
+                    <span style={{fontSize: 10, marginLeft: 2}}>({project.type})</span>
+                </span>
+                <br/>
+                <span style={{fontSize: 11}}>{project.mvn}</span>
+                <br/>
+                <span style={{fontSize: 11}}>{project.repo + ':' + project.svn}</span>
+                <button onClick={e => this.props.onReloadProject(project.id)}>RELOAD</button>
+                <br/>
+                <LinesOfCode loc={project.loc}/>&nbsp;
+                <Coverage coverage={project.coverage}/>&nbsp;
+            </div>
+        )
+    }
+    else {
+        return (<div>Select a project to see details</div>)
     }
 }
 
