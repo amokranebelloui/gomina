@@ -3,6 +3,7 @@ import axios from "axios/index";
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import {Coverage, LinesOfCode, ProjectSummary, ScmLog} from "../project/project";
 import {Container, Well} from "../common/component-library";
+import "../project/project.css"
 
 class ProjectApp extends React.Component {
     
@@ -97,13 +98,13 @@ class ProjectApp extends React.Component {
                     <Container>
                         {this.state.search && <span>Search: {this.state.search}</span>}
                         {!this.state.search && <span>All</span>}
-                        <table>
+                        <div className='project-list'>
                             {projects
                                 .map(project => {console.info(project.label, this.state.search); return project})
                                 .filter(project => this.matchesSearch(project))
                                 .map(project => <ProjectSummary key={project.id} project={project}/>)
                             }
-                        </table>
+                        </div>
                     </Container>
                     <Well block>
                         <ProjectBadge project={project} onReloadProject={id => this.reloadProject(id)} />

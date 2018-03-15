@@ -1,0 +1,22 @@
+
+.project-list {
+    display: table;
+    width: 100%;
+}
+
+.project-row {
+    display: table-row;
+}
+
+.project-row > * {
+    display: table-cell;
+    padding: 3px;
+}
+
+.project-row > .loc {
+    width: 100px;
+}
+
+.project-row > .coverage {
+    width: 100px;
+}
