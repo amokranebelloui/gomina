@@ -82,22 +82,22 @@
 
 .principal-content {
     display: table-cell;
-    width: 80%;
+    width: 70%;
     height: 100%;
     box-sizing: border-box;
     vertical-align: top;
     overflow: hidden;
-    padding: 4px
+    padding: 4px;
 }
 
 .side-content {
     display: table-cell;
-    width: 20%;
+    width: 30%;
     height: 100%;
     box-sizing: border-box;
     vertical-align: top;
     overflow: hidden;
-    padding: 4px
+    padding: 4px;
 }
 
 .side-content-wrapper {

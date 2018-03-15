@@ -71,7 +71,7 @@ class InstanceFilter extends React.Component {
     }
     render() {
         return (
-            <Well>
+            <Well block>
                 <h4>Filters</h4>
                 <Selection id='all' label='ALL' selected={this.props.id}
                            onSelectionChanged={e => this.changeSelected('all', instance => true)} />

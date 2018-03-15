@@ -66,6 +66,29 @@ class AppLayout extends React.Component {
     }
 }
 
+class PrimarySecondaryLayout extends React.Component {
+    render() {
+        return (
+            <div className='main-content'>
+                <div className='principal-content'>
+                    {this.props.children[0]}
+                </div>
+                <div className='side-content'>
+                    <div className='side-content-wrapper'>
+                        <div className='side-primary'>
+                            {this.props.children[1]}
+                        </div>
+                        <div className='side-secondary'>
+                            {this.props.children[2]}
+                        </div>
+                    </div>
+                </div>
 
-export { AppLayout };
+            </div>
+        )
+    }
+}
+
+
+export { AppLayout, PrimarySecondaryLayout };
 

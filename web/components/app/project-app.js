@@ -1,14 +1,14 @@
 import React from "react";
 import axios from "axios/index";
-import {AppLayout} from "./common/layout";
+import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import {Coverage, LinesOfCode, ProjectSummary, ScmLog} from "../project/project";
-import {Well} from "../common/component-library";
+import {Container, Well} from "../common/component-library";
 
 class ProjectApp extends React.Component {
     
     constructor(props) {
         super(props);
-        this.state = {projects: [], projectId: this.props.match.params.id, project: {}, instances: []};
+        this.state = {projects: [], projectId: this.props.match.params.id, project: {}, instances: [], search: ""};
         this.retrieveProjects = this.retrieveProjects.bind(this);
         this.retrieveProject = this.retrieveProject.bind(this);
         this.retrieveInstances= this.retrieveInstances.bind(this);
@@ -81,28 +81,29 @@ class ProjectApp extends React.Component {
     }
     render() {
         //console.info("!render ", this.props.match.params.id);
+        console.info("RRR", this.state.search);
         const projects = this.state.projects;
         const project = this.state.project;
         const commits = project.commitLog || [];
         const instances = this.state.instances.filter(instance => instance.project == project.id);
-        const title = "Project '" + project.label + "'";
+        const title = (<span>Projects &nbsp;&nbsp;&nbsp; <input type="text" name="search" onChange={e => this.setState({search: e.target.value})}/></span>);
         const cellStyle = {display: 'inline'};
         return (
             <AppLayout title={title}>
-                <div style={{
-                    display: 'grid',
-                    gridGap: '2px',
-                    gridTemplateColumns: 'minmax(350px, 4fr) minmax(200px, 3fr)'
-                }}>
-                    <div style={cellStyle}>
+
+                <PrimarySecondaryLayout>
+                    <Container>
+                        {this.state.search && <span>Search: {this.state.search}</span>}
+                        {!this.state.search && <span>All</span>}
                         <table>
-                        {projects.map(project =>
-                            <ProjectSummary key={project.id} project={project}/>
-                        )}
+                            {projects
+                                .map(project => {console.info(project.label, this.state.search); return project})
+                                .filter(project => this.matchesSearch(project))
+                                .map(project => <ProjectSummary key={project.id} project={project}/>)
+                            }
                         </table>
-                    </div>
-                    <Well block padding="10px 10px" margin="2px">
-                    <div style={cellStyle}>
+                    </Container>
+                    <Well>
                         <div>
                             <span title={project.id}>
                                 <b>{project.label}</b>
@@ -117,13 +118,19 @@ class ProjectApp extends React.Component {
                             <LinesOfCode loc={project.loc}/>&nbsp;
                             <Coverage coverage={project.coverage}/>&nbsp;
                         </div>
-                        <br/>
-                        <ScmLog project={project} commits={commits} instances={instances}/>
-                    </div>
                     </Well>
-                </div>
+                    <Container>
+                        <ScmLog project={project} commits={commits} instances={instances}/>
+                    </Container>
+                </PrimarySecondaryLayout>
+
             </AppLayout>
         );
+    }
+
+    matchesSearch(project) {
+        return project.label && project.label.match(new RegExp(this.state.search, "i"));
+        //return project.label && project.label.indexOf(this.state.search) !== -1;
     }
 }
 
