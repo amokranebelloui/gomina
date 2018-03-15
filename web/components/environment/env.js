@@ -27,8 +27,8 @@ class Instance extends React.Component {
 
          */
         return ([
-            <Status status={instance.status} leader={instance.leader} participating={instance.participating} cluster={instance.cluster} style={{opacity: opacity}} />,
-            <div className='instance-badge' style={{display: 'table-cell', opacity:opacity}}>{comp}</div>
+            <Status key={'status' + instance.id} status={instance.status} leader={instance.leader} participating={instance.participating} cluster={instance.cluster} style={{opacity: opacity}} />,
+            <div key={instance.id} className='instance-badge' style={{display: 'table-cell', opacity:opacity}}>{comp}</div>
         ])
     }
 }
@@ -121,10 +121,10 @@ class EnvironmentLogical extends React.Component {
         return (
             <div className='env-table'>
                 {Object.keys(services).map( service =>
-                    <div className='env-row'>
-                        <Service key={service} name={service} instances={services[service]} highlightFunction={this.props.highlight} />
+                    <div key={service} className='env-row'>
+                        <Service name={service} instances={services[service]} highlightFunction={this.props.highlight} />
                         {services[service].map(instance =>
-                            <Instance instance={instance} highlighted={this.props.highlight(instance)} />
+                            <Instance key={instance.id} instance={instance} highlighted={this.props.highlight(instance)} />
                         )}
                     </div>
                 )}
