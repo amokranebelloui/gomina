@@ -28,8 +28,8 @@ class ProjectPlugin : ProjectsExt {
     private fun ProjectDetail.apply(project: Project) {
         this.label = project.label ?: project.id
         this.type = project.type
-        this.repo = project.svnRepo
-        this.svn = project.svnUrl
+        this.scmRepo = project.svnRepo
+        this.scmLocation = project.svnUrl
         this.mvn = project.maven
         this.jenkins = project.jenkinsJob
     }

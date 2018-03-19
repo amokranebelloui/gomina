@@ -71,6 +71,17 @@ class ScmLink extends React.Component {
     }
 }
 
+class UnreleasedChangeCount extends React.Component {
+    render() {
+        const changesCount = this.props.changes;
+        const hasChanges = changesCount > 0;
+        //const backgroundColor = hasChanges ? '#EAA910' : '#F2E18F';
+        return (
+            hasChanges && <Badge backgroundColor='#EAA910' color='white'>{changesCount}</Badge>
+        )
+    }
+}
+
 class ProjectSummary extends React.Component {
     render() {
         const project = this.props.project;
@@ -78,20 +89,50 @@ class ProjectSummary extends React.Component {
             <div className='project-row'>
                 <div className='summary'>
                     <span title={project.id}>
-                        <b>{project.label}</b>
-                        <span style={{fontSize: 10, marginLeft: 2}}>({project.type})</span>
+                        <span style={{fontSize: 14}}>{project.label}</span>
+                        &nbsp;
+                        <UnreleasedChangeCount changes={project.changes} />
+                        <span style={{fontSize: 8, marginLeft: 2}}>({project.type})</span>
                     </span>
                     <br/>
-                    <span style={{fontSize: 11}}>{project.mvn}</span>
+                    <span style={{fontSize: 8}}>{project.mvn}</span>
                 </div>
-                <div><ScmLink projectId={project.id} url={project.repo + ':' + project.svn} changes={project.changes} /></div>
-                <div className='build'><BuildLink url={project.jenkins} /> (BuildSt)</div>
+                <div><ScmLink projectId={project.id} url={project.scmRepo + ': ' + project.scmUrl} changes={project.changes} /></div>
+                <div className='build'><BuildLink url={project.jenkins} />&nbsp;<span>(BuildSt)</span></div>
                 <div className='released'><Version version={project.released} /></div>
                 <div className='latest'><Version version={project.latest} /></div>
                 <div className='loc'><LinesOfCode loc={project.loc} /></div>
                 <div className='coverage'><Coverage coverage={project.coverage} /></div>
             </div>
         )
+    }
+}
+
+function ProjectBadge(props) {
+    const project = props.project;
+    if (project && project.id) {
+        return (
+            <div className='project-badge'>
+                <span title={project.id}>
+                    <span style={{fontSize: 14}}><b>{project.label}</b></span>
+                    <span style={{fontSize: 8, marginLeft: 2}}>({project.type})</span>
+                </span>
+                <br/>
+                <span style={{fontSize: 9}}>{project.mvn}</span>
+                <br/>
+                <span style={{fontSize: 9}}>{project.scmRepo + ': ' + project.scmUrl}</span>
+                <br/>
+                <LinesOfCode loc={project.loc}/>
+                <Coverage coverage={project.coverage}/>
+                <br/>
+                <BuildLink url={project.jenkins} /><span>(BuildSt)</span>
+                <br/>
+                <button onClick={e => this.props.onReloadProject(project.id)}>RELOAD</button>
+            </div>
+        )
+    }
+    else {
+        return (<div>Select a project to see details</div>)
     }
 }
 
@@ -149,7 +190,7 @@ class ScmLog extends React.Component {
     }
 }
 
-export {BuildLink, ScmLog, ProjectSummary, ScmLink, LinesOfCode, Coverage}
+export {BuildLink, ScmLog, ProjectSummary, ProjectBadge, UnreleasedChangeCount, ScmLink, LinesOfCode, Coverage}
 
 
 

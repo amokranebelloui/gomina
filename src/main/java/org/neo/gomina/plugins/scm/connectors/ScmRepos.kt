@@ -1,7 +1,10 @@
 package org.neo.gomina.plugins.scm.connectors
 
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.scm.*
+import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.ScmClient
+import org.neo.gomina.model.scm.ScmRepo
+import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.model.security.Passwords
 import java.util.*
 import javax.inject.Inject
@@ -21,12 +24,14 @@ class ConfigScmRepos : ScmRepos {
         private val logger = LogManager.getLogger(ConfigScmRepos::class.java)
     }
 
+    private val repos = HashMap<String, ScmRepo>()
     private val clients = HashMap<String, ScmClient>()
 
     @Inject
     constructor(config: ScmConfig, passwords: Passwords) {
         for (repo in config.repos) {
             try {
+                repos.put(repo.id, repo)
                 val client = buildScmClient(repo, passwords)
                 if (client != null) {
                     clients.put(repo.id, client)
@@ -38,7 +43,11 @@ class ConfigScmRepos : ScmRepos {
         }
     }
 
-    override fun get(id: String): ScmClient {
+    override fun getRepo(id: String): ScmRepo? {
+        return repos[id]
+    }
+
+    override fun getClient(id: String): ScmClient {
         return clients[id] ?: noOpScmClient
     }
 

@@ -1,18 +1,24 @@
 package org.neo.gomina.plugins.scm.impl;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 import org.neo.gomina.model.scm.ScmClient;
+import org.neo.gomina.model.scm.ScmRepo;
 import org.neo.gomina.model.scm.ScmRepos;
-import org.neo.gomina.plugins.scm.connectors.DummyScmClient;
 import org.neo.gomina.plugins.scm.ScmPlugin;
+import org.neo.gomina.plugins.scm.connectors.DummyScmClient;
 
 public class ScmPluginTest {
 
     @Test
     public void getSvnDetails() {
         class FileScmReposOverride implements ScmRepos {
-            public ScmClient get(String id) {
+            public ScmClient getClient(String id) {
                 return new DummyScmClient();
+            }
+
+            public ScmRepo getRepo(@NotNull String id) {
+                return null;
             }
         }
 

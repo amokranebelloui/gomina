@@ -48,6 +48,8 @@ class ScmPlugin : InstancesExt, ProjectsExt {
         for (project in projects.getProjects()) {
             val projectDetail = projectSet.get(project.id)
             if (projectDetail != null) {
+                val root = scmRepos.getRepo(project.svnRepo)?.location
+                projectDetail.scmUrl = "$root${project.svnUrl}"
                 val scmDetails = this.getSvnDetails(project.svnRepo, project.svnUrl)
                 apply(projectDetail, scmDetails)
             }
@@ -57,7 +59,9 @@ class ScmPlugin : InstancesExt, ProjectsExt {
     override fun onGetProject(projectId: String, projectDetail: ProjectDetail) {
         projects.getProject(projectId)
             ?. let {
-                val commitLog = getCommits(it.svnRepo, it.svnUrl, scmRepos.get(it.svnRepo), retrieve = SCM_DELTA)
+                val commitLog = getCommits(it.svnRepo, it.svnUrl, scmRepos.getClient(it.svnRepo), retrieve = SCM_DELTA)
+                val root = scmRepos.getRepo(it.svnRepo)?.location
+                projectDetail.scmUrl = "$root${it.svnUrl}"
                 Pair(getSvnDetails(it.svnRepo, it.svnUrl), commitLog)
             }
             ?. let { (svnDetail, commitLog) ->
@@ -107,7 +111,7 @@ class ScmPlugin : InstancesExt, ProjectsExt {
 
     fun refresh(svnRepo: String, svnUrl: String) {
         if (svnUrl.isNotBlank()) {
-            val scmClient = scmRepos.get(svnRepo)
+            val scmClient = scmRepos.getClient(svnRepo)
             val logEntries = getCommits(svnRepo, svnUrl, scmClient, retrieve = SCM)
             val scmDetails = computeScmDetails(svnRepo, svnUrl, logEntries, scmClient)
             scmCache.cacheLog(svnRepo, svnUrl, logEntries)
@@ -120,7 +124,7 @@ class ScmPlugin : InstancesExt, ProjectsExt {
             val detail = scmCache.getDetail(svnRepo, svnUrl)
             return if (detail != null) detail
             else {
-                val scmClient = scmRepos.get(svnRepo)
+                val scmClient = scmRepos.getClient(svnRepo)
                 val logEntries = getCommits(svnRepo, svnUrl, scmClient, retrieve = CACHE)
                 val scmDetails = computeScmDetails(svnRepo, svnUrl, logEntries, scmClient)
                 scmCache.cacheDetail(svnRepo, svnUrl, scmDetails)

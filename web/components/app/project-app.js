@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios/index";
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
-import {Coverage, LinesOfCode, ProjectSummary, ScmLog} from "../project/project";
+import {Coverage, LinesOfCode, ProjectBadge, ProjectSummary, ScmLog} from "../project/project";
 import {Container, Well} from "../common/component-library";
 import "../project/project.css"
 
@@ -121,31 +121,6 @@ class ProjectApp extends React.Component {
     matchesSearch(project) {
         return project.label && project.label.match(new RegExp(this.state.search, "i"));
         //return project.label && project.label.indexOf(this.state.search) !== -1;
-    }
-}
-
-function ProjectBadge(props) {
-    const project = props.project
-    if (project && project.id) {
-        return (
-            <div>
-                <span title={project.id}>
-                    <b>{project.label}</b>
-                    <span style={{fontSize: 10, marginLeft: 2}}>({project.type})</span>
-                </span>
-                <br/>
-                <span style={{fontSize: 11}}>{project.mvn}</span>
-                <br/>
-                <span style={{fontSize: 11}}>{project.repo + ':' + project.svn}</span>
-                <button onClick={e => this.props.onReloadProject(project.id)}>RELOAD</button>
-                <br/>
-                <LinesOfCode loc={project.loc}/>&nbsp;
-                <Coverage coverage={project.coverage}/>&nbsp;
-            </div>
-        )
-    }
-    else {
-        return (<div>Select a project to see details</div>)
     }
 }
 
