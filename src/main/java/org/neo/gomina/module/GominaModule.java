@@ -20,6 +20,8 @@ import org.neo.gomina.model.security.Passwords;
 import org.neo.gomina.module.config.Config;
 import org.neo.gomina.module.config.ConfigLoader;
 import org.neo.gomina.plugins.inventory.InventoryPlugin;
+import org.neo.gomina.plugins.jenkins.JenkinsConfig;
+import org.neo.gomina.plugins.jenkins.JenkinsPlugin;
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin;
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig;
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThreads;
@@ -32,9 +34,9 @@ import org.neo.gomina.plugins.sonar.SonarPlugin;
 import org.neo.gomina.plugins.sonar.connectors.DummySonarConnector;
 import org.neo.gomina.plugins.sonar.connectors.HttpSonarConnector;
 import org.neo.gomina.plugins.ssh.SshConfig;
+import org.neo.gomina.plugins.ssh.SshOnDemandConnector;
 import org.neo.gomina.plugins.ssh.SshPlugin;
 import org.neo.gomina.plugins.ssh.connector.SshClient;
-import org.neo.gomina.plugins.ssh.SshOnDemandConnector;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -83,6 +85,10 @@ public class GominaModule extends AbstractModule {
         bind(ScmRepos.class).to(ConfigScmRepos.class).in(Scopes.SINGLETON);
         bind(ScmPlugin.class).in(Scopes.SINGLETON);
 
+        // Jenkins
+        bind(JenkinsConfig.class).toInstance(config.jenkins);
+        bind(JenkinsPlugin.class).in(Scopes.SINGLETON);
+
         // Sonar
         bind(String.class).annotatedWith(Names.named("sonar.url")).toInstance(config.sonar.getUrl());
         Class<? extends SonarConnector> sonarConnector = StringUtils.equals(config.sonar.getMode(), "dummy")
@@ -103,12 +109,14 @@ public class GominaModule extends AbstractModule {
         bind(new TypeLiteral<ArrayList<ProjectsExt>>(){}).annotatedWith(Names.named("projects.plugins"))
                 .toProvider(new Provider<ArrayList<ProjectsExt>>() {
             @Inject private ProjectPlugin projectPlugin;
+            @Inject private JenkinsPlugin jenkinsPlugin;
             @Inject private SonarPlugin sonarPlugin;
             @Inject private ScmPlugin scmPlugin;
-            
+
             @Override public ArrayList<ProjectsExt> get() {
                 return new ArrayList<>(Arrays.asList(
                         projectPlugin,
+                        jenkinsPlugin,
                         sonarPlugin,
                         scmPlugin
                 ));

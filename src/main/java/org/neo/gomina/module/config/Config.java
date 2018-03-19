@@ -2,6 +2,7 @@ package org.neo.gomina.module.config;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.neo.gomina.plugins.jenkins.JenkinsConfig;
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig;
 import org.neo.gomina.plugins.scm.connectors.ScmConfig;
 import org.neo.gomina.plugins.sonar.SonarConfig;
@@ -17,6 +18,7 @@ public class Config {
     public Map<String, String> inventory;
 
     public ScmConfig scm;
+    public JenkinsConfig jenkins;
     public SonarConfig sonar;
     public SshConfig ssh;
 

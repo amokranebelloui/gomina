@@ -4,6 +4,7 @@
   svnRepo: home
   svnUrl: svn-project1
   maven: x.oms.core:tradex-core
+  jenkinsServer: principal
   jenkinsJob: 6.14 SERVER-SrvTradexCore
 
 - id: kernel
@@ -12,7 +13,7 @@
   svnRepo: dummy
   svnUrl: OMS/Server/tradex-kernel
   maven: x.oms.kernel:tradex-kernel
-  jenkinsJob: https://jenkins.io/6.14 SERVER-SrvTradexKernel
+  jenkinsJob: 6.14 SERVER-SrvTradexKernel
 
 - id: tradex-viewkernel
   label: View Kernel
@@ -68,6 +69,7 @@
   svnRepo: home
   svnUrl: svn-project2
   maven: x.oms.vac:voms-bus
+  jenkinsServer: principal
   jenkinsJob: 6.14 SERVER-LibBus
 
 - id: torkjell
@@ -76,4 +78,15 @@
   svnRepo: ''
   svnUrl: ''
   maven: torkjell:torkjell
-  jenkinsJob: 
+  sonarServer: home
+  jenkinsServer: edge
+  jenkinsJob: Torkjell Build
+
+- id: kafka
+  label: Kafka
+  type: server
+  svnRepo: ''
+  svnUrl: ''
+  maven: org.apache:kafka
+  jenkinsServer: apache
+  jenkinsJob: kafka-1.1-jdk7

@@ -46,10 +46,11 @@ class Coverage extends React.Component {
 
 class BuildLink extends React.Component {
     render() {
+        const text = this.props.server ? this.props.server : "build";
         return (
             <a href={this.props.url} target="_blank" title={this.props.url}
                style={{backgroundColor: '#E8BD30', color: 'white', padding: 2, borderRadius: '3px', fontSize: 10}}>
-                build
+                {text}
             </a>
         )
     }
@@ -98,7 +99,7 @@ class ProjectSummary extends React.Component {
                     <span style={{fontSize: 8}}>{project.mvn}</span>
                 </div>
                 <div><ScmLink projectId={project.id} url={project.scmRepo + ': ' + project.scmUrl} changes={project.changes} /></div>
-                <div className='build'><BuildLink url={project.jenkins} />&nbsp;<span>(BuildSt)</span></div>
+                <div className='build'><BuildLink server={project.jenkinsServer} url={project.jenkinsUrl} />&nbsp;<span>(BuildSt)</span></div>
                 <div className='released'><Version version={project.released} /></div>
                 <div className='latest'><Version version={project.latest} /></div>
                 <div className='loc'><LinesOfCode loc={project.loc} /></div>
@@ -125,9 +126,10 @@ function ProjectBadge(props) {
                 <LinesOfCode loc={project.loc}/>
                 <Coverage coverage={project.coverage}/>
                 <br/>
-                <BuildLink url={project.jenkins} /><span>(BuildSt)</span>
+                <BuildLink server={project.jenkinsServer} url={project.jenkinsUrl} /><span>(BuildSt)</span>
+                <span>{project.jenkinsJob}</span>
                 <br/>
-                <button onClick={e => this.props.onReloadProject(project.id)}>RELOAD</button>
+                <button onClick={e => props.onReloadProject(project.id)}>RELOAD</button>
             </div>
         )
     }

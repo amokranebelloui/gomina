@@ -31,7 +31,8 @@ class ProjectPlugin : ProjectsExt {
         this.scmRepo = project.svnRepo
         this.scmLocation = project.svnUrl
         this.mvn = project.maven
-        this.jenkins = project.jenkinsJob
+        this.jenkinsServer = project.jenkinsServer
+        this.jenkinsJob = project.jenkinsJob
     }
 
 }

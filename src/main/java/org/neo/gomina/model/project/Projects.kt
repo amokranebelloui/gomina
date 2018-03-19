@@ -16,6 +16,8 @@ data class Project (
     var svnRepo: String = "",
     var svnUrl: String = "",
     var maven: String?,
+    var sonarServer: String = "",
+    var jenkinsServer: String = "",
     var jenkinsJob: String?
 )
 
