@@ -61,7 +61,7 @@ class SshOnDemandConnector {
             val config = hosts[host]
             if (config != null) {
                 val username = config.username
-                val password = passwords.getRealPassword(config.passwordAlias)
+                val password = passwords.getRealPassword(config.passwordAlias!!)
                 val sudo = config.sudo
                 try {
                     logger.info("Analyze instances ${instances.size} on '$host' using $username/***${StringUtils.length(password)} $sudo")

@@ -247,7 +247,7 @@
                     </descriptors>
                     <archive>
                         <manifest>
-                            <mainClass>org.neo.gomina.runner.Runner</mainClass>
+                            <mainClass>org.neo.gomina.runner.RunnerKt</mainClass>
                         </manifest>
                     </archive>
                     

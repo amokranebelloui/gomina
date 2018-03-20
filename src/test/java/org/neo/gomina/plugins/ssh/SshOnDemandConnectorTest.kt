@@ -15,7 +15,7 @@ class SshOnDemandConnectorTest {
         val sshConfig = ConfigLoader().load().ssh
         val passwords = Passwords(File("config/pass.properties"))
         val sshClient = SshClient()
-        val sshConnector = SshOnDemandConnector(sshConfig)
+        val sshConnector = SshOnDemandConnector(sshConfig!!)
         sshConnector.inventory = inventory
         sshConnector.passwords = passwords
         sshConnector.sshClient = sshClient
