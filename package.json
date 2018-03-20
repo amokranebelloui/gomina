@@ -1,4 +1,11 @@
 {
+  "name": "gomina",
+  "version": "0.9.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\"",
+    "build": "webpack --progress --colors",
+    "build-watch": "webpack --progress --colors --watch"
+  },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
