@@ -99,6 +99,15 @@ class ProjectApp extends React.Component {
                         {this.state.search && <span>Search: {this.state.search}</span>}
                         {!this.state.search && <span>All</span>}
                         <div className='project-list'>
+                            <div className='project-row'>
+                                <div className='summary'><b>Project</b></div>
+                                <div className='released'><b>Released</b></div>
+                                <div className='latest'><b>Latest</b></div>
+                                <div className='loc'><b>LOC</b></div>
+                                <div className='coverage'><b>Coverage</b></div>
+                                <div className='scm'><b>SCM</b></div>
+                                <div className='build'><b>Build</b></div>
+                            </div>
                             {projects
                                 .map(project => {console.info(project.label, this.state.search); return project})
                                 .filter(project => this.matchesSearch(project))

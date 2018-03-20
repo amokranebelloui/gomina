@@ -13,12 +13,12 @@
     padding: 3px;
 }
 
-.project-row > .loc {
-    width: 100px;
+.project-row > .loc, .coverage {
+    /*min-width: 50px;*/
 }
 
-.project-row > .coverage {
-    width: 100px;
+.project-row > .released, .latest, .scm, .build {
+    text-align: center;
 }
 
 .project-badge > * {

@@ -62,12 +62,10 @@ class ScmLink extends React.Component {
         const hasChanges = changesCount > 0;
         const backgroundColor = hasChanges ? '#EAA910' : '#F2E18F';
         return (
-            <span title={this.props.url}
-                  style={{backgroundColor: backgroundColor, color: 'white', padding: 2, borderRadius: '3px', fontSize: 10}}>
-                <Link to={"/project/" + this.props.projectId}>
-                    {hasChanges ? 'svn (' + changesCount + ' chg)' : 'svn'}
-                </Link>
-            </span>
+            <a href={this.props.url} target="_blank" title={this.props.url}
+               style={{backgroundColor: backgroundColor, color: 'white', padding: 2, borderRadius: '3px', fontSize: 10}}>
+                svn
+            </a>
         )
     }
 }
@@ -90,7 +88,9 @@ class ProjectSummary extends React.Component {
             <div className='project-row'>
                 <div className='summary'>
                     <span title={project.id}>
-                        <span style={{fontSize: 14}}>{project.label}</span>
+                        <Link to={"/project/" + project.id}>
+                            <span style={{fontSize: 14}}>{project.label}</span>
+                        </Link>
                         &nbsp;
                         <UnreleasedChangeCount changes={project.changes} />
                         <span style={{fontSize: 8, marginLeft: 2}}>({project.type})</span>
@@ -98,12 +98,12 @@ class ProjectSummary extends React.Component {
                     <br/>
                     <span style={{fontSize: 8}}>{project.mvn}</span>
                 </div>
-                <div><ScmLink projectId={project.id} url={project.scmRepo + ': ' + project.scmUrl} changes={project.changes} /></div>
-                <div className='build'><BuildLink server={project.jenkinsServer} url={project.jenkinsUrl} />&nbsp;<span>(BuildSt)</span></div>
                 <div className='released'><Version version={project.released} /></div>
                 <div className='latest'><Version version={project.latest} /></div>
                 <div className='loc'><LinesOfCode loc={project.loc} /></div>
                 <div className='coverage'><Coverage coverage={project.coverage} /></div>
+                <div className='scm'><ScmLink projectId={project.id} url={project.scmUrl} changes={project.changes} /></div>
+                <div className='build'><BuildLink server={project.jenkinsServer} url={project.jenkinsUrl} /></div>
             </div>
         )
     }
@@ -126,7 +126,7 @@ function ProjectBadge(props) {
                 <LinesOfCode loc={project.loc}/>
                 <Coverage coverage={project.coverage}/>
                 <br/>
-                <BuildLink server={project.jenkinsServer} url={project.jenkinsUrl} /><span>(BuildSt)</span>
+                <BuildLink server={project.jenkinsServer} url={project.jenkinsUrl} />
                 <span>{project.jenkinsJob}</span>
                 <br/>
                 <button onClick={e => props.onReloadProject(project.id)}>RELOAD</button>
