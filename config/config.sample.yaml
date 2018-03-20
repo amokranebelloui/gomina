@@ -3,10 +3,11 @@ name: 'My Governance Dashboard'
 passwordsFile: 'config/pass.properties'
 
 inventory:
-  projectsFile: 'data/projects.json'
+  #projectsFile: 'data/projects.json'
+  projectsFile: 'data/projects.yaml'
   inventoryDir: 'data'
-  inventoryFilter: 'env\.(.*?)\..*'
-  #inventoryFilter: 'env\.(.*?)\.yaml'
+  #inventoryFilter: 'env\.(.*?)\..*'
+  inventoryFilter: 'env\.(.*?)\.yaml'
   #inventoryFilter: 'env\.(.*i.*?)\.yaml'
 
 scm:
@@ -21,12 +22,23 @@ scm:
       passwordAlias: '@amokrane'
     - id: 'dummy'
       type: 'dummy'
-      location: ''
+      location: 'dummy://'
 
 sonar:
   mode: 'dummy'
   #mode: 'sonar'
   url: 'http://localhost:9000'
+
+jenkins:
+  servers:
+    - id: ''
+      location: 'http://default-jenkins/jenkins/'
+    - id: 'principal'
+      location: 'http://localhost:7111/jenkins/'
+    - id: 'edge'
+      location: 'https://jenkins.io/edge/'
+    - id: 'apache'
+      location: 'https://builds.apache.org/job/'
 
 ssh:
   hosts:
@@ -39,5 +51,5 @@ zmqMonitoring:
   connections:
     - url: 'tcp://localhost:7070'
       #type: 'SUB'
-      #serializationClass: 'org.neo.gomina.model.monitoring.zmq.ZmqMonitorThread'
+      #serializationClass: 'org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThread'
     - url: 'tcp://localhost:7071'
