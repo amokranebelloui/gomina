@@ -37,6 +37,7 @@
   svnRepo: dummy
   svnUrl: OMS/Server/tradex-basketmanager
   maven: x.oms.vac:voms-basketmanager
+  sonarServer: dummy
   jenkinsJob: 6.14 SERVER-SrvManagerBasket
 
 - id: order
@@ -45,6 +46,7 @@
   svnRepo: dummy
   svnUrl: OMS/Server/tradex-ordermanager
   maven: x.oms.vac:voms-ordermanager
+  sonarServer: dummy
   jenkinsJob: 6.14 SERVER-SrvManagerOrder
 
 - id: market
@@ -61,6 +63,7 @@
   svnRepo: dummy
   svnUrl: OMS/Server/tradex-fixin
   maven: x.oms.vac:voms-fixin
+  sonarServer: dummy
   jenkinsJob: 6.14 SERVER-Srvfixin
 
 - id: libbus
@@ -69,6 +72,7 @@
   svnRepo: home
   svnUrl: svn-project2
   maven: x.oms.vac:voms-bus
+  sonarServer: dummy
   jenkinsServer: principal
   jenkinsJob: 6.14 SERVER-LibBus
 
@@ -78,7 +82,7 @@
   svnRepo: ''
   svnUrl: ''
   maven: torkjell:torkjell
-  sonarServer: home
+  sonarServer: main
   jenkinsServer: edge
   jenkinsJob: Torkjell Build
 

@@ -18,6 +18,7 @@ class DummySonarConnector : SonarConnector {
     val file = File("datadummy/projects.sonar.yaml")
 
     override fun getMetrics(): Map<String, SonarIndicators> {
+        logger.info("Get metrics for dummy")
         return getMetrics(null)
     }
 

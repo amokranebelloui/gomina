@@ -2,7 +2,6 @@ package org.neo.gomina.plugins.sonar.connectors
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.google.inject.name.Named
 import org.apache.commons.lang3.StringUtils
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClients
@@ -12,15 +11,13 @@ import org.neo.gomina.plugins.sonar.SonarConnector
 import org.neo.gomina.plugins.sonar.SonarIndicators
 import java.io.IOException
 import java.util.*
-import javax.inject.Inject
 
-class HttpSonarConnector : SonarConnector {
-
-    @Inject @Named("sonar.url") internal lateinit var url: String
+class HttpSonarConnector(val url: String) : SonarConnector {
 
     private val mapper = ObjectMapper()
 
     override fun getMetrics(): Map<String, SonarIndicators> {
+        logger.info("Get metrics for $url")
         return getMetrics(null)
     }
 
@@ -50,7 +47,7 @@ class HttpSonarConnector : SonarConnector {
             } finally {
                 response1.close()
             }
-        } catch (e: IOException) {
+        } catch (e: Exception) {
             logger.error("", e)
         }
 

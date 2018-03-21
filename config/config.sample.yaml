@@ -25,9 +25,14 @@ scm:
       location: 'dummy://'
 
 sonar:
-  mode: 'dummy'
-  #mode: 'sonar'
-  url: 'http://localhost:9000'
+  servers:
+    - id: ''
+      mode: 'http'
+      url: 'http://localhost:9000'
+    - id: 'main'
+      mode: 'dummy'
+    - id: 'dummy'
+      mode: 'dummy'
 
 jenkins:
   servers:

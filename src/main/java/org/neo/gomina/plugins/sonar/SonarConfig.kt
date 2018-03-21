@@ -1,6 +1,9 @@
 package org.neo.gomina.plugins.sonar
 
-class SonarConfig {
-    var mode: String? = null
-    var url: String? = null
+import java.util.*
+
+data class SonarServer(val id: String = "", val mode: String, val url: String = "")
+
+data class SonarConfig (val servers: List<SonarServer> = ArrayList()) {
+    val serverMap = servers.associateBy { it.id }
 }

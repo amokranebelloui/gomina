@@ -2,7 +2,6 @@ package org.neo.gomina.module
 
 import com.google.inject.*
 import com.google.inject.name.Names
-import org.apache.commons.lang3.StringUtils
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvBuilder
 import org.neo.gomina.api.envs.EnvsApi
@@ -29,10 +28,9 @@ import org.neo.gomina.plugins.project.ProjectPlugin
 import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.scm.connectors.ConfigScmRepos
 import org.neo.gomina.plugins.scm.connectors.ScmConfig
-import org.neo.gomina.plugins.sonar.SonarConnector
+import org.neo.gomina.plugins.sonar.SonarConfig
+import org.neo.gomina.plugins.sonar.SonarConnectors
 import org.neo.gomina.plugins.sonar.SonarPlugin
-import org.neo.gomina.plugins.sonar.connectors.DummySonarConnector
-import org.neo.gomina.plugins.sonar.connectors.HttpSonarConnector
 import org.neo.gomina.plugins.ssh.SshConfig
 import org.neo.gomina.plugins.ssh.SshOnDemandConnector
 import org.neo.gomina.plugins.ssh.SshPlugin
@@ -86,12 +84,8 @@ class GominaModule : AbstractModule() {
         bind(JenkinsPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // Sonar
-        bind(String::class.java).annotatedWith(Names.named("sonar.url")).toInstance(config.sonar!!.url)
-        val sonarConnector = if (StringUtils.equals(config.sonar!!.mode, "dummy"))
-            DummySonarConnector::class.java
-        else
-            HttpSonarConnector::class.java
-        bind(SonarConnector::class.java).to(sonarConnector).`in`(Scopes.SINGLETON)
+        bind(SonarConfig::class.java).toInstance(config.sonar)
+        bind(SonarConnectors::class.java).`in`(Scopes.SINGLETON)
         bind(SonarPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // SSH
