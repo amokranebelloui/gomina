@@ -13,6 +13,8 @@ import javax.inject.Inject
 private class NoOpScmClient : ScmClient {
     override fun getLog(url: String, rev: String, count: Int): List<Commit> = emptyList()
     override fun getFile(url: String, rev: String): String? = null
+    override fun listFiles(url: String, rev: String): List<String> = emptyList()
+
 }
 private val noOpScmClient = NoOpScmClient()
 

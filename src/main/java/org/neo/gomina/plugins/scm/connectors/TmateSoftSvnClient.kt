@@ -4,10 +4,7 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
-import org.tmatesoft.svn.core.ISVNLogEntryHandler
-import org.tmatesoft.svn.core.SVNLogEntry
-import org.tmatesoft.svn.core.SVNProperties
-import org.tmatesoft.svn.core.SVNURL
+import org.tmatesoft.svn.core.*
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory
 import org.tmatesoft.svn.core.io.SVNRepository
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory
@@ -55,6 +52,12 @@ class TmateSoftSvnClient : ScmClient {
         val baos = ByteArrayOutputStream()
         repository.getFile(url, java.lang.Long.valueOf(rev), SVNProperties(), baos)
         return String(baos.toByteArray())
+    }
+
+    override fun listFiles(url: String, rev: String): List<String> {
+        val dirEntries = ArrayList<SVNDirEntry>()
+        repository.getDir(url, rev.toLong(), SVNProperties()) { dirEntries.add(it) }
+        return dirEntries.map { it.relativePath }
     }
 
     private fun revAsString(rev: Long?): String? {

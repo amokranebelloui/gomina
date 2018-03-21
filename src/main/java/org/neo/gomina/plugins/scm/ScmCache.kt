@@ -31,6 +31,7 @@ class ScmCache {
         else if (detailCacheFile.exists()) {
             try {
                 val scmDetails = xStream.fromXML(detailCacheFile) as ScmDetails
+                scmDetails.docFiles = scmDetails.docFiles ?: emptyList() // Keep  the defaulting, as it gets set to null if not in the file
                 cache.put(svnUrl, scmDetails)
                 logger.debug("SCM Detail Served from File Cache $scmDetails")
                 return scmDetails

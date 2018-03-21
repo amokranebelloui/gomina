@@ -18,13 +18,12 @@ data class Commit (
 interface ScmClient {
 
     /** Get log from HEAD to revision, max @count elements */
-    @Throws(Exception::class)
     fun getLog(url: String, rev: String, count: Int): List<Commit>
 
     /** get file for a revision, HEAD is -1 **/
-    @Throws(Exception::class)
     fun getFile(url: String, rev: String): String?
 
+    fun listFiles(url: String, rev: String): List<String>
 }
 
 interface ReleaseFlagger {

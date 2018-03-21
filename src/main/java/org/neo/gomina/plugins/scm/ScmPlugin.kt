@@ -79,6 +79,7 @@ class ScmPlugin : InstancesExt, ProjectsExt {
     }
 
     private fun apply(projectDetail: ProjectDetail, scmDetails: ScmDetails) {
+        projectDetail.docFiles = scmDetails.docFiles
         projectDetail.changes = scmDetails.changes
         projectDetail.latest = scmDetails.latest
         projectDetail.released = scmDetails.released
@@ -161,6 +162,7 @@ class ScmPlugin : InstancesExt, ProjectsExt {
                             .filter { StringUtils.isNotBlank(it.release) }
                             .firstOrNull()?.release,
                     releasedRevision = lastReleasedRev,
+                    docFiles = scmClient.listFiles("$svnUrl/trunk/", "-1").filter { it.endsWith(".md") },
                     changes = commitCountTo(logEntries, lastReleasedRev)
             )
             logger.info(scmDetails)

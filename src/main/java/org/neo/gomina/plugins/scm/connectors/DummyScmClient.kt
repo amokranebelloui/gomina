@@ -52,6 +52,10 @@ class DummyScmClient : ScmClient {
         return null
     }
 
+    override fun listFiles(url: String, rev: String): List<String> {
+        return listOf("README.md")
+    }
+
     private fun sampleFile(version: String): String {
         return "<project><version>$version</version></project>"
     }

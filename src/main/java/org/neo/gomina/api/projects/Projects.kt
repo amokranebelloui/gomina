@@ -68,7 +68,7 @@ class ProjectsApi {
         val projectId = ctx.request().getParam("projectId")
         val docId = ctx.request().getParam("docId")
         try {
-            val doc = plugins.mapNotNull { it.onGetDocument(projectId, docId) }.joinToString()
+            val doc = plugins.mapNotNull { it.onGetDocument(projectId, docId) }.joinToString(separator = "")
             if (doc != null) {
                 ctx.response().putHeader("content-type", "text/html")
                         .end(doc)

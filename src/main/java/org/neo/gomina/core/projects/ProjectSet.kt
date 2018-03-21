@@ -14,6 +14,7 @@ data class ProjectDetail (
         var jenkinsServer: String? = null,
         var jenkinsJob: String? = null,
         var jenkinsUrl: String? = null,
+        var docFiles: List<String> = emptyList(),
         var changes: Int? = null,
         var latest: String? = null,
         var released: String? = null,
