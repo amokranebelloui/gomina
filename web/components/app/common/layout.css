@@ -82,7 +82,7 @@
 
 .principal-content {
     display: table-cell;
-    width: 70%;
+    width: 60%;
     height: 100%;
     box-sizing: border-box;
     vertical-align: top;
@@ -92,7 +92,7 @@
 
 .side-content {
     display: table-cell;
-    width: 30%;
+    width: 40%;
     height: 100%;
     box-sizing: border-box;
     vertical-align: top;

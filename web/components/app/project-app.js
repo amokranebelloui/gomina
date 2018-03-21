@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios/index";
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
-import {Coverage, LinesOfCode, ProjectBadge, ProjectSummary, ScmLog} from "../project/project";
+import {Documentation, ProjectBadge, ProjectSummary, ScmLog} from "../project/project";
 import {Container, Well} from "../common/component-library";
 import "../project/project.css"
 
@@ -9,10 +9,18 @@ class ProjectApp extends React.Component {
     
     constructor(props) {
         super(props);
-        this.state = {projects: [], projectId: this.props.match.params.id, project: {}, instances: [], search: ""};
+        this.state = {
+            projects: [],
+            projectId: this.props.match.params.id,
+            project: {},
+            instances: [],
+            docId: this.props.match.params.docId,
+            doc: null,
+            search: ""};
         this.retrieveProjects = this.retrieveProjects.bind(this);
         this.retrieveProject = this.retrieveProject.bind(this);
         this.retrieveInstances= this.retrieveInstances.bind(this);
+        this.retrieveDoc = this.retrieveDoc.bind(this);
         this.reloadProject = this.reloadProject.bind(this);
         console.info("projectApp !constructor ", this.props.match.params.id);
     }
@@ -51,6 +59,18 @@ class ProjectApp extends React.Component {
                 console.log("project reload error", error.response);
             });
     }
+    retrieveDoc(projectId, docId) {
+        const thisComponent = this;
+        axios.get('/data/projects/' + projectId + '/doc/' + docId)
+            .then(response => {
+                console.log("doc data", response.data);
+                thisComponent.setState({doc: response.data});
+            })
+            .catch(function (error) {
+                console.log("doc error", error.response);
+                thisComponent.setState({doc: null});
+            });
+    }
     retrieveInstances(projectId) {
         console.log("projectApp Retr Instances... " + projectId);
         const thisComponent = this;
@@ -71,15 +91,23 @@ class ProjectApp extends React.Component {
         if (this.state.projectId) {
             this.retrieveProject(this.state.projectId);
             this.retrieveInstances(this.state.projectId);
+            if (this.state.docId) {
+                this.retrieveDoc(this.state.projectId, this.state.docId);
+            }
         }
     }
     componentWillReceiveProps(nextProps) {
         const newProject = nextProps.match.params.id;
+        const newDoc = nextProps.match.params.docId;
         console.info("projectApp !props-chg ", this.props.match.params.id, newProject);
         this.setState({projectId: newProject});
         if (this.props.match.params.id != newProject && newProject) {
             this.retrieveProject(newProject);
             this.retrieveInstances(newProject);
+        }
+        if (newProject && newDoc &&
+            (this.props.match.params.id != newProject || this.props.match.params.docId != newDoc)) {
+            this.retrieveDoc(newProject, newDoc);
         }
     }
     render() {
@@ -90,7 +118,7 @@ class ProjectApp extends React.Component {
         const commits = project.commitLog || [];
         const instances = this.state.instances.filter(instance => instance.project == project.id);
         const title = (<span>Projects &nbsp;&nbsp;&nbsp; <input type="text" name="search" onChange={e => this.setState({search: e.target.value})}/></span>);
-        const cellStyle = {display: 'inline'};
+        const docId = this.props.match.params.docId;
         return (
             <AppLayout title={title}>
 
@@ -119,7 +147,10 @@ class ProjectApp extends React.Component {
                         <ProjectBadge project={project} onReloadProject={id => this.reloadProject(id)} />
                     </Well>
                     <Container>
-                        <ScmLog project={project} commits={commits} instances={instances}/>
+                        {docId
+                            ? <Documentation doc={this.state.doc} />
+                            : <ScmLog project={project} commits={commits} instances={instances}/>
+                        }
                     </Container>
                 </PrimarySecondaryLayout>
 

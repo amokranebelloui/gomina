@@ -1,6 +1,6 @@
 import React from "react";
 import {Link} from "react-router-dom";
-import {groupBy, Well, Badge} from "../common/component-library";
+import {Badge, groupBy, Well} from "../common/component-library";
 import {Version} from "../common/version";
 
 class LinesOfCode extends React.Component {
@@ -130,6 +130,12 @@ function ProjectBadge(props) {
                 <span>{project.jenkinsJob}</span>
                 <br/>
                 <button onClick={e => props.onReloadProject(project.id)}>RELOAD</button>
+                <hr />
+                <Link to={'/project/' + props.project.id}>SVN Log</Link>
+                <span>|</span>
+                {project.docFiles
+                    .map(doc => <Link to={'/project/' + props.project.id + '/doc/' + doc}>{doc}</Link>)
+                }
             </div>
         )
     }
@@ -192,7 +198,24 @@ class ScmLog extends React.Component {
     }
 }
 
-export {BuildLink, ScmLog, ProjectSummary, ProjectBadge, UnreleasedChangeCount, ScmLink, LinesOfCode, Coverage}
+class Documentation extends React.Component {
+    componentWillReceiveProps(nextProps) {
+        console.info('doc', nextProps.doc);
+        this.content.innerHTML = nextProps.doc;
+    }
+    render() {
+        return (
+            <div>
+                <b>Doc</b>
+                <br/>
+                <div ref={(ref) => { this.content = ref; }}></div>
+            </div>
+        )
+    }
+}
+
+
+export {BuildLink, ScmLog, ProjectSummary, ProjectBadge, UnreleasedChangeCount, ScmLink, Documentation, LinesOfCode, Coverage}
 
 
 
