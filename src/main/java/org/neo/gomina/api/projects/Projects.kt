@@ -33,6 +33,7 @@ class ProjectsApi {
 
         router.get("/").handler(this::projects)
         router.get("/:projectId").handler(this::project)
+        router.get("/:projectId/doc/:docId").handler(this::projectDoc)
         router.post("/:projectId/reload").handler(this::reload)
     }
 
@@ -59,6 +60,24 @@ class ProjectsApi {
             }
         } catch (e: Exception) {
             logger.error("Cannot get project", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun projectDoc(ctx: RoutingContext) {
+        val projectId = ctx.request().getParam("projectId")
+        val docId = ctx.request().getParam("docId")
+        try {
+            val doc = plugins.mapNotNull { it.onGetDocument(projectId, docId) }.joinToString()
+            if (doc != null) {
+                ctx.response().putHeader("content-type", "text/html")
+                        .end(doc)
+            } else {
+                logger.info("Cannot get doc $projectId $docId")
+                ctx.fail(404)
+            }
+        } catch (e: Exception) {
+            logger.error("Cannot get doc $projectId $docId")
             ctx.fail(500)
         }
     }

@@ -1,5 +1,6 @@
 package org.neo.gomina.plugins.scm
 
+import com.github.rjeschke.txtmark.Processor
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
@@ -68,6 +69,13 @@ class ScmPlugin : InstancesExt, ProjectsExt {
                 apply(projectDetail, svnDetail)
                 projectDetail.commitLog = map(commitLog)
             }
+    }
+
+    override fun onGetDocument(projectId: String, docId: String): String? {
+        return projects.getProject(projectId) ?. let {
+            val scmClient = scmRepos.getClient(it.svnRepo)
+            Processor.process(scmClient.getFile("${it.svnUrl}/trunk/$docId", "-1"))
+        }
     }
 
     private fun apply(projectDetail: ProjectDetail, scmDetails: ScmDetails) {
@@ -147,7 +155,7 @@ class ScmPlugin : InstancesExt, ProjectsExt {
 
             val scmDetails = ScmDetails(
                     url = svnUrl,
-                    latest = MavenUtils.extractVersion(scmClient.getFile(svnUrl + "/trunk/pom.xml", "-1")),
+                    latest = MavenUtils.extractVersion(scmClient.getFile("$svnUrl/trunk/pom.xml", "-1")),
                     latestRevision = logEntries.firstOrNull()?.revision,
                     released = logEntries
                             .filter { StringUtils.isNotBlank(it.release) }
