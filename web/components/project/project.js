@@ -134,7 +134,7 @@ function ProjectBadge(props) {
                 <Link to={'/project/' + props.project.id}>SVN Log</Link>
                 <span>|</span>
                 {project.docFiles
-                    .map(doc => <Link to={'/project/' + props.project.id + '/doc/' + doc}>{doc}</Link>)
+                    .map(doc => <Link key={doc} to={'/project/' + props.project.id + '/doc/' + doc}>{doc}</Link>)
                 }
             </div>
         )
@@ -200,7 +200,6 @@ class ScmLog extends React.Component {
 
 class Documentation extends React.Component {
     componentWillReceiveProps(nextProps) {
-        console.info('doc', nextProps.doc);
         this.content.innerHTML = nextProps.doc;
     }
     render() {

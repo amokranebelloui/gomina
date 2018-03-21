@@ -63,7 +63,7 @@ class ProjectApp extends React.Component {
         const thisComponent = this;
         axios.get('/data/projects/' + projectId + '/doc/' + docId)
             .then(response => {
-                console.log("doc data", response.data);
+                console.log("doc data");
                 thisComponent.setState({doc: response.data});
             })
             .catch(function (error) {
