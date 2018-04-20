@@ -9,6 +9,8 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.StaticHandler
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.api.ScmApi
+import org.neo.gomina.api.SshApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvsApi
 import org.neo.gomina.api.instances.InstancesApi
@@ -28,22 +30,19 @@ class WebVerticle : AbstractVerticle() {
             }
         }))
 
-        val envsApi = injector.getInstance(EnvsApi::class.java)
-        val projectsApi = injector.getInstance(ProjectsApi::class.java)
-        val instancesApi = injector.getInstance(InstancesApi::class.java)
-        val diagramApi = injector.getInstance(DiagramApi::class.java)
-        val notificationsApi = injector.getInstance(NotificationsApi::class.java)
-
         val router = Router.router(vertx)
         router.route().handler(BodyHandler.create())
 
+        val notificationsApi = injector.getInstance(NotificationsApi::class.java)
         notificationsApi.start()
 
         router
-                .mountSubRouter("/data/envs", envsApi.router)
-                .mountSubRouter("/data/projects", projectsApi.router)
-                .mountSubRouter("/data/instances", instancesApi.router)
-                .mountSubRouter("/data/diagram", diagramApi.router)
+                .mountSubRouter("/data/envs", injector.getInstance(EnvsApi::class.java).router)
+                .mountSubRouter("/data/projects", injector.getInstance(ProjectsApi::class.java).router)
+                .mountSubRouter("/data/instances", injector.getInstance(InstancesApi::class.java).router)
+                .mountSubRouter("/data/scm", injector.getInstance(ScmApi::class.java).router)
+                .mountSubRouter("/data/ssh", injector.getInstance(SshApi::class.java).router)
+                .mountSubRouter("/data/diagram", injector.getInstance(DiagramApi::class.java).router)
                 .mountSubRouter("/realtime", notificationsApi.router)
 
         router.get("/*").pathRegex(".*\\.(js|ico|map)").handler(StaticHandler.create("dist").setCachingEnabled(false))

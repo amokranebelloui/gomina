@@ -2,6 +2,8 @@ package org.neo.gomina.module
 
 import com.google.inject.*
 import com.google.inject.name.Names
+import org.neo.gomina.api.ScmApi
+import org.neo.gomina.api.SshApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvBuilder
 import org.neo.gomina.api.envs.EnvsApi
@@ -138,6 +140,8 @@ class GominaModule : AbstractModule() {
         bind(EnvsApi::class.java).`in`(Scopes.SINGLETON)
         bind(ProjectsApi::class.java).`in`(Scopes.SINGLETON)
         bind(InstancesApi::class.java).`in`(Scopes.SINGLETON)
+        bind(ScmApi::class.java).`in`(Scopes.SINGLETON)
+        bind(SshApi::class.java).`in`(Scopes.SINGLETON)
         bind(DiagramApi::class.java).`in`(Scopes.SINGLETON)
         bind(NotificationsApi::class.java).`in`(Scopes.SINGLETON)
     }

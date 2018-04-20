@@ -91,8 +91,8 @@ class EnvApp extends React.Component {
                 thisComponent.setState({instances: []});
             });
     }
-    reload() {
-        axios.post('/data/instances/' + this.state.env + '/reload')
+    reloadScm() {
+        axios.post('/data/scm/' + this.state.env + '/reload')
             .then(response => {
                 console.log("reloaded", response.data);
             })
@@ -100,6 +100,15 @@ class EnvApp extends React.Component {
                 console.log("reload error", error.response);
             });
     }
+    reloadSsh() {
+            axios.post('/data/ssh/' + this.state.env + '/reload')
+                .then(response => {
+                    console.log("reloaded", response.data);
+                })
+                .catch(function (error) {
+                    console.log("reload error", error.response);
+                });
+        }
     componentWillMount() {
         console.info("envApp !will-mount ");
     }
@@ -166,9 +175,8 @@ class EnvApp extends React.Component {
                         <div className='side-content-wrapper'>
                             <div className='side-primary'>
                                 <InstanceFilter id={this.state.filterId} hosts={hosts} onFilterChanged={(e, hf) => this.changeSelected(e, hf)} />
-                                <button onClick={e => this.reload()}>
-                                    RELOAD
-                                </button>
+                                <button onClick={e => this.reloadScm()}>RELOAD SCM</button>
+                                <button onClick={e => this.reloadSsh()}>RELOAD SSH</button>
                                 <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
                             </div>
                             <div className='side-secondary'>

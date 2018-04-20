@@ -21,6 +21,7 @@ class InstancesApi {
         private val logger = LogManager.getLogger(InstancesApi::class.java)
     }
 
+    val vertx: Vertx
     val router: Router
 
     @Inject private lateinit var inventory: Inventory
@@ -32,11 +33,11 @@ class InstancesApi {
 
     @Inject
     constructor(vertx: Vertx) {
+        this.vertx = vertx
         this.router = Router.router(vertx)
 
         router.get("/").handler(this::instances)
         router.get("/:envId").handler(this::forEnv)
-        router.post("/:envId/reload").handler(this::reload)
     }
 
     fun instances(ctx: RoutingContext) {
@@ -80,17 +81,4 @@ class InstancesApi {
         plugins.forEach { it.onGetInstances(env.id, instances) }
     }
 
-    fun reload(ctx: RoutingContext) {
-        try {
-            val envId = ctx.request().getParam("envId")
-            logger.info("Reloading $envId ...")
-            plugins.forEach { it.onReloadInstances(envId) }
-            ctx.response().putHeader("content-type", "text/javascript").end()
-        }
-        catch (e: Exception) {
-            logger.error("Cannot get instances", e)
-            ctx.fail(500)
-        }
-
-    }
 }
