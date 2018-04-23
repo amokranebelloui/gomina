@@ -38,6 +38,7 @@ class InstancesApi {
 
         router.get("/").handler(this::instances)
         router.get("/:envId").handler(this::forEnv)
+        router.get("/:envId/services").handler(this::servicesForEnv)
     }
 
     fun instances(ctx: RoutingContext) {
@@ -49,7 +50,6 @@ class InstancesApi {
             logger.error("Cannot get instances", e)
             ctx.fail(500)
         }
-
     }
 
     fun forEnv(ctx: RoutingContext) {
@@ -58,6 +58,19 @@ class InstancesApi {
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(buildInstances(envId)))
+        } catch (e: Exception) {
+            logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+    }
+
+    fun servicesForEnv(ctx: RoutingContext) {
+        try {
+            val envId = ctx.request().getParam("envId")
+            val services = buildInstances(envId).groupBy { it.service }
+            ctx.response()
+                    .putHeader("content-type", "text/javascript")
+                    .end(mapper.writeValueAsString(services))
         } catch (e: Exception) {
             logger.error("Cannot get instances", e)
             ctx.fail(500)
