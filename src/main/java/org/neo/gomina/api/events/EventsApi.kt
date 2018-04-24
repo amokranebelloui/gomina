@@ -37,6 +37,7 @@ class EventsApi {
             logger.info("Events for $envId")
             // Most recent first
 
+            // FIXME Dummy Data
             val events = listOf(
                 Event(Date(2018, 4, 24, 18, 57), "release", "Release order manager", instanceId = "order", version = "2.5.6"),
                 Event(Date(2018, 4, 24, 18, 55), "maintenance", "Purge data"),
