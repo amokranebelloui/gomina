@@ -9,7 +9,15 @@ import {Link} from "react-router-dom";
 class EnvApp extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {env: props.match.params.id, envs: [], realtime: false, instances: [], filterId: 'all', highlight: instance => true};
+        this.state = {
+            env: props.match.params.id,
+            envs: [],
+            realtime: false,
+            instances: [],
+            filterId: 'all',
+            highlight: instance => true,
+            events: []
+        };
         this.connect = this.connect.bind(this);
         this.switch = this.switch.bind(this);
         this.retrieveEnvs = this.retrieveEnvs.bind(this);
@@ -25,17 +33,21 @@ class EnvApp extends React.Component {
         this.sock.onopen = function() {
             console.log('open');
             thisComponent.setState({realtime: true});
-            eventsDiv.innerHTML = eventsDiv.innerHTML + 'Open<br>';
+            ///eventsDiv.innerHTML = eventsDiv.innerHTML + 'Open<br>';
             //sock.send('test');
+            thisComponent.state.events.unshift({type: 'notification', message: 'Open'});
+            thisComponent.setState({events: thisComponent.state.events});
         };
 
         this.sock.onmessage = function(e) {
             //var r = Math.floor((Math.random() * 3) + 1);
             //var fakeStatus = r == 1 ? 'LIVE' : r == 2 ? 'LOADING' : 'DOWN';
             let event = JSON.parse(e.data);
-            console.log('real time event', event);
-            eventsDiv.innerHTML = eventsDiv.innerHTML + ' ' + event.env + ' ' + event.name + ' ' +
-                event.status + ' ' + event.leader + ' ' + event.participating + '<br>';
+            console.log('real time event', event, thisComponent.state);
+            //eventsDiv.innerHTML = eventsDiv.innerHTML + ' ' + event.env + ' ' + event.name + ' ' +
+            //    event.status + ' ' + event.leader + ' ' + event.participating + '<br>';
+            thisComponent.state.events.unshift({type: 'status', message: event.env + ' ' + event.name + ' ' + event.status + ' ' + event.leader + ' ' + event.participating})
+            thisComponent.setState({events: thisComponent.state.events});
 
             // FIXME review how to identify instances
             const found = thisComponent.state.instances.find(instance => instance.name == event.name);
@@ -53,7 +65,9 @@ class EnvApp extends React.Component {
         this.sock.onclose = function() {
             console.log('close');
             thisComponent.setState({realtime: false});
-            eventsDiv.innerHTML = eventsDiv.innerHTML + 'Close<br>';
+            //eventsDiv.innerHTML = eventsDiv.innerHTML + 'Close<br>';
+            thisComponent.state.events.unshift({type: 'notification', message: 'Close'});
+            thisComponent.setState({events: thisComponent.state.events});
         };
     }
     switch(newStatus) {
@@ -91,6 +105,19 @@ class EnvApp extends React.Component {
                 thisComponent.setState({instances: []});
             });
     }
+    retrieveEvents(env) {
+        console.log("Retr events... " + env);
+        const thisComponent = this;
+        axios.get('/data/events/' + env)
+            .then(response => {
+                console.log("envApp data events", response.data);
+                thisComponent.setState({events: response.data});
+            })
+            .catch(function (error) {
+                console.log("envApp error events", error);
+                thisComponent.setState({events: []});
+            });
+    }
     reloadScm() {
         axios.post('/data/scm/' + this.state.env + '/reload')
             .then(response => {
@@ -118,6 +145,7 @@ class EnvApp extends React.Component {
         this.setState({env: newEnv});
         if (this.props.match.params.id != newEnv) {
             this.retrieveInstances(newEnv);
+            this.retrieveEvents(newEnv);
         }
     }
     componentDidMount() {
@@ -125,6 +153,7 @@ class EnvApp extends React.Component {
         //this.connect();
         this.retrieveEnvs();
         this.retrieveInstances(this.state.env);
+        this.retrieveEvents(this.state.env);
     }
     selectEnv(env) {
         this.setState({env: env});
@@ -137,6 +166,7 @@ class EnvApp extends React.Component {
         const instancesByEnv = groupBy(this.state.instances, 'env');
         const instances = instancesByEnv[this.state.env] || [];
         const envsByType = groupBy(this.state.envs, 'type');
+        const events = this.state.events;
         //console.info("envApp", this.state.instances, this.state.env, instances);
 
         const iterable = instances.map(instance => instance.host);
@@ -182,6 +212,11 @@ class EnvApp extends React.Component {
                             <div className='side-secondary'>
                                 <Container>
                                     <div ref={node => this.eventsList = node}></div>
+                                    <ul>
+                                    {events.map(event =>
+                                        <li>{event.timestamp} {event.type} {event.message}</li>
+                                    )}
+                                    </ul>
                                 </Container>
                             </div>
                         </div>

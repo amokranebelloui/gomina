@@ -3,6 +3,7 @@ package org.neo.gomina.module
 import com.google.inject.AbstractModule
 import com.google.inject.Scopes
 import com.google.inject.name.Names
+import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvBuilder
 import org.neo.gomina.api.envs.EnvsApi
@@ -154,6 +155,7 @@ class GominaModule : AbstractModule() {
         bind(ScmApi::class.java).`in`(Scopes.SINGLETON)
         bind(SshApi::class.java).`in`(Scopes.SINGLETON)
         bind(SonarApi::class.java).`in`(Scopes.SINGLETON)
+        bind(EventsApi::class.java).`in`(Scopes.SINGLETON)
         bind(DiagramApi::class.java).`in`(Scopes.SINGLETON)
         bind(NotificationsApi::class.java).`in`(Scopes.SINGLETON)
     }
