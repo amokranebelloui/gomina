@@ -2,9 +2,9 @@ package org.neo.gomina.module
 
 import com.google.inject.*
 import com.google.inject.name.Names
-import org.neo.gomina.api.ScmApi
-import org.neo.gomina.api.SonarApi
-import org.neo.gomina.api.SshApi
+import org.neo.gomina.plugins.scm.ScmApi
+import org.neo.gomina.plugins.sonar.SonarApi
+import org.neo.gomina.plugins.ssh.SshApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvBuilder
 import org.neo.gomina.api.envs.EnvsApi

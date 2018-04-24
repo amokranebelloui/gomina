@@ -1,4 +1,4 @@
-package org.neo.gomina.api
+package org.neo.gomina.plugins.sonar
 
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
@@ -6,7 +6,6 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.plugins.sonar.SonarPlugin
 import javax.inject.Inject
 
 class SonarApi {

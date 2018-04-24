@@ -9,9 +9,9 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.StaticHandler
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.api.ScmApi
-import org.neo.gomina.api.SonarApi
-import org.neo.gomina.api.SshApi
+import org.neo.gomina.plugins.scm.ScmApi
+import org.neo.gomina.plugins.sonar.SonarApi
+import org.neo.gomina.plugins.ssh.SshApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvsApi
 import org.neo.gomina.api.instances.InstancesApi
