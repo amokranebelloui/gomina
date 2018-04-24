@@ -1,10 +1,11 @@
 import React from "react";
-import {Badge, Container, groupBy, Well} from "../common/component-library";
+import {groupBy, Well} from "../common/component-library";
 import {isSnapshot} from "../common/version";
 import {AppInstance} from "./instance-app";
 import {RedisInstance} from "./instance-redis";
 import {Status} from "./instance-common";
 import './env.css'
+import {Service} from "./service";
 
 class Instance extends React.Component {
     render() {
@@ -30,24 +31,6 @@ class Instance extends React.Component {
             <Status key={'status' + instance.id} status={instance.status} leader={instance.leader} participating={instance.participating} cluster={instance.cluster} style={{opacity: opacity}} />,
             <div key={instance.id} className='instance-badge' style={{display: 'table-cell', opacity:opacity}}>{comp}</div>
         ])
-    }
-}
-
-class Service extends React.Component {
-    render() {
-        const instances = this.props.instances ? this.props.instances : [];
-        const differentVersions = new Set(instances.map(instance => instance.version)).size > 1;
-        const liveInstances = instances.filter(instance => instance.status == 'LIVE' && instance.leader);
-        const multiple = liveInstances.length > 1;
-        console.log("-", multiple, liveInstances);
-        //const highlightFunction = this.props.highlightFunction || (instance => true);
-        return (
-            <div className="service">
-                <span><b>{this.props.name}</b></span>
-                {differentVersions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
-                {multiple && <Badge title="Multiple instances running" backgroundColor="orange" >multi?</Badge>}
-            </div>
-        )
     }
 }
 

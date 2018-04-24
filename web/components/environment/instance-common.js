@@ -44,7 +44,7 @@ class Status extends React.Component {
             status == 'LOADING' && leader ? '#ff8600' :
             status == 'LOADING' && participating ? '#ffdc92' :
             status == 'LOADING' ? '#ebe5c5' :
-            status == 'DOWN' && leader ? 'red' :
+            status == 'DOWN' && leader ? 'lightgray' :
                         'lightgray';
         /*
          const badge = (
