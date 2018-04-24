@@ -12,8 +12,28 @@ import org.neo.gomina.plugins.Plugin
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
+import kotlin.concurrent.thread
 
-class Indicators : ConcurrentHashMap<String, String>()
+val TIMEOUT_SECONDS = 5
+
+class Indicators : ConcurrentHashMap<String, String>() {
+    private var lastTime = LocalDateTime(DateTimeZone.UTC)
+    private var delayed = false
+    fun touch() {
+        lastTime = LocalDateTime(DateTimeZone.UTC)
+        delayed = false
+    }
+    fun checkDelayed(notification: () -> Unit) {
+        if (this.isLastTimeTooOld() && !delayed) {
+            delayed = true
+            notification()
+        }
+
+    }
+    private fun isLastTimeTooOld(): Boolean {
+        return LocalDateTime(DateTimeZone.UTC).isAfter(lastTime.plusSeconds(TIMEOUT_SECONDS))
+    }
+}
 
 class EnvMonitoring {
     val instances: MutableMap<String, Indicators> = ConcurrentHashMap()
@@ -35,13 +55,28 @@ class MonitoringPlugin : Plugin {
     }
 
     override fun init() {
-
+        thread(start = true, name = "mon-ditcher") {
+            while (!Thread.currentThread().isInterrupted) {
+                topology.forEach { env, envMon ->
+                    envMon.instances.forEach { instanceId, indicators ->
+                        indicators.checkDelayed {
+                            logger.info("Instance $env $instanceId delayed")
+                            notify(env, instanceId, mapOf("STATUS" to "NOINFO"), touch = false)
+                        }
+                    }
+                }
+                Thread.sleep(1000)
+            }
+        }
     }
 
-    fun notify(env: String, instanceId: String, newValues: Map<String, String>) {
+    fun notify(env: String, instanceId: String, newValues: Map<String, String>, touch: Boolean = true) {
         try {
             val envMonitoring = topology.getOrPut(env) { EnvMonitoring() }
             val indicators = envMonitoring.getForInstance(instanceId)
+            if (touch) {
+                indicators.touch()
+            }
             logger.trace("Notify $newValues")
             for ((key, value) in newValues) {
                 if (value != null) indicators.put(key, value) else indicators.remove(key)
@@ -61,10 +96,6 @@ class MonitoringPlugin : Plugin {
         catch (e: Exception) {
             logger.error("Cannot notify env=$env instance=$instanceId", e)
         }
-    }
-
-    fun getFor(env: String): EnvMonitoring {
-        return topology.getOrDefault(env, EnvMonitoring())
     }
 
     companion object {
@@ -126,9 +157,4 @@ private fun Instance.applyRedis(indicators: Indicators) {
     this.redisClientCount = indicators["REDIS_CLIENTS"].clean()?.toInt()
 }
 
-// FIXME Easier to have it on the UI level
-private fun isLive(indicators: Map<String, Any>): Boolean {
-    val timestamp = indicators["timestamp"] as LocalDateTime?  // FIXME Date format
-    return if (timestamp != null) LocalDateTime(DateTimeZone.UTC).minusSeconds(1).isAfter(timestamp) else true
-}
 
