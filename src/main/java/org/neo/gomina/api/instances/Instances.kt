@@ -1,18 +1,13 @@
 package org.neo.gomina.api.instances
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.inject.name.Named
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.instances.Instance
-import org.neo.gomina.core.instances.Instances
-import org.neo.gomina.core.instances.InstancesExt
-import org.neo.gomina.model.inventory.Environment
+import org.neo.gomina.core.instances.InstanceDetailRepository
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.project.Projects
-import java.util.*
 import javax.inject.Inject
 
 class InstancesApi {
@@ -26,8 +21,8 @@ class InstancesApi {
 
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var projects: Projects
-    
-    @Inject @Named("instances.plugins") lateinit var plugins: ArrayList<InstancesExt>
+
+    @Inject lateinit var instanceDetailRepository: InstanceDetailRepository
 
     private val mapper = ObjectMapper()
 
@@ -45,7 +40,7 @@ class InstancesApi {
         try {
             ctx.response()
                     .putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(buildInstances()))
+                    .end(mapper.writeValueAsString(instanceDetailRepository.getInstances()))
         } catch (e: Exception) {
             logger.error("Cannot get instances", e)
             ctx.fail(500)
@@ -57,7 +52,7 @@ class InstancesApi {
             val envId = ctx.request().getParam("envId")
             ctx.response()
                     .putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(buildInstances(envId)))
+                    .end(mapper.writeValueAsString(instanceDetailRepository.getInstances(envId)))
         } catch (e: Exception) {
             logger.error("Cannot get instances", e)
             ctx.fail(500)
@@ -67,7 +62,7 @@ class InstancesApi {
     fun servicesForEnv(ctx: RoutingContext) {
         try {
             val envId = ctx.request().getParam("envId")
-            val services = buildInstances(envId).groupBy { it.service }
+            val services = instanceDetailRepository.getInstances(envId).groupBy { it.service }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(services))
@@ -75,23 +70,6 @@ class InstancesApi {
             logger.error("Cannot get instances", e)
             ctx.fail(500)
         }
-    }
-
-    private fun buildInstances(): List<Instance> {
-        val instances = Instances()
-        inventory.getEnvironments().forEach { buildInstances(it, instances) }
-        return instances.list
-    }
-
-    private fun buildInstances(envId: String): List<Instance> {
-        val instances = Instances()
-        val env = inventory.getEnvironment(envId)
-        env?.let { buildInstances(env, instances) }
-        return instances.list
-    }
-
-    private fun buildInstances(env: Environment, instances: Instances) {
-        plugins.forEach { it.onGetInstances(env.id, instances) }
     }
 
 }

@@ -1,7 +1,8 @@
 package org.neo.gomina.plugins.ssh
 
+import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
-import org.neo.gomina.core.instances.Instances
+import org.neo.gomina.core.instances.InstanceDetailRepository
 import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.model.inventory.Inventory
 import javax.inject.Inject
@@ -13,19 +14,23 @@ class SshPlugin : InstancesExt {
 
     private val sshCache = SshCache()
 
-    override fun onGetInstances(envId: String, instances: Instances) {
-        inventory.getEnvironment(envId)?.let { env ->
+    @Inject lateinit var instanceDetailRepository: InstanceDetailRepository
+
+    override fun instancesInit() {
+        logger.info("Initializing instances SSH data ...")
+        inventory.getEnvironments().forEach { env ->
             env.services
-                .flatMap { it.instances }
-                .filter { !it.host.isNullOrBlank() }
-                .filter { !it.folder.isNullOrBlank() }
-                .forEach {
-                    val id = env.id + "-" + it.id
-                    sshCache.getDetail(it.host!!, it.folder!!) ?. let {
-                        instances.get(id)?.applySsh(it)
+                    .flatMap { it.instances }
+                    .filter { !it.host.isNullOrBlank() }
+                    .filter { !it.folder.isNullOrBlank() }
+                    .forEach {
+                        val id = env.id + "-" + it.id
+                        sshCache.getDetail(it.host!!, it.folder!!) ?. let {
+                            instanceDetailRepository.getInstance(id)?.applySsh(it)
+                        }
                     }
-                }
         }
+        logger.info("Instances SSH data initialized")
     }
 
     fun reloadInstances(envId: String) {
@@ -38,8 +43,14 @@ class SshPlugin : InstancesExt {
                     .forEach {
                         val sshDetails = analysis.getFor(it.host, it.folder)
                         sshCache.cacheDetail(it.host!!, it.folder!!, sshDetails)
+                        val id = env.id + "-" + it.id
+                        instanceDetailRepository.getInstance(id)?.applySsh(sshDetails)
                     }
         }
+    }
+
+    companion object {
+        private val logger = LogManager.getLogger(SshPlugin::class.java)
     }
 }
 

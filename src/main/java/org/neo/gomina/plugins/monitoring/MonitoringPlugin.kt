@@ -7,12 +7,13 @@ import org.joda.time.LocalDateTime
 import org.neo.gomina.core.instances.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
+import javax.inject.Inject
 
 class Indicators : ConcurrentHashMap<String, String>()
 
 class EnvMonitoring {
     val instances: MutableMap<String, Indicators> = ConcurrentHashMap()
-    fun getForInstance(name: String): MutableMap<String, String> {
+    fun getForInstance(name: String): Indicators {
         return instances.getOrPut(name) { Indicators() }
     }
 }
@@ -23,17 +24,14 @@ class MonitoringPlugin : InstancesExt {
 
     private val listeners = CopyOnWriteArrayList<InstanceListener>()
 
+    @Inject lateinit var instanceDetailRepository: InstanceDetailRepository
+
     fun registerListener(listener: InstanceListener) {
         this.listeners.add(listener)
     }
 
-    override fun onGetInstances(env: String, instances: Instances) {
-        val monitoring = this.getFor(env)
-        for ((instanceId, indicators) in monitoring.instances) {
-            val id = env + "-" + instanceId // FIXME Only needed when returning all envs instances, simplify later
-            var instance = instances.ensure(id, env, indicators["TYPE"], indicators["SERVICE"], instanceId, expected = false)
-            instance.applyMonitoring(indicators)
-        }
+    override fun instancesInit() {
+
     }
 
     fun notify(env: String, instanceId: String, newValues: Map<String, String>) {
@@ -45,10 +43,16 @@ class MonitoringPlugin : InstancesExt {
                 if (value != null) indicators.put(key, value) else indicators.remove(key)
             }
 
-            val instance = InstanceRealTime(env = env, id = instanceId, name = instanceId)
-            instance.applyRealTime(newValues)
+            val id = env + "-" + instanceId // FIXME Only needed when returning all envs instances, simplify later
+            val unexpected = Instance(id=id, env=env, type=indicators["TYPE"], service=indicators["SERVICE"], name=instanceId, unexpected = true)
+            // FIXME Use a function
+            val instance = instanceDetailRepository.getOrCreateInstance(id, unexpected)
+            instance.applyMonitoring(indicators)
 
-            listeners.forEach { it.invoke(instance) }
+            val instanceRT = InstanceRealTime(env = env, id = instanceId, name = instanceId)
+            instanceRT.applyRealTime(newValues)
+
+            listeners.forEach { it.invoke(instanceRT) }
         }
         catch (e: Exception) {
             logger.error("Cannot notify env=$env instance=$instanceId", e)

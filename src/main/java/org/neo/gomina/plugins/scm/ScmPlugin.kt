@@ -4,7 +4,7 @@ import com.github.rjeschke.txtmark.Processor
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
-import org.neo.gomina.core.instances.Instances
+import org.neo.gomina.core.instances.InstanceDetailRepository
 import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.core.projects.CommitLogEntry
 import org.neo.gomina.core.projects.ProjectDetail
@@ -47,6 +47,7 @@ class ScmPlugin : InstancesExt, ProjectsExt {
     @Inject private lateinit var projects: Projects
 
     @Inject lateinit var projectDetailRepository: ProjectDetailRepository
+    @Inject lateinit var instanceDetailRepository: InstanceDetailRepository
 
     @Inject
     constructor(scmRepos: ScmRepos) {
@@ -56,6 +57,21 @@ class ScmPlugin : InstancesExt, ProjectsExt {
             val mkdir = file.mkdir()
             logger.info("Created $file $mkdir")
         }
+    }
+
+    override fun instancesInit() {
+        logger.info("Initializing instances SCM data ...")
+        for (env in inventory.getEnvironments()) {
+            for (service in env.services) {
+                for (envInstance in service.instances) {
+                    val id = env.id + "-" + envInstance.id
+                    val instance = instanceDetailRepository.getInstance(id)
+                    val project = if (service.project != null) projects.getProject(service.project) else null
+                    project?.let { instance?.applyScm(this.getSvnDetails(project.svnRepo, project.svnUrl)) }
+                }
+            }
+        }
+        logger.info("Instances SCM data initialized")
     }
 
     override fun init() {
@@ -94,19 +110,6 @@ class ScmPlugin : InstancesExt, ProjectsExt {
         ) }
     }
 
-    override fun onGetInstances(env: String, instances: Instances) {
-        for (env in inventory.getEnvironments()) {
-            for (service in env.services) {
-                for (envInstance in service.instances) {
-                    val id = env.id + "-" + envInstance.id
-                    val instance = instances.get(id)
-                    val project = if (service.project != null) projects.getProject(service.project) else null
-                    project?.let { instance?.applyScm(this.getSvnDetails(project.svnRepo, project.svnUrl)) }
-                }
-            }
-        }
-    }
-
     fun getSvnDetails(svnRepo: String, svnUrl: String): ScmDetails {
         if (svnUrl.isNotBlank()) {
             val detail = scmCache.getDetail(svnRepo, svnUrl)
@@ -130,6 +133,17 @@ class ScmPlugin : InstancesExt, ProjectsExt {
         projects.getProjects()
                 .filter { StringUtils.isNotBlank(it.svnUrl) }
                 .forEach { this.refresh(it.id, it.svnRepo, it.svnUrl) }
+
+        for (env in inventory.getEnvironments()) {
+            for (service in env.services) {
+                for (envInstance in service.instances) {
+                    val id = env.id + "-" + envInstance.id
+                    val instance = instanceDetailRepository.getInstance(id)
+                    val project = if (service.project != null) projects.getProject(service.project) else null
+                    project?.let { instance?.applyScm(this.getSvnDetails(project.svnRepo, project.svnUrl)) }
+                }
+            }
+        }
     }
 
     fun reloadProject(projectId: String) {

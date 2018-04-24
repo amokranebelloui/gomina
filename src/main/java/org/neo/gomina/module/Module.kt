@@ -2,15 +2,14 @@ package org.neo.gomina.module
 
 import com.google.inject.*
 import com.google.inject.name.Names
-import org.neo.gomina.plugins.scm.ScmApi
-import org.neo.gomina.plugins.sonar.SonarApi
-import org.neo.gomina.plugins.ssh.SshApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvBuilder
 import org.neo.gomina.api.envs.EnvsApi
 import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
+import org.neo.gomina.core.instances.InstanceDetailRepository
+import org.neo.gomina.core.instances.InstanceDetailRepositoryImpl
 import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.core.projects.ProjectDetailRepository
 import org.neo.gomina.core.projects.ProjectDetailRepositoryImpl
@@ -30,12 +29,15 @@ import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThreads
 import org.neo.gomina.plugins.project.ProjectPlugin
+import org.neo.gomina.plugins.scm.ScmApi
 import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.scm.connectors.ConfigScmRepos
 import org.neo.gomina.plugins.scm.connectors.ScmConfig
+import org.neo.gomina.plugins.sonar.SonarApi
 import org.neo.gomina.plugins.sonar.SonarConfig
 import org.neo.gomina.plugins.sonar.SonarConnectors
 import org.neo.gomina.plugins.sonar.SonarPlugin
+import org.neo.gomina.plugins.ssh.SshApi
 import org.neo.gomina.plugins.ssh.SshConfig
 import org.neo.gomina.plugins.ssh.SshOnDemandConnector
 import org.neo.gomina.plugins.ssh.SshPlugin
@@ -72,6 +74,7 @@ class GominaModule : AbstractModule() {
 
         // core
         bind(ProjectDetailRepository::class.java).to(ProjectDetailRepositoryImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(InstanceDetailRepository::class.java).to(InstanceDetailRepositoryImpl::class.java).`in`(Scopes.SINGLETON)
 
         bind(Projects::class.java).to(FileProjects::class.java).`in`(Scopes.SINGLETON)
         bind(Inventory::class.java).to(FileInventory::class.java).`in`(Scopes.SINGLETON)

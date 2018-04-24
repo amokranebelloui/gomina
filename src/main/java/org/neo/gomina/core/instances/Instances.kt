@@ -1,7 +1,5 @@
 package org.neo.gomina.core.instances
 
-import java.util.*
-
 class Instance (
 
         var env: String? = null ,
@@ -69,26 +67,40 @@ class InstanceRealTime (
 
 typealias InstanceListener = (instance: InstanceRealTime) -> Unit
 
-class Instances {
-    val list = ArrayList<Instance>()
-    private val index = HashMap<String, Instance>()
+interface InstanceDetailRepository {
+    fun getInstances(): Collection<Instance>
+    fun getInstances(envId: String): Collection<Instance>
+    fun addInstance(id: String, instance: Instance)
+    fun getInstance(id: String): Instance?
+    fun getOrCreateInstance(id: String, unexpected: Instance): Instance
+}
 
-    fun get(id: String) = index[id]
+class InstanceDetailRepositoryImpl : InstanceDetailRepository {
 
-    fun ensure(id: String, envId: String, type: String?, service: String?, instanceId: String, expected: Boolean = true): Instance {
-        var instance = index[id]
-        if (instance == null) {
-            instance = Instance(
-                    id = id,
-                    env = envId,
-                    type = type,
-                    service = service,
-                    name = instanceId,
-                    unexpected = !expected
-            )
-            index.put(id, instance)
-            list.add(instance)
+    private val index = mutableMapOf<String, Instance>()
+
+    override fun getInstances(): Collection<Instance> {
+        return index.values
+    }
+
+    override fun getInstances(envId: String): Collection<Instance> {
+        return index.values.filter { it.env == envId }
+    }
+
+    override fun addInstance(id: String, instance: Instance) {
+        index.put(id, instance)
+    }
+
+    override fun getInstance(id: String): Instance? {
+        return index[id]
+    }
+
+    override fun getOrCreateInstance(id: String, unexpected: Instance): Instance {
+        var ins = index[id]
+        if (ins == null) {
+            ins = unexpected;
+            index.put(id, unexpected)
         }
-        return instance
+        return ins
     }
 }
