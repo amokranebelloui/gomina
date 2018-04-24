@@ -1,14 +1,12 @@
 package org.neo.gomina.api.projects
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.inject.name.Named
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.projects.ProjectDetail
-import org.neo.gomina.core.projects.ProjectSet
-import org.neo.gomina.core.projects.ProjectsExt
+import org.neo.gomina.core.projects.ProjectDetailRepository
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.plugins.scm.ScmPlugin
 import javax.inject.Inject
@@ -23,9 +21,9 @@ class ProjectsApi {
 
     @Inject private lateinit var projects: Projects
 
-    @Inject @Named("projects.plugins") lateinit var plugins: ArrayList<ProjectsExt>
+    @Inject lateinit var projectDetailRepository: ProjectDetailRepository
 
-    @Inject lateinit var scmPlugin: ScmPlugin
+    @Inject lateinit var scmPlugin: ScmPlugin // FIXME Plugin
 
     private val mapper = ObjectMapper()
 
@@ -84,17 +82,12 @@ class ProjectsApi {
         }
     }
 
-    private fun getProjects(): List<ProjectDetail> {
-        val projectSet = ProjectSet()
-        plugins.forEach { it.onGetProjects(projectSet) }
-        return projectSet.list
+    private fun getProjects(): Collection<ProjectDetail> {
+        return projectDetailRepository.getProjects()
     }
 
     private fun getProject(projectId: String): ProjectDetail? {
-        val projectDetail = ProjectDetail(projectId)
-        plugins.forEach { it.onGetProject(projectId, projectDetail) }
-        return projectDetail
+        return projectDetailRepository.getProject(projectId)
     }
-
 
 }

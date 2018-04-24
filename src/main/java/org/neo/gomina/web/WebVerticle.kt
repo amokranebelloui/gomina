@@ -10,6 +10,7 @@ import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.StaticHandler
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.ScmApi
+import org.neo.gomina.api.SonarApi
 import org.neo.gomina.api.SshApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvsApi
@@ -33,6 +34,9 @@ class WebVerticle : AbstractVerticle() {
         val router = Router.router(vertx)
         router.route().handler(BodyHandler.create())
 
+        val pluginAssembler = injector.getInstance(PluginAssembler::class.java)
+        pluginAssembler.init()
+
         val notificationsApi = injector.getInstance(NotificationsApi::class.java)
         notificationsApi.start()
 
@@ -42,6 +46,7 @@ class WebVerticle : AbstractVerticle() {
                 .mountSubRouter("/data/instances", injector.getInstance(InstancesApi::class.java).router)
                 .mountSubRouter("/data/scm", injector.getInstance(ScmApi::class.java).router)
                 .mountSubRouter("/data/ssh", injector.getInstance(SshApi::class.java).router)
+                .mountSubRouter("/data/sonar", injector.getInstance(SonarApi::class.java).router)
                 .mountSubRouter("/data/diagram", injector.getInstance(DiagramApi::class.java).router)
                 .mountSubRouter("/realtime", notificationsApi.router)
 

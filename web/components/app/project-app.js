@@ -59,6 +59,15 @@ class ProjectApp extends React.Component {
                 console.log("project reload error", error.response);
             });
     }
+    reloadSonar(projectId) {
+        axios.post('/data/sonar/reload')
+            .then(response => {
+                console.log("sonar reloaded", response.data);
+            })
+            .catch(function (error) {
+                console.log("sonar reload error", error.response);
+            });
+    }
     retrieveDoc(projectId, docId) {
         const thisComponent = this;
         axios.get('/data/projects/' + projectId + '/doc/' + docId)
@@ -144,7 +153,7 @@ class ProjectApp extends React.Component {
                         </div>
                     </Container>
                     <Well block>
-                        <ProjectBadge project={project} onReloadProject={id => this.reloadProject(id)} />
+                        <ProjectBadge project={project} onReloadProject={id => this.reloadProject(id)} onReloadSonar={() => this.reloadSonar()} />
                     </Well>
                     <Container>
                         {docId

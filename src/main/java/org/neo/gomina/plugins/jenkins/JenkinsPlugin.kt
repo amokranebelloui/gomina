@@ -1,7 +1,7 @@
 package org.neo.gomina.plugins.jenkins
 
-import org.neo.gomina.core.projects.ProjectDetail
-import org.neo.gomina.core.projects.ProjectSet
+import org.apache.logging.log4j.LogManager
+import org.neo.gomina.core.projects.ProjectDetailRepository
 import org.neo.gomina.core.projects.ProjectsExt
 import org.neo.gomina.model.project.Projects
 import java.util.*
@@ -19,21 +19,21 @@ class JenkinsPlugin : ProjectsExt {
     @Inject private lateinit var projects: Projects
     @Inject private lateinit var jenkinsConfig: JenkinsConfig
 
-    override fun onGetProjects(projectSet: ProjectSet) {
+    @Inject lateinit var projectDetailRepository: ProjectDetailRepository
+
+    override fun init() {
+        logger.info("Initializing Jenkins data ...")
         for (project in projects.getProjects()) {
-            val projectDetail = projectSet.get(project.id)
+            val projectDetail = projectDetailRepository.getProject(project.id)
             if (projectDetail != null) {
                 val root = jenkinsConfig.serverMap[project.jenkinsServer]?.location
                 projectDetail.jenkinsUrl = "$root${project.jenkinsJob}"
             }
         }
+        logger.info("Jenkins data initialized")
     }
 
-    override fun onGetProject(projectId: String, projectDetail: ProjectDetail) {
-        projects.getProject(projectId) ?. let {
-            val root = jenkinsConfig.serverMap[it.jenkinsServer]?.location
-            projectDetail.jenkinsUrl = "$root${it.jenkinsJob}"
-        }
+    companion object {
+        private val logger = LogManager.getLogger(JenkinsPlugin::class.java)
     }
-
 }

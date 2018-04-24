@@ -3,6 +3,7 @@ package org.neo.gomina.module
 import com.google.inject.*
 import com.google.inject.name.Names
 import org.neo.gomina.api.ScmApi
+import org.neo.gomina.api.SonarApi
 import org.neo.gomina.api.SshApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvBuilder
@@ -11,6 +12,8 @@ import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.core.instances.InstancesExt
+import org.neo.gomina.core.projects.ProjectDetailRepository
+import org.neo.gomina.core.projects.ProjectDetailRepositoryImpl
 import org.neo.gomina.core.projects.ProjectsExt
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.file.FileInventory
@@ -37,6 +40,7 @@ import org.neo.gomina.plugins.ssh.SshConfig
 import org.neo.gomina.plugins.ssh.SshOnDemandConnector
 import org.neo.gomina.plugins.ssh.SshPlugin
 import org.neo.gomina.plugins.ssh.connector.SshClient
+import org.neo.gomina.web.PluginAssembler
 import java.io.File
 import java.util.*
 
@@ -65,6 +69,9 @@ class GominaModule : AbstractModule() {
         bind(String::class.java).annotatedWith(Names.named("inventory.filter"))
                 .toInstance(config.inventory!!["inventoryFilter"])
         // FIXME Type
+
+        // core
+        bind(ProjectDetailRepository::class.java).to(ProjectDetailRepositoryImpl::class.java).`in`(Scopes.SINGLETON)
 
         bind(Projects::class.java).to(FileProjects::class.java).`in`(Scopes.SINGLETON)
         bind(Inventory::class.java).to(FileInventory::class.java).`in`(Scopes.SINGLETON)
@@ -136,12 +143,15 @@ class GominaModule : AbstractModule() {
                     }
                 })
 
+        bind(PluginAssembler::class.java).`in`(Scopes.SINGLETON)
+
         // Vertx API
         bind(EnvsApi::class.java).`in`(Scopes.SINGLETON)
         bind(ProjectsApi::class.java).`in`(Scopes.SINGLETON)
         bind(InstancesApi::class.java).`in`(Scopes.SINGLETON)
         bind(ScmApi::class.java).`in`(Scopes.SINGLETON)
         bind(SshApi::class.java).`in`(Scopes.SINGLETON)
+        bind(SonarApi::class.java).`in`(Scopes.SINGLETON)
         bind(DiagramApi::class.java).`in`(Scopes.SINGLETON)
         bind(NotificationsApi::class.java).`in`(Scopes.SINGLETON)
     }

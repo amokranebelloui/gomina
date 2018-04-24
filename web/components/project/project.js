@@ -130,6 +130,7 @@ function ProjectBadge(props) {
                 <span>{project.jenkinsJob}</span>
                 <br/>
                 <button onClick={e => props.onReloadProject(project.id)}>RELOAD</button>
+                <button onClick={e => props.onReloadSonar()}>RELOAD SONAR</button>
                 <hr />
                 <Link to={'/project/' + props.project.id}>SVN Log</Link>
                 <span>|</span>

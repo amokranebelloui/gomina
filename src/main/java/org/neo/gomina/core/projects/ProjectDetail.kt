@@ -1,6 +1,5 @@
 package org.neo.gomina.core.projects
 
-
 import java.util.*
 
 data class ProjectDetail (
@@ -30,19 +29,25 @@ data class CommitLogEntry (
         var message: String?
 )
 
-class ProjectSet {
-    val list = ArrayList<ProjectDetail>()
+interface ProjectDetailRepository {
+    fun getProjects(): Collection<ProjectDetail>
+    fun getProject(projectId: String): ProjectDetail?
+    fun addProject(projectDetail: ProjectDetail)
+}
+
+class ProjectDetailRepositoryImpl : ProjectDetailRepository {
+
     private val index = HashMap<String, ProjectDetail>()
 
-    fun get(id: String) = index[id]
+    override fun getProjects(): Collection<ProjectDetail> {
+        return index.values
+    }
 
-    fun ensure(id: String): ProjectDetail {
-        var project = index[id]
-        if (project == null) {
-            project = ProjectDetail(id = id)
-            index.put(id, project)
-            list.add(project)
-        }
-        return project
+    override fun getProject(projectId: String): ProjectDetail? {
+        return index[projectId]
+    }
+
+    override fun addProject(projectDetail: ProjectDetail) {
+        index.put(projectDetail.id, projectDetail)
     }
 }
