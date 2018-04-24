@@ -4,7 +4,11 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.joda.time.DateTimeZone
 import org.joda.time.LocalDateTime
-import org.neo.gomina.core.instances.*
+import org.neo.gomina.core.instances.Instance
+import org.neo.gomina.core.instances.InstanceDetailRepository
+import org.neo.gomina.core.instances.InstanceListener
+import org.neo.gomina.core.instances.InstanceRealTime
+import org.neo.gomina.plugins.Plugin
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
@@ -18,7 +22,7 @@ class EnvMonitoring {
     }
 }
 
-class MonitoringPlugin : InstancesExt {
+class MonitoringPlugin : Plugin {
 
     private val topology = ConcurrentHashMap<String, EnvMonitoring>()
 
@@ -30,7 +34,7 @@ class MonitoringPlugin : InstancesExt {
         this.listeners.add(listener)
     }
 
-    override fun instancesInit() {
+    override fun init() {
 
     }
 

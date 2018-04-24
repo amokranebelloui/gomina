@@ -21,12 +21,11 @@ class PluginAssembler {
 
     fun init() {
         projectPlugin.init()
-        inventoryPlugin.instancesInit()
+        inventoryPlugin.init()
         jenkinsPlugin.init()
         scmPlugin.init()
-        scmPlugin.instancesInit()
-        sshPlugin.instancesInit()
+        sshPlugin.init()
         sonarPlugin.init()
-        monitoringPlugin.instancesInit()
+        monitoringPlugin.init()
     }
 }

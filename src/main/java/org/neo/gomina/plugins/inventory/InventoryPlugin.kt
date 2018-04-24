@@ -3,11 +3,10 @@ package org.neo.gomina.plugins.inventory
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.InstanceDetailRepository
-import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.model.inventory.InvInstance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
-import org.neo.gomina.plugins.monitoring.MonitoringPlugin
+import org.neo.gomina.plugins.Plugin
 import javax.inject.Inject
 
 fun Instance.applyInventory(service: Service, envInstance: InvInstance) {
@@ -16,13 +15,13 @@ fun Instance.applyInventory(service: Service, envInstance: InvInstance) {
     this.deployFolder = envInstance.folder
 }
 
-class InventoryPlugin : InstancesExt {
+class InventoryPlugin : Plugin {
 
     @Inject private lateinit var inventory: Inventory
 
     @Inject lateinit var instanceDetailRepository: InstanceDetailRepository
 
-    override fun instancesInit() {
+    override fun init() {
         logger.info("Initializing instances ...")
         for (env in inventory.getEnvironments()) {
             for (service in env.services) {

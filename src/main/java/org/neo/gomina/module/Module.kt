@@ -1,6 +1,7 @@
 package org.neo.gomina.module
 
-import com.google.inject.*
+import com.google.inject.AbstractModule
+import com.google.inject.Scopes
 import com.google.inject.name.Names
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvBuilder
@@ -10,10 +11,8 @@ import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.core.instances.InstanceDetailRepository
 import org.neo.gomina.core.instances.InstanceDetailRepositoryImpl
-import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.core.projects.ProjectDetailRepository
 import org.neo.gomina.core.projects.ProjectDetailRepositoryImpl
-import org.neo.gomina.core.projects.ProjectsExt
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.file.FileInventory
 import org.neo.gomina.model.project.Projects
@@ -44,7 +43,6 @@ import org.neo.gomina.plugins.ssh.SshPlugin
 import org.neo.gomina.plugins.ssh.connector.SshClient
 import org.neo.gomina.web.PluginAssembler
 import java.io.File
-import java.util.*
 
 class GominaModule : AbstractModule() {
 
@@ -109,6 +107,7 @@ class GominaModule : AbstractModule() {
         // API
         bind(EnvBuilder::class.java).`in`(Scopes.SINGLETON)
 
+        /*
         bind(object : TypeLiteral<ArrayList<ProjectsExt>>() {
 
         }).annotatedWith(Names.named("projects.plugins"))
@@ -145,7 +144,7 @@ class GominaModule : AbstractModule() {
                         ))
                     }
                 })
-
+*/
         bind(PluginAssembler::class.java).`in`(Scopes.SINGLETON)
 
         // Vertx API

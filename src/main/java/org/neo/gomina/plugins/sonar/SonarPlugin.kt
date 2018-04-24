@@ -3,8 +3,8 @@ package org.neo.gomina.plugins.sonar
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.core.projects.ProjectDetailRepository
-import org.neo.gomina.core.projects.ProjectsExt
 import org.neo.gomina.model.project.Projects
+import org.neo.gomina.plugins.Plugin
 import org.neo.gomina.plugins.sonar.connectors.DummySonarConnector
 import org.neo.gomina.plugins.sonar.connectors.HttpSonarConnector
 import javax.inject.Inject
@@ -28,7 +28,7 @@ private fun ProjectDetail.apply(sonarIndicators: SonarIndicators?) {
     this.coverage = sonarIndicators?.coverage
 }
 
-class SonarPlugin : ProjectsExt {
+class SonarPlugin : Plugin {
 
     @Inject private lateinit var projects: Projects
     @Inject private lateinit var connectors: SonarConnectors

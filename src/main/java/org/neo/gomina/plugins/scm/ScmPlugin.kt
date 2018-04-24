@@ -5,11 +5,9 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.InstanceDetailRepository
-import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.core.projects.CommitLogEntry
 import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.core.projects.ProjectDetailRepository
-import org.neo.gomina.core.projects.ProjectsExt
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.maven.MavenUtils
 import org.neo.gomina.model.project.Projects
@@ -17,6 +15,7 @@ import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.MavenReleaseFlagger
 import org.neo.gomina.model.scm.ScmClient
 import org.neo.gomina.model.scm.ScmRepos
+import org.neo.gomina.plugins.Plugin
 import org.neo.gomina.plugins.scm.ScmRetrieveStrategy.*
 import java.io.File
 import javax.inject.Inject
@@ -38,7 +37,7 @@ fun Instance.applyScm(scmDetails: ScmDetails) {
     this.releasedRevision = scmDetails.releasedRevision
 }
 
-class ScmPlugin : InstancesExt, ProjectsExt {
+class ScmPlugin : Plugin {
 
     private val scmRepos: ScmRepos
     private val scmCache = ScmCache()
@@ -59,21 +58,6 @@ class ScmPlugin : InstancesExt, ProjectsExt {
         }
     }
 
-    override fun instancesInit() {
-        logger.info("Initializing instances SCM data ...")
-        for (env in inventory.getEnvironments()) {
-            for (service in env.services) {
-                for (envInstance in service.instances) {
-                    val id = env.id + "-" + envInstance.id
-                    val instance = instanceDetailRepository.getInstance(id)
-                    val project = if (service.project != null) projects.getProject(service.project) else null
-                    project?.let { instance?.applyScm(this.getSvnDetails(project.svnRepo, project.svnUrl)) }
-                }
-            }
-        }
-        logger.info("Instances SCM data initialized")
-    }
-
     override fun init() {
         logger.info("Initializing SCM Data ...")
         for (project in projects.getProjects()) {
@@ -91,6 +75,18 @@ class ScmPlugin : InstancesExt, ProjectsExt {
                 projectDetail.commitLog = map(commitLog)
             }
         }
+
+        for (env in inventory.getEnvironments()) {
+            for (service in env.services) {
+                for (envInstance in service.instances) {
+                    val id = env.id + "-" + envInstance.id
+                    val instance = instanceDetailRepository.getInstance(id)
+                    val project = if (service.project != null) projects.getProject(service.project) else null
+                    project?.let { instance?.applyScm(this.getSvnDetails(project.svnRepo, project.svnUrl)) }
+                }
+            }
+        }
+
         logger.info("SCM Data initialized")
     }
 

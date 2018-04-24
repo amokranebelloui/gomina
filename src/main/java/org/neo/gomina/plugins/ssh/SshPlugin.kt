@@ -3,11 +3,11 @@ package org.neo.gomina.plugins.ssh
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.InstanceDetailRepository
-import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.model.inventory.Inventory
+import org.neo.gomina.plugins.Plugin
 import javax.inject.Inject
 
-class SshPlugin : InstancesExt {
+class SshPlugin : Plugin {
 
     @Inject private lateinit var sshConnector: SshOnDemandConnector
     @Inject private lateinit var inventory: Inventory
@@ -16,7 +16,7 @@ class SshPlugin : InstancesExt {
 
     @Inject lateinit var instanceDetailRepository: InstanceDetailRepository
 
-    override fun instancesInit() {
+    override fun init() {
         logger.info("Initializing instances SSH data ...")
         inventory.getEnvironments().forEach { env ->
             env.services
