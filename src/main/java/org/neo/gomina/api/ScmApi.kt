@@ -29,6 +29,7 @@ class ScmApi {
         this.router = Router.router(vertx)
 
         router.post("/:envId/reload").handler(this::reload)
+        router.post("/project/:projectId/reload").handler(this::reloadProject)
     }
 
     fun reload(ctx: RoutingContext) {
@@ -36,7 +37,7 @@ class ScmApi {
             vertx.executeBlocking({future: Future<Void> ->
                 val envId = ctx.request().getParam("envId")
                 logger.info("Reloading SCM data $envId ...")
-                scmPlugin.onReloadInstances(envId)
+                scmPlugin.reloadInstances(envId)
                 future.complete()
             }, false)
             {res: AsyncResult<Void> ->
@@ -49,4 +50,15 @@ class ScmApi {
         }
     }
 
+    fun reloadProject(ctx: RoutingContext) {
+        try {
+            val projectId = ctx.request().getParam("projectId")
+            scmPlugin.reloadProject(projectId)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get project", e)
+            ctx.fail(500)
+        }
+    }
 }

@@ -2,7 +2,6 @@ package org.neo.gomina.api.realtime
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.inject.name.Named
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.ext.web.Router
@@ -10,8 +9,8 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.instances.InstancesExt
 import org.neo.gomina.core.instances.InstanceListener
+import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import java.util.*
 import javax.inject.Inject
 
@@ -24,7 +23,7 @@ class NotificationsApi {
     val router: Router
     val sockets = ArrayList<SockJSSocket>()
 
-    @Inject @Named("instances.plugins") lateinit var plugins: ArrayList<InstancesExt>
+    @Inject lateinit var monitoringPlugin: MonitoringPlugin
 
     @Inject
     constructor(vertx: Vertx) {
@@ -61,6 +60,6 @@ class NotificationsApi {
                 e.printStackTrace()
             }
         }
-        plugins.forEach { it.onRegisterForInstanceUpdates(instanceListener) }
+        monitoringPlugin.registerListener(instanceListener)
     }
 }

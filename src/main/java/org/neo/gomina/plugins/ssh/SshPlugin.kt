@@ -28,7 +28,7 @@ class SshPlugin : InstancesExt {
         }
     }
 
-    override fun onReloadInstances(envId: String) {
+    fun reloadInstances(envId: String) {
         inventory.getEnvironment(envId)?.let { env ->
             val analysis = sshConnector.analyze(env)
             env.services

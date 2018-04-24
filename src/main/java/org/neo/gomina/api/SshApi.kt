@@ -36,7 +36,7 @@ class SshApi {
             vertx.executeBlocking({future: Future<Void> ->
                 val envId = ctx.request().getParam("envId")
                 logger.info("Reloading SSH data $envId ...")
-                sshPlugin.onReloadInstances(envId)
+                sshPlugin.reloadInstances(envId)
                 future.complete()
             }, false)
             {res: AsyncResult<Void> ->

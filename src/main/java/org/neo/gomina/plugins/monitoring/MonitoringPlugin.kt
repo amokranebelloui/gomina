@@ -23,7 +23,7 @@ class MonitoringPlugin : InstancesExt {
 
     private val listeners = CopyOnWriteArrayList<InstanceListener>()
 
-    override fun onRegisterForInstanceUpdates(listener: InstanceListener) {
+    fun registerListener(listener: InstanceListener) {
         this.listeners.add(listener)
     }
 

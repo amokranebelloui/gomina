@@ -28,7 +28,7 @@ class MonitorXTest {
         thread.start()
 
         val counter = AtomicInteger(0)
-        monitoring.onRegisterForInstanceUpdates { instance ->
+        monitoring.registerListener { instance ->
             println("received " + instance)
             assertThat(instance.env).isEqualTo("UAT")
             assertThat(instance.id).isEqualTo("kernel")

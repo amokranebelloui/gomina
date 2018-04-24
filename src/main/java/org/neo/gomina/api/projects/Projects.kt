@@ -10,7 +10,7 @@ import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.core.projects.ProjectSet
 import org.neo.gomina.core.projects.ProjectsExt
 import org.neo.gomina.model.project.Projects
-import java.util.*
+import org.neo.gomina.plugins.scm.ScmPlugin
 import javax.inject.Inject
 
 class ProjectsApi {
@@ -25,6 +25,8 @@ class ProjectsApi {
 
     @Inject @Named("projects.plugins") lateinit var plugins: ArrayList<ProjectsExt>
 
+    @Inject lateinit var scmPlugin: ScmPlugin
+
     private val mapper = ObjectMapper()
 
     @Inject
@@ -34,7 +36,6 @@ class ProjectsApi {
         router.get("/").handler(this::projects)
         router.get("/:projectId").handler(this::project)
         router.get("/:projectId/doc/:docId").handler(this::projectDoc)
-        router.post("/:projectId/reload").handler(this::reload)
     }
 
     fun projects(ctx: RoutingContext) {
@@ -68,7 +69,8 @@ class ProjectsApi {
         val projectId = ctx.request().getParam("projectId")
         val docId = ctx.request().getParam("docId")
         try {
-            val doc = plugins.mapNotNull { it.onGetDocument(projectId, docId) }.joinToString(separator = "")
+            logger.info("Get doc for $projectId $docId")
+            val doc = scmPlugin.getDocument(projectId, docId) //.joinToString(separator = "")
             if (doc != null) {
                 ctx.response().putHeader("content-type", "text/html")
                         .end(doc)
@@ -94,15 +96,5 @@ class ProjectsApi {
         return projectDetail
     }
 
-    fun reload(ctx: RoutingContext) {
-        try {
-            val projectId = ctx.request().getParam("projectId")
-            plugins.forEach { it.onReloadProject(projectId) }
-            ctx.response().putHeader("content-type", "text/javascript").end()
-        }
-        catch (e: Exception) {
-            logger.error("Cannot get project", e)
-            ctx.fail(500)
-        }
-    }
+
 }

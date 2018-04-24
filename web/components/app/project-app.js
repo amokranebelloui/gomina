@@ -51,7 +51,7 @@ class ProjectApp extends React.Component {
             });
     }
     reloadProject(projectId) {
-        axios.post('/data/projects/' + projectId + '/reload')
+        axios.post('/data/scm/project/' + projectId + '/reload')
             .then(response => {
                 console.log("project reloaded", response.data);
             })

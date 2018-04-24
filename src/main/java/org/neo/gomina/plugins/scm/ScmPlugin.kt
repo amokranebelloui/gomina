@@ -71,7 +71,7 @@ class ScmPlugin : InstancesExt, ProjectsExt {
             }
     }
 
-    override fun onGetDocument(projectId: String, docId: String): String? {
+    fun getDocument(projectId: String, docId: String): String? {
         return projects.getProject(projectId) ?. let {
             val scmClient = scmRepos.getClient(it.svnRepo)
             Processor.process(scmClient.getFile("${it.svnUrl}/trunk/$docId", "-1"))
@@ -85,7 +85,7 @@ class ScmPlugin : InstancesExt, ProjectsExt {
         projectDetail.released = scmDetails.released
     }
 
-    override fun onReloadInstances(env: String) {
+    fun reloadInstances(env: String) {
         projects.getProjects()
                 .filter { StringUtils.isNotBlank(it.svnUrl) }
                 .forEach { this.refresh(it.svnRepo, it.svnUrl) }
@@ -113,7 +113,7 @@ class ScmPlugin : InstancesExt, ProjectsExt {
         }
     }
 
-    override fun onReloadProject(projectId: String) {
+    fun reloadProject(projectId: String) {
         val project = projects.getProject(projectId)
         this.refresh(project?.svnRepo ?: "", project?.svnUrl ?: "")
     }
