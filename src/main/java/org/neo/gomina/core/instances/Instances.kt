@@ -17,7 +17,7 @@ class Instance (
 
         var pid: String? = null,
         var host: String? = null,
-        var status: String? = null,
+        var status: String? = "NOINFO",
 
         var project: String? = null,
         var deployHost: String? = null,
