@@ -161,7 +161,7 @@ class RedisLink extends React.Component {
 
 class Host extends React.Component {
     render() {
-        const unexpected = this.props.expected && this.props.expected != this.props.host;
+        const unexpected = this.props.host && this.props.expected != this.props.host;
         return (
             <span>
                 <span title="Running on host" style={{userSelect: 'all'}}>{this.props.host}</span>

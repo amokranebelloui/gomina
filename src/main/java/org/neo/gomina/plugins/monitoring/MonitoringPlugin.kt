@@ -8,6 +8,7 @@ import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.InstanceDetailRepository
 import org.neo.gomina.core.instances.InstanceListener
 import org.neo.gomina.core.instances.InstanceRealTime
+import org.neo.gomina.model.hosts.resolveHostname
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.plugins.Plugin
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
@@ -117,7 +118,7 @@ class MonitoringPlugin : Plugin {
 
 fun Instance.applyMonitoring(indicators: Indicators) {
     this.pid = indicators["PID"]
-    this.host = indicators["IP"]
+    this.host = resolveHostname(indicators["IP"])
     this.version = indicators["VERSION"]
     this.revision = indicators["REVISION"]
 
