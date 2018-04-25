@@ -86,21 +86,19 @@ class Service extends React.Component {
         const serviceName = this.props.name;
         const instances = this.props.instances ? this.props.instances : [];
         const d = computeServiceDetails(serviceName, instances);
-        //const highlightFunction = this.props.highlightFunction || (instance => true);
-        //const opacity = this.props.highlighted ? 1 : 0.06;
-        /*
-        {d.multiple && <Badge title="Multiple instances running" backgroundColor="orange">multi?</Badge>}
-        {d.noleader && <Badge title="No leader" backgroundColor="orange">leader?</Badge>}
-         */
-        const opacity = 1;
+        const highlightFunction = this.props.highlightFunction || (instance => true);
+        var serviceHighlighted = false;
+        {instances.map(instance =>
+            serviceHighlighted |= highlightFunction(instance)
+        )}
+        const opacity = serviceHighlighted ? 1 : 0.1;
         return ([
                 <ServiceStatus key={'status' + serviceName}
                                status={d.status} reason={d.reason} text={d.text}
                                style={{opacity: opacity}} />,
-                <div className="service">
+                <div className="service" style={{opacity: opacity}}>
                     <span><b>{serviceName}</b></span><br/>
                     {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
-
                 </div>
             ]
         )
