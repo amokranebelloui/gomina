@@ -77,18 +77,21 @@ interface InstanceDetailRepository {
 
 class InstanceDetailRepositoryImpl : InstanceDetailRepository {
 
+    private val list = mutableListOf<Instance>()
     private val index = mutableMapOf<String, Instance>()
 
     override fun getInstances(): Collection<Instance> {
-        return index.values
+        return list
     }
 
     override fun getInstances(envId: String): Collection<Instance> {
-        return index.values.filter { it.env == envId }
+        return list.filter { it.env == envId }
     }
 
     override fun addInstance(id: String, instance: Instance) {
-        index.put(id, instance)
+        if (index.put(id, instance) == null) {
+            list.add(instance)
+        }
     }
 
     override fun getInstance(id: String): Instance? {
@@ -99,7 +102,7 @@ class InstanceDetailRepositoryImpl : InstanceDetailRepository {
         var ins = index[id]
         if (ins == null) {
             ins = unexpected;
-            index.put(id, unexpected)
+            addInstance(id, unexpected)
         }
         return ins
     }

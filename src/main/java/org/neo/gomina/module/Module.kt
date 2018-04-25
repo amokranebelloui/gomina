@@ -3,10 +3,10 @@ package org.neo.gomina.module
 import com.google.inject.AbstractModule
 import com.google.inject.Scopes
 import com.google.inject.name.Names
-import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvBuilder
 import org.neo.gomina.api.envs.EnvsApi
+import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
@@ -27,7 +27,6 @@ import org.neo.gomina.plugins.jenkins.JenkinsConfig
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
-import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThreads
 import org.neo.gomina.plugins.project.ProjectPlugin
 import org.neo.gomina.plugins.scm.ScmApi
 import org.neo.gomina.plugins.scm.ScmPlugin
@@ -83,7 +82,6 @@ class GominaModule : AbstractModule() {
         // Monitoring
         bind(MonitoringPlugin::class.java).`in`(Scopes.SINGLETON)
         bind(ZmqMonitorConfig::class.java).toInstance(config.zmqMonitoring)
-        bind(ZmqMonitorThreads::class.java).asEagerSingleton()
 
         // SCM
         bind(ScmConfig::class.java).toInstance(config.scm)

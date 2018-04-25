@@ -8,7 +8,10 @@ import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.InstanceDetailRepository
 import org.neo.gomina.core.instances.InstanceListener
 import org.neo.gomina.core.instances.InstanceRealTime
+import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.plugins.Plugin
+import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
+import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThread
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
@@ -50,11 +53,20 @@ class MonitoringPlugin : Plugin {
 
     @Inject lateinit var instanceDetailRepository: InstanceDetailRepository
 
+    @Inject lateinit var config: ZmqMonitorConfig
+    @Inject lateinit var inventory: Inventory
+
     fun registerListener(listener: InstanceListener) {
         this.listeners.add(listener)
     }
 
     override fun init() {
+        if (config.connections != null) {
+            val subscriptions = inventory.getEnvironments().map { ".#HB.${it.id}." }
+            config.connections
+                    .map { ZmqMonitorThread(this, it.url, subscriptions) }
+                    .forEach { it.start() }
+        }
         thread(start = true, name = "mon-ditcher") {
             while (!Thread.currentThread().isInterrupted) {
                 topology.forEach { env, envMon ->
