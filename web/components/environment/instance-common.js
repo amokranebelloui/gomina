@@ -88,7 +88,7 @@ class Status extends React.Component {
                 <div style={{display: 'table', width: '100%', boxSizing: 'border-box', padding: '3px'}}>
 
                     <div style={{display: 'table-row'}}>
-                        <div style={{display: 'table-cell', textAlign: 'left'}}>{status}</div>
+                        <div style={{display: 'table-cell', textAlign: 'left', fontSize: '15px'}}>{status}</div>
                     </div>
                     <div style={{display: 'table-row'}}>
                         <div style={{display: 'table-cell', textAlign: 'right'}}>
