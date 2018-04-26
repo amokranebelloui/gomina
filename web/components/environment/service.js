@@ -2,10 +2,12 @@ import React from "react";
 import {Badge} from "../common/component-library";
 
 function computeServiceDetails(serviceName, instances) {
+    const unexpected = instances.filter(instance => instance.unexpected == true);
     const versions = new Set(instances.map(instance => instance.version));
     const confrevs = new Set(instances.map(instance => instance.confRevision));
     const confpend = instances.filter(instance => instance.confCommited == false);
     const liveLeaders = instances.filter(instance => instance.status == 'LIVE' && instance.leader);
+    const live = instances.filter(instance => instance.status == 'LIVE');
     const liveNotLeaders = instances.filter(instance => instance.status == 'LIVE' && !instance.leader);
     const loading = instances.filter(instance => instance.status == 'LOADING');
     const multiple = liveLeaders.length > 1;
@@ -19,6 +21,11 @@ function computeServiceDetails(serviceName, instances) {
         status = 'ERROR';
         reason = 'MULTI';
         text = 'Multiple instances running';
+    }
+    else if (liveLeaders.length == 1 && live.length < 2) {
+        status = 'LIVE';
+        reason = 'NOBKP';
+        text = 'No Running Backup';
     }
     else if (liveLeaders.length == 1) {
         status = 'LIVE';
@@ -42,6 +49,7 @@ function computeServiceDetails(serviceName, instances) {
     }
     console.info("$$ ", serviceName, status, liveLeaders, instances);
     return {
+        unexpected: unexpected.length > 0,
         status: status,
         reason: reason,
         text: text,
@@ -101,6 +109,7 @@ class Service extends React.Component {
                                style={{opacity: opacity}} />,
                 <div className="service" style={{opacity: opacity}}>
                     <span><b>{serviceName}</b></span><br/>
+                    {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">unexpected?</Badge>}
                     {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
                     {d.configs && <Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge>}
                 </div>
