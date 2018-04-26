@@ -3,12 +3,14 @@ import {Badge} from "../common/component-library";
 
 function computeServiceDetails(serviceName, instances) {
     const versions = new Set(instances.map(instance => instance.version));
+    const confrevs = new Set(instances.map(instance => instance.confRevision));
+    const confpend = instances.filter(instance => instance.confCommited == false);
     const liveLeaders = instances.filter(instance => instance.status == 'LIVE' && instance.leader);
     const liveNotLeaders = instances.filter(instance => instance.status == 'LIVE' && !instance.leader);
     const loading = instances.filter(instance => instance.status == 'LOADING');
     const multiple = liveLeaders.length > 1;
     const noleader = liveLeaders.length == 0;
-    console.log("-", versions, liveLeaders);
+    console.log("-", serviceName, confpend, confpend.length > 0);
 
     let status;
     let reason;
@@ -44,6 +46,7 @@ function computeServiceDetails(serviceName, instances) {
         reason: reason,
         text: text,
         versions: versions.size > 1,
+        configs: confrevs.size > 1 || confpend.length > 0,
         multiple: multiple,
         noleader: noleader,
     }
@@ -99,6 +102,7 @@ class Service extends React.Component {
                 <div className="service" style={{opacity: opacity}}>
                     <span><b>{serviceName}</b></span><br/>
                     {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
+                    {d.configs && <Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge>}
                 </div>
             ]
         )

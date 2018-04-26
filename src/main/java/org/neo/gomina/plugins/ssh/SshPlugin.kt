@@ -59,5 +59,6 @@ fun Instance.applySsh(sshDetails: SshDetails) {
     this.deployRevision = sshDetails.deployedRevision
     this.confCommited = sshDetails.confCommitted
     this.confUpToDate = sshDetails.confUpToDate
+    this.confRevision = sshDetails.confRevision
 }
 

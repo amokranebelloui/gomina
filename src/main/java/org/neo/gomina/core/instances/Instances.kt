@@ -26,6 +26,7 @@ class Instance (
         var deployRevision: String? = null,
         var confCommited: Boolean? = null,
         var confUpToDate: Boolean? = null,
+        var confRevision: String? = null,
         var version: String? = null,
         var revision: String? = null,
 

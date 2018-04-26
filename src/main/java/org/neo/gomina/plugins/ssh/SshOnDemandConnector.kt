@@ -16,7 +16,8 @@ data class SshDetails (
     var deployedVersion: String? = null,
     var deployedRevision: String? = null,
     var confCommitted: Boolean? = null,
-    var confUpToDate: Boolean? = null
+    var confUpToDate: Boolean? = null,
+    var confRevision: String? = null
 )
 
 class EnvAnalysis(val map: ConcurrentHashMap<String, MutableMap<String, SshDetails>>) {
@@ -78,6 +79,7 @@ class SshOnDemandConnector {
                         sshDetails.analyzed = true
                         sshDetails.deployedVersion = deployedVersion(session, instance.folder, prefix)
                         sshDetails.deployedRevision = null
+                        sshDetails.confRevision = confRevision(session, instance.folder, prefix)
                         sshDetails.confCommitted = checkConfCommited(session, instance.folder, prefix)
                         sshDetails.confUpToDate = null
                         logger.info("Analyzed $host ${instance.folder} $sshDetails")
@@ -106,6 +108,15 @@ class SshOnDemandConnector {
     fun checkConfCommited(session: Session, applicationFolder: String?, prefix: String): Boolean? {
         val result = sshClient.executeCommand(session, "$prefix svn status $applicationFolder/config")
         return if (StringUtils.isBlank(result)) java.lang.Boolean.TRUE else if (result.contains("is not a working copy")) null else java.lang.Boolean.FALSE
+    }
+
+    fun confRevision(session: Session, applicationFolder: String?, prefix: String): String? {
+        val result = sshClient.executeCommand(session, "$prefix svn info $applicationFolder/config | grep Revision: |cut -c11-")
+        return when {
+            result.contains("does not exist") -> "?"
+            result.contains("is not a working copy") -> "!svn"
+            else -> result
+        }
     }
 
     fun deployedVersion(session: Session, applicationFolder: String?, prefix: String): String {

@@ -34,6 +34,7 @@ class RedisInstance extends React.Component {
                     </li>
                     <li><Badge title={extra.redisClientCount + ' clients'}>{extra.redisClientCount}</Badge></li>
 
+                    <li><Badge title={'Conf SVN revision'} backgroundColor='red' color='white'>{instance.confRevision}</Badge></li>
                     <li><ConfCommited commited={instance.confCommited} /></li>
                     <li><Expected expected={!instance.unexpected} /></li>
 
