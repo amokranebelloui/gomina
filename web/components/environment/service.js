@@ -67,6 +67,7 @@ class ServiceStatus extends React.Component {
         const text = this.props.text;
         const backgroundColor =
             status == 'ERROR' ? '#840513' :
+            status == 'LIVE' && reason == 'NOBKP' ? '#6ebf75' :
             status == 'LIVE'  ? '#00ad0e' :
             status == 'LOADING' ? '#ffdc92' :
             status == 'DOWN'? '#FF0000' :
@@ -109,7 +110,7 @@ class Service extends React.Component {
                                style={{opacity: opacity}} />,
                 <div className="service" style={{opacity: opacity}}>
                     <span><b>{serviceName}</b></span><br/>
-                    {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">unexpected?</Badge>}
+                    {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge>}
                     {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
                     {d.configs && <Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge>}
                 </div>
