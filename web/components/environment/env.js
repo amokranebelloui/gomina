@@ -64,7 +64,7 @@ class InstanceFilter extends React.Component {
                     <Selection id='loading' label='LOADING' selected={this.props.id}
                                onSelectionChanged={e => this.changeSelected('loading', instance => instance.status == 'LOADING')} />
                     <Selection id='down' label='DOWN' selected={this.props.id}
-                               onSelectionChanged={e => this.changeSelected('down', instance => instance.status == 'DOWN')} />
+                               onSelectionChanged={e => this.changeSelected('down', instance => instance.status == 'DOWN' || instance.status == 'NOINFO')} />
                     <Selection id='running' label='RUNNING' selected={this.props.id}
                                onSelectionChanged={e => this.changeSelected('running', instance => instance.status == 'LIVE')} />
                 </div>
