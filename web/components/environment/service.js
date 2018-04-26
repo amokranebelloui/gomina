@@ -1,5 +1,6 @@
 import React from "react";
 import {Badge} from "../common/component-library";
+import {BuildLink} from "../project/project";
 
 function computeServiceDetails(serviceName, instances) {
     const unexpected = instances.filter(instance => instance.unexpected == true);
@@ -74,7 +75,7 @@ class ServiceStatus extends React.Component {
             'lightgray';
         const opacity = 0.9;
         return (
-            <div className='status' style={Object.assign(this.props.style, {backgroundColor: backgroundColor, color: 'white'})}>
+            <div className='status' style={Object.assign(this.props.style, {backgroundColor: backgroundColor, color: 'white', cursor: 'pointer'})}>
                 <div style={{display: 'table', width: '100%', boxSizing: 'border-box', padding: '3px'}}>
 
                     <div style={{display: 'table-row'}}>
@@ -97,6 +98,8 @@ class Service extends React.Component {
     render() {
         const serviceName = this.props.name;
         const instances = this.props.instances ? this.props.instances : [];
+        const projectSet = new Set(instances.map(instance => instance.project).filter(p => p != null));
+        const projects = [...projectSet]
         const d = computeServiceDetails(serviceName, instances);
         const highlightFunction = this.props.highlightFunction || (instance => true);
         var serviceHighlighted = false;
@@ -109,7 +112,11 @@ class Service extends React.Component {
                                status={d.status} reason={d.reason} text={d.text}
                                style={{opacity: opacity}} />,
                 <div className="service" style={{opacity: opacity}}>
-                    <span><b>{serviceName}</b></span><br/>
+                    <span><b>{serviceName}</b></span>&nbsp;
+                    <Badge backgroundColor="">{instances.length}</Badge><br/>
+                    {projects.map(project =>
+                        <BuildLink url={'navigate/' + project}/>
+                    )}
                     {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge>}
                     {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
                     {d.configs && <Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge>}

@@ -84,7 +84,7 @@ class Status extends React.Component {
             }
         }
         return (
-            <div className='status' style={Object.assign(this.props.style, {backgroundColor: backgroundColor, color: 'white'})}>
+            <div className='status' style={Object.assign(this.props.style, {backgroundColor: backgroundColor, color: 'white', cursor: 'pointer'})}>
                 <div style={{display: 'table', width: '100%', boxSizing: 'border-box', padding: '3px'}}>
 
                     <div style={{display: 'table-row'}}>

@@ -11,8 +11,8 @@ data class Environment (
 
 data class Service (
     val svc: String,
-    val type: String?,
-    val project: String?,
+    val type: String? = null,
+    val project: String? = null,
     val instances: List<InvInstance> = emptyList()
 )
 

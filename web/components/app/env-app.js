@@ -170,7 +170,7 @@ class EnvApp extends React.Component {
         //console.info("envApp", this.state.instances, this.state.env, instances);
 
         const iterable = instances.map(instance => instance.host);
-        const hosts = Array.from(new Set(iterable)).sort();
+        const hosts = [...new Set(iterable)].sort();
 
         console.info("envApp !render");
 

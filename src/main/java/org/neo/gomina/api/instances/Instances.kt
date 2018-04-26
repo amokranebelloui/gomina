@@ -6,7 +6,9 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.InstanceDetailRepository
+import org.neo.gomina.core.instances.ServiceDetail
 import org.neo.gomina.model.inventory.Inventory
+import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.project.Projects
 import javax.inject.Inject
 
@@ -62,14 +64,24 @@ class InstancesApi {
     fun servicesForEnv(ctx: RoutingContext) {
         try {
             val envId = ctx.request().getParam("envId")
-            val services = instanceDetailRepository.getInstances(envId).groupBy { it.service }
+            val servicesMap = inventory.getEnvironment(envId)?.services
+                    ?.associateBy { it.svc }
+                    ?: emptyMap()
+            val instances = instanceDetailRepository.getInstances(envId)
+                    .groupBy { it.service }
+                    .mapKeys { (k, _) -> servicesMap[k]?.toServiceDetail() ?: ServiceDetail(svc = "unexpected") }
+                    .map { (service, instances) -> mapOf("service" to service, "instances" to instances) }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(services))
+                    .end(mapper.writeValueAsString(instances))
         } catch (e: Exception) {
             logger.error("Cannot get instances", e)
             ctx.fail(500)
         }
     }
 
+}
+
+fun Service.toServiceDetail(): ServiceDetail {
+    return ServiceDetail(svc = this.svc, type = this.type, project = this.project)
 }

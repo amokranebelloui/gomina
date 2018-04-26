@@ -1,5 +1,11 @@
 package org.neo.gomina.core.instances
 
+data class ServiceDetail (
+    val svc: String,
+    val type: String? = null,
+    val project: String? = null
+)
+
 class Instance (
 
         var env: String? = null ,
