@@ -79,7 +79,7 @@ interface InstanceDetailRepository {
     fun getInstances(envId: String): Collection<Instance>
     fun addInstance(id: String, instance: Instance)
     fun getInstance(id: String): Instance?
-    fun getOrCreateInstance(id: String, unexpected: Instance): Instance
+    fun getOrCreateInstance(id: String, unexpected: () -> Instance): Instance
 }
 
 class InstanceDetailRepositoryImpl : InstanceDetailRepository {
@@ -105,11 +105,11 @@ class InstanceDetailRepositoryImpl : InstanceDetailRepository {
         return index[id]
     }
 
-    override fun getOrCreateInstance(id: String, unexpected: Instance): Instance {
+    override fun getOrCreateInstance(id: String, unexpected: () -> Instance): Instance {
         var ins = index[id]
         if (ins == null) {
-            ins = unexpected;
-            addInstance(id, unexpected)
+            ins = unexpected()
+            addInstance(id, ins)
         }
         return ins
     }

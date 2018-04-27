@@ -22,6 +22,7 @@ import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.module.config.Config
 import org.neo.gomina.module.config.ConfigLoader
+import org.neo.gomina.plugins.inventory.InventoryApi
 import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.jenkins.JenkinsConfig
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
@@ -150,6 +151,8 @@ class GominaModule : AbstractModule() {
         bind(EnvsApi::class.java).`in`(Scopes.SINGLETON)
         bind(ProjectsApi::class.java).`in`(Scopes.SINGLETON)
         bind(InstancesApi::class.java).`in`(Scopes.SINGLETON)
+
+        bind(InventoryApi::class.java).`in`(Scopes.SINGLETON)
         bind(ScmApi::class.java).`in`(Scopes.SINGLETON)
         bind(SshApi::class.java).`in`(Scopes.SINGLETON)
         bind(SonarApi::class.java).`in`(Scopes.SINGLETON)

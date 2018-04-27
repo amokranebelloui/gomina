@@ -1,4 +1,4 @@
-package org.neo.gomina.plugins.sonar
+package org.neo.gomina.plugins.inventory
 
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
@@ -8,35 +8,35 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import javax.inject.Inject
 
-class SonarApi {
+class InventoryApi {
 
     companion object {
-        private val logger = LogManager.getLogger(SonarApi::class.java)
+        private val logger = LogManager.getLogger(InventoryApi::class.java)
     }
 
     val vertx: Vertx
     val router: Router
 
-    @Inject lateinit var sonarPlugin: SonarPlugin
+    @Inject lateinit var inventoryPlugin: InventoryPlugin
 
     @Inject
     constructor(vertx: Vertx) {
         this.vertx = vertx
         this.router = Router.router(vertx)
 
-        router.post("/reload").handler(this::reload)
+        router.post("/:envId/reload").handler(this::reload)
     }
 
     fun reload(ctx: RoutingContext) {
         try {
             vertx.executeBlocking({future: Future<Void> ->
-                //val envId = ctx.request().getParam("envId")
-                logger.info("Reloading Sonar data ...")
-                sonarPlugin.reload()
+                val envId = ctx.request().getParam("envId")
+                logger.info("Reloading inventory data ...")
+                inventoryPlugin.reload(envId)
                 future.complete()
             }, false)
             {res: AsyncResult<Void> ->
-                ctx.response().putHeader("content-type", "text/javascript").end("reload Sonar done!")
+                ctx.response().putHeader("content-type", "text/javascript").end("reload inventory done!")
             }
         }
         catch (e: Exception) {

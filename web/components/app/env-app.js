@@ -118,24 +118,39 @@ class EnvApp extends React.Component {
                 thisComponent.setState({events: []});
             });
     }
+    reloadInventory() {
+        const thisComponent = this;
+        axios.post('/data/inventory/' + this.state.env + '/reload')
+            .then(response => {
+                console.log("reloaded inv", response.data);
+                this.retrieveInstances(thisComponent.state.env);
+            })
+            .catch(function (error) {
+                console.log("reload error inv", error.response);
+            });
+    }
     reloadScm() {
+        const thisComponent = this;
         axios.post('/data/scm/' + this.state.env + '/reload')
             .then(response => {
                 console.log("reloaded", response.data);
+                this.retrieveInstances(thisComponent.state.env);
             })
             .catch(function (error) {
                 console.log("reload error", error.response);
             });
     }
     reloadSsh() {
-            axios.post('/data/ssh/' + this.state.env + '/reload')
-                .then(response => {
-                    console.log("reloaded", response.data);
-                })
-                .catch(function (error) {
-                    console.log("reload error", error.response);
-                });
-        }
+         const thisComponent = this;
+         axios.post('/data/ssh/' + this.state.env + '/reload')
+            .then(response => {
+                console.log("reloaded", response.data);
+                this.retrieveInstances(thisComponent.state.env);
+            })
+            .catch(function (error) {
+                console.log("reload error", error.response);
+            });
+    }
     componentWillMount() {
         console.info("envApp !will-mount ");
     }
@@ -205,6 +220,7 @@ class EnvApp extends React.Component {
                         <div className='side-content-wrapper'>
                             <div className='side-primary'>
                                 <InstanceFilter id={this.state.filterId} hosts={hosts} onFilterChanged={(e, hf) => this.changeSelected(e, hf)} />
+                                <button onClick={e => this.reloadInventory()}>RELOAD INV</button>
                                 <button onClick={e => this.reloadScm()}>RELOAD SCM</button>
                                 <button onClick={e => this.reloadSsh()}>RELOAD SSH</button>
                                 <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />

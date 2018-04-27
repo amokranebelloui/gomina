@@ -96,9 +96,9 @@ class MonitoringPlugin : Plugin {
             }
 
             val id = env + "-" + instanceId // FIXME Only needed when returning all envs instances, simplify later
-            val unexpected = Instance(id=id, env=env, type=indicators["TYPE"], service=indicators["SERVICE"], name=instanceId, unexpected = true)
-            // FIXME Use a function
-            val instance = instanceDetailRepository.getOrCreateInstance(id, unexpected)
+            val instance = instanceDetailRepository.getOrCreateInstance(id) {
+                Instance(id=id, env=env, type=indicators["TYPE"], service=indicators["SERVICE"], name=instanceId, unexpected = true)
+            }
 
             val participating = newValues["PARTICIPATING"]?.toBoolean() ?: false
             val leader = newValues["LEADER"]?.toBoolean() ?: true

@@ -19,6 +19,7 @@ import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.module.GominaModule
+import org.neo.gomina.plugins.inventory.InventoryApi
 
 class WebVerticle : AbstractVerticle() {
 
@@ -46,6 +47,7 @@ class WebVerticle : AbstractVerticle() {
                 .mountSubRouter("/data/projects", injector.getInstance(ProjectsApi::class.java).router)
                 .mountSubRouter("/data/instances", injector.getInstance(InstancesApi::class.java).router)
                 .mountSubRouter("/data/scm", injector.getInstance(ScmApi::class.java).router)
+                .mountSubRouter("/data/inventory", injector.getInstance(InventoryApi::class.java).router)
                 .mountSubRouter("/data/ssh", injector.getInstance(SshApi::class.java).router)
                 .mountSubRouter("/data/sonar", injector.getInstance(SonarApi::class.java).router)
                 .mountSubRouter("/data/events", injector.getInstance(EventsApi::class.java).router)
