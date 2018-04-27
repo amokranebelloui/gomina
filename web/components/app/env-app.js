@@ -13,7 +13,7 @@ class EnvApp extends React.Component {
             env: props.match.params.id,
             envs: [],
             realtime: false,
-            instances: [],
+            services: [],
             filterId: 'all',
             highlight: instance => true,
             events: []
@@ -49,8 +49,8 @@ class EnvApp extends React.Component {
             thisComponent.state.events.unshift({type: 'status', message: event.env + ' ' + event.name + ' ' + event.status + ' ' + event.leader + ' ' + event.participating})
             thisComponent.setState({events: thisComponent.state.events});
 
-            // FIXME review how to identify instances
-            const found = thisComponent.state.instances.find(instance => instance.name == event.name);
+            // FIXME review how to identify services/instances
+            const found = thisComponent.state.services.find(svc => svc.instances.find(ins => ins.name == event.name));
 
             //console.info("found", found);
 
@@ -58,7 +58,7 @@ class EnvApp extends React.Component {
                 found.status = event.status;
                 found.leader = event.leader;
                 found.participating = event.participating;
-                thisComponent.setState({instances: thisComponent.state.instances});
+                thisComponent.setState({services: thisComponent.state.services});
             }
         };
 
@@ -95,14 +95,14 @@ class EnvApp extends React.Component {
     retrieveInstances(env) {
         console.log("Retr... " + env);
         const thisComponent = this;
-        axios.get('/data/instances/' + env)
+        axios.get('/data/instances/' + env + '/services')
             .then(response => {
-                console.log("envApp data instances", response.data);
-                thisComponent.setState({instances: response.data});
+                console.log("envApp data services", response.data);
+                thisComponent.setState({services: response.data});
             })
             .catch(function (error) {
-                console.log("envApp error", error);
-                thisComponent.setState({instances: []});
+                console.log("envApp error services", error);
+                thisComponent.setState({services: []});
             });
     }
     retrieveEvents(env) {
@@ -163,11 +163,11 @@ class EnvApp extends React.Component {
         this.setState({filterId: filterId, highlight: highlightFunction})
     }
     render() {
-        const instancesByEnv = groupBy(this.state.instances, 'env');
-        const instances = instancesByEnv[this.state.env] || [];
+        const flatMap = (arr, f) => arr.map(f).reduce((x,y) => x.concat(y), [])
+
         const envsByType = groupBy(this.state.envs, 'type');
+        const instances = flatMap(this.state.services, svc => svc.instances)
         const events = this.state.events;
-        //console.info("envApp", this.state.instances, this.state.env, instances);
 
         const iterable = instances.map(instance => instance.host);
         const hosts = [...new Set(iterable)].sort();
@@ -198,7 +198,7 @@ class EnvApp extends React.Component {
                 <div className='main-content'>
                     <div className='principal-content'>
                         <Container>
-                            <EnvironmentLogical instances={instances} highlight={this.state.highlight} />
+                            <EnvironmentLogical services={this.state.services} highlight={this.state.highlight} />
                         </Container>
                     </div>
                     <div className='side-content'>

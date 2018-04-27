@@ -64,12 +64,15 @@ class InstancesApi {
     fun servicesForEnv(ctx: RoutingContext) {
         try {
             val envId = ctx.request().getParam("envId")
-            val servicesMap = inventory.getEnvironment(envId)?.services
+            val svcMap = (inventory.getEnvironment(envId)?.services
+                    ?.map { it.toServiceDetail() }
                     ?.associateBy { it.svc }
-                    ?: emptyMap()
+                    ?: emptyMap())
+            val serviceMap = svcMap.toMutableMap()
+
             val instances = instanceDetailRepository.getInstances(envId)
-                    .groupBy { it.service }
-                    .mapKeys { (k, _) -> servicesMap[k]?.toServiceDetail() ?: ServiceDetail(svc = "unexpected") }
+                    .groupBy { it.service ?: "unknown" }
+                    .mapKeys { (k, _) -> serviceMap.getOrPut(k) { ServiceDetail(svc = k) } }
                     .map { (service, instances) -> mapOf("service" to service, "instances" to instances) }
             ctx.response()
                     .putHeader("content-type", "text/javascript")

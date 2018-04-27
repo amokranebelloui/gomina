@@ -99,14 +99,13 @@ class EnvironmentLogical extends React.Component {
         super(props);
     }
     render() {
-        const instances = this.props.instances;
-        const services = groupBy(instances, 'service');
+        const services = this.props.services;
         return (
             <div className='env-table'>
-                {Object.keys(services).map( service =>
-                    <div key={service} className='env-row'>
-                        <Service name={service} instances={services[service]} highlightFunction={this.props.highlight} />
-                        {services[service].map(instance =>
+                {services.map( svc =>
+                    <div key={svc.service.svc} className='env-row'>
+                        <Service service={svc.service} instances={svc.instances || []} highlightFunction={this.props.highlight} />
+                        {(svc.instances || []).map(instance =>
                             <Instance key={instance.id} instance={instance} highlighted={this.props.highlight(instance)} />
                         )}
                     </div>

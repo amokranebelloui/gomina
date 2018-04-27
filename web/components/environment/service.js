@@ -96,11 +96,11 @@ class ServiceStatus extends React.Component {
 
 class Service extends React.Component {
     render() {
-        const serviceName = this.props.name;
+        const service = this.props.service;
         const instances = this.props.instances ? this.props.instances : [];
         const projectSet = new Set(instances.map(instance => instance.project).filter(p => p != null));
         const projects = [...projectSet]
-        const d = computeServiceDetails(serviceName, instances);
+        const d = computeServiceDetails(service.svc, instances);
         const highlightFunction = this.props.highlightFunction || (instance => true);
         var serviceHighlighted = false;
         {instances.map(instance =>
@@ -108,11 +108,11 @@ class Service extends React.Component {
         )}
         const opacity = serviceHighlighted ? 1 : 0.1;
         return ([
-                <ServiceStatus key={'status' + serviceName}
+                <ServiceStatus key={'status' + service.svc}
                                status={d.status} reason={d.reason} text={d.text}
                                style={{opacity: opacity}} />,
                 <div className="service" style={{opacity: opacity}}>
-                    <span><b>{serviceName}</b></span>&nbsp;
+                    <span><b>{service.svc}</b>&nbsp;<i>{service.type}</i></span>&nbsp;
                     <Badge backgroundColor="">{instances.length}</Badge><br/>
                     {projects.map(project =>
                         <BuildLink url={'navigate/' + project}/>
