@@ -63,7 +63,7 @@ class Instance (
         var redisClientCount: Int? = null
 )
 
-class InstanceRealTime (
+data class InstanceRealTime (
         var env: String? = null ,
         var id: String? = null, // Unique by env
         var name: String? = null ,// X Replication

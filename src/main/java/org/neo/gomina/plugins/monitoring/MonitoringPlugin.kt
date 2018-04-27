@@ -99,12 +99,19 @@ class MonitoringPlugin : Plugin {
             val unexpected = Instance(id=id, env=env, type=indicators["TYPE"], service=indicators["SERVICE"], name=instanceId, unexpected = true)
             // FIXME Use a function
             val instance = instanceDetailRepository.getOrCreateInstance(id, unexpected)
+
+            val participating = newValues["PARTICIPATING"]?.toBoolean() ?: false
+            val leader = newValues["LEADER"]?.toBoolean() ?: true
+            val status = newValues["STATUS"]
+            val rt = instance.participating != participating || instance.leader != leader || instance.status != status
+
             instance.applyMonitoring(indicators)
 
-            val instanceRT = InstanceRealTime(env = env, id = instanceId, name = instanceId)
-            instanceRT.applyRealTime(newValues)
-
-            listeners.forEach { it.invoke(instanceRT) }
+            if (rt) {
+                val instanceRT = InstanceRealTime(env = env, id = instanceId, name = instanceId)
+                instanceRT.applyRealTime(newValues)
+                listeners.forEach { it.invoke(instanceRT) }
+            }
         }
         catch (e: Exception) {
             logger.error("Cannot notify env=$env instance=$instanceId", e)
