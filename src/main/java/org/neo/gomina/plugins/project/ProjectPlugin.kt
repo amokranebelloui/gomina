@@ -11,6 +11,7 @@ import javax.inject.Inject
 private fun ProjectDetail.apply(project: Project) {
     this.label = project.label ?: project.id
     this.type = project.type
+    this.tags = project.tags
     this.scmRepo = project.svnRepo
     this.scmLocation = project.svnUrl
     this.mvn = project.maven
@@ -29,7 +30,7 @@ class ProjectPlugin : Plugin {
         for (project in projects.getProjects()) {
             val projectDetail = ProjectDetail(project.id)
             projectDetail.apply(project)
-            projectDetailRepository.addProject(projectDetail);
+            projectDetailRepository.addProject(projectDetail)
         }
         logger.info("Projects initialized")
     }

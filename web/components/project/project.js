@@ -94,6 +94,7 @@ class ProjectSummary extends React.Component {
                         &nbsp;
                         <UnreleasedChangeCount changes={project.changes} />
                         <span style={{fontSize: 8, marginLeft: 2}}>({project.type})</span>
+                        {project.tags && <span style={{fontSize: 8, marginLeft: 2}}>({project.tags})</span>}
                     </span>
                     <br/>
                     <span style={{fontSize: 8}}>{project.mvn}</span>
@@ -129,7 +130,8 @@ function ProjectBadge(props) {
                 <BuildLink server={project.jenkinsServer} url={project.jenkinsUrl} />
                 <span>{project.jenkinsJob}</span>
                 <br/>
-                <button onClick={e => props.onReloadProject(project.id)}>RELOAD</button>
+                <button onClick={e => props.onReload(project.id)}>RELOAD</button>
+                <button onClick={e => props.onReloadScm(project.id)}>RELOAD SCM</button>
                 <button onClick={e => props.onReloadSonar()}>RELOAD SONAR</button>
                 <hr />
                 <Link to={'/project/' + props.project.id}>SVN Log</Link>

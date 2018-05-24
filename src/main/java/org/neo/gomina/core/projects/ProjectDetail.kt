@@ -6,6 +6,7 @@ data class ProjectDetail (
         var id: String,
         var label: String? = null,
         var type: String? = null,
+        var tags: String? = null,
         var scmRepo: String? = null,
         var scmLocation: String? = null,
         var scmUrl: String? = null,

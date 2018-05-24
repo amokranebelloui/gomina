@@ -25,6 +25,7 @@ import org.neo.gomina.module.config.ConfigLoader
 import org.neo.gomina.plugins.inventory.InventoryApi
 import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.jenkins.JenkinsConfig
+import org.neo.gomina.plugins.jenkins.JenkinsConnector
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
@@ -91,6 +92,7 @@ class GominaModule : AbstractModule() {
 
         // Jenkins
         bind(JenkinsConfig::class.java).toInstance(config.jenkins)
+        bind(JenkinsConnector::class.java).`in`(Scopes.SINGLETON)
         bind(JenkinsPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // Sonar

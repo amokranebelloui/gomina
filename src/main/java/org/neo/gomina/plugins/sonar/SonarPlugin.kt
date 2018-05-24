@@ -52,9 +52,7 @@ class SonarPlugin : Plugin {
             val sonarIndicators = map[project.sonarServer]?.get(project.maven)
 
             val projectDetail = projectDetailRepository.getProject(project.id)
-            if (projectDetail != null) {
-                projectDetail.apply(sonarIndicators)
-            }
+            projectDetail?.apply(sonarIndicators)
         }
     }
 

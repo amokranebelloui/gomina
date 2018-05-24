@@ -76,6 +76,7 @@ class CustomFix(
         var connected: Boolean?
 )
 
+/*
 class Instance2 (
         val identification: Identification,
         val deployment: Deployment,
@@ -91,3 +92,4 @@ class Instance2 (
         var unexpected: Boolean = false,
         var unexpectedHost: Boolean = false
 )
+        */

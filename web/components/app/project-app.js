@@ -51,6 +51,7 @@ class ProjectApp extends React.Component {
             });
     }
     reloadProject(projectId) {
+        console.info("reloading", projectId);
         axios.post('/data/scm/project/' + projectId + '/reload')
             .then(response => {
                 console.log("project reloaded", response.data);
@@ -122,7 +123,7 @@ class ProjectApp extends React.Component {
     render() {
         //console.info("!render ", this.props.match.params.id);
         console.info("RRR", this.state.search);
-        const projects = this.state.projects;
+        const projects = this.state.projects.sort((a, b) => a.label > b.label ? 1 : -1);
         const project = this.state.project;
         const commits = project.commitLog || [];
         const instances = this.state.instances.filter(instance => instance.project == project.id);
@@ -153,7 +154,10 @@ class ProjectApp extends React.Component {
                         </div>
                     </Container>
                     <Well block>
-                        <ProjectBadge project={project} onReloadProject={id => this.reloadProject(id)} onReloadSonar={() => this.reloadSonar()} />
+                        <ProjectBadge project={project}
+                                      onReload={id => this.retrieveProject(id)}
+                                      onReloadScm={id => this.reloadProject(id)}
+                                      onReloadSonar={() => this.reloadSonar()} />
                     </Well>
                     <Container>
                         {docId
@@ -168,7 +172,8 @@ class ProjectApp extends React.Component {
     }
 
     matchesSearch(project) {
-        return project.label && project.label.match(new RegExp(this.state.search, "i"));
+        return project.label && project.label.match(new RegExp(this.state.search, "i")) ||
+            project.tags && project.tags.match(new RegExp(this.state.search, "i"));
         //return project.label && project.label.indexOf(this.state.search) !== -1;
     }
 }

@@ -7,7 +7,6 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.core.projects.ProjectDetailRepository
-import org.neo.gomina.model.project.Projects
 import org.neo.gomina.plugins.scm.ScmPlugin
 import javax.inject.Inject
 
@@ -19,11 +18,11 @@ class ProjectsApi {
 
     val router: Router
 
-    @Inject private lateinit var projects: Projects
+    //@Inject private lateinit var projects: Projects
 
-    @Inject lateinit var projectDetailRepository: ProjectDetailRepository
+    @Inject lateinit private var projectDetailRepository: ProjectDetailRepository
 
-    @Inject lateinit var scmPlugin: ScmPlugin // FIXME Plugin
+    @Inject lateinit private var scmPlugin: ScmPlugin // FIXME Plugin
 
     private val mapper = ObjectMapper()
 

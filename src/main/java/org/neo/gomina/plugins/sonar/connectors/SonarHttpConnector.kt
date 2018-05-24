@@ -9,7 +9,6 @@ import org.apache.http.util.EntityUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.plugins.sonar.SonarConnector
 import org.neo.gomina.plugins.sonar.SonarIndicators
-import java.io.IOException
 import java.util.*
 
 class HttpSonarConnector(val url: String) : SonarConnector {
@@ -27,11 +26,11 @@ class HttpSonarConnector(val url: String) : SonarConnector {
             val httpclient = HttpClients.createDefault()
             val resourceQuery = if (StringUtils.isNotBlank(resource)) "resource=$resource&" else ""
             val httpGet = HttpGet(url + "/api/resources?" + resourceQuery + "metrics=ncloc,coverage")
-            val response1 = httpclient.execute(httpGet)
-            try {
-                logger.info("-> Result " + response1.statusLine)
-                if (response1.statusLine.statusCode == 200) {
-                    val entity1 = response1.entity
+            val response = httpclient.execute(httpGet)
+            response.use {
+                logger.info("-> Result " + it.statusLine)
+                if (it.statusLine.statusCode == 200) {
+                    val entity1 = it.entity
 
                     val data = mapper.readValue<List<Map<String, Object>>>(entity1.content)
                     for (project in data) {
@@ -44,8 +43,6 @@ class HttpSonarConnector(val url: String) : SonarConnector {
                     }
                     EntityUtils.consume(entity1)
                 }
-            } finally {
-                response1.close()
             }
         } catch (e: Exception) {
             logger.error("", e)
