@@ -1,4 +1,4 @@
-package org.neo.gomina.model.maven
+package org.neo.gomina.integration.maven
 
 import org.apache.logging.log4j.LogManager
 import java.io.ByteArrayInputStream

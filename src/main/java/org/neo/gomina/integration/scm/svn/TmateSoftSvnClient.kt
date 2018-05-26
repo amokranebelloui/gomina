@@ -1,9 +1,9 @@
-package org.neo.gomina.plugins.scm.connectors
+package org.neo.gomina.integration.scm.svn
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.scm.Commit
-import org.neo.gomina.model.scm.ScmClient
+import org.neo.gomina.integration.scm.Commit
+import org.neo.gomina.integration.scm.ScmClient
 import org.tmatesoft.svn.core.*
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory
 import org.tmatesoft.svn.core.io.SVNRepository

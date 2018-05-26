@@ -1,4 +1,4 @@
-package org.neo.gomina.model.maven
+package org.neo.gomina.integration.maven
 
 import org.fest.assertions.Assertions.assertThat
 import org.junit.Test

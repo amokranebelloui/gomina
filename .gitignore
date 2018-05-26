@@ -2,8 +2,12 @@
 !.idea/runConfigurations/
 .vertx/
 node_modules/*
+node
+npm-debug.log
 dist/
 *.iml
 config/pass.properties
 config/config.yaml
+.cache
+data
 

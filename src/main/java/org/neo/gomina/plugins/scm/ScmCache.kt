@@ -4,7 +4,7 @@ package org.neo.gomina.plugins.scm
 
 import com.thoughtworks.xstream.XStream
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.integration.scm.Commit
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream

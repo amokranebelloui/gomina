@@ -1,4 +1,4 @@
-package org.neo.gomina.plugins.scm.connectors
+package org.neo.gomina.integration.scm.dummy
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -7,8 +7,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.scm.Commit
-import org.neo.gomina.model.scm.ScmClient
+import org.neo.gomina.integration.scm.Commit
+import org.neo.gomina.integration.scm.ScmClient
 import java.io.File
 import java.util.*
 

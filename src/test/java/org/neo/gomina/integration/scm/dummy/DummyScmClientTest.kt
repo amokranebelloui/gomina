@@ -1,4 +1,4 @@
-package org.neo.gomina.plugins.scm.connectors
+package org.neo.gomina.integration.scm.dummy
 
 import org.apache.logging.log4j.LogManager
 import org.junit.Test

@@ -1,4 +1,4 @@
-package org.neo.gomina.plugins.scm.connectors
+package org.neo.gomina.integration.scm.svn
 
 import org.junit.Test
 

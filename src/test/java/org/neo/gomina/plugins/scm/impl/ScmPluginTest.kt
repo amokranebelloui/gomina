@@ -1,11 +1,11 @@
 package org.neo.gomina.plugins.scm.impl
 
 import org.junit.Test
-import org.neo.gomina.model.scm.ScmClient
-import org.neo.gomina.model.scm.ScmRepo
-import org.neo.gomina.model.scm.ScmRepos
+import org.neo.gomina.integration.scm.ScmClient
+import org.neo.gomina.integration.scm.ScmRepo
+import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.plugins.scm.ScmPlugin
-import org.neo.gomina.plugins.scm.connectors.DummyScmClient
+import org.neo.gomina.integration.scm.dummy.DummyScmClient
 
 class ScmPluginTest {
 

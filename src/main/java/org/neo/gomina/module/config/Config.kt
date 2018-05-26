@@ -7,24 +7,23 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.neo.gomina.plugins.jenkins.JenkinsConfig
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
-import org.neo.gomina.plugins.scm.connectors.ScmConfig
+import org.neo.gomina.integration.scm.impl.ScmConfig
 import org.neo.gomina.plugins.sonar.SonarConfig
 import org.neo.gomina.plugins.ssh.SshConfig
 import java.io.File
 
 data class Config (
 
-    var name: String? = null,
-    var passwordsFile: String? = null,
+        var name: String? = null,
+        var passwordsFile: String? = null,
 
-    var inventory: Map<String, String>? = mapOf(),
+        var inventory: Map<String, String>? = mapOf(),
 
-    var scm: ScmConfig? = null,
-    var jenkins: JenkinsConfig = JenkinsConfig(),
-    var sonar: SonarConfig = SonarConfig(),
-    var ssh: SshConfig = SshConfig(),
+        var jenkins: JenkinsConfig = JenkinsConfig(),
+        var sonar: SonarConfig = SonarConfig(),
+        var ssh: SshConfig = SshConfig(),
 
-    var zmqMonitoring: ZmqMonitorConfig = ZmqMonitorConfig()
+        var zmqMonitoring: ZmqMonitorConfig = ZmqMonitorConfig()
 
 )
 

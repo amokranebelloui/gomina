@@ -18,10 +18,11 @@ import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.file.FileInventory
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.project.file.FileProjects
-import org.neo.gomina.model.scm.ScmRepos
+import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.module.config.Config
 import org.neo.gomina.module.config.ConfigLoader
+import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.plugins.inventory.InventoryApi
 import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.jenkins.JenkinsConfig
@@ -32,8 +33,8 @@ import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
 import org.neo.gomina.plugins.project.ProjectPlugin
 import org.neo.gomina.plugins.scm.ScmApi
 import org.neo.gomina.plugins.scm.ScmPlugin
-import org.neo.gomina.plugins.scm.connectors.ConfigScmRepos
-import org.neo.gomina.plugins.scm.connectors.ScmConfig
+import org.neo.gomina.integration.scm.impl.ScmReposImpl
+import org.neo.gomina.integration.scm.impl.ScmConfig
 import org.neo.gomina.plugins.sonar.SonarApi
 import org.neo.gomina.plugins.sonar.SonarConfig
 import org.neo.gomina.plugins.sonar.SonarConnectors
@@ -86,8 +87,8 @@ class GominaModule : AbstractModule() {
         bind(ZmqMonitorConfig::class.java).toInstance(config.zmqMonitoring)
 
         // SCM
-        bind(ScmConfig::class.java).toInstance(config.scm)
-        bind(ScmRepos::class.java).to(ConfigScmRepos::class.java).`in`(Scopes.SINGLETON)
+        bind(ScmConfig::class.java).toProvider(ScmConfigProvider::class.java)
+        bind(ScmRepos::class.java).to(ScmReposImpl::class.java).`in`(Scopes.SINGLETON)
         bind(ScmPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // Jenkins
