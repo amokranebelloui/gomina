@@ -8,6 +8,16 @@
   jenkinsServer: principal
   jenkinsJob: 6.14 SERVER-SrvTradexCore
 
+- id: tradex-core-fork
+  label: Core Fork
+  type: common
+  tags: "tradex lib"
+  svnRepo: home
+  svnUrl: svn-project1
+  maven: x.oms.core:tradex-core
+  #jenkinsServer:
+  #jenkinsJob:
+
 - id: kernel
   label: Kernel
   type: server
