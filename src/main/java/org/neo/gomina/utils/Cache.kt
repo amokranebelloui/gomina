@@ -15,15 +15,17 @@ class Cache<T>(val prefix:String, val fixFunction:(T) -> Unit = {}) {
     init {
         File(".cache/$prefix").
                 takeUnless { it.exists() }?.
-                let { logger.info("Created $it ${it.mkdirs()}") }
+                let { logger.info("$prefix: Created $it ${it.mkdirs()}") }
     }
 
-    fun get(id: String): T? {
+    fun get(id: String): T? = getOrLoad(id) {null}
+
+    fun getOrLoad(id: String, retrieve:(String) -> T? = { null }): T? {
         val file = fileNameFor(id)
 
         if (cache.containsKey(id)) {
             val data = cache[id]
-            logger.debug("Data Served from Memory Cache $data")
+            logger.debug("$prefix: Data Served from Memory Cache $data")
             return data
         }
         else if (file.exists()) {
@@ -31,15 +33,16 @@ class Cache<T>(val prefix:String, val fixFunction:(T) -> Unit = {}) {
                 val data = xStream.fromXML(file) as T
                 fixFunction(data) // Keep  the defaulting, as it gets set to null if not in the file
                 cache.put(id, data)
-                logger.debug("Data Served from File Cache $data")
+                logger.debug("$prefix: Data Served from File Cache $data")
                 return data
             }
             catch (e: Exception) {
-                logger.debug("Error loading Cache", e)
-                logger.info("Error loading Cache from File $file")
+                logger.debug("$prefix: Error loading Cache", e)
+                logger.info("$prefix: Error loading Cache from File $file")
             }
         }
-        return null
+        logger.info("$prefix: Cache miss $id")
+        return retrieve(id) ?. also { data -> cache(id, data) }
     }
 
     fun cache(id: String, data: T) {
@@ -56,7 +59,7 @@ class Cache<T>(val prefix:String, val fixFunction:(T) -> Unit = {}) {
 
     private fun fileNameFor(id: String): File {
         val filename = id.replace("/".toRegex(), "-").replace("\\\\".toRegex(), "-")
-        return File(".cache/$prefix/$filename")
+        return File(".cache/$prefix/$filename.$prefix")
     }
 
     companion object {

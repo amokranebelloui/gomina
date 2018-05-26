@@ -5,8 +5,10 @@ import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.core.projects.ProjectDetailRepository
 import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.integration.sonar.SonarIndicators
+import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.plugins.Plugin
+import org.neo.gomina.utils.Cache
 import javax.inject.Inject
 
 private fun ProjectDetail.apply(sonarIndicators: SonarIndicators?) {
@@ -19,26 +21,39 @@ class SonarPlugin : Plugin {
     @Inject private lateinit var projects: Projects
     @Inject private lateinit var connectors: SonarConnectors
 
+    private val sonarCache = Cache<Map<String, SonarIndicators>>("sonar")
+
     @Inject lateinit var projectDetailRepository: ProjectDetailRepository
 
     override fun init() {
         logger.info("Initializing Sonar Data ...")
-        reload()
+        projects.getProjects()
+                .groupBy { it.sonarServer }
+                .forEach { (srv, projects) ->
+                    val metrics = sonarCache.getOrLoad(srv) { getMetrics(srv) }
+                    projects.apply(metrics)
+                }
         logger.info("Sonar Data initialized")
     }
 
     fun reload() {
-        val map = projects.getProjects()
-                .map { p -> p.sonarServer }
-                .distinct()
-                .mapNotNull { srv -> connectors.getConnector(srv)?.let { Pair(srv, it.getMetrics()) } }
-                .toMap()
+        projects.getProjects()
+                .groupBy { it.sonarServer }
+                .forEach { (srv, projects) ->
+                    getMetrics(srv) ?. let { metrics ->
+                        sonarCache.cache(srv, metrics)
+                        projects.apply(metrics)
+                    }
+                }
+    }
 
-        for (project in projects.getProjects()) {
-            val sonarIndicators = map[project.sonarServer]?.get(project.maven)
+    private fun getMetrics(srv:String) = connectors.getConnector(srv)?.getMetrics()
 
-            val projectDetail = projectDetailRepository.getProject(project.id)
-            projectDetail?.apply(sonarIndicators)
+    private fun List<Project>.apply(metrics: Map<String, SonarIndicators>?) {
+        metrics?. let { metrics ->
+            forEach {
+                projectDetailRepository.getProject(it.id)?.apply(metrics[it.maven])
+            }
         }
     }
 
