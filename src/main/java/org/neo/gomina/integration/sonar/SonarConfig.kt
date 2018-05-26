@@ -1,4 +1,4 @@
-package org.neo.gomina.plugins.sonar
+package org.neo.gomina.integration.sonar
 
 import java.util.*
 

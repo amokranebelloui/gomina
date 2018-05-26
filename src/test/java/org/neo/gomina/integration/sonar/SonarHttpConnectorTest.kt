@@ -1,7 +1,7 @@
-package org.neo.gomina.plugins.sonar
+package org.neo.gomina.integration.sonar
 
 import org.junit.Test
-import org.neo.gomina.plugins.sonar.connectors.HttpSonarConnector
+import org.neo.gomina.integration.sonar.sonar.HttpSonarConnector
 
 class HttpSonarConnectorTest {
 

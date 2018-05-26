@@ -1,4 +1,4 @@
-package org.neo.gomina.plugins.sonar.connectors
+package org.neo.gomina.integration.sonar.sonar
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -7,8 +7,8 @@ import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.plugins.sonar.SonarConnector
-import org.neo.gomina.plugins.sonar.SonarIndicators
+import org.neo.gomina.integration.sonar.SonarConnector
+import org.neo.gomina.integration.sonar.SonarIndicators
 import java.util.*
 
 class HttpSonarConnector(val url: String) : SonarConnector {

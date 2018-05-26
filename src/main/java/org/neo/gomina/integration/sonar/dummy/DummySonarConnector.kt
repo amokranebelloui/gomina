@@ -1,12 +1,12 @@
-package org.neo.gomina.plugins.sonar.connectors
+package org.neo.gomina.integration.sonar.dummy
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.plugins.sonar.SonarConnector
-import org.neo.gomina.plugins.sonar.SonarIndicators
+import org.neo.gomina.integration.sonar.SonarConnector
+import org.neo.gomina.integration.sonar.SonarIndicators
 import java.io.File
 import java.io.IOException
 import java.util.*

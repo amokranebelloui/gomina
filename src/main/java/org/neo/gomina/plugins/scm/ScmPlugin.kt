@@ -8,7 +8,6 @@ import org.neo.gomina.core.instances.InstanceDetailRepository
 import org.neo.gomina.core.projects.CommitLogEntry
 import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.core.projects.ProjectDetailRepository
-import org.neo.gomina.integration.scm.Commit
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.integration.scm.cache.ScmCache
@@ -18,21 +17,20 @@ import org.neo.gomina.plugins.Plugin
 import java.io.File
 import javax.inject.Inject
 
-private fun map(commitLog: List<Commit>): List<CommitLogEntry> {
-    return commitLog.map { CommitLogEntry(
+private fun ProjectDetail.apply(scmDetails: ScmDetails) {
+    this.scmUrl = scmDetails.url
+    this.docFiles = scmDetails.docFiles
+    this.changes = scmDetails.changes
+    this.latest = scmDetails.latest
+    this.released = scmDetails.released
+    this.commitLog = scmDetails.commitLog.map {
+        CommitLogEntry(
             revision = it.revision,
             date = it.date,
             author = it.author,
             message = it.message
-    ) }
-}
-private fun apply(projectDetail: ProjectDetail, scmDetails: ScmDetails) {
-    projectDetail.scmUrl = scmDetails.url
-    projectDetail.docFiles = scmDetails.docFiles
-    projectDetail.changes = scmDetails.changes
-    projectDetail.latest = scmDetails.latest
-    projectDetail.released = scmDetails.released
-    projectDetail.commitLog = map(scmDetails.commitLog)
+        )
+    }
 }
 
 
@@ -67,12 +65,8 @@ class ScmPlugin : Plugin {
     override fun init() {
         logger.info("Initializing SCM Data ...")
         for (project in projects.getProjects()) {
-            val projectDetail = projectDetailRepository.getProject(project.id)
-            if (projectDetail != null) {
-                val scmDetails = this.getSvnDetails(project.svnRepo, project.svnUrl)
-                apply(projectDetail, scmDetails)
-
-            }
+            projectDetailRepository.getProject(project.id)
+                    ?.apply(getSvnDetails(project.svnRepo, project.svnUrl))
         }
 
         for (env in inventory.getEnvironments()) {
@@ -80,8 +74,9 @@ class ScmPlugin : Plugin {
                 for (envInstance in service.instances) {
                     val id = env.id + "-" + envInstance.id
                     val instance = instanceDetailRepository.getInstance(id)
-                    val project = if (service.project != null) projects.getProject(service.project) else null
-                    project?.let { instance?.applyScm(this.getSvnDetails(project.svnRepo, project.svnUrl)) }
+                    service.project
+                            ?.let { projects.getProject(it) }
+                            ?.let { instance?.applyScm(this.getSvnDetails(it.svnRepo, it.svnUrl)) }
                 }
             }
         }
@@ -122,8 +117,9 @@ class ScmPlugin : Plugin {
                 for (envInstance in service.instances) {
                     val id = env.id + "-" + envInstance.id
                     val instance = instanceDetailRepository.getInstance(id)
-                    val project = if (service.project != null) projects.getProject(service.project) else null
-                    project?.let { instance?.applyScm(this.getSvnDetails(project.svnRepo, project.svnUrl)) }
+                    service.project
+                            ?.let { projects.getProject(it) }
+                            ?.let { instance?.applyScm(this.getSvnDetails(it.svnRepo, it.svnUrl)) }
                 }
             }
         }
@@ -137,11 +133,9 @@ class ScmPlugin : Plugin {
     fun refresh(projectId: String, svnRepo: String, svnUrl: String) {
         if (svnUrl.isNotBlank()) {
             val scmDetails = scmRepos.getScmDetails(svnRepo, svnUrl)
-            ///scmCache.cacheLog(svnRepo, svnUrl, commitLog)
             scmCache.cacheDetail(svnRepo, svnUrl, scmDetails)
-
-            val projectDetail = projectDetailRepository.getProject(projectId)
-            projectDetail?.let { apply(projectDetail, scmDetails) }
+            projectDetailRepository.getProject(projectId)
+                    ?.apply(scmDetails)
         }
     }
 

@@ -2,6 +2,8 @@ package org.neo.gomina.plugins.jenkins
 
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.projects.ProjectDetailRepository
+import org.neo.gomina.integration.jenkins.JenkinsConnector
+import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.plugins.Plugin
 import java.util.*

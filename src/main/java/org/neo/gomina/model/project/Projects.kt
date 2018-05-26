@@ -9,6 +9,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import java.io.File
 
+data class ScmLocation (var svnRepo: String = "", var svnUrl: String = "")
+
 data class Project (
     var id: String,
     var label: String?,

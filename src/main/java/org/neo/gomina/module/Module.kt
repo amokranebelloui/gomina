@@ -14,30 +14,33 @@ import org.neo.gomina.core.instances.InstanceDetailRepository
 import org.neo.gomina.core.instances.InstanceDetailRepositoryImpl
 import org.neo.gomina.core.projects.ProjectDetailRepository
 import org.neo.gomina.core.projects.ProjectDetailRepositoryImpl
+import org.neo.gomina.integration.jenkins.JenkinsConnector
+import org.neo.gomina.integration.scm.ScmRepos
+import org.neo.gomina.integration.scm.impl.ScmConfig
+import org.neo.gomina.integration.scm.impl.ScmReposImpl
+import org.neo.gomina.integration.sonar.SonarConfig
+import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.file.FileInventory
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.project.file.FileProjects
-import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.module.config.Config
 import org.neo.gomina.module.config.ConfigLoader
+import org.neo.gomina.persistence.jenkins.JenkinsConfigProvider
 import org.neo.gomina.persistence.scm.ScmConfigProvider
+import org.neo.gomina.persistence.sonar.SonarConfigProvider
 import org.neo.gomina.plugins.inventory.InventoryApi
 import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.jenkins.JenkinsConfig
-import org.neo.gomina.plugins.jenkins.JenkinsConnector
+import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
 import org.neo.gomina.plugins.project.ProjectPlugin
 import org.neo.gomina.plugins.scm.ScmApi
 import org.neo.gomina.plugins.scm.ScmPlugin
-import org.neo.gomina.integration.scm.impl.ScmReposImpl
-import org.neo.gomina.integration.scm.impl.ScmConfig
 import org.neo.gomina.plugins.sonar.SonarApi
-import org.neo.gomina.plugins.sonar.SonarConfig
-import org.neo.gomina.plugins.sonar.SonarConnectors
 import org.neo.gomina.plugins.sonar.SonarPlugin
 import org.neo.gomina.plugins.ssh.SshApi
 import org.neo.gomina.plugins.ssh.SshConfig
@@ -92,12 +95,12 @@ class GominaModule : AbstractModule() {
         bind(ScmPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // Jenkins
-        bind(JenkinsConfig::class.java).toInstance(config.jenkins)
-        bind(JenkinsConnector::class.java).`in`(Scopes.SINGLETON)
+        bind(JenkinsConfig::class.java).toProvider(JenkinsConfigProvider::class.java)
+        bind(JenkinsConnector::class.java).to(JenkinsConnectorImpl::class.java).`in`(Scopes.SINGLETON)
         bind(JenkinsPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // Sonar
-        bind(SonarConfig::class.java).toInstance(config.sonar)
+        bind(SonarConfig::class.java).toProvider(SonarConfigProvider::class.java)
         bind(SonarConnectors::class.java).`in`(Scopes.SINGLETON)
         bind(SonarPlugin::class.java).`in`(Scopes.SINGLETON)
 
