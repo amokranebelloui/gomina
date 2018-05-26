@@ -7,6 +7,7 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import javax.inject.Inject
 
 class ScmApi {
@@ -19,6 +20,8 @@ class ScmApi {
     val router: Router
 
     @Inject lateinit var scmPlugin: ScmPlugin
+    @Inject lateinit var jenkinsPlugin: JenkinsPlugin // FIXME Review reloads, have only one reload method?
+
 
     private val mapper = ObjectMapper()
 
@@ -54,6 +57,7 @@ class ScmApi {
             val projectId = ctx.request().getParam("projectId")
             logger.info("Reloading Project data $projectId ...")
             scmPlugin.reloadProject(projectId)
+            jenkinsPlugin.reload(projectId)
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
