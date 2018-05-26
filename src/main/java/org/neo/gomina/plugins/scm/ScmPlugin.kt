@@ -10,11 +10,10 @@ import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.core.projects.ProjectDetailRepository
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmRepos
-import org.neo.gomina.integration.scm.cache.ScmCache
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.plugins.Plugin
-import java.io.File
+import org.neo.gomina.utils.Cache
 import javax.inject.Inject
 
 private fun ProjectDetail.apply(scmDetails: ScmDetails) {
@@ -44,7 +43,9 @@ fun Instance.applyScm(scmDetails: ScmDetails) {
 class ScmPlugin : Plugin {
 
     private val scmRepos: ScmRepos
-    private val scmCache = ScmCache()
+    private val scmCache = Cache<ScmDetails>("scm") {
+        it.docFiles = it.docFiles ?: emptyList()
+    }
 
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var projects: Projects
@@ -55,11 +56,6 @@ class ScmPlugin : Plugin {
     @Inject
     constructor(scmRepos: ScmRepos) {
         this.scmRepos = scmRepos
-        val file = File(".cache")
-        if (!file.exists()) {
-            val mkdir = file.mkdir()
-            logger.info("Created $file $mkdir")
-        }
     }
 
     override fun init() {
@@ -92,11 +88,11 @@ class ScmPlugin : Plugin {
 
     fun getSvnDetails(svnRepo: String, svnUrl: String): ScmDetails {
         if (svnUrl.isNotBlank()) {
-            val detail = scmCache.getDetail(svnRepo, svnUrl)
+            val detail = scmCache.get("$svnRepo-$svnUrl")
             return if (detail != null) detail
             else {
                 val scmDetails = scmRepos.getScmDetails(svnRepo, svnUrl)
-                scmCache.cacheDetail(svnRepo, svnUrl, scmDetails)
+                scmCache.cache("$svnRepo-$svnUrl", scmDetails)
                 ///scmCache.cacheLog(svnRepo, svnUrl, logEntries)
                 logger.info("SCM Detail Served from SCM " + scmDetails)
                 scmDetails
@@ -133,7 +129,7 @@ class ScmPlugin : Plugin {
     fun refresh(projectId: String, svnRepo: String, svnUrl: String) {
         if (svnUrl.isNotBlank()) {
             val scmDetails = scmRepos.getScmDetails(svnRepo, svnUrl)
-            scmCache.cacheDetail(svnRepo, svnUrl, scmDetails)
+            scmCache.cache("$svnRepo-$svnUrl", scmDetails)
             projectDetailRepository.getProject(projectId)
                     ?.apply(scmDetails)
         }
