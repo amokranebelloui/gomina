@@ -6,8 +6,12 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.projects.ProjectDetail
-import org.neo.gomina.core.projects.ProjectDetailRepository
+import org.neo.gomina.model.project.Project
+import org.neo.gomina.model.project.Projects
+import org.neo.gomina.plugins.jenkins.JenkinsPlugin
+import org.neo.gomina.plugins.project.apply
 import org.neo.gomina.plugins.scm.ScmPlugin
+import org.neo.gomina.plugins.sonar.SonarPlugin
 import javax.inject.Inject
 
 class ProjectsApi {
@@ -18,11 +22,12 @@ class ProjectsApi {
 
     val router: Router
 
-    //@Inject private lateinit var projects: Projects
+    @Inject private lateinit var projects: Projects
 
-    @Inject lateinit private var projectDetailRepository: ProjectDetailRepository
-
-    @Inject lateinit private var scmPlugin: ScmPlugin // FIXME Plugin
+    // FIXME Plugins
+    @Inject lateinit private var scmPlugin: ScmPlugin
+    @Inject lateinit private var sonarPlugin: SonarPlugin
+    @Inject lateinit private var jenkinsPlugin: JenkinsPlugin
 
     private val mapper = ObjectMapper()
 
@@ -82,11 +87,20 @@ class ProjectsApi {
     }
 
     private fun getProjects(): Collection<ProjectDetail> {
-        return projectDetailRepository.getProjects()
+        return projects.getProjects().map { build(it) }
     }
 
     private fun getProject(projectId: String): ProjectDetail? {
-        return projectDetailRepository.getProject(projectId)
+        return projects.getProject(projectId)?.let { build(it) }
+    }
+
+    private fun build(project: Project): ProjectDetail {
+        return ProjectDetail(project.id).apply {
+            apply(project)
+            scmPlugin.enrich(project, this)
+            sonarPlugin.enrich(project, this)
+            jenkinsPlugin.enrich(project, this)
+        }
     }
 
 }

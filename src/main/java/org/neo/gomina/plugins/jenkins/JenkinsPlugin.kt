@@ -2,15 +2,14 @@ package org.neo.gomina.plugins.jenkins
 
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.projects.ProjectDetail
-import org.neo.gomina.core.projects.ProjectDetailRepository
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
+import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.plugins.Plugin
 import org.neo.gomina.utils.Cache
 import java.util.*
 import javax.inject.Inject
-
 
 data class JenkinsServer(val id: String = "", val location: String = "")
 
@@ -33,33 +32,21 @@ class JenkinsPlugin : Plugin {
 
     private val jenkinsCache = Cache<BuildStatus>("jenkins")
 
-    @Inject lateinit var projectDetailRepository: ProjectDetailRepository
-
-    override fun init() {
-        logger.info("Initializing Jenkins data ...")
-
-        projects.getProjects()
-                .mapNotNull { projectDetailRepository.getProject(it.id) ?. let { detail -> Pair(it, detail) } }
-                .forEach { (project, detail) ->
-                    val root = jenkinsConfig.serverMap[project.jenkinsServer]?.location
-                    val url = "$root${project.jenkinsJob}"
-                    val status = jenkinsCache.getOrLoad(url) { jenkinsConnector.getStatus(url) }
-                    detail.apply(url, status)
-                }
-        logger.info("Jenkins data initialized")
+    fun enrich(project: Project, detail: ProjectDetail) {
+        val root = jenkinsConfig.serverMap[project.jenkinsServer]?.location
+        val url = "$root${project.jenkinsJob}"
+        val status = jenkinsCache.getOrLoad(url) { jenkinsConnector.getStatus(url) }
+        detail.apply(url, status)
     }
 
     fun reload(projectId:String) {
+        logger.info("Reload Jenkins data for $projectId ...")
         projects.getProject(projectId)?.let { project ->
-            projectDetailRepository.getProject(projectId)?.let { detail ->
-                val root = jenkinsConfig.serverMap[project.jenkinsServer]?.location
-                val url = "$root${project.jenkinsJob}"
-                val status = jenkinsConnector.getStatus(url)
-                detail.apply(url, status)
-                status?.let { jenkinsCache.cache(url, status) }
-            }
+            val root = jenkinsConfig.serverMap[project.jenkinsServer]?.location
+            val url = "$root${project.jenkinsJob}"
+            val status = jenkinsConnector.getStatus(url)
+            status?.let { jenkinsCache.cache(url, status) }
         }
-
     }
 
     companion object {

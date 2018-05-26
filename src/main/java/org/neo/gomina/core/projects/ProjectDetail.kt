@@ -33,6 +33,7 @@ data class CommitLogEntry (
         var message: String?
 )
 
+/*
 interface ProjectDetailRepository {
     fun getProjects(): Collection<ProjectDetail>
     fun getProject(projectId: String): ProjectDetail?
@@ -55,3 +56,4 @@ class ProjectDetailRepositoryImpl : ProjectDetailRepository {
         index.put(projectDetail.id, projectDetail)
     }
 }
+*/

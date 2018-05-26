@@ -1,5 +1,5 @@
 package org.neo.gomina.plugins
 
 interface Plugin {
-    fun init()
+    fun init() = Unit
 }

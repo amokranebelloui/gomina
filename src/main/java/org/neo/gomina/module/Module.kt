@@ -12,9 +12,8 @@ import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.core.instances.InstanceDetailRepository
 import org.neo.gomina.core.instances.InstanceDetailRepositoryImpl
-import org.neo.gomina.core.projects.ProjectDetailRepository
-import org.neo.gomina.core.projects.ProjectDetailRepositoryImpl
 import org.neo.gomina.integration.jenkins.JenkinsConnector
+import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
 import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.integration.scm.impl.ScmConfig
 import org.neo.gomina.integration.scm.impl.ScmReposImpl
@@ -33,7 +32,6 @@ import org.neo.gomina.persistence.sonar.SonarConfigProvider
 import org.neo.gomina.plugins.inventory.InventoryApi
 import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.jenkins.JenkinsConfig
-import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
@@ -77,7 +75,7 @@ class GominaModule : AbstractModule() {
         // FIXME Type
 
         // core
-        bind(ProjectDetailRepository::class.java).to(ProjectDetailRepositoryImpl::class.java).`in`(Scopes.SINGLETON)
+        //bind(ProjectDetailRepository::class.java).to(ProjectDetailRepositoryImpl::class.java).`in`(Scopes.SINGLETON)
         bind(InstanceDetailRepository::class.java).to(InstanceDetailRepositoryImpl::class.java).`in`(Scopes.SINGLETON)
 
         bind(Projects::class.java).to(FileProjects::class.java).`in`(Scopes.SINGLETON)

@@ -7,16 +7,16 @@ import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.InstanceDetailRepository
 import org.neo.gomina.core.projects.CommitLogEntry
 import org.neo.gomina.core.projects.ProjectDetail
-import org.neo.gomina.core.projects.ProjectDetailRepository
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.model.inventory.Inventory
+import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.plugins.Plugin
 import org.neo.gomina.utils.Cache
 import javax.inject.Inject
 
-private fun ProjectDetail.apply(scmDetails: ScmDetails) {
+fun ProjectDetail.apply(scmDetails: ScmDetails) {
     this.scmUrl = scmDetails.url
     this.docFiles = scmDetails.docFiles
     this.changes = scmDetails.changes
@@ -50,7 +50,6 @@ class ScmPlugin : Plugin {
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var projects: Projects
 
-    @Inject lateinit var projectDetailRepository: ProjectDetailRepository
     @Inject lateinit var instanceDetailRepository: InstanceDetailRepository
 
     @Inject
@@ -58,13 +57,14 @@ class ScmPlugin : Plugin {
         this.scmRepos = scmRepos
     }
 
+    fun enrich(project: Project, detail: ProjectDetail) {
+        val svnDetails = getSvnDetails(project.svnRepo, project.svnUrl)
+        detail.apply(svnDetails)
+    }
+
     override fun init() {
         logger.info("Initializing SCM Data ...")
-        for (project in projects.getProjects()) {
-            projectDetailRepository.getProject(project.id)
-                    ?.apply(getSvnDetails(project.svnRepo, project.svnUrl))
-        }
-
+        
         for (env in inventory.getEnvironments()) {
             for (service in env.services) {
                 for (envInstance in service.instances) {
@@ -106,7 +106,12 @@ class ScmPlugin : Plugin {
     fun reloadInstances(env: String) {
         projects.getProjects()
                 .filter { StringUtils.isNotBlank(it.svnUrl) }
-                .forEach { this.refresh(it.id, it.svnRepo, it.svnUrl) }
+                .forEach {
+                    if (it.svnUrl.isNotBlank()) {
+                        val scmDetails = this.scmRepos.getScmDetails(it.svnRepo, it.svnUrl)
+                        this.scmCache.cache("${it.svnRepo}-${it.svnUrl}", scmDetails)
+                    }
+                }
 
         for (env in inventory.getEnvironments()) {
             for (service in env.services) {
@@ -123,15 +128,11 @@ class ScmPlugin : Plugin {
 
     fun reloadProject(projectId: String) {
         val project = projects.getProject(projectId)
-        this.refresh(projectId, project?.svnRepo ?: "", project?.svnUrl ?: "")
-    }
-
-    fun refresh(projectId: String, svnRepo: String, svnUrl: String) {
+        val svnRepo = project?.svnRepo ?: ""
+        val svnUrl = project?.svnUrl ?: ""
         if (svnUrl.isNotBlank()) {
-            val scmDetails = scmRepos.getScmDetails(svnRepo, svnUrl)
-            scmCache.cache("$svnRepo-$svnUrl", scmDetails)
-            projectDetailRepository.getProject(projectId)
-                    ?.apply(scmDetails)
+            val scmDetails = this.scmRepos.getScmDetails(svnRepo, svnUrl)
+            this.scmCache.cache("$svnRepo-$svnUrl", scmDetails)
         }
     }
 
