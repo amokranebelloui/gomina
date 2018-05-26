@@ -93,8 +93,20 @@
   svnUrl: ''
   maven: torkjell:torkjell
   sonarServer: main
-  jenkinsServer: edge
-  jenkinsJob: Torkjell Build
+  jenkinsServer: local
+  jenkinsJob: torkjell
+
+- id: gomina
+  label: Gomina
+  type: server
+  tags: "governance server"
+  svnRepo: ''
+  svnUrl: ''
+  maven: gomina:gomina
+  sonarServer: main
+  jenkinsServer: local
+  jenkinsJob: gomina
+
 
 - id: kafka
   label: Kafka

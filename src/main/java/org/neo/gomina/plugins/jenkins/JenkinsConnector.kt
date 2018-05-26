@@ -10,7 +10,7 @@ import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 import org.apache.logging.log4j.LogManager
 
-data class BuildStatus (val id:String, val building:Boolean, val result:String, val timestamp:Long)
+data class BuildStatus (val id:String, val building:Boolean, val result:String?, val timestamp:Long)
 
 class JenkinsConnector {
 

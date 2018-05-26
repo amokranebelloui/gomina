@@ -18,6 +18,7 @@ class JenkinsPlugin : Plugin {
 
     @Inject private lateinit var projects: Projects
     @Inject private lateinit var jenkinsConfig: JenkinsConfig
+    @Inject private lateinit var jenkinsConnector: JenkinsConnector
 
     @Inject lateinit var projectDetailRepository: ProjectDetailRepository
 
@@ -27,7 +28,15 @@ class JenkinsPlugin : Plugin {
             val projectDetail = projectDetailRepository.getProject(project.id)
             if (projectDetail != null) {
                 val root = jenkinsConfig.serverMap[project.jenkinsServer]?.location
-                projectDetail.jenkinsUrl = "$root${project.jenkinsJob}"
+                "$root${project.jenkinsJob}".let {
+                    projectDetail.jenkinsUrl = it
+                    val status = jenkinsConnector.getStatus(it)
+                    projectDetail.buildNumber = status?.id
+                    projectDetail.buildStatus = if (status?.building == true) "BUILDING" else status?.result
+                    projectDetail.buildTimestamp = status?.timestamp
+                }
+
+
             }
         }
         logger.info("Jenkins data initialized")

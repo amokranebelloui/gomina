@@ -130,6 +130,12 @@ function ProjectBadge(props) {
                 <BuildLink server={project.jenkinsServer} url={project.jenkinsUrl} />
                 <span>{project.jenkinsJob}</span>
                 <br/>
+                <span>
+                {project.buildNumber} &nbsp;
+                {project.buildStatus} &nbsp;
+                {new Date(project.buildTimestamp).toLocaleString()} &nbsp;
+                </span>
+                <br/>
                 <button onClick={e => props.onReload(project.id)}>RELOAD</button>
                 <button onClick={e => props.onReloadScm(project.id)}>RELOAD SCM</button>
                 <button onClick={e => props.onReloadSonar()}>RELOAD SONAR</button>
