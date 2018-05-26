@@ -1,24 +1,23 @@
 package org.neo.gomina.plugins.scm.impl
 
 import org.junit.Test
-import org.neo.gomina.integration.scm.ScmClient
-import org.neo.gomina.integration.scm.ScmRepo
+import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.plugins.scm.ScmPlugin
-import org.neo.gomina.integration.scm.dummy.DummyScmClient
 
 class ScmPluginTest {
 
     @Test
     fun getSvnDetails() {
         class FileScmReposOverride : ScmRepos {
-            override fun getClient(id: String): ScmClient {
-                return DummyScmClient()
+            override fun getDocument(id: String, svnUrl: String, docId: String): String? {
+                TODO("not implemented")
             }
 
-            override fun getRepo(id: String): ScmRepo? {
-                return null
+            override fun getScmDetails(id: String, svnUrl: String): ScmDetails {
+                TODO("not implemented")
             }
+
         }
 
         val connector = ScmPlugin(FileScmReposOverride())

@@ -1,10 +1,9 @@
-@file:JvmName("ScmPluginKt")
-
-package org.neo.gomina.plugins.scm
+package org.neo.gomina.integration.scm.cache
 
 import com.thoughtworks.xstream.XStream
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.scm.Commit
+import org.neo.gomina.integration.scm.ScmDetails
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -56,6 +55,7 @@ class ScmCache {
         }
     }
 
+    /*
     fun getLog(svnRepo: String, svnUrl: String): List<Commit> {
         val logCacheFileName = svnRepo + "-" + svnUrl.replace("/".toRegex(), "-").replace("\\\\".toRegex(), "-")
         val cacheFile = File(".cache/$logCacheFileName.log")
@@ -72,6 +72,7 @@ class ScmCache {
             logger.error("Cannot save cache in $cacheFile")
         }
     }
+    */
 
 }
 
