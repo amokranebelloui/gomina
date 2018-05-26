@@ -133,7 +133,7 @@ function ProjectBadge(props) {
                 <span>
                 {project.buildNumber} &nbsp;
                 {project.buildStatus} &nbsp;
-                {new Date(project.buildTimestamp).toLocaleString()} &nbsp;
+                {project.buildTimestamp && new Date(project.buildTimestamp).toLocaleString()} &nbsp;
                 </span>
                 <br/>
                 <button onClick={e => props.onReload(project.id)}>RELOAD</button>
