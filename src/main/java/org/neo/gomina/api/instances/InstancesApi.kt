@@ -89,7 +89,7 @@ class InstancesApi {
                         .groupBy { it.service }
                         .map { (service, extInstances) ->
                             mapOf(
-                                    "service" to service,
+                                    "service" to service.toServiceDetail(),
                                     "instances" to extInstances.map { build(envId, it) }
                             )
                         }
