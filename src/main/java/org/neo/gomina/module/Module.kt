@@ -41,8 +41,8 @@ import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.sonar.SonarApi
 import org.neo.gomina.plugins.sonar.SonarPlugin
 import org.neo.gomina.plugins.ssh.SshApi
-import org.neo.gomina.plugins.ssh.SshConfig
-import org.neo.gomina.plugins.ssh.SshOnDemandConnector
+import org.neo.gomina.integration.ssh.SshConfig
+import org.neo.gomina.integration.ssh.SshOnDemandConnector
 import org.neo.gomina.plugins.ssh.SshPlugin
 import org.neo.gomina.web.PluginAssembler
 import java.io.File
