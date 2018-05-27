@@ -2,6 +2,7 @@ package org.neo.gomina.plugins.jenkins
 
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.projects.ProjectDetail
+import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
 import org.neo.gomina.model.project.Project
@@ -10,12 +11,6 @@ import org.neo.gomina.plugins.Plugin
 import org.neo.gomina.utils.Cache
 import java.util.*
 import javax.inject.Inject
-
-data class JenkinsServer(val id: String = "", val location: String = "")
-
-data class JenkinsConfig(val servers: List<JenkinsServer> = ArrayList()) {
-    val serverMap = servers.associateBy { it.id }
-}
 
 private fun ProjectDetail.apply(url:String, status:BuildStatus?) {
     this.jenkinsUrl = url

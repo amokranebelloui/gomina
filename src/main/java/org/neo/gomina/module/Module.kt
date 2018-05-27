@@ -10,6 +10,7 @@ import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
+import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
 import org.neo.gomina.integration.scm.ScmRepos
@@ -17,19 +18,21 @@ import org.neo.gomina.integration.scm.impl.ScmConfig
 import org.neo.gomina.integration.scm.impl.ScmReposImpl
 import org.neo.gomina.integration.sonar.SonarConfig
 import org.neo.gomina.integration.sonar.SonarConnectors
+import org.neo.gomina.integration.ssh.SshClient
 import org.neo.gomina.model.inventory.Inventory
-import org.neo.gomina.persistence.model.FileInventory
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.persistence.model.FileProjects
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.module.config.Config
 import org.neo.gomina.module.config.ConfigLoader
 import org.neo.gomina.persistence.jenkins.JenkinsConfigProvider
+import org.neo.gomina.persistence.model.FileInventory
+import org.neo.gomina.persistence.model.FileProjects
+import org.neo.gomina.persistence.monitoring.ZmqMonitoringConfigProvider
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
+import org.neo.gomina.persistence.ssh.SshConfigProvider
 import org.neo.gomina.plugins.inventory.InventoryApi
 import org.neo.gomina.plugins.inventory.InventoryPlugin
-import org.neo.gomina.plugins.jenkins.JenkinsConfig
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
@@ -41,9 +44,6 @@ import org.neo.gomina.plugins.ssh.SshApi
 import org.neo.gomina.plugins.ssh.SshConfig
 import org.neo.gomina.plugins.ssh.SshOnDemandConnector
 import org.neo.gomina.plugins.ssh.SshPlugin
-import org.neo.gomina.integration.ssh.SshClient
-import org.neo.gomina.persistence.monitoring.ZmqMonitoringConfigProvider
-import org.neo.gomina.persistence.ssh.SshConfigProvider
 import org.neo.gomina.web.PluginAssembler
 import java.io.File
 

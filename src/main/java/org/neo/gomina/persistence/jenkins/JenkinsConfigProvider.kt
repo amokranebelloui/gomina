@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.inject.Provider
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.plugins.jenkins.JenkinsConfig
+import org.neo.gomina.integration.jenkins.JenkinsConfig
 import java.io.File
 
 // FIXME Reloadable
