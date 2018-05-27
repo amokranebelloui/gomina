@@ -35,7 +35,6 @@ import org.neo.gomina.plugins.jenkins.JenkinsConfig
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
-import org.neo.gomina.plugins.project.ProjectPlugin
 import org.neo.gomina.plugins.scm.ScmApi
 import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.sonar.SonarApi
@@ -81,7 +80,6 @@ class GominaModule : AbstractModule() {
         bind(Projects::class.java).to(FileProjects::class.java).`in`(Scopes.SINGLETON)
         bind(Inventory::class.java).to(FileInventory::class.java).`in`(Scopes.SINGLETON)
         bind(InventoryPlugin::class.java).`in`(Scopes.SINGLETON)
-        bind(ProjectPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // Monitoring
         bind(MonitoringPlugin::class.java).`in`(Scopes.SINGLETON)

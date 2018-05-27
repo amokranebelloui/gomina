@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager
 import org.joda.time.DateTimeZone
 import org.joda.time.LocalDateTime
 import org.neo.gomina.core.instances.Instance
-import org.neo.gomina.core.instances.InstanceDetailRepository
 import org.neo.gomina.core.instances.InstanceListener
 import org.neo.gomina.core.instances.InstanceRealTime
 import org.neo.gomina.model.hosts.resolveHostname
@@ -20,7 +19,7 @@ import kotlin.concurrent.thread
 
 val TIMEOUT_SECONDS = 5
 
-class Indicators : ConcurrentHashMap<String, String>() {
+class Indicators(val instanceId: String) : ConcurrentHashMap<String, String>() {
     private var lastTime = LocalDateTime(DateTimeZone.UTC)
     private var delayed = false
     fun touch() {
@@ -42,20 +41,19 @@ class Indicators : ConcurrentHashMap<String, String>() {
 class EnvMonitoring {
     val instances: MutableMap<String, Indicators> = ConcurrentHashMap()
     fun getForInstance(name: String): Indicators {
-        return instances.getOrPut(name) { Indicators() }
+        return instances.getOrPut(name) { Indicators(name) }
     }
 }
 
 class MonitoringPlugin : Plugin {
 
-    private val topology = ConcurrentHashMap<String, EnvMonitoring>()
-
-    private val listeners = CopyOnWriteArrayList<InstanceListener>()
-
-    @Inject lateinit var instanceDetailRepository: InstanceDetailRepository
-
     @Inject lateinit var config: ZmqMonitorConfig
     @Inject lateinit var inventory: Inventory
+
+    private val topology = ConcurrentHashMap<String, EnvMonitoring>()
+    private val listeners = CopyOnWriteArrayList<InstanceListener>()
+
+    private val rtFields = setOf("PARTICIPATING", "LEADER", "STATUS")
 
     fun registerListener(listener: InstanceListener) {
         this.listeners.add(listener)
@@ -83,6 +81,10 @@ class MonitoringPlugin : Plugin {
         }
     }
 
+    fun instancesFor(envId: String): Collection<Indicators> {
+        return topology[envId]?.instances?.values ?: emptyList()
+    }
+
     fun notify(env: String, instanceId: String, newValues: Map<String, String>, touch: Boolean = true) {
         try {
             val envMonitoring = topology.getOrPut(env) { EnvMonitoring() }
@@ -91,21 +93,14 @@ class MonitoringPlugin : Plugin {
                 indicators.touch()
             }
             logger.trace("Notify $newValues")
+            var rt = false
             for ((key, value) in newValues) {
+                if (rtFields.contains(key)) {
+                    val oldValue = indicators[key]
+                    rt = rt || oldValue != value
+                }
                 if (value != null) indicators.put(key, value) else indicators.remove(key)
             }
-
-            val id = env + "-" + instanceId // FIXME Only needed when returning all envs instances, simplify later
-            val instance = instanceDetailRepository.getOrCreateInstance(id) {
-                Instance(id=id, env=env, type=indicators["TYPE"], service=indicators["SERVICE"], name=instanceId, unexpected = true)
-            }
-
-            val participating = newValues["PARTICIPATING"]?.toBoolean() ?: false
-            val leader = newValues["LEADER"]?.toBoolean() ?: true
-            val status = newValues["STATUS"]
-            val rt = instance.participating != participating || instance.leader != leader || instance.status != status
-
-            instance.applyMonitoring(indicators)
 
             if (rt) {
                 val instanceRT = InstanceRealTime(env = env, id = instanceId, name = instanceId)

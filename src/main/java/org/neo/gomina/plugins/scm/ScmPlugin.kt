@@ -4,7 +4,6 @@ import com.github.rjeschke.txtmark.Processor
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
-import org.neo.gomina.core.instances.InstanceDetailRepository
 import org.neo.gomina.core.projects.CommitLogEntry
 import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.integration.scm.ScmDetails
@@ -50,8 +49,6 @@ class ScmPlugin : Plugin {
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var projects: Projects
 
-    @Inject lateinit var instanceDetailRepository: InstanceDetailRepository
-
     @Inject
     constructor(scmRepos: ScmRepos) {
         this.scmRepos = scmRepos
@@ -64,7 +61,7 @@ class ScmPlugin : Plugin {
 
     override fun init() {
         logger.info("Initializing SCM Data ...")
-        
+        /*
         for (env in inventory.getEnvironments()) {
             for (service in env.services) {
                 for (envInstance in service.instances) {
@@ -76,6 +73,7 @@ class ScmPlugin : Plugin {
                 }
             }
         }
+        */
         logger.info("SCM Data initialized")
     }
 
@@ -104,6 +102,7 @@ class ScmPlugin : Plugin {
     }
 
     fun reloadInstances(env: String) {
+        logger.info("Reload instances $env")
         projects.getProjects()
                 .filter { StringUtils.isNotBlank(it.svnUrl) }
                 .forEach {
@@ -112,21 +111,10 @@ class ScmPlugin : Plugin {
                         this.scmCache.cache("${it.svnRepo}-${it.svnUrl}", scmDetails)
                     }
                 }
-
-        for (env in inventory.getEnvironments()) {
-            for (service in env.services) {
-                for (envInstance in service.instances) {
-                    val id = env.id + "-" + envInstance.id
-                    val instance = instanceDetailRepository.getInstance(id)
-                    service.project
-                            ?.let { projects.getProject(it) }
-                            ?.let { instance?.applyScm(this.getSvnDetails(it.svnRepo, it.svnUrl)) }
-                }
-            }
-        }
     }
 
     fun reloadProject(projectId: String) {
+        logger.info("Reload project $projectId")
         val project = projects.getProject(projectId)
         val svnRepo = project?.svnRepo ?: ""
         val svnUrl = project?.svnUrl ?: ""

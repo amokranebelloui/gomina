@@ -74,6 +74,7 @@ data class InstanceRealTime (
 
 typealias InstanceListener = (instance: InstanceRealTime) -> Unit
 
+/**/
 interface InstanceDetailRepository {
     fun getInstances(): Collection<Instance>
     fun getInstances(envId: String): Collection<Instance>
@@ -114,3 +115,4 @@ class InstanceDetailRepositoryImpl : InstanceDetailRepository {
         return ins
     }
 }
+/**/
