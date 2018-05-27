@@ -1,8 +1,8 @@
-package org.neo.gomina.model.project
+package org.neo.gomina.persistence.model
 
 import org.fest.assertions.Assertions.assertThat
 import org.junit.Test
-import org.neo.gomina.model.project.file.FileProjects
+import org.neo.gomina.persistence.model.FileProjects
 
 class FileProjectsTest {
 

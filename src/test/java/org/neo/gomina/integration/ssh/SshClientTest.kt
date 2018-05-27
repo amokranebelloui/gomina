@@ -1,6 +1,7 @@
-package org.neo.gomina.plugins.ssh.connector
+package org.neo.gomina.integration.ssh
 
-import org.neo.gomina.model.ssh.SshAuth
+import org.neo.gomina.integration.ssh.SshAuth
+import org.neo.gomina.integration.ssh.SshClient
 import java.util.*
 
 

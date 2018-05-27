@@ -1,4 +1,4 @@
-package org.neo.gomina.model.ssh
+package org.neo.gomina.integration.ssh
 
 data class SshAuth (
     var username: String,

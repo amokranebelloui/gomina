@@ -18,9 +18,9 @@ import org.neo.gomina.integration.scm.impl.ScmReposImpl
 import org.neo.gomina.integration.sonar.SonarConfig
 import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.model.inventory.Inventory
-import org.neo.gomina.model.inventory.file.FileInventory
+import org.neo.gomina.persistence.model.FileInventory
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.model.project.file.FileProjects
+import org.neo.gomina.persistence.model.FileProjects
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.module.config.Config
 import org.neo.gomina.module.config.ConfigLoader
@@ -41,7 +41,9 @@ import org.neo.gomina.plugins.ssh.SshApi
 import org.neo.gomina.plugins.ssh.SshConfig
 import org.neo.gomina.plugins.ssh.SshOnDemandConnector
 import org.neo.gomina.plugins.ssh.SshPlugin
-import org.neo.gomina.plugins.ssh.connector.SshClient
+import org.neo.gomina.integration.ssh.SshClient
+import org.neo.gomina.persistence.monitoring.ZmqMonitoringConfigProvider
+import org.neo.gomina.persistence.ssh.SshConfigProvider
 import org.neo.gomina.web.PluginAssembler
 import java.io.File
 
@@ -78,7 +80,7 @@ class GominaModule : AbstractModule() {
 
         // Monitoring
         bind(MonitoringPlugin::class.java).`in`(Scopes.SINGLETON)
-        bind(ZmqMonitorConfig::class.java).toInstance(config.zmqMonitoring)
+        bind(ZmqMonitorConfig::class.java).toProvider(ZmqMonitoringConfigProvider::class.java)
 
         // SCM
         bind(ScmConfig::class.java).toProvider(ScmConfigProvider::class.java)
@@ -96,7 +98,7 @@ class GominaModule : AbstractModule() {
         bind(SonarPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // SSH
-        bind(SshConfig::class.java).toInstance(config.ssh)
+        bind(SshConfig::class.java).toProvider(SshConfigProvider::class.java)
         bind(SshClient::class.java).`in`(Scopes.SINGLETON)
         bind(SshOnDemandConnector::class.java).`in`(Scopes.SINGLETON)
         bind(SshPlugin::class.java).`in`(Scopes.SINGLETON)

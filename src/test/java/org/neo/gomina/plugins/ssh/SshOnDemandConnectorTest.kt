@@ -1,10 +1,9 @@
 package org.neo.gomina.plugins.ssh
 
 import org.junit.Test
-import org.neo.gomina.model.inventory.file.FileInventory
+import org.neo.gomina.persistence.model.FileInventory
 import org.neo.gomina.model.security.Passwords
-import org.neo.gomina.module.config.ConfigLoader
-import org.neo.gomina.plugins.ssh.connector.SshClient
+import org.neo.gomina.integration.ssh.SshClient
 import java.io.File
 
 class SshOnDemandConnectorTest {
@@ -12,7 +11,7 @@ class SshOnDemandConnectorTest {
     @Test
     fun testAnalyze() {
         val inventory = FileInventory("data")
-        val sshConfig = ConfigLoader().load().ssh
+        val sshConfig = SshConfig(listOf(Host("localhost", "Amokrane", "@amokrane")))
         val passwords = Passwords(File("config/pass.properties"))
         val sshClient = SshClient()
         val sshConnector = SshOnDemandConnector(sshConfig!!)

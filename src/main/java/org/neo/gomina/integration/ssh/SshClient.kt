@@ -1,11 +1,10 @@
-package org.neo.gomina.plugins.ssh.connector
+package org.neo.gomina.integration.ssh
 
 import com.jcraft.jsch.ChannelExec
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.ssh.SshAuth
 import java.io.ByteArrayOutputStream
 
 class SshClient {

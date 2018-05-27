@@ -1,8 +1,8 @@
-package org.neo.gomina.model.inventory
+package org.neo.gomina.persistence.model
 
 import org.fest.assertions.Assertions.assertThat
 import org.junit.Test
-import org.neo.gomina.model.inventory.file.FileInventory
+import org.neo.gomina.persistence.model.FileInventory
 import java.io.File
 
 class FileInventoryTest {

@@ -6,8 +6,8 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.security.Passwords
-import org.neo.gomina.model.ssh.SshAuth
-import org.neo.gomina.plugins.ssh.connector.SshClient
+import org.neo.gomina.integration.ssh.SshAuth
+import org.neo.gomina.integration.ssh.SshClient
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 

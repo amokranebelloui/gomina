@@ -1,4 +1,4 @@
-package org.neo.gomina.model.project
+package org.neo.gomina.persistence.model
 
 import org.fest.assertions.Assertions.assertThat
 import org.junit.Test

@@ -1,4 +1,4 @@
-package org.neo.gomina.model.inventory.file
+package org.neo.gomina.persistence.model
 
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.JsonParser

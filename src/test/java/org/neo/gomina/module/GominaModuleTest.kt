@@ -6,7 +6,7 @@ import com.google.inject.Scopes
 import com.google.inject.name.Names
 import org.junit.Test
 import org.neo.gomina.model.inventory.Inventory
-import org.neo.gomina.model.inventory.file.FileInventory
+import org.neo.gomina.persistence.model.FileInventory
 
 
 class GominaModuleTest {
