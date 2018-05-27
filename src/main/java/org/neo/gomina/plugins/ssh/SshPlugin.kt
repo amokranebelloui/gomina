@@ -2,7 +2,7 @@ package org.neo.gomina.plugins.ssh
 
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
-import org.neo.gomina.core.instances.InstanceDetailRepository
+import org.neo.gomina.model.inventory.InvInstance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.plugins.Plugin
 import org.neo.gomina.utils.Cache
@@ -15,25 +15,14 @@ class SshPlugin : Plugin {
 
     private val sshCache = Cache<SshDetails>("ssh")
 
-    @Inject lateinit var instanceDetailRepository: InstanceDetailRepository
+    fun enrich(instance: InvInstance, detail: Instance) {
+        if (!instance.host.isNullOrBlank() && !instance.folder.isNullOrBlank()) {
+            sshCache.get("${instance.host}-${instance.folder}")?. let { detail.applySsh(it) }
+        }
+    }
 
     override fun init() {
-        logger.info("Initializing instances SSH data ...")
-        inventory.getEnvironments().forEach { env ->
-            env.services
-                    .flatMap { it.instances }
-                    .filter { !it.host.isNullOrBlank() }
-                    .filter { !it.folder.isNullOrBlank() }
-                    .forEach {
-                        val id = env.id + "-" + it.id
-                        val host = it.host!!
-                        val folder = it.folder!!
-                        sshCache.get("$host-$folder") ?. let {
-                            instanceDetailRepository.getInstance(id)?.applySsh(it)
-                        }
-                    }
-        }
-        logger.info("Instances SSH data initialized")
+        logger.info("Initializing instances SSH data")
     }
 
     fun reloadInstances(envId: String) {
@@ -48,8 +37,6 @@ class SshPlugin : Plugin {
                         val host = it.host!!
                         val folder = it.folder!!
                         sshCache.cache("$host-$folder", sshDetails)
-                        val id = env.id + "-" + it.id
-                        instanceDetailRepository.getInstance(id)?.applySsh(sshDetails)
                     }
         }
     }

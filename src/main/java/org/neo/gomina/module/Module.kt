@@ -10,8 +10,6 @@ import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
-import org.neo.gomina.core.instances.InstanceDetailRepository
-import org.neo.gomina.core.instances.InstanceDetailRepositoryImpl
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
 import org.neo.gomina.integration.scm.ScmRepos
@@ -73,10 +71,7 @@ class GominaModule : AbstractModule() {
                 .toInstance(config.inventory!!["inventoryFilter"])
         // FIXME Type
 
-        // core
-        //bind(ProjectDetailRepository::class.java).to(ProjectDetailRepositoryImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(InstanceDetailRepository::class.java).to(InstanceDetailRepositoryImpl::class.java).`in`(Scopes.SINGLETON)
-
+        // Model
         bind(Projects::class.java).to(FileProjects::class.java).`in`(Scopes.SINGLETON)
         bind(Inventory::class.java).to(FileInventory::class.java).`in`(Scopes.SINGLETON)
         bind(InventoryPlugin::class.java).`in`(Scopes.SINGLETON)

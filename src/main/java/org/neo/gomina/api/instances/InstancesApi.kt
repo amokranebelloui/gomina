@@ -13,8 +13,6 @@ import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.plugins.inventory.InventoryPlugin
-import org.neo.gomina.plugins.inventory.applyInventory
 import org.neo.gomina.plugins.monitoring.Indicators
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.applyMonitoring
@@ -114,8 +112,19 @@ class InstancesApi {
         ext.indicators?.let { instance.applyMonitoring(ext.indicators) }
 
         ext.project?.let { instance.applyScm(scmPlugin.getSvnDetails(it.svnRepo, it.svnUrl)) }
+        ext.invInstance?.let { sshPlugin.enrich(ext.invInstance, instance) }
         return instance
     }
+
+    private fun Instance.applyInventory(service: Service, envInstance: InvInstance) {
+        this.unexpected = false
+        this.type = service.type
+        this.service = service.svc
+        this.project = service.project
+        this.deployHost = envInstance.host
+        this.deployFolder = envInstance.folder
+    }
+
 
     private data class ExtInstance(val id:String, val service:Service, val project:Project?, val invInstance:InvInstance?, val indicators:Indicators?)
 
