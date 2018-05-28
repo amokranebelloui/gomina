@@ -13,7 +13,7 @@ import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.plugins.monitoring.Indicators
+import org.neo.gomina.integration.monitoring.Indicators
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.applyMonitoring
 import org.neo.gomina.plugins.scm.ScmPlugin
@@ -126,7 +126,7 @@ class InstancesApi {
     }
 
 
-    private data class ExtInstance(val id:String, val service:Service, val project:Project?, val invInstance:InvInstance?, val indicators:Indicators?)
+    private data class ExtInstance(val id:String, val service:Service, val project:Project?, val invInstance:InvInstance?, val indicators: Indicators?)
 
     private fun buildExtInstances(env: Environment): List<ExtInstance> {
         val services = env ?. services ?. associateBy { it.svc }

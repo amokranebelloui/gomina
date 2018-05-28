@@ -56,5 +56,5 @@ zmqMonitoring:
   connections:
     - url: 'tcp://localhost:7070'
       #type: 'SUB'
-      #serializationClass: 'org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThread'
+      #serializationClass: 'org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThread'
     - url: 'tcp://localhost:7071'

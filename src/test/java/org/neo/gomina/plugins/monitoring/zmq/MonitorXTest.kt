@@ -3,6 +3,8 @@ package org.neo.gomina.plugins.monitoring.zmq
 import org.fest.assertions.Assertions.assertThat
 import org.fest.assertions.MapAssert.entry
 import org.junit.Test
+import org.neo.gomina.integration.zmqmonitoring.MessageParser
+import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThread
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.zeromq.ZMQ
 import java.util.*
@@ -24,7 +26,7 @@ class MonitorXTest {
 
         val monitoring = MonitoringPlugin()
         val url = "tcp://localhost:7073"
-        val thread = ZmqMonitorThread(monitoring, url, Arrays.asList(""))
+        val thread = ZmqMonitorThread(monitoring::notify, url, Arrays.asList(""))
         thread.start()
 
         val counter = AtomicInteger(0)

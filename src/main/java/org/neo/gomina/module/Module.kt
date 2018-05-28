@@ -35,7 +35,7 @@ import org.neo.gomina.plugins.inventory.InventoryApi
 import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
-import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
+import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorConfig
 import org.neo.gomina.plugins.scm.ScmApi
 import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.sonar.SonarApi

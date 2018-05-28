@@ -1,15 +1,15 @@
-package org.neo.gomina.plugins.monitoring.zmq
+package org.neo.gomina.integration.zmqmonitoring
 
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.zeromq.ZMQ
 import java.util.*
 
 data class ZmqMonitorConfig (var connections: List<Connection> = emptyList())
 data class Connection (var url: String)
 
+typealias MonitoringEventListener = (env: String, instanceId: String, newValues: Map<String, String>, touch: Boolean) -> Unit
 
-class ZmqMonitorThread(private val monitoringPlugin: MonitoringPlugin, private val url: String, private val subscriptions: Collection<String>) : Thread() {
+class ZmqMonitorThread(private val listener: MonitoringEventListener, private val url: String, private val subscriptions: Collection<String>) : Thread() {
 
     override fun run() {
         val context = ZMQ.context(1)
@@ -25,9 +25,9 @@ class ZmqMonitorThread(private val monitoringPlugin: MonitoringPlugin, private v
             logger.trace("Received " + obj)
             try {
                 val message = MessageParser.parse(obj)
-                if (message.indicators["STATUS"] != null && message.indicators["VERSION"] != null) {
+                if (message.indicators["STATUS"] != null && message.indicators["VERSION"] != null) { // FIXME Move out of generic
                     enrich(message.indicators)
-                    monitoringPlugin.notify(message.env, message.instanceId, message.indicators)
+                    listener(message.env, message.instanceId, message.indicators, true)
                 }
                 logger.trace(message)
             }
@@ -40,11 +40,13 @@ class ZmqMonitorThread(private val monitoringPlugin: MonitoringPlugin, private v
         logger.info("closed")
     }
 
+    // FIXME Move out of generic
     private fun enrich(indicators: MutableMap<String, String>) {
         indicators.put("TIMESTAMP", Date().toString()) // FIXME Date format
         indicators.put("STATUS", mapStatus(indicators["STATUS"]))
     }
 
+    // FIXME Move out of generic
     private fun mapStatus(status: String?) = if ("SHUTDOWN" == status) "DOWN" else status ?: "DOWN"
 
     companion object {

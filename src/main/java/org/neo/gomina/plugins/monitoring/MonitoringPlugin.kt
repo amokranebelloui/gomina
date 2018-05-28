@@ -2,48 +2,20 @@ package org.neo.gomina.plugins.monitoring
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.joda.time.DateTimeZone
-import org.joda.time.LocalDateTime
 import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.InstanceListener
 import org.neo.gomina.core.instances.InstanceRealTime
+import org.neo.gomina.integration.monitoring.EnvMonitoring
+import org.neo.gomina.integration.monitoring.Indicators
+import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorConfig
+import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThread
 import org.neo.gomina.model.hosts.resolveHostname
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.plugins.Plugin
-import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorConfig
-import org.neo.gomina.plugins.monitoring.zmq.ZmqMonitorThread
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 import kotlin.concurrent.thread
-
-val TIMEOUT_SECONDS = 5
-
-class Indicators(val instanceId: String) : ConcurrentHashMap<String, String>() {
-    private var lastTime = LocalDateTime(DateTimeZone.UTC)
-    private var delayed = false
-    fun touch() {
-        lastTime = LocalDateTime(DateTimeZone.UTC)
-        delayed = false
-    }
-    fun checkDelayed(notification: () -> Unit) {
-        if (this.isLastTimeTooOld() && !delayed) {
-            delayed = true
-            notification()
-        }
-
-    }
-    private fun isLastTimeTooOld(): Boolean {
-        return LocalDateTime(DateTimeZone.UTC).isAfter(lastTime.plusSeconds(TIMEOUT_SECONDS))
-    }
-}
-
-class EnvMonitoring {
-    val instances: MutableMap<String, Indicators> = ConcurrentHashMap()
-    fun getForInstance(name: String): Indicators {
-        return instances.getOrPut(name) { Indicators(name) }
-    }
-}
 
 class MonitoringPlugin : Plugin {
 
@@ -63,7 +35,7 @@ class MonitoringPlugin : Plugin {
         if (config.connections != null) {
             val subscriptions = inventory.getEnvironments().map { ".#HB.${it.id}." }
             config.connections
-                    .map { ZmqMonitorThread(this, it.url, subscriptions) }
+                    .map { ZmqMonitorThread(this::notify, it.url, subscriptions) }
                     .forEach { it.start() }
         }
         thread(start = true, name = "mon-ditcher") {
