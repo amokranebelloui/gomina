@@ -81,26 +81,29 @@ class DummyMonitorThread : Thread {
         }
         while (true) {
             println("Round ..")
+            var count = 1
             data.listEnvs().forEach { env ->
                 for ((instanceId, indicators) in data.getFor(env)) {
                     val i = random.nextInt(15)
-                    val status = when (i) {
-                        0 -> "LIVE"
-                        1 -> "LOADING"
-                        2 -> "DOWN"
+                    val status = when {
+                        i in 0..11 -> "LIVE"
+                        i == 12 -> "LOADING"
+                        i == 13 -> "DOWN"
                         else -> null
                     }
                     if (status != null) {
                         //indicators.put("timestamp", LocalDateTime(DateTimeZone.UTC)) // FIXME Too long
                         indicators.put("STATUS", status)
-                        indicators.put("PARTICIPATING", random.nextBoolean())
-                        indicators.put("LEADER", random.nextBoolean())
+                        indicators.put("PARTICIPATING", random.nextInt(20) < 19)
+                        indicators.put("LEADER", random.nextInt(20) < 2)
                         send(env, instanceId, indicators)
+                        count++
                     }
                 }
             }
+            println("Sent $count messages")
             try {
-                Thread.sleep(5000)
+                Thread.sleep(4000)
             } catch (e: InterruptedException) {
                 e.printStackTrace()
             }
@@ -108,7 +111,7 @@ class DummyMonitorThread : Thread {
     }
 
     private fun send(env: String, instanceId: String, indicators: MutableMap<String, Any>) {
-        println("Send mon $env $instanceId $indicators")
+        //println("Send mon $env $instanceId $indicators")
         val body = indicators
                 .filter { (key, value) -> value != null }
                 .map { (key, value) -> "$key=$value" }
