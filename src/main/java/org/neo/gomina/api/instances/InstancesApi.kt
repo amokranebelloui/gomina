@@ -7,15 +7,17 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.ServiceDetail
+import org.neo.gomina.integration.monitoring.Indicators
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.InvInstance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.integration.monitoring.Indicators
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
+import org.neo.gomina.plugins.monitoring.applyCluster
 import org.neo.gomina.plugins.monitoring.applyMonitoring
+import org.neo.gomina.plugins.monitoring.applyRedis
 import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.scm.applyScm
 import org.neo.gomina.plugins.ssh.SshPlugin
@@ -109,7 +111,11 @@ class InstancesApi {
         val id = envId + "-" + ext.id
         val instance = Instance(id=id, env=envId, type=ext.service.type, service=ext.service.svc, name=ext.id, unexpected=!expected)
         ext.invInstance?.let { instance.applyInventory(ext.service, ext.invInstance) }
-        ext.indicators?.let { instance.applyMonitoring(ext.indicators) }
+        ext.indicators?.let {
+            instance.applyMonitoring(ext.indicators)
+            instance.applyCluster(ext.indicators)
+            instance.applyRedis(ext.indicators)
+        }
 
         ext.project?.let { instance.applyScm(scmPlugin.getSvnDetails(it.svnRepo, it.svnUrl)) }
         ext.invInstance?.let { sshPlugin.enrich(ext.invInstance, instance) }
