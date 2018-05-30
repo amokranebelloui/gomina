@@ -5,93 +5,56 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.core.instances.Instance
 import org.neo.gomina.core.instances.InstanceListener
 import org.neo.gomina.core.instances.InstanceRealTime
-import org.neo.gomina.integration.monitoring.EnvMonitoring
 import org.neo.gomina.integration.monitoring.Indicators
+import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorConfig
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThread
 import org.neo.gomina.model.hosts.resolveHostname
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.plugins.Plugin
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
-import kotlin.concurrent.thread
 
 class MonitoringPlugin : Plugin {
 
     @Inject lateinit var config: ZmqMonitorConfig
     @Inject lateinit var inventory: Inventory
 
-    private val topology = ConcurrentHashMap<String, EnvMonitoring>()
+    @Inject lateinit var monitoring: Monitoring
     private val listeners = CopyOnWriteArrayList<InstanceListener>()
-
-    private val rtFields = setOf("PARTICIPATING", "LEADER", "STATUS")
 
     fun registerListener(listener: InstanceListener) {
         this.listeners.add(listener)
+    }
+
+    // FIXME Specifics in one place
+
+    fun prepare() {
+        monitoring.enrich = { indicators ->
+            indicators.put("TIMESTAMP", Date().toString())
+            indicators["status"]?.let { status -> indicators.put("STATUS", this.mapStatus(status)) }
+        }
+        monitoring.include = { it["STATUS"] != null && it["VERSION"] != null }
+        monitoring.checkFields(setOf("PARTICIPATING", "LEADER", "STATUS"))
+        monitoring.onMessage { env, instanceId, newValues ->
+            val instanceRT = InstanceRealTime(env = env, id = instanceId, name = instanceId)
+            instanceRT.applyRealTime(newValues)
+            listeners.forEach { it.invoke(instanceRT) }
+        }
+        monitoring.onDelay {
+            mapOf("STATUS" to "NOINFO")
+        }
     }
 
     override fun init() {
         if (config.connections != null) {
             val subscriptions = inventory.getEnvironments().map { ".#HB.${it.id}." }
             config.connections
-                    .map { ZmqMonitorThread(this::notify, it.url, subscriptions, this::include, this::enrich) }
+                    .map { ZmqMonitorThread(monitoring, it.url, subscriptions) }
                     .forEach { it.start() }
         }
-        thread(start = true, name = "mon-ditcher") {
-            while (!Thread.currentThread().isInterrupted) {
-                topology.forEach { env, envMon ->
-                    envMon.instances.forEach { instanceId, indicators ->
-                        indicators.checkDelayed {
-                            logger.info("Instance $env $instanceId delayed")
-                            notify(env, instanceId, mapOf("STATUS" to "NOINFO"), touch = false) // FIXME Specifics in one place
-                        }
-                    }
-                }
-                Thread.sleep(1000)
-            }
-        }
-    }
-
-    fun instancesFor(envId: String): Collection<Indicators> {
-        return topology[envId]?.instances?.values ?: emptyList()
-    }
-
-    fun notify(env: String, instanceId: String, newValues: Map<String, String>, touch: Boolean = true) {
-        try {
-            val envMonitoring = topology.getOrPut(env) { EnvMonitoring(config.timeoutSeconds) }
-            val indicators = envMonitoring.getForInstance(instanceId)
-            if (touch) {
-                indicators.touch()
-            }
-            logger.trace("Notify $newValues")
-            var rt = false
-            for ((key, value) in newValues) {
-                if (rtFields.contains(key)) {
-                    val oldValue = indicators[key]
-                    rt = rt || oldValue != value
-                }
-                if (value != null) indicators.put(key, value) else indicators.remove(key)
-            }
-
-            if (rt) {
-                val instanceRT = InstanceRealTime(env = env, id = instanceId, name = instanceId)
-                instanceRT.applyRealTime(newValues)
-                listeners.forEach { it.invoke(instanceRT) }
-            }
-        }
-        catch (e: Exception) {
-            logger.error("Cannot notify env=$env instance=$instanceId", e)
-        }
-    }
-
-    // FIXME Specifics in one place
-    fun include(indicators: MutableMap<String, String>) = indicators["STATUS"] != null && indicators["VERSION"] != null
-
-    fun enrich(indicators: MutableMap<String, String>) {
-        indicators.put("TIMESTAMP", Date().toString()) // FIXME Date format
-        indicators["status"]?.let { indicators.put("STATUS", mapStatus(it)) }
+        prepare()
     }
 
     private fun mapStatus(status: String?) = if ("SHUTDOWN" == status) "DOWN" else status ?: "DOWN"

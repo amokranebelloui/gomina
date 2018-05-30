@@ -13,6 +13,7 @@ import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
+import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.integration.scm.impl.ScmConfig
 import org.neo.gomina.integration.scm.impl.ScmReposImpl
@@ -80,6 +81,7 @@ class GominaModule : AbstractModule() {
 
         // Monitoring
         bind(MonitoringPlugin::class.java).`in`(Scopes.SINGLETON)
+        bind(Monitoring::class.java).`in`(Scopes.SINGLETON)
         bind(ZmqMonitorConfig::class.java).toProvider(ZmqMonitoringConfigProvider::class.java)
 
         // SCM

@@ -3,6 +3,7 @@ package org.neo.gomina.plugins.monitoring.zmq
 import org.fest.assertions.Assertions.assertThat
 import org.fest.assertions.MapAssert.entry
 import org.junit.Test
+import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.zmqmonitoring.MessageParser
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorConfig
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThread
@@ -25,14 +26,15 @@ class MonitorXTest {
     @Test
     fun testZmq() {
 
-        val monitoring = MonitoringPlugin()
-        monitoring.config = ZmqMonitorConfig(5, emptyList())
-        val url = "tcp://localhost:7073"
-        val thread = ZmqMonitorThread(monitoring::notify, url, Arrays.asList(""), { true }, monitoring::enrich)
-        thread.start()
+        val config = ZmqMonitorConfig(5, emptyList())
+        val monitoring = Monitoring()
+        monitoring.config = config
+        val plugin = MonitoringPlugin()
+        plugin.config = config
+        plugin.monitoring = monitoring
 
         val counter = AtomicInteger(0)
-        monitoring.registerListener { instance ->
+        plugin.registerListener { instance ->
             println("received " + instance)
             assertThat(instance.env).isEqualTo("UAT")
             assertThat(instance.id).isEqualTo("kernel")
@@ -42,20 +44,26 @@ class MonitorXTest {
             counter.incrementAndGet()
         }
 
+        plugin.prepare()
+
+        val url = "tcp://localhost:7073"
+        val thread = ZmqMonitorThread(plugin.monitoring, url, Arrays.asList(""))
+        thread.start()
+
         val context = ZMQ.context(1)
         val subscriber = context.socket(ZMQ.PUB)
         subscriber.bind(url)
         Thread.sleep(1000) // Connection to be established
 
-        subscriber.send(".#HB.UAT.kernel.*.0;status=DOWN;quickfixPersistence=ORACLE")
+        subscriber.send(".#HB.UAT.kernel.*.0;status=DOWN;quickfixPersistence=ORACLE;VERSION=12")
         println("Sent 1")
         Thread.sleep(1400)
-        subscriber.send(".#HB.UAT.kernel.*.0;status=LIVE;quickfixPersistence=ORACLE")
+        subscriber.send(".#HB.UAT.kernel.*.0;status=LIVE;quickfixPersistence=ORACLE;VERSION=12")
         println("Sent 2")
         Thread.sleep(200)
 
         subscriber.close()
-        assertThat(monitoring.instancesFor("UAT")).hasSize(1)
+        assertThat(plugin.monitoring.instancesFor("UAT")).hasSize(1)
         assertThat(counter.get()).isEqualTo(2)
 
     }

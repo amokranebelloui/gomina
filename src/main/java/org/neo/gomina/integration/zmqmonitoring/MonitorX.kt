@@ -1,19 +1,16 @@
 package org.neo.gomina.integration.zmqmonitoring
 
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.integration.monitoring.Monitoring
 import org.zeromq.ZMQ
 
 data class ZmqMonitorConfig (var timeoutSeconds: Int, var connections: List<Connection> = emptyList())
 data class Connection (var url: String)
 
-typealias MonitoringEventListener = (env: String, instanceId: String, newValues: Map<String, String>, touch: Boolean) -> Unit
-
 class ZmqMonitorThread(
-        private val listener: MonitoringEventListener,
+        private val monitoring: Monitoring,
         private val url: String,
-        private val subscriptions: Collection<String>,
-        private val include:(indicators: MutableMap<String, String>) -> Boolean = { true },
-        private val enrich:(indicators: MutableMap<String, String>) -> Unit = {}
+        private val subscriptions: Collection<String>
     ) : Thread() {
 
     override fun run() {
@@ -30,10 +27,7 @@ class ZmqMonitorThread(
             logger.trace("Received " + obj)
             try {
                 val message = MessageParser.parse(obj)
-                if (include(message.indicators)) {
-                    enrich(message.indicators)
-                    listener(message.env, message.instanceId, message.indicators, true)
-                }
+                monitoring.notify(message.env, message.instanceId, message.indicators, touch = true)
                 logger.trace(message)
             }
             catch (e: Exception) {
