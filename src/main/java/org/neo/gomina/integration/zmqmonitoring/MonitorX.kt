@@ -2,14 +2,19 @@ package org.neo.gomina.integration.zmqmonitoring
 
 import org.apache.logging.log4j.LogManager
 import org.zeromq.ZMQ
-import java.util.*
 
-data class ZmqMonitorConfig (var connections: List<Connection> = emptyList())
+data class ZmqMonitorConfig (var timeoutSeconds: Int, var connections: List<Connection> = emptyList())
 data class Connection (var url: String)
 
 typealias MonitoringEventListener = (env: String, instanceId: String, newValues: Map<String, String>, touch: Boolean) -> Unit
 
-class ZmqMonitorThread(private val listener: MonitoringEventListener, private val url: String, private val subscriptions: Collection<String>) : Thread() {
+class ZmqMonitorThread(
+        private val listener: MonitoringEventListener,
+        private val url: String,
+        private val subscriptions: Collection<String>,
+        private val include:(indicators: MutableMap<String, String>) -> Boolean = { true },
+        private val enrich:(indicators: MutableMap<String, String>) -> Unit = {}
+    ) : Thread() {
 
     override fun run() {
         val context = ZMQ.context(1)
@@ -25,7 +30,7 @@ class ZmqMonitorThread(private val listener: MonitoringEventListener, private va
             logger.trace("Received " + obj)
             try {
                 val message = MessageParser.parse(obj)
-                if (message.indicators["STATUS"] != null && message.indicators["VERSION"] != null) { // FIXME Move out of generic
+                if (include(message.indicators)) {
                     enrich(message.indicators)
                     listener(message.env, message.instanceId, message.indicators, true)
                 }
@@ -39,15 +44,6 @@ class ZmqMonitorThread(private val listener: MonitoringEventListener, private va
         context.term()
         logger.info("closed")
     }
-
-    // FIXME Move out of generic
-    private fun enrich(indicators: MutableMap<String, String>) {
-        indicators.put("TIMESTAMP", Date().toString()) // FIXME Date format
-        indicators.put("STATUS", mapStatus(indicators["STATUS"]))
-    }
-
-    // FIXME Move out of generic
-    private fun mapStatus(status: String?) = if ("SHUTDOWN" == status) "DOWN" else status ?: "DOWN"
 
     companion object {
         private val logger = LogManager.getLogger(ZmqMonitorThread::class.java)

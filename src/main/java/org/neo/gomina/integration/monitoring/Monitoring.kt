@@ -4,10 +4,7 @@ import org.joda.time.DateTimeZone
 import org.joda.time.LocalDateTime
 import java.util.concurrent.ConcurrentHashMap
 
-// FIXME Injectable
-val TIMEOUT_SECONDS = 5
-
-class Indicators(val instanceId: String) : ConcurrentHashMap<String, String>() {
+class Indicators(val instanceId: String, private val timeoutSeconds: Int = 5) : ConcurrentHashMap<String, String>() {
     private var lastTime = LocalDateTime(DateTimeZone.UTC)
     private var delayed = false
     fun touch() {
@@ -22,13 +19,13 @@ class Indicators(val instanceId: String) : ConcurrentHashMap<String, String>() {
 
     }
     private fun isLastTimeTooOld(): Boolean {
-        return LocalDateTime(DateTimeZone.UTC).isAfter(lastTime.plusSeconds(TIMEOUT_SECONDS))
+        return LocalDateTime(DateTimeZone.UTC).isAfter(lastTime.plusSeconds(timeoutSeconds))
     }
 }
 
-class EnvMonitoring {
+class EnvMonitoring(private val timeoutSeconds: Int) {
     val instances: MutableMap<String, Indicators> = ConcurrentHashMap()
     fun getForInstance(name: String): Indicators {
-        return instances.getOrPut(name) { Indicators(name) }
+        return instances.getOrPut(name) { Indicators(name, timeoutSeconds) }
     }
 }

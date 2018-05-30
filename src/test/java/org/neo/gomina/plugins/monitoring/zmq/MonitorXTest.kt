@@ -4,6 +4,7 @@ import org.fest.assertions.Assertions.assertThat
 import org.fest.assertions.MapAssert.entry
 import org.junit.Test
 import org.neo.gomina.integration.zmqmonitoring.MessageParser
+import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorConfig
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThread
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.zeromq.ZMQ
@@ -25,8 +26,9 @@ class MonitorXTest {
     fun testZmq() {
 
         val monitoring = MonitoringPlugin()
+        monitoring.config = ZmqMonitorConfig(5, emptyList())
         val url = "tcp://localhost:7073"
-        val thread = ZmqMonitorThread(monitoring::notify, url, Arrays.asList(""))
+        val thread = ZmqMonitorThread(monitoring::notify, url, Arrays.asList(""), { true }, monitoring::enrich)
         thread.start()
 
         val counter = AtomicInteger(0)
@@ -43,7 +45,7 @@ class MonitorXTest {
         val context = ZMQ.context(1)
         val subscriber = context.socket(ZMQ.PUB)
         subscriber.bind(url)
-        Thread.sleep(400) // Connection to be established
+        Thread.sleep(1000) // Connection to be established
 
         subscriber.send(".#HB.UAT.kernel.*.0;status=DOWN;quickfixPersistence=ORACLE")
         println("Sent 1")
@@ -53,6 +55,7 @@ class MonitorXTest {
         Thread.sleep(200)
 
         subscriber.close()
+        assertThat(monitoring.instancesFor("UAT")).hasSize(1)
         assertThat(counter.get()).isEqualTo(2)
 
     }

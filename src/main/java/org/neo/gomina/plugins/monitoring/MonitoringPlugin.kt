@@ -12,6 +12,7 @@ import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThread
 import org.neo.gomina.model.hosts.resolveHostname
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.plugins.Plugin
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
@@ -35,7 +36,7 @@ class MonitoringPlugin : Plugin {
         if (config.connections != null) {
             val subscriptions = inventory.getEnvironments().map { ".#HB.${it.id}." }
             config.connections
-                    .map { ZmqMonitorThread(this::notify, it.url, subscriptions) }
+                    .map { ZmqMonitorThread(this::notify, it.url, subscriptions, this::include, this::enrich) }
                     .forEach { it.start() }
         }
         thread(start = true, name = "mon-ditcher") {
@@ -44,7 +45,7 @@ class MonitoringPlugin : Plugin {
                     envMon.instances.forEach { instanceId, indicators ->
                         indicators.checkDelayed {
                             logger.info("Instance $env $instanceId delayed")
-                            notify(env, instanceId, mapOf("STATUS" to "NOINFO"), touch = false)
+                            notify(env, instanceId, mapOf("STATUS" to "NOINFO"), touch = false) // FIXME Specifics in one place
                         }
                     }
                 }
@@ -59,7 +60,7 @@ class MonitoringPlugin : Plugin {
 
     fun notify(env: String, instanceId: String, newValues: Map<String, String>, touch: Boolean = true) {
         try {
-            val envMonitoring = topology.getOrPut(env) { EnvMonitoring() }
+            val envMonitoring = topology.getOrPut(env) { EnvMonitoring(config.timeoutSeconds) }
             val indicators = envMonitoring.getForInstance(instanceId)
             if (touch) {
                 indicators.touch()
@@ -84,6 +85,16 @@ class MonitoringPlugin : Plugin {
             logger.error("Cannot notify env=$env instance=$instanceId", e)
         }
     }
+
+    // FIXME Specifics in one place
+    fun include(indicators: MutableMap<String, String>) = indicators["STATUS"] != null && indicators["VERSION"] != null
+
+    fun enrich(indicators: MutableMap<String, String>) {
+        indicators.put("TIMESTAMP", Date().toString()) // FIXME Date format
+        indicators["status"]?.let { indicators.put("STATUS", mapStatus(it)) }
+    }
+
+    private fun mapStatus(status: String?) = if ("SHUTDOWN" == status) "DOWN" else status ?: "DOWN"
 
     companion object {
         private val logger = LogManager.getLogger(MonitoringPlugin::class.java)
