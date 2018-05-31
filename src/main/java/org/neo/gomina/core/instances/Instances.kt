@@ -6,7 +6,7 @@ data class ServiceDetail (
     val project: String? = null
 )
 
-class Instance (
+class InstanceDetail(
 
         var env: String? = null ,
         var id: String? = null, // Unique by env

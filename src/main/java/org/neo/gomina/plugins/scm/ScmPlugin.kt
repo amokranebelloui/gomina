@@ -3,7 +3,7 @@ package org.neo.gomina.plugins.scm
 import com.github.rjeschke.txtmark.Processor
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.instances.Instance
+import org.neo.gomina.core.instances.InstanceDetail
 import org.neo.gomina.core.projects.CommitLogEntry
 import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.integration.scm.ScmDetails
@@ -32,7 +32,7 @@ fun ProjectDetail.apply(scmDetails: ScmDetails) {
 }
 
 
-fun Instance.applyScm(scmDetails: ScmDetails) {
+fun InstanceDetail.applyScm(scmDetails: ScmDetails) {
     this.latestVersion = scmDetails.latest
     this.latestRevision = scmDetails.latestRevision
     this.releasedVersion = scmDetails.released

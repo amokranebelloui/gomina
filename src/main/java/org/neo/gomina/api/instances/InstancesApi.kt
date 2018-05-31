@@ -5,11 +5,11 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.instances.Instance
+import org.neo.gomina.core.instances.InstanceDetail
 import org.neo.gomina.core.instances.ServiceDetail
 import org.neo.gomina.integration.monitoring.Indicators
 import org.neo.gomina.model.inventory.Environment
-import org.neo.gomina.model.inventory.InvInstance
+import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.project.Project
@@ -106,11 +106,11 @@ class InstancesApi {
         }
     }
 
-    private fun build(envId: String, ext: ExtInstance): Instance {
-        val expected = ext.invInstance != null
+    private fun build(envId: String, ext: ExtInstance): InstanceDetail {
+        val expected = ext.instance != null
         val id = envId + "-" + ext.id
-        val instance = Instance(id=id, env=envId, type=ext.service.type, service=ext.service.svc, name=ext.id, unexpected=!expected)
-        ext.invInstance?.let { instance.applyInventory(ext.service, ext.invInstance) }
+        val instance = InstanceDetail(id=id, env=envId, type=ext.service.type, service=ext.service.svc, name=ext.id, unexpected=!expected)
+        ext.instance?.let { instance.applyInventory(ext.service, ext.instance) }
         ext.indicators?.let {
             instance.applyMonitoring(ext.indicators)
             instance.applyCluster(ext.indicators)
@@ -118,11 +118,11 @@ class InstancesApi {
         }
 
         ext.project?.let { instance.applyScm(scmPlugin.getSvnDetails(it.svnRepo, it.svnUrl)) }
-        ext.invInstance?.let { sshPlugin.enrich(ext.invInstance, instance) }
+        ext.instance?.let { sshPlugin.enrich(ext.instance, instance) }
         return instance
     }
 
-    private fun Instance.applyInventory(service: Service, envInstance: InvInstance) {
+    private fun InstanceDetail.applyInventory(service: Service, envInstance: Instance) {
         this.unexpected = false
         this.type = service.type
         this.service = service.svc
@@ -132,7 +132,7 @@ class InstancesApi {
     }
 
 
-    private data class ExtInstance(val id:String, val service:Service, val project:Project?, val invInstance:InvInstance?, val indicators: Indicators?)
+    private data class ExtInstance(val id:String, val service:Service, val project:Project?, val instance: Instance?, val indicators: Indicators?)
 
     private fun buildExtInstances(env: Environment): List<ExtInstance> {
         val services = env ?. services ?. associateBy { it.svc }

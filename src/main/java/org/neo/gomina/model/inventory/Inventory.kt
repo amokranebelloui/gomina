@@ -13,10 +13,10 @@ data class Service (
     val svc: String,
     val type: String? = null,
     val project: String? = null,
-    val instances: List<InvInstance> = emptyList()
+    val instances: List<Instance> = emptyList()
 )
 
-data class InvInstance (
+data class Instance(
     val id: String,
     val host: String?,
     val folder: String?

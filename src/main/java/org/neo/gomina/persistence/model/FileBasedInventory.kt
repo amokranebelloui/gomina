@@ -11,7 +11,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.inventory.Environment
-import org.neo.gomina.model.inventory.InvInstance
+import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import java.io.File
@@ -78,7 +78,7 @@ class FileInventory : Inventory {
                 .groupBy { i -> i.svc }
                 .map { (svc, instances) -> Triple(svc, instances.first(), instances) }
                 .map { (svc, i, instances) ->
-                    Service(svc, i.type, i.project, instances.map { InvInstance(it.id, it.host, it.folder) })
+                    Service(svc, i.type, i.project, instances.map { Instance(it.id, it.host, it.folder) })
                 }
 
         return Environment(old.code, old.name, old.type, old.monitoringUrl, old.active, services)

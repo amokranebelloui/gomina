@@ -4,7 +4,7 @@ import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.inventory.Environment
-import org.neo.gomina.model.inventory.InvInstance
+import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.security.Passwords
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -31,7 +31,7 @@ class EnvAnalysis(val map: ConcurrentHashMap<String, MutableMap<String, SshDetai
     }
 }
 
-typealias AnalysisFunction = (instance: InvInstance, sshClient: SshClient, session: Session, prefix: String, sshDetails: SshDetails) -> Unit
+typealias AnalysisFunction = (instance: Instance, sshClient: SshClient, session: Session, prefix: String, sshDetails: SshDetails) -> Unit
 
 class SshOnDemandConnector {
 

@@ -2,7 +2,7 @@ package org.neo.gomina.plugins.monitoring
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.instances.Instance
+import org.neo.gomina.core.instances.InstanceDetail
 import org.neo.gomina.core.instances.InstanceListener
 import org.neo.gomina.core.instances.InstanceRealTime
 import org.neo.gomina.integration.monitoring.Indicators
@@ -60,7 +60,7 @@ class MonitoringPlugin : Plugin {
     }
 }
 
-fun Instance.applyMonitoring(indicators: Indicators) {
+fun InstanceDetail.applyMonitoring(indicators: Indicators) {
     this.pid = indicators["PID"]
     this.host = resolveHostname(indicators["IP"])
     this.version = indicators["VERSION"]
@@ -74,7 +74,7 @@ fun Instance.applyMonitoring(indicators: Indicators) {
     this.quickfixPersistence = indicators["QUICKFIX_MODE"]
 }
 
-fun Instance.applyCluster(indicators: Indicators) {
+fun InstanceDetail.applyCluster(indicators: Indicators) {
     this.cluster = indicators["ELECTION"].asBoolean ?: false
     this.participating = indicators["PARTICIPATING"].asBoolean ?: false
     this.leader = indicators["LEADER"].asBoolean ?: true // Historically we didn't have this field
@@ -86,7 +86,7 @@ private fun InstanceRealTime.applyRealTime(newValues: Map<String, String>) {
     this.status = newValues["STATUS"]
 }
 
-fun Instance.applyRedis(indicators: Indicators) {
+fun InstanceDetail.applyRedis(indicators: Indicators) {
     this.redisHost = indicators["REDIS_HOST"]
     this.redisPort = indicators["REDIS_PORT"].asInt
     this.redisMasterHost = indicators["REDIS_MASTER_HOST"]

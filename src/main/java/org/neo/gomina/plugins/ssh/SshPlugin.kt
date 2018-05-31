@@ -3,11 +3,11 @@ package org.neo.gomina.plugins.ssh
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.instances.Instance
+import org.neo.gomina.core.instances.InstanceDetail
 import org.neo.gomina.integration.ssh.SshClient
 import org.neo.gomina.integration.ssh.SshDetails
 import org.neo.gomina.integration.ssh.SshOnDemandConnector
-import org.neo.gomina.model.inventory.InvInstance
+import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.plugins.Plugin
 import org.neo.gomina.utils.Cache
@@ -20,7 +20,7 @@ class SshPlugin : Plugin {
 
     private val sshCache = Cache<SshDetails>("ssh")
 
-    fun enrich(instance: InvInstance, detail: Instance) {
+    fun enrich(instance: Instance, detail: InstanceDetail) {
         if (!instance.host.isNullOrBlank() && !instance.folder.isNullOrBlank()) {
             sshCache.get("${instance.host}-${instance.folder}")?. let { detail.applySsh(it) }
         }
@@ -91,7 +91,7 @@ class SshPlugin : Plugin {
     }
 }
 
-fun Instance.applySsh(sshDetails: SshDetails) {
+fun InstanceDetail.applySsh(sshDetails: SshDetails) {
     this.deployVersion = sshDetails.deployedVersion
     this.deployRevision = sshDetails.deployedRevision
     this.confCommited = sshDetails.confCommitted
