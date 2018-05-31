@@ -9,11 +9,10 @@ import org.neo.gomina.integration.ssh.SshDetails
 import org.neo.gomina.integration.ssh.SshOnDemandConnector
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.inventory.Inventory
-import org.neo.gomina.plugins.Plugin
 import org.neo.gomina.utils.Cache
 import javax.inject.Inject
 
-class SshPlugin : Plugin {
+class SshPlugin {
 
     @Inject private lateinit var sshConnector: SshOnDemandConnector
     @Inject private lateinit var inventory: Inventory
@@ -26,7 +25,7 @@ class SshPlugin : Plugin {
         }
     }
 
-    override fun init() {
+    fun init() {
         logger.info("Initializing instances SSH data")
     }
 

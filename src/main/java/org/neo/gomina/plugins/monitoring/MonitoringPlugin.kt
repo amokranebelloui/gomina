@@ -10,12 +10,11 @@ import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.model.hosts.resolveHostname
 import org.neo.gomina.model.inventory.Inventory
-import org.neo.gomina.plugins.Plugin
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 
-class MonitoringPlugin : Plugin {
+class MonitoringPlugin {
 
     @Inject lateinit var inventory: Inventory
 
@@ -47,7 +46,7 @@ class MonitoringPlugin : Plugin {
         }
     }
 
-    override fun init() {
+    fun init() {
         inventory.getEnvironments()
                 .groupBy { it.monitoringUrl }
                 .filterKeys { it != null }

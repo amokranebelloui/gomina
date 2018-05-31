@@ -16,7 +16,6 @@ import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.applyCluster
 import org.neo.gomina.plugins.monitoring.applyMonitoring
@@ -38,7 +37,6 @@ class InstancesApi {
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var projects: Projects
 
-    @Inject lateinit private var inventoryPlugin: InventoryPlugin
     @Inject lateinit private var monitoringPlugin: MonitoringPlugin
     @Inject lateinit private var scmPlugin: ScmPlugin
     @Inject lateinit private var sshPlugin: SshPlugin
@@ -195,7 +193,7 @@ class InstancesApi {
             vertx.executeBlocking({future: Future<Void> ->
                 val envId = ctx.request().getParam("envId")
                 logger.info("Reloading inventory data ...")
-                inventoryPlugin.reload(envId)
+                //inventoryPlugin.reload(envId)
                 future.complete()
             }, false)
             {res: AsyncResult<Void> ->

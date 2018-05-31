@@ -7,19 +7,13 @@ import javax.inject.Inject
 
 class PluginAssembler {
 
-    //@Inject lateinit var inventoryPlugin: InventoryPlugin
-    //@Inject lateinit var jenkinsPlugin: JenkinsPlugin
     @Inject lateinit var scmPlugin: ScmPlugin
     @Inject lateinit var sshPlugin: SshPlugin
-    //@Inject lateinit var sonarPlugin: SonarPlugin
     @Inject lateinit var monitoringPlugin: MonitoringPlugin
 
     fun init() {
-        //inventoryPlugin.init()
-        //jenkinsPlugin.init()
         scmPlugin.init()
         sshPlugin.init()
-        //sonarPlugin.init()
         monitoringPlugin.init()
     }
 }

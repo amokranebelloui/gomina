@@ -11,7 +11,6 @@ import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.plugins.Plugin
 import org.neo.gomina.utils.Cache
 import javax.inject.Inject
 
@@ -39,7 +38,7 @@ fun InstanceDetail.applyScm(scmDetails: ScmDetails) {
     this.releasedRevision = scmDetails.releasedRevision
 }
 
-class ScmPlugin : Plugin {
+class ScmPlugin {
 
     private val scmRepos: ScmRepos
     private val scmCache = Cache<ScmDetails>("scm") {
@@ -59,7 +58,7 @@ class ScmPlugin : Plugin {
         detail.apply(svnDetails)
     }
 
-    override fun init() {
+    fun init() {
         logger.info("Initializing SCM Data ...")
         /*
         for (env in inventory.getEnvironments()) {

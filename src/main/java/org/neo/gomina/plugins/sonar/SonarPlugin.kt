@@ -6,7 +6,6 @@ import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.integration.sonar.SonarIndicators
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.plugins.Plugin
 import org.neo.gomina.utils.Cache
 import javax.inject.Inject
 
@@ -15,7 +14,7 @@ private fun ProjectDetail.apply(sonarIndicators: SonarIndicators?) {
     this.coverage = sonarIndicators?.coverage
 }
 
-class SonarPlugin : Plugin {
+class SonarPlugin {
 
     @Inject private lateinit var projects: Projects
     @Inject private lateinit var connectors: SonarConnectors

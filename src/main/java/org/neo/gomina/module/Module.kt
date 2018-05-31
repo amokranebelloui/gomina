@@ -34,7 +34,6 @@ import org.neo.gomina.persistence.model.FileProjects
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
 import org.neo.gomina.persistence.ssh.SshConfigProvider
-import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.scm.ScmPlugin
@@ -72,7 +71,6 @@ class GominaModule : AbstractModule() {
         // Model
         bind(Projects::class.java).to(FileProjects::class.java).`in`(Scopes.SINGLETON)
         bind(Inventory::class.java).to(FileInventory::class.java).`in`(Scopes.SINGLETON)
-        bind(InventoryPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // Monitoring
         bind(Int::class.java).annotatedWith(named("monitoring.timeout")).toInstance(config.monitoring.timeout)

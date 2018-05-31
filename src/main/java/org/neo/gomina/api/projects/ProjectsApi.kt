@@ -11,7 +11,6 @@ import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
-import org.neo.gomina.plugins.project.apply
 import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.sonar.SonarPlugin
 import javax.inject.Inject
@@ -108,6 +107,17 @@ class ProjectsApi {
             sonarPlugin.enrich(project, this)
             jenkinsPlugin.enrich(project, this)
         }
+    }
+
+    private fun ProjectDetail.apply(project: Project) {
+        this.label = project.label ?: project.id
+        this.type = project.type
+        this.tags = project.tags
+        this.scmRepo = project.svnRepo
+        this.scmLocation = project.svnUrl
+        this.mvn = project.maven
+        this.jenkinsServer = project.jenkinsServer
+        this.jenkinsJob = project.jenkinsJob
     }
 
     private fun reloadProject(ctx: RoutingContext) {

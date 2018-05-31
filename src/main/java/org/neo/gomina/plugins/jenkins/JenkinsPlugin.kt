@@ -7,9 +7,7 @@ import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.plugins.Plugin
 import org.neo.gomina.utils.Cache
-import java.util.*
 import javax.inject.Inject
 
 private fun ProjectDetail.apply(url:String, status:BuildStatus?) {
@@ -19,7 +17,7 @@ private fun ProjectDetail.apply(url:String, status:BuildStatus?) {
     this.buildTimestamp = status?.timestamp
 }
 
-class JenkinsPlugin : Plugin {
+class JenkinsPlugin {
 
     @Inject private lateinit var projects: Projects
     @Inject private lateinit var jenkinsConfig: JenkinsConfig
