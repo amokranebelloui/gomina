@@ -138,6 +138,9 @@ function ProjectBadge(props) {
                 <br/>
                 <span style={{fontSize: 9}}>{project.scmRepo + ': ' + project.scmUrl}</span>
                 <br/>
+                {project.owner && [<span>Owner {project.owner}</span>, <br/>]}
+                {project.critical && [<span>Criticality {project.critical}</span>, <br/>]}
+
                 <ImageLink src={sonarIcon} url={project.sonarUrl} />
                 <LinesOfCode loc={project.loc}/>
                 <Coverage coverage={project.coverage}/>
