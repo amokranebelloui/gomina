@@ -27,6 +27,12 @@ class Indicators(val instanceId: String, private val timeoutSeconds: Int = 5) : 
     }
 }
 
+private fun String?.clean() = if (this == "null") null else this
+val String?.asInt: Int? get() = this.clean()?.toInt()
+val String?.asLong: Long? get() = this.clean()?.toLong()
+val String?.asBoolean: Boolean? get() = this.clean()?.toBoolean()
+
+
 private class EnvMonitoring(private val timeoutSeconds: Int) {
     val instances: MutableMap<String, Indicators> = ConcurrentHashMap()
     fun getForInstance(name: String): Indicators {

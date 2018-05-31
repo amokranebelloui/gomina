@@ -5,14 +5,14 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.instances.InstanceDetail
 import org.neo.gomina.api.instances.InstanceListener
 import org.neo.gomina.api.instances.InstanceRealTime
-import org.neo.gomina.integration.monitoring.Indicators
-import org.neo.gomina.integration.monitoring.Monitoring
+import org.neo.gomina.integration.monitoring.*
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.model.hosts.resolveHostname
 import org.neo.gomina.model.inventory.Inventory
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
+import kotlin.concurrent.timer
 
 class MonitoringPlugin {
 
@@ -47,11 +47,14 @@ class MonitoringPlugin {
     }
 
     fun init() {
-        inventory.getEnvironments()
-                .groupBy { it.monitoringUrl }
-                .filterKeys { it != null }
-                .forEach { (url, envs) -> zmqThreadPool.add(url!!, envs.map { ".#HB.${it.id}." }) }
         prepare()
+        timer(name = "monitoring-checker", period = 5000) {
+            logger.debug("Checking if any new env to monitor ...")
+            inventory.getEnvironments()
+                    .groupBy { it.monitoringUrl }
+                    .filterKeys { it != null }
+                    .forEach { (url, envs) -> zmqThreadPool.add(url!!, envs.map { ".#HB.${it.id}." }) }
+        }
     }
 
     companion object {
@@ -103,9 +106,5 @@ fun InstanceDetail.applyRedis(indicators: Indicators) {
     this.redisClientCount = indicators["REDIS_CLIENTS"].asInt
 }
 
-private fun String?.clean() = if (this == "null") null else this
-private val String?.asInt: Int? get() = this.clean()?.toInt()
-private val String?.asLong: Long? get() = this.clean()?.toLong()
-private val String?.asBoolean: Boolean? get() = this.clean()?.toBoolean()
 
 
