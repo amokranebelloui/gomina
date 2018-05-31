@@ -1,6 +1,8 @@
 package org.neo.gomina.api.projects
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.vertx.core.AsyncResult
+import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
@@ -20,6 +22,7 @@ class ProjectsApi {
         private val logger = LogManager.getLogger(ProjectsApi::class.java)
     }
 
+    val vertx: Vertx
     val router: Router
 
     @Inject private lateinit var projects: Projects
@@ -33,13 +36,15 @@ class ProjectsApi {
 
     @Inject
     constructor(vertx: Vertx) {
+        this.vertx = vertx
         this.router = Router.router(vertx)
 
         router.get("/").handler(this::projects)
         router.get("/:projectId").handler(this::project)
         router.get("/:projectId/doc/:docId").handler(this::projectDoc)
 
-        router.post("/:projectId/reloadscm").handler(this::reloadProject)
+        router.post("/:projectId/reload-scm").handler(this::reloadProject)
+        router.post("/reload-sonar").handler(this::reloadSonar)
     }
 
     fun projects(ctx: RoutingContext) {
@@ -115,6 +120,24 @@ class ProjectsApi {
         }
         catch (e: Exception) {
             logger.error("Cannot get project", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun reloadSonar(ctx: RoutingContext) {
+        try {
+            vertx.executeBlocking({future: Future<Void> ->
+                //val envId = ctx.request().getParam("envId")
+                logger.info("Reloading Sonar data ...")
+                sonarPlugin.reload()
+                future.complete()
+            }, false)
+            {res: AsyncResult<Void> ->
+                ctx.response().putHeader("content-type", "text/javascript").end("reload Sonar done!")
+            }
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get instances", e)
             ctx.fail(500)
         }
     }

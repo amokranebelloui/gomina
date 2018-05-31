@@ -121,7 +121,7 @@ class EnvApp extends React.Component {
     }
     reloadInventory() {
         const thisComponent = this;
-        axios.post('/data/inventory/' + this.state.env + '/reload')
+        axios.post('/data/instances/' + this.state.env + '/reload-inventory')
             .then(response => {
                 console.log("reloaded inv", response.data);
                 this.retrieveInstances(thisComponent.state.env);
@@ -132,7 +132,7 @@ class EnvApp extends React.Component {
     }
     reloadScm() {
         const thisComponent = this;
-        axios.post('/data/instances/' + this.state.env + '/reloadscm')
+        axios.post('/data/instances/' + this.state.env + '/reload-scm')
             .then(response => {
                 console.log("reloaded", response.data);
                 this.retrieveInstances(thisComponent.state.env);
@@ -143,7 +143,7 @@ class EnvApp extends React.Component {
     }
     reloadSsh() {
          const thisComponent = this;
-         axios.post('/data/ssh/' + this.state.env + '/reload')
+         axios.post('/data/instances/' + this.state.env + '/reload-ssh')
             .then(response => {
                 console.log("reloaded", response.data);
                 this.retrieveInstances(thisComponent.state.env);

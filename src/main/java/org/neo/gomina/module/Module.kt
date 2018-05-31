@@ -34,14 +34,11 @@ import org.neo.gomina.persistence.model.FileProjects
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
 import org.neo.gomina.persistence.ssh.SshConfigProvider
-import org.neo.gomina.plugins.inventory.InventoryApi
 import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.scm.ScmPlugin
-import org.neo.gomina.plugins.sonar.SonarApi
 import org.neo.gomina.plugins.sonar.SonarPlugin
-import org.neo.gomina.plugins.ssh.SshApi
 import org.neo.gomina.plugins.ssh.SshPlugin
 import org.neo.gomina.web.PluginAssembler
 import java.io.File
@@ -152,9 +149,6 @@ class GominaModule : AbstractModule() {
         bind(ProjectsApi::class.java).`in`(Scopes.SINGLETON)
         bind(InstancesApi::class.java).`in`(Scopes.SINGLETON)
 
-        bind(InventoryApi::class.java).`in`(Scopes.SINGLETON)
-        bind(SshApi::class.java).`in`(Scopes.SINGLETON)
-        bind(SonarApi::class.java).`in`(Scopes.SINGLETON)
         bind(EventsApi::class.java).`in`(Scopes.SINGLETON)
         bind(DiagramApi::class.java).`in`(Scopes.SINGLETON)
         bind(NotificationsApi::class.java).`in`(Scopes.SINGLETON)

@@ -52,7 +52,7 @@ class ProjectApp extends React.Component {
     }
     reloadProject(projectId) {
         console.info("reloading", projectId);
-        axios.post('/data/projects/' + projectId + '/reloadscm')
+        axios.post('/data/projects/' + projectId + '/reload-scm')
             .then(response => {
                 console.log("project reloaded", response.data);
             })
@@ -61,7 +61,7 @@ class ProjectApp extends React.Component {
             });
     }
     reloadSonar(projectId) {
-        axios.post('/data/sonar/reload')
+        axios.post('/data/projects/reload-sonar')
             .then(response => {
                 console.log("sonar reloaded", response.data);
             })

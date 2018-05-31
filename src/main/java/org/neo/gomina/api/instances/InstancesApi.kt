@@ -16,6 +16,7 @@ import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
+import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.applyCluster
 import org.neo.gomina.plugins.monitoring.applyMonitoring
@@ -37,7 +38,7 @@ class InstancesApi {
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var projects: Projects
 
-    //@Inject lateinit private var inventoryPlugin: InventoryPlugin
+    @Inject lateinit private var inventoryPlugin: InventoryPlugin
     @Inject lateinit private var monitoringPlugin: MonitoringPlugin
     @Inject lateinit private var scmPlugin: ScmPlugin
     @Inject lateinit private var sshPlugin: SshPlugin
@@ -53,7 +54,9 @@ class InstancesApi {
         router.get("/:envId").handler(this::forEnv)
         router.get("/:envId/services").handler(this::servicesForEnv)
 
-        router.post("/:envId/reloadscm").handler(this::reloadScm)
+        router.post("/:envId/reload-inventory").handler(this::reloadInv)
+        router.post("/:envId/reload-scm").handler(this::reloadScm)
+        router.post("/:envId/reload-ssh").handler(this::reloadSsh)
     }
 
     fun instances(ctx: RoutingContext) {
@@ -168,6 +171,43 @@ class InstancesApi {
             ctx.fail(500)
         }
     }
+
+    private fun reloadSsh(ctx: RoutingContext) {
+        try {
+            vertx.executeBlocking({future: Future<Void> ->
+                val envId = ctx.request().getParam("envId")
+                logger.info("Reloading SSH data $envId ...")
+                sshPlugin.reloadInstances(envId)
+                future.complete()
+            }, false)
+            {res: AsyncResult<Void> ->
+                ctx.response().putHeader("content-type", "text/javascript").end("reload SSH done!")
+            }
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun reloadInv(ctx: RoutingContext) {
+        try {
+            vertx.executeBlocking({future: Future<Void> ->
+                val envId = ctx.request().getParam("envId")
+                logger.info("Reloading inventory data ...")
+                inventoryPlugin.reload(envId)
+                future.complete()
+            }, false)
+            {res: AsyncResult<Void> ->
+                ctx.response().putHeader("content-type", "text/javascript").end("reload inventory done!")
+            }
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+    }
+
 }
 
 fun <T, R> merge(map1:Map<String, T>, map2:Map<String, R>): Collection<Triple<String, T?, R?>> {
