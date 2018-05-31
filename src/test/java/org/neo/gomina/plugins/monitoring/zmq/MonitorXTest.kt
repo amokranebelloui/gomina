@@ -6,7 +6,7 @@ import org.junit.Test
 import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.zmqmonitoring.MessageParser
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorConfig
-import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThread
+import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.zeromq.ZMQ
 import java.util.*
@@ -47,8 +47,9 @@ class MonitorXTest {
         plugin.prepare()
 
         val url = "tcp://localhost:7073"
-        val thread = ZmqMonitorThread(plugin.monitoring, url, Arrays.asList(""))
-        thread.start()
+        val pool = ZmqMonitorThreadPool()
+        pool.monitoring = monitoring
+        pool.add(url, Arrays.asList(""))
 
         val context = ZMQ.context(1)
         val subscriber = context.socket(ZMQ.PUB)

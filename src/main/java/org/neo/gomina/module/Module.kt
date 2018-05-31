@@ -44,6 +44,7 @@ import org.neo.gomina.plugins.sonar.SonarPlugin
 import org.neo.gomina.plugins.ssh.SshApi
 import org.neo.gomina.integration.ssh.SshConfig
 import org.neo.gomina.integration.ssh.SshOnDemandConnector
+import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.plugins.ssh.SshPlugin
 import org.neo.gomina.web.PluginAssembler
 import java.io.File
@@ -82,6 +83,7 @@ class GominaModule : AbstractModule() {
         // Monitoring
         bind(MonitoringPlugin::class.java).`in`(Scopes.SINGLETON)
         bind(Monitoring::class.java).`in`(Scopes.SINGLETON)
+        bind(ZmqMonitorThreadPool::class.java).`in`(Scopes.SINGLETON)
         bind(ZmqMonitorConfig::class.java).toProvider(ZmqMonitoringConfigProvider::class.java)
 
         // SCM

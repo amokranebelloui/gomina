@@ -3,25 +3,46 @@ package org.neo.gomina.integration.zmqmonitoring
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.monitoring.Monitoring
 import org.zeromq.ZMQ
+import javax.inject.Inject
 
 data class ZmqMonitorConfig (var timeoutSeconds: Int, var connections: List<Connection> = emptyList())
 data class Connection (var url: String)
 
+class ZmqMonitorThreadPool {
+    @Inject lateinit var monitoring: Monitoring
+    val map = mutableMapOf<String, ZmqMonitorThread>()
+
+    fun add(url: String, subscriptions: Collection<String>) {
+        val thread = map.getOrPut(url) {
+            ZmqMonitorThread(monitoring, url).apply { start() }
+        }
+        subscriptions.forEach { thread.subscribe(it) }
+    }
+}
+
 class ZmqMonitorThread(
         private val monitoring: Monitoring,
-        private val url: String,
-        private val subscriptions: Collection<String>
+        private val url: String
     ) : Thread() {
 
-    override fun run() {
-        val context = ZMQ.context(1)
-        val subscriber = context.socket(ZMQ.SUB)
-        subscriber.connect(url)
-        for (subscription in subscriptions) {
-            subscriber.subscribe(subscription.toByteArray())
-        }
-        logger.info("Listening to " + url)
+    private val subscriptions = mutableSetOf<String>()
+    private val context: ZMQ.Context = ZMQ.context(1)
+    private val subscriber: ZMQ.Socket
 
+    init {
+        subscriber = context.socket(ZMQ.SUB)
+        subscriber.connect(url)
+        logger.info("Listening on $url")
+    }
+
+    fun subscribe(subscription: String) {
+        if (subscriptions.add(subscription)) {
+            subscriber.subscribe(subscription.toByteArray())
+            logger.info("Subscribed to $subscription, on $url")
+        }
+    }
+
+    override fun run() {
         while (!Thread.currentThread().isInterrupted) {
             val obj = subscriber.recvStr(0)
             logger.trace("Received " + obj)

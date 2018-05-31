@@ -8,7 +8,7 @@ import org.neo.gomina.core.instances.InstanceRealTime
 import org.neo.gomina.integration.monitoring.Indicators
 import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorConfig
-import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThread
+import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.model.hosts.resolveHostname
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.plugins.Plugin
@@ -22,6 +22,7 @@ class MonitoringPlugin : Plugin {
     @Inject lateinit var inventory: Inventory
 
     @Inject lateinit var monitoring: Monitoring
+    @Inject lateinit var zmqThreadPool: ZmqMonitorThreadPool
     private val listeners = CopyOnWriteArrayList<InstanceListener>()
 
     fun registerListener(listener: InstanceListener) {
@@ -51,9 +52,7 @@ class MonitoringPlugin : Plugin {
     override fun init() {
         if (config.connections != null) {
             val subscriptions = inventory.getEnvironments().map { ".#HB.${it.id}." }
-            config.connections
-                    .map { ZmqMonitorThread(monitoring, it.url, subscriptions) }
-                    .forEach { it.start() }
+            config.connections.forEach { zmqThreadPool.add(it.url, subscriptions) }
         }
         prepare()
     }

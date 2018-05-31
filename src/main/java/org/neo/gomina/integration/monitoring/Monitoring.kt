@@ -28,7 +28,7 @@ class Indicators(val instanceId: String, private val timeoutSeconds: Int = 5) : 
     }
 }
 
-class EnvMonitoring(private val timeoutSeconds: Int) {
+private class EnvMonitoring(private val timeoutSeconds: Int) {
     val instances: MutableMap<String, Indicators> = ConcurrentHashMap()
     fun getForInstance(name: String): Indicators {
         return instances.getOrPut(name) { Indicators(name, timeoutSeconds) }
