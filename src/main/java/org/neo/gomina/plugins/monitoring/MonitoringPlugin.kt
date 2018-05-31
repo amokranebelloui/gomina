@@ -51,8 +51,12 @@ class MonitoringPlugin : Plugin {
 
     override fun init() {
         if (config.connections != null) {
-            val subscriptions = inventory.getEnvironments().map { ".#HB.${it.id}." }
-            config.connections.forEach { zmqThreadPool.add(it.url, subscriptions) }
+            inventory.getEnvironments()
+                    .groupBy { it.monitoringUrl }
+                    .filterKeys { it != null }
+                    .forEach { (url, envs) ->
+                        zmqThreadPool.add(url!!, envs.map { ".#HB.${it.id}." })
+                    }
         }
         prepare()
     }

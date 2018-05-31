@@ -31,8 +31,13 @@ class ZmqMonitorThread(
 
     init {
         subscriber = context.socket(ZMQ.SUB)
-        subscriber.connect(url)
-        logger.info("Listening on $url")
+        try {
+            subscriber.connect(url)
+            logger.info("Listening on $url")
+        }
+        catch (e: Exception) {
+            logger.info("Error listening on $url", e.message)
+        }
     }
 
     fun subscribe(subscription: String) {

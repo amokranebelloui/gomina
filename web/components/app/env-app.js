@@ -50,7 +50,7 @@ class EnvApp extends React.Component {
             thisComponent.setState({events: thisComponent.state.events});
 
             // FIXME review how to identify services/instances
-            var found = thisComponent.state.services.find(svc => svc.instances.find(ins => ins.name == event.name));
+            var found = thisComponent.state.services.find(svc => svc.instances.find(ins => ins.env == event.env && ins.name == event.name));
 
             if (found) {
                 found = found.instances.find(ins => ins.name == event.name);
