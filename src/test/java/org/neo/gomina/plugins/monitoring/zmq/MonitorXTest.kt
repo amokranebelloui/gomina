@@ -5,7 +5,6 @@ import org.fest.assertions.MapAssert.entry
 import org.junit.Test
 import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.zmqmonitoring.MessageParser
-import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorConfig
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.zeromq.ZMQ
@@ -26,11 +25,9 @@ class MonitorXTest {
     @Test
     fun testZmq() {
 
-        val config = ZmqMonitorConfig(5, emptyList())
         val monitoring = Monitoring()
-        monitoring.config = config
+        monitoring.timeoutSeconds = 7
         val plugin = MonitoringPlugin()
-        plugin.config = config
         plugin.monitoring = monitoring
 
         val counter = AtomicInteger(0)

@@ -5,9 +5,6 @@ import org.neo.gomina.integration.monitoring.Monitoring
 import org.zeromq.ZMQ
 import javax.inject.Inject
 
-data class ZmqMonitorConfig (var timeoutSeconds: Int, var connections: List<Connection> = emptyList())
-data class Connection (var url: String)
-
 class ZmqMonitorThreadPool {
     @Inject lateinit var monitoring: Monitoring
     val map = mutableMapOf<String, ZmqMonitorThread>()

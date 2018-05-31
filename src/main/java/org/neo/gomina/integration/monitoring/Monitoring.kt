@@ -1,10 +1,9 @@
 package org.neo.gomina.integration.monitoring
 
+import com.google.inject.name.Named
 import org.apache.logging.log4j.LogManager
 import org.joda.time.DateTimeZone
 import org.joda.time.LocalDateTime
-import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorConfig
-import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.concurrent.thread
@@ -39,7 +38,7 @@ typealias MonitoringEventListener = (env: String, instanceId: String, newValues:
 
 class Monitoring {
 
-    @Inject lateinit var config: ZmqMonitorConfig
+    @Inject @Named("monitoring.timeout") var timeoutSeconds: Int = 5
 
     private val topology = ConcurrentHashMap<String, EnvMonitoring>()
     private var listener: MonitoringEventListener? = null
@@ -81,7 +80,7 @@ class Monitoring {
         try {
             enrich(newValues)
             if (include(newValues)) {
-                val envMonitoring = topology.getOrPut(env) { EnvMonitoring(config.timeoutSeconds) }
+                val envMonitoring = topology.getOrPut(env) { EnvMonitoring(timeoutSeconds) }
                 val indicators = envMonitoring.getForInstance(instanceId)
                 if (touch) {
                     indicators.touch()
@@ -111,6 +110,6 @@ class Monitoring {
     }
     
     companion object {
-        private val logger = LogManager.getLogger(MonitoringPlugin::class.java)
+        private val logger = LogManager.getLogger(Monitoring::class.java)
     }
 }

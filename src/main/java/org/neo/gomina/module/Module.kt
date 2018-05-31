@@ -2,7 +2,7 @@ package org.neo.gomina.module
 
 import com.google.inject.AbstractModule
 import com.google.inject.Scopes
-import com.google.inject.name.Names
+import com.google.inject.name.Names.named
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvBuilder
 import org.neo.gomina.api.envs.EnvsApi
@@ -20,6 +20,9 @@ import org.neo.gomina.integration.scm.impl.ScmReposImpl
 import org.neo.gomina.integration.sonar.SonarConfig
 import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.integration.ssh.SshClient
+import org.neo.gomina.integration.ssh.SshConfig
+import org.neo.gomina.integration.ssh.SshOnDemandConnector
+import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.security.Passwords
@@ -28,7 +31,6 @@ import org.neo.gomina.module.config.ConfigLoader
 import org.neo.gomina.persistence.jenkins.JenkinsConfigProvider
 import org.neo.gomina.persistence.model.FileInventory
 import org.neo.gomina.persistence.model.FileProjects
-import org.neo.gomina.persistence.monitoring.ZmqMonitoringConfigProvider
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
 import org.neo.gomina.persistence.ssh.SshConfigProvider
@@ -36,15 +38,11 @@ import org.neo.gomina.plugins.inventory.InventoryApi
 import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
-import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorConfig
 import org.neo.gomina.plugins.scm.ScmApi
 import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.sonar.SonarApi
 import org.neo.gomina.plugins.sonar.SonarPlugin
 import org.neo.gomina.plugins.ssh.SshApi
-import org.neo.gomina.integration.ssh.SshConfig
-import org.neo.gomina.integration.ssh.SshOnDemandConnector
-import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.plugins.ssh.SshPlugin
 import org.neo.gomina.web.PluginAssembler
 import java.io.File
@@ -63,15 +61,15 @@ class GominaModule : AbstractModule() {
         }
 
         // Security
-        bind(File::class.java).annotatedWith(Names.named("passwords")).toInstance(File(config.passwordsFile!!))
+        bind(File::class.java).annotatedWith(named("passwords")).toInstance(File(config.passwordsFile!!))
         bind(Passwords::class.java).`in`(Scopes.SINGLETON)
 
         // Inventory
-        bind(File::class.java).annotatedWith(Names.named("projects.file"))
+        bind(File::class.java).annotatedWith(named("projects.file"))
                 .toInstance(File(config.inventory!!["projectsFile"]))
-        bind(String::class.java).annotatedWith(Names.named("inventory.dir"))
+        bind(String::class.java).annotatedWith(named("inventory.dir"))
                 .toInstance(config.inventory!!["inventoryDir"])
-        bind(String::class.java).annotatedWith(Names.named("inventory.filter"))
+        bind(String::class.java).annotatedWith(named("inventory.filter"))
                 .toInstance(config.inventory!!["inventoryFilter"])
         // FIXME Type
 
@@ -81,10 +79,10 @@ class GominaModule : AbstractModule() {
         bind(InventoryPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // Monitoring
+        bind(Int::class.java).annotatedWith(named("monitoring.timeout")).toInstance(config.monitoring.timeout)
         bind(MonitoringPlugin::class.java).`in`(Scopes.SINGLETON)
         bind(Monitoring::class.java).`in`(Scopes.SINGLETON)
         bind(ZmqMonitorThreadPool::class.java).`in`(Scopes.SINGLETON)
-        bind(ZmqMonitorConfig::class.java).toProvider(ZmqMonitoringConfigProvider::class.java)
 
         // SCM
         bind(ScmConfig::class.java).toProvider(ScmConfigProvider::class.java)

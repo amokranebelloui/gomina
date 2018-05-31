@@ -7,14 +7,17 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.File
 
+
+data class MonitoringConfig(var timeout: Int = 5)
+
 data class Config (
 
     var name: String? = null,
     var passwordsFile: String? = null,
 
-    var inventory: Map<String, String>? = mapOf()
+    var inventory: Map<String, String>? = mapOf(),
+    var monitoring: MonitoringConfig = MonitoringConfig()
 )
-
 
 class ConfigLoader {
 
@@ -26,4 +29,8 @@ class ConfigLoader {
         val configFile = File("config/config.yaml")
         return mapper.readValue(configFile)
     }
+}
+
+fun main(args: Array<String>) {
+    println(ConfigLoader().load())
 }

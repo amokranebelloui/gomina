@@ -7,7 +7,6 @@ import org.neo.gomina.core.instances.InstanceListener
 import org.neo.gomina.core.instances.InstanceRealTime
 import org.neo.gomina.integration.monitoring.Indicators
 import org.neo.gomina.integration.monitoring.Monitoring
-import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorConfig
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.model.hosts.resolveHostname
 import org.neo.gomina.model.inventory.Inventory
@@ -18,7 +17,6 @@ import javax.inject.Inject
 
 class MonitoringPlugin : Plugin {
 
-    @Inject lateinit var config: ZmqMonitorConfig
     @Inject lateinit var inventory: Inventory
 
     @Inject lateinit var monitoring: Monitoring
@@ -50,14 +48,10 @@ class MonitoringPlugin : Plugin {
     }
 
     override fun init() {
-        if (config.connections != null) {
-            inventory.getEnvironments()
-                    .groupBy { it.monitoringUrl }
-                    .filterKeys { it != null }
-                    .forEach { (url, envs) ->
-                        zmqThreadPool.add(url!!, envs.map { ".#HB.${it.id}." })
-                    }
-        }
+        inventory.getEnvironments()
+                .groupBy { it.monitoringUrl }
+                .filterKeys { it != null }
+                .forEach { (url, envs) -> zmqThreadPool.add(url!!, envs.map { ".#HB.${it.id}." }) }
         prepare()
     }
 
