@@ -38,6 +38,8 @@ class ProjectsApi {
         router.get("/").handler(this::projects)
         router.get("/:projectId").handler(this::project)
         router.get("/:projectId/doc/:docId").handler(this::projectDoc)
+
+        router.post("/:projectId/reloadscm").handler(this::reloadProject)
     }
 
     fun projects(ctx: RoutingContext) {
@@ -100,6 +102,20 @@ class ProjectsApi {
             scmPlugin.enrich(project, this)
             sonarPlugin.enrich(project, this)
             jenkinsPlugin.enrich(project, this)
+        }
+    }
+
+    private fun reloadProject(ctx: RoutingContext) {
+        try {
+            val projectId = ctx.request().getParam("projectId")
+            logger.info("Reloading Project data $projectId ...")
+            scmPlugin.reloadProject(projectId)
+            jenkinsPlugin.reload(projectId) // FIXME Jenkins in it's own, or rename API
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get project", e)
+            ctx.fail(500)
         }
     }
 

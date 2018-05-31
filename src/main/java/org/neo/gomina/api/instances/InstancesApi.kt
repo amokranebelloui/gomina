@@ -1,6 +1,8 @@
 package org.neo.gomina.api.instances
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.vertx.core.AsyncResult
+import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
@@ -50,6 +52,8 @@ class InstancesApi {
         router.get("/").handler(this::instances)
         router.get("/:envId").handler(this::forEnv)
         router.get("/:envId/services").handler(this::servicesForEnv)
+
+        router.post("/:envId/reloadscm").handler(this::reloadScm)
     }
 
     fun instances(ctx: RoutingContext) {
@@ -145,6 +149,24 @@ class InstancesApi {
                     val project = service.project?.let { projects.getProject(it) }
                     ExtInstance(id, service, project, instance?.second, indicators)
                 }
+    }
+
+    private fun reloadScm(ctx: RoutingContext) {
+        try {
+            vertx.executeBlocking({future: Future<Void> ->
+                val envId = ctx.request().getParam("envId")
+                logger.info("Reloading SCM data $envId ...")
+                scmPlugin.reloadInstances(envId)
+                future.complete()
+            }, false)
+            {res: AsyncResult<Void> ->
+                ctx.response().putHeader("content-type", "text/javascript").end("reload SCM done!")
+            }
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
     }
 }
 

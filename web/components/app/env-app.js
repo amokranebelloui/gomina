@@ -132,7 +132,7 @@ class EnvApp extends React.Component {
     }
     reloadScm() {
         const thisComponent = this;
-        axios.post('/data/scm/' + this.state.env + '/reload')
+        axios.post('/data/instances/' + this.state.env + '/reloadscm')
             .then(response => {
                 console.log("reloaded", response.data);
                 this.retrieveInstances(thisComponent.state.env);

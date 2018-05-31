@@ -38,7 +38,6 @@ import org.neo.gomina.plugins.inventory.InventoryApi
 import org.neo.gomina.plugins.inventory.InventoryPlugin
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
-import org.neo.gomina.plugins.scm.ScmApi
 import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.sonar.SonarApi
 import org.neo.gomina.plugins.sonar.SonarPlugin
@@ -154,7 +153,6 @@ class GominaModule : AbstractModule() {
         bind(InstancesApi::class.java).`in`(Scopes.SINGLETON)
 
         bind(InventoryApi::class.java).`in`(Scopes.SINGLETON)
-        bind(ScmApi::class.java).`in`(Scopes.SINGLETON)
         bind(SshApi::class.java).`in`(Scopes.SINGLETON)
         bind(SonarApi::class.java).`in`(Scopes.SINGLETON)
         bind(EventsApi::class.java).`in`(Scopes.SINGLETON)

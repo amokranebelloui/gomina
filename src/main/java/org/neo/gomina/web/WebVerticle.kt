@@ -10,7 +10,6 @@ import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.StaticHandler
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.events.EventsApi
-import org.neo.gomina.plugins.scm.ScmApi
 import org.neo.gomina.plugins.sonar.SonarApi
 import org.neo.gomina.plugins.ssh.SshApi
 import org.neo.gomina.api.diagram.DiagramApi
@@ -46,7 +45,6 @@ class WebVerticle : AbstractVerticle() {
                 .mountSubRouter("/data/envs", injector.getInstance(EnvsApi::class.java).router)
                 .mountSubRouter("/data/projects", injector.getInstance(ProjectsApi::class.java).router)
                 .mountSubRouter("/data/instances", injector.getInstance(InstancesApi::class.java).router)
-                .mountSubRouter("/data/scm", injector.getInstance(ScmApi::class.java).router)
                 .mountSubRouter("/data/inventory", injector.getInstance(InventoryApi::class.java).router)
                 .mountSubRouter("/data/ssh", injector.getInstance(SshApi::class.java).router)
                 .mountSubRouter("/data/sonar", injector.getInstance(SonarApi::class.java).router)
