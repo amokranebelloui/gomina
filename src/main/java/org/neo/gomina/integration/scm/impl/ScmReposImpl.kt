@@ -8,6 +8,7 @@ import org.neo.gomina.integration.scm.ScmClient
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.integration.scm.dummy.DummyScmClient
+import org.neo.gomina.integration.scm.metadata.ProjectMetadataMapper
 import org.neo.gomina.integration.scm.none.NoneScmClient
 import org.neo.gomina.integration.scm.svn.TmateSoftSvnClient
 import org.neo.gomina.integration.scm.versions.MavenReleaseFlagger
@@ -31,6 +32,8 @@ class ScmReposImpl : ScmRepos {
 
     private val repos = HashMap<String, ScmRepo>()
     private val clients = HashMap<String, ScmClient>()
+
+    private val metadataMapper = ProjectMetadataMapper()
 
     @Inject
     constructor(config: ScmConfig, passwords: Passwords) {
@@ -74,9 +77,17 @@ class ScmReposImpl : ScmRepos {
             val root = repo?.location
             val url = "$root$svnUrl"
 
+            val metadataFile = scmClient.getFile("$svnUrl/trunk/project.yaml", "-1")
+            val metadata = metadataFile?.let { metadataMapper.map(metadataFile) }
+
+            val pomFile = scmClient.getFile("$svnUrl/trunk/pom.xml", "-1")
+
             val scmDetails = ScmDetails(
+                    owner = metadata?.owner,
+                    critical = metadata?.critical,
                     url = url,
-                    latest = MavenUtils.extractVersion(scmClient.getFile("$svnUrl/trunk/pom.xml", "-1")),
+                    mavenId = MavenUtils.extractMavenId(pomFile),
+                    latest = MavenUtils.extractVersion(pomFile),
                     latestRevision = logEntries.firstOrNull()?.revision,
                     released = logEntries
                             .filter { StringUtils.isNotBlank(it.release) }

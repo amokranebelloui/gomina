@@ -3,7 +3,10 @@ package org.neo.gomina.integration.scm
 // FIXME encapsulate document, and include type matadata
 
 data class ScmDetails (
+        var owner: String? = null,
+        var critical: Int? = null,
         var url: String? = null,
+        var mavenId: String? = null,
         var latest: String? = null,
         var latestRevision: String? = null,
         var released: String? = null,

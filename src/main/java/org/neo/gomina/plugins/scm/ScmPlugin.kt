@@ -15,6 +15,11 @@ import org.neo.gomina.utils.Cache
 import javax.inject.Inject
 
 fun ProjectDetail.apply(scmDetails: ScmDetails) {
+    this.owner = scmDetails.owner
+    this.critical = scmDetails.critical
+    if (!scmDetails.mavenId.isNullOrBlank()) {
+        this.mvn = scmDetails.mavenId
+    }
     this.scmUrl = scmDetails.url
     this.docFiles = scmDetails.docFiles
     this.changes = scmDetails.changes

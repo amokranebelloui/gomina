@@ -49,9 +49,14 @@ class TmateSoftSvnClient : ScmClient {
     }
 
     override fun getFile(url: String, rev: String): String? {
-        val baos = ByteArrayOutputStream()
-        repository.getFile(url, java.lang.Long.valueOf(rev), SVNProperties(), baos)
-        return String(baos.toByteArray())
+        try {
+            val baos = ByteArrayOutputStream()
+            repository.getFile(url, java.lang.Long.valueOf(rev), SVNProperties(), baos)
+            return String(baos.toByteArray())
+        } catch (e: Exception) {
+            logger.info("Cannot find file $url")
+        }
+        return null
     }
 
     override fun listFiles(url: String, rev: String): List<String> {

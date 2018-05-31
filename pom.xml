@@ -92,7 +92,7 @@
         <dependency>
             <groupId>org.tmatesoft.svnkit</groupId>
             <artifactId>svnkit</artifactId>
-            <version>1.7.11</version>
+            <version>1.9.2</version>
         </dependency>
 
         <dependency>
