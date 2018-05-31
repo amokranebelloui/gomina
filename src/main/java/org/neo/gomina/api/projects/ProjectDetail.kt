@@ -1,4 +1,4 @@
-package org.neo.gomina.core.projects
+package org.neo.gomina.api.projects
 
 import java.util.*
 

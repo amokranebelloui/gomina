@@ -1,4 +1,4 @@
-package org.neo.gomina.core.instances
+package org.neo.gomina.api.instances
 
 data class ServiceDetail (
     val svc: String,

@@ -1,7 +1,7 @@
 package org.neo.gomina.plugins.sonar
 
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.projects.ProjectDetail
+import org.neo.gomina.api.projects.ProjectDetail
 import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.integration.sonar.SonarIndicators
 import org.neo.gomina.model.project.Project

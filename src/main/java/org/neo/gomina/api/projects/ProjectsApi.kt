@@ -7,7 +7,6 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.projects.ProjectDetail
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin

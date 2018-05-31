@@ -3,9 +3,9 @@ package org.neo.gomina.plugins.scm
 import com.github.rjeschke.txtmark.Processor
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.instances.InstanceDetail
-import org.neo.gomina.core.projects.CommitLogEntry
-import org.neo.gomina.core.projects.ProjectDetail
+import org.neo.gomina.api.instances.InstanceDetail
+import org.neo.gomina.api.projects.CommitLogEntry
+import org.neo.gomina.api.projects.ProjectDetail
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.model.inventory.Inventory
@@ -22,10 +22,10 @@ fun ProjectDetail.apply(scmDetails: ScmDetails) {
     this.released = scmDetails.released
     this.commitLog = scmDetails.commitLog.map {
         CommitLogEntry(
-            revision = it.revision,
-            date = it.date,
-            author = it.author,
-            message = it.message
+                revision = it.revision,
+                date = it.date,
+                author = it.author,
+                message = it.message
         )
     }
 }

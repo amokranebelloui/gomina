@@ -2,9 +2,9 @@ package org.neo.gomina.plugins.monitoring
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.instances.InstanceDetail
-import org.neo.gomina.core.instances.InstanceListener
-import org.neo.gomina.core.instances.InstanceRealTime
+import org.neo.gomina.api.instances.InstanceDetail
+import org.neo.gomina.api.instances.InstanceListener
+import org.neo.gomina.api.instances.InstanceRealTime
 import org.neo.gomina.integration.monitoring.Indicators
 import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool

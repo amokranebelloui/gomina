@@ -1,4 +1,4 @@
-package org.neo.gomina.core.events
+package org.neo.gomina.api.events
 
 import java.util.*
 

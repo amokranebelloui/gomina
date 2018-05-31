@@ -1,7 +1,7 @@
 package org.neo.gomina.plugins.jenkins
 
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.projects.ProjectDetail
+import org.neo.gomina.api.projects.ProjectDetail
 import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus

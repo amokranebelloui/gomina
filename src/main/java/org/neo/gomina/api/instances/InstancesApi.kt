@@ -7,8 +7,6 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.instances.InstanceDetail
-import org.neo.gomina.core.instances.ServiceDetail
 import org.neo.gomina.integration.monitoring.Indicators
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Instance
@@ -114,7 +112,7 @@ class InstancesApi {
     private fun build(envId: String, ext: ExtInstance): InstanceDetail {
         val expected = ext.instance != null
         val id = envId + "-" + ext.id
-        val instance = InstanceDetail(id=id, env=envId, type=ext.service.type, service=ext.service.svc, name=ext.id, unexpected=!expected)
+        val instance = InstanceDetail(id = id, env = envId, type = ext.service.type, service = ext.service.svc, name = ext.id, unexpected = !expected)
         ext.instance?.let { instance.applyInventory(ext.service, ext.instance) }
         ext.indicators?.let {
             instance.applyMonitoring(ext.indicators)

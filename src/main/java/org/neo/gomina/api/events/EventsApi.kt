@@ -5,7 +5,6 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.events.Event
 import org.neo.gomina.plugins.scm.ScmPlugin
 import java.util.*
 import javax.inject.Inject

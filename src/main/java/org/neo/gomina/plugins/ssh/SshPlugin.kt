@@ -3,7 +3,7 @@ package org.neo.gomina.plugins.ssh
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.core.instances.InstanceDetail
+import org.neo.gomina.api.instances.InstanceDetail
 import org.neo.gomina.integration.ssh.SshClient
 import org.neo.gomina.integration.ssh.SshDetails
 import org.neo.gomina.integration.ssh.SshOnDemandConnector
