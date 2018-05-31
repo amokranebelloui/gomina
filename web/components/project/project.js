@@ -2,6 +2,7 @@ import React from "react";
 import {Link} from "react-router-dom";
 import {Badge, groupBy, Well} from "../common/component-library";
 import {Version} from "../common/version";
+import sonarIcon from "./sonar.ico"
 
 class LinesOfCode extends React.Component {
     render() {
@@ -41,6 +42,19 @@ class Coverage extends React.Component {
                     </span>
                 </span>
         );
+    }
+}
+
+class ImageLink extends React.Component {
+    render() {
+        const text = this.props.server ? this.props.server : "build";
+        //const text = this.props.src ? this.props.src : "build";
+        return (
+            <a href={this.props.url} target="_blank" title={this.props.url}
+               style={{padding: 2, borderRadius: '3px', fontSize: 10}}>
+                <img src={this.props.src} width="16" height="16" />
+            </a>
+        )
     }
 }
 
@@ -124,6 +138,7 @@ function ProjectBadge(props) {
                 <br/>
                 <span style={{fontSize: 9}}>{project.scmRepo + ': ' + project.scmUrl}</span>
                 <br/>
+                <ImageLink src={sonarIcon} url={project.sonarUrl} />
                 <LinesOfCode loc={project.loc}/>
                 <Coverage coverage={project.coverage}/>
                 <br/>
@@ -131,9 +146,10 @@ function ProjectBadge(props) {
                 <span>{project.jenkinsJob}</span>
                 <br/>
                 <span>
-                {project.buildNumber} &nbsp;
-                {project.buildStatus} &nbsp;
-                {project.buildTimestamp && new Date(project.buildTimestamp).toLocaleString()} &nbsp;
+                    Jenkins &nbsp;
+                    {project.buildNumber} &nbsp;
+                    {project.buildStatus} &nbsp;
+                    {project.buildTimestamp && new Date(project.buildTimestamp).toLocaleString()} &nbsp;
                 </span>
                 <br/>
                 <button onClick={e => props.onReload(project.id)}>RELOAD</button>
@@ -223,7 +239,7 @@ class Documentation extends React.Component {
 }
 
 
-export {BuildLink, ScmLog, ProjectSummary, ProjectBadge, UnreleasedChangeCount, ScmLink, Documentation, LinesOfCode, Coverage}
+export {BuildLink, ImageLink, ScmLog, ProjectSummary, ProjectBadge, UnreleasedChangeCount, ScmLink, Documentation, LinesOfCode, Coverage}
 
 
 

@@ -11,6 +11,7 @@ data class ProjectDetail (
         var scmLocation: String? = null,
         var scmUrl: String? = null,
         var mvn: String? = null,
+        var sonarUrl: String? = null,
         var jenkinsServer: String? = null,
         var jenkinsJob: String? = null,
         var jenkinsUrl: String? = null,

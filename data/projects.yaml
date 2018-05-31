@@ -99,6 +99,7 @@
   label: Torkjell
   type: server
   tags: "personal server"
+  sonarServer: main
   svnRepo: ''
   svnUrl: ''
   maven: torkjell:torkjell
