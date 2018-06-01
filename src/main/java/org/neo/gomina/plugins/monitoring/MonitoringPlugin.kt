@@ -7,7 +7,7 @@ import org.neo.gomina.api.instances.InstanceListener
 import org.neo.gomina.api.instances.InstanceRealTime
 import org.neo.gomina.integration.monitoring.*
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
-import org.neo.gomina.model.hosts.resolveHostname
+import org.neo.gomina.model.host.resolveHostname
 import org.neo.gomina.model.inventory.Inventory
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList

@@ -4,8 +4,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.hosts.Host
-import org.neo.gomina.model.hosts.Hosts
+import org.neo.gomina.model.host.Host
+import org.neo.gomina.model.host.Hosts
 import java.io.File
 
 class HostsFile : Hosts, AbstractFileRepo() {

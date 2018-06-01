@@ -3,7 +3,7 @@ package org.neo.gomina.integration.ssh
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.hosts.Hosts
+import org.neo.gomina.model.host.Hosts
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.security.Passwords

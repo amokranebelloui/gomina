@@ -22,7 +22,7 @@ import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.integration.ssh.SshClient
 import org.neo.gomina.integration.ssh.SshOnDemandConnector
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
-import org.neo.gomina.model.hosts.Hosts
+import org.neo.gomina.model.host.Hosts
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.security.Passwords
