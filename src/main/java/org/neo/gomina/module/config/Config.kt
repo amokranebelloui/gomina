@@ -7,7 +7,10 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.File
 
-
+data class InventoryConfig(var projectsFile: String = "",
+                           var hostsFile: String = "",
+                           var inventoryDir: String = "",
+                           var inventoryFilter: String = "")
 data class MonitoringConfig(var timeout: Int = 5)
 
 data class Config (
@@ -15,7 +18,7 @@ data class Config (
     var name: String? = null,
     var passwordsFile: String? = null,
 
-    var inventory: Map<String, String>? = mapOf(),
+    var inventory: InventoryConfig = InventoryConfig(),
     var monitoring: MonitoringConfig = MonitoringConfig()
 )
 

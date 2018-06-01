@@ -8,20 +8,20 @@ import kotlin.test.assertFailsWith
 class ProjectsTest {
 
     @Test fun testYaml() {
-        val projects = ProjectsReader().read(File("data/projects.yaml"))
+        val projects = ProjectsFile().read(File("data/projects.yaml"))
         projects.forEach { println(it) }
         assertThat(projects.size).isGreaterThan(0)
     }
 
     @Test fun testJson() {
-        val projects = ProjectsReader().read(File("data/projects.json"))
+        val projects = ProjectsFile().read(File("data/projects.json"))
         projects.forEach { println(it) }
         assertThat(projects.size).isGreaterThan(0)
     }
 
     @Test fun testException() {
         assertFailsWith(RuntimeException::class) {
-            ProjectsReader().read(File("data/projects.txt"))
+            ProjectsFile().read(File("data/projects.txt"))
         }
     }
 }

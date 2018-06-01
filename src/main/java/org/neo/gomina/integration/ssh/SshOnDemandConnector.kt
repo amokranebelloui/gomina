@@ -3,6 +3,7 @@ package org.neo.gomina.integration.ssh
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.model.hosts.Hosts
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.security.Passwords
@@ -35,21 +36,9 @@ typealias AnalysisFunction = (instance: Instance, sshClient: SshClient, session:
 
 class SshOnDemandConnector {
 
-    private val hosts: Map<String, Host>
-
-    //@Inject internal lateinit var inventory: Inventory
+    @Inject internal lateinit var hosts: Hosts
     @Inject internal lateinit var passwords: Passwords
     @Inject internal lateinit var sshClient: SshClient
-
-    @Inject
-    constructor(sshConfig: SshConfig) {
-        hosts = sshConfig.hosts
-        .groupBy { it.host }
-        .entries
-        .map { (host, configs) -> Pair(host, configs.first())}
-        .toMap()
-    }
-
 
     fun analyze(env: Environment, analysisFunction: AnalysisFunction): EnvAnalysis {
         logger.info("SSH Analysis for ${env.id}")
@@ -60,7 +49,7 @@ class SshOnDemandConnector {
 
         val map = ConcurrentHashMap<String, MutableMap<String, SshDetails>>()
         for ((host, instances) in instancesByHost) {
-            val config = hosts[host]
+            val config = hosts.getHost(host)
             if (config != null) {
                 val username = config.username
                 val password = passwords.getRealPassword(config.passwordAlias!!)

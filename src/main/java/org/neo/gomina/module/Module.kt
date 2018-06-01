@@ -20,20 +20,20 @@ import org.neo.gomina.integration.scm.impl.ScmReposImpl
 import org.neo.gomina.integration.sonar.SonarConfig
 import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.integration.ssh.SshClient
-import org.neo.gomina.integration.ssh.SshConfig
 import org.neo.gomina.integration.ssh.SshOnDemandConnector
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
+import org.neo.gomina.model.hosts.Hosts
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.module.config.Config
 import org.neo.gomina.module.config.ConfigLoader
 import org.neo.gomina.persistence.jenkins.JenkinsConfigProvider
-import org.neo.gomina.persistence.model.FileInventory
-import org.neo.gomina.persistence.model.FileProjects
+import org.neo.gomina.persistence.model.HostsFile
+import org.neo.gomina.persistence.model.InventoryFile
+import org.neo.gomina.persistence.model.ProjectsFile
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
-import org.neo.gomina.persistence.ssh.SshConfigProvider
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.scm.ScmPlugin
@@ -59,18 +59,15 @@ class GominaModule : AbstractModule() {
         bind(File::class.java).annotatedWith(named("passwords")).toInstance(File(config.passwordsFile!!))
         bind(Passwords::class.java).`in`(Scopes.SINGLETON)
 
-        // Inventory
-        bind(File::class.java).annotatedWith(named("projects.file"))
-                .toInstance(File(config.inventory!!["projectsFile"]))
-        bind(String::class.java).annotatedWith(named("inventory.dir"))
-                .toInstance(config.inventory!!["inventoryDir"])
-        bind(String::class.java).annotatedWith(named("inventory.filter"))
-                .toInstance(config.inventory!!["inventoryFilter"])
-        // FIXME Type
-
         // Model
-        bind(Projects::class.java).to(FileProjects::class.java).`in`(Scopes.SINGLETON)
-        bind(Inventory::class.java).to(FileInventory::class.java).`in`(Scopes.SINGLETON)
+        bind(File::class.java).annotatedWith(named("projects.file")).toInstance(File(config.inventory.projectsFile))
+        bind(File::class.java).annotatedWith(named("hosts.file")).toInstance(File(config.inventory.hostsFile))
+        bind(String::class.java).annotatedWith(named("inventory.dir")).toInstance(config.inventory.inventoryDir)
+        bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
+
+        bind(Projects::class.java).to(ProjectsFile::class.java).`in`(Scopes.SINGLETON)
+        bind(Hosts::class.java).to(HostsFile::class.java).`in`(Scopes.SINGLETON)
+        bind(Inventory::class.java).to(InventoryFile::class.java).`in`(Scopes.SINGLETON)
 
         // Monitoring
         bind(Int::class.java).annotatedWith(named("monitoring.timeout")).toInstance(config.monitoring.timeout)
@@ -94,7 +91,6 @@ class GominaModule : AbstractModule() {
         bind(SonarPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // SSH
-        bind(SshConfig::class.java).toProvider(SshConfigProvider::class.java)
         bind(SshClient::class.java).`in`(Scopes.SINGLETON)
         bind(SshOnDemandConnector::class.java).`in`(Scopes.SINGLETON)
         bind(SshPlugin::class.java).`in`(Scopes.SINGLETON)

@@ -1,24 +1,29 @@
 package org.neo.gomina.plugins.ssh
 
 import org.junit.Test
-import org.neo.gomina.integration.ssh.Host
-import org.neo.gomina.persistence.model.FileInventory
-import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.integration.ssh.SshClient
-import org.neo.gomina.integration.ssh.SshConfig
 import org.neo.gomina.integration.ssh.SshOnDemandConnector
+import org.neo.gomina.model.hosts.Host
+import org.neo.gomina.model.hosts.Hosts
+import org.neo.gomina.model.security.Passwords
+import org.neo.gomina.persistence.model.InventoryFile
 import java.io.File
 
 class SshOnDemandConnectorTest {
 
+    class DummyHosts : Hosts {
+        val host1 = Host("localhost", "Amokrane", "@amokrane")
+        override fun getHosts(): List<Host> = listOf(host1)
+        override fun getHost(host: String): Host? = host1
+    }
+
     @Test
     fun testAnalyze() {
-        val inventory = FileInventory("data")
-        val sshConfig = SshConfig(listOf(Host("localhost", "Amokrane", "@amokrane")))
+        val inventory = InventoryFile("data")
         val passwords = Passwords(File("config/pass.properties"))
         val sshClient = SshClient()
-        val sshConnector = SshOnDemandConnector(sshConfig!!)
-        //sshConnector.inventory = inventory
+        val sshConnector = SshOnDemandConnector()
+        sshConnector.hosts = DummyHosts()
         sshConnector.passwords = passwords
         sshConnector.sshClient = sshClient
 
