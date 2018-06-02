@@ -10,11 +10,11 @@ class PasswordsTest {
 
     @Test
     fun getRealPassword() {
-        val passwords = Passwords(File("config/pass.properties.sample"))
+        val passwords = Passwords(File("config/pass.properties"))
 
         assertThat(String(Base64.encodeBase64("super$\$sec".toByteArray()))).isEqualTo("c3VwZXIkJHNlYw==")
-        assertThat(passwords.getRealPassword("@amokrane")).isEqualTo("mysecret")
-        assertThat(passwords.getRealPassword("@vac")).isEqualTo("super$\$sec")
+        assertThat(passwords.getRealPassword("@test")).isEqualTo("test")
+        assertThat(passwords.getRealPassword("@majortom")).isEqualTo("super$\$sec")
     }
 
 }

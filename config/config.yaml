@@ -1,0 +1,71 @@
+
+name: 'My Governance Dashboard'
+passwordsFile: 'config/pass.properties'
+
+inventory:
+  #projectsFile: 'data/projects.json'
+  projectsFile: 'data/projects.yaml'
+  hostsFile: 'data/hosts.yaml'
+  inventoryDir: 'data'
+  #inventoryFilter: 'env\.(.*?)\..*'
+  inventoryFilter: 'env\.(.*?)\.yaml'
+  #inventoryFilter: 'env\.(.*i.*?)\.yaml'
+
+monitoring:
+  timeout: 8
+
+events:
+  host: "localhost"
+  port: 9200
+
+##### Deprecated #####
+
+#scm:
+#  repos:
+#    - id: 'vac'
+#      type: 'svn'
+#      location: 'http://svn/actions/venteaction/vaction/Developpement/'
+#    - id: 'home'
+#      type: 'svn'
+#      location: 'file:////Users/Shared/SvnRepo/svn-repo-demo/'
+#      username: 'Test'
+#      passwordAlias: '@test'
+#    - id: 'dummy'
+#      type: 'dummy'
+#      location: 'dummy://'
+#
+#sonar:
+#  servers:
+#    - id: ''
+#      mode: 'http'
+#      url: 'http://localhost:9000'
+#    - id: 'main'
+#      mode: 'dummy'
+#    - id: 'dummy'
+#      mode: 'dummy'
+#
+#jenkins:
+#  servers:
+#    - id: ''
+#      location: 'http://default-jenkins/jenkins/'
+#    - id: 'principal'
+#      location: 'http://localhost:7111/jenkins/'
+#    - id: 'edge'
+#      location: 'https://jenkins.io/edge/'
+#    - id: 'apache'
+#      location: 'https://builds.apache.org/job/'
+#
+#ssh:
+#  hosts:
+#    - host: 'localhost'
+#      username: 'Test'
+#      passwordAlias: '@test'
+#      sudo: ''
+#
+#zmqMonitoring:
+#  connections:
+#    - url: 'tcp://localhost:7070'
+#      #type: 'SUB'
+#      #serializationClass: 'org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThread'
+#    - url: 'tcp://localhost:7071'
+#

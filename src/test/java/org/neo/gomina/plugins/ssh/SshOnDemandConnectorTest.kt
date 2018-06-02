@@ -12,7 +12,7 @@ import java.io.File
 class SshOnDemandConnectorTest {
 
     class DummyHosts : Hosts {
-        val host1 = Host("localhost", "Amokrane", "@amokrane")
+        val host1 = Host("localhost", "paris", "Test", "@test")
         override fun getHosts(): List<Host> = listOf(host1)
         override fun getHost(host: String): Host? = host1
     }
