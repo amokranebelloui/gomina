@@ -231,7 +231,11 @@ class EnvApp extends React.Component {
                                     <div ref={node => this.eventsList = node}></div>
                                     <ul>
                                     {events.map(event =>
-                                        <li>{event.timestamp} {event.type} {event.message}</li>
+                                        <li>
+                                            {new Date(event.timestamp).toLocaleString()}&nbsp;
+                                            {event.type}&nbsp;
+                                            {event.message}
+                                        </li>
                                     )}
                                     </ul>
                                 </Container>

@@ -1,11 +1,16 @@
 package org.neo.gomina.api.events
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.inject.name.Named
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.plugins.scm.ScmPlugin
+import org.neo.gomina.integration.elasticsearch.ElasticEvents
+import org.neo.gomina.integration.eventrepo.EventRepo
+import org.neo.gomina.model.event.Event
+import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.*
 import javax.inject.Inject
 
@@ -18,7 +23,8 @@ class EventsApi {
     val vertx: Vertx
     val router: Router
 
-    @Inject lateinit var scmPlugin: ScmPlugin
+    @Inject lateinit var eventRepo: EventRepo
+    @Inject @Named("releases") lateinit var releaseEvents: ElasticEvents
 
     private val mapper = ObjectMapper()
 
@@ -34,15 +40,11 @@ class EventsApi {
         try {
             val envId = ctx.request().getParam("envId")
             logger.info("Events for $envId")
-            // Most recent first
-
-            // FIXME Dummy Data
-            val events = listOf(
-                    Event(Date(2018, 4, 24, 18, 57), "release", "Release order manager", instanceId = "order", version = "2.5.6"),
-                    Event(Date(2018, 4, 24, 18, 55), "maintenance", "Purge data"),
-                    Event(Date(2018, 4, 22, 17, 12), "outage", "database trading down"),
-                    Event(Date(2018, 4, 20, 19, 0), "release", "Release bugfix", instanceId = "basket", version = "1.1.5")
-            )
+            val since = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
+            val all = eventRepo.getEvents(since) + releaseEvents.getEvents(since)
+            val events = all
+                    .sortedByDescending { it.timestamp }
+                    .map { it.toEventDetail() }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(events))
@@ -54,3 +56,12 @@ class EventsApi {
     }
 
 }
+
+fun Event.toEventDetail() = EventDetail(
+        timestamp = Date.from(this.timestamp.atZone(ZoneOffset.UTC).toInstant()),
+        type = this.type,
+        message = this.message,
+        envId =  this.envId,
+        instanceId = this.instanceId,
+        version = this.version
+)

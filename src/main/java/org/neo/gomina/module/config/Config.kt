@@ -12,6 +12,7 @@ data class InventoryConfig(var projectsFile: String = "",
                            var inventoryDir: String = "",
                            var inventoryFilter: String = "")
 data class MonitoringConfig(var timeout: Int = 5)
+data class EventsConfig(var host: String = "localhost", var port: Int = 9200)
 
 data class Config (
 
@@ -19,7 +20,8 @@ data class Config (
     var passwordsFile: String? = null,
 
     var inventory: InventoryConfig = InventoryConfig(),
-    var monitoring: MonitoringConfig = MonitoringConfig()
+    var monitoring: MonitoringConfig = MonitoringConfig(),
+    var events: EventsConfig = EventsConfig()
 )
 
 class ConfigLoader {

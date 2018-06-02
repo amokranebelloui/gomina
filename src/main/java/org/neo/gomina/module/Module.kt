@@ -10,6 +10,8 @@ import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
+import org.neo.gomina.integration.elasticsearch.ElasticEvents
+import org.neo.gomina.integration.eventrepo.EventRepo
 import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
@@ -94,6 +96,14 @@ class GominaModule : AbstractModule() {
         bind(SshClient::class.java).`in`(Scopes.SINGLETON)
         bind(SshOnDemandConnector::class.java).`in`(Scopes.SINGLETON)
         bind(SshPlugin::class.java).`in`(Scopes.SINGLETON)
+
+        // EventRepo
+        bind(EventRepo::class.java).`in`(Scopes.SINGLETON)
+
+        // Elastic
+        bind(String::class.java).annotatedWith(named("elastic.host")).toInstance(config.events.host)
+        bind(Int::class.java).annotatedWith(named("elastic.port")).toInstance(config.events.port)
+        bind(ElasticEvents::class.java).annotatedWith(named("releases")).to(ElasticEvents::class.java).`in`(Scopes.SINGLETON)
 
         // API
         bind(EnvBuilder::class.java).`in`(Scopes.SINGLETON)
