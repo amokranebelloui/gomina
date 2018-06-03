@@ -1,14 +1,12 @@
 package org.neo.gomina.api.events
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.inject.name.Named
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.elasticsearch.ElasticEvents
-import org.neo.gomina.integration.eventrepo.EventRepo
 import org.neo.gomina.model.event.Event
+import org.neo.gomina.plugins.events.EventsPlugin
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.*
@@ -23,8 +21,7 @@ class EventsApi {
     val vertx: Vertx
     val router: Router
 
-    @Inject lateinit var eventRepo: EventRepo
-    @Inject @Named("releases") lateinit var releaseEvents: ElasticEvents
+    @Inject lateinit var eventsPlugin: EventsPlugin
 
     private val mapper = ObjectMapper()
 
@@ -40,14 +37,24 @@ class EventsApi {
         try {
             val envId = ctx.request().getParam("envId")
             logger.info("Events for $envId")
-            val since = LocalDate.now().atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
-            val all = eventRepo.getEvents(since) + releaseEvents.getEvents(since)
-            val events = all
+            val since = LocalDate.now().minusDays(1).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
+
+            val errors = mutableListOf<String>()
+            val events = eventsPlugin.eventProviders()
+                    .flatMap {
+                        try {
+                            it.getEvents(since)
+                        } catch (e: Exception) {
+                            errors.add(e.message ?: "Unknown error")
+                            emptyList<Event>()
+                        }
+                    }
                     .sortedByDescending { it.timestamp }
                     .map { it.toEventDetail() }
+
             ctx.response()
                     .putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(events))
+                    .end(mapper.writeValueAsString(EventList(events, errors)))
         }
         catch (e: Exception) {
             logger.error("Cannot get instances", e)

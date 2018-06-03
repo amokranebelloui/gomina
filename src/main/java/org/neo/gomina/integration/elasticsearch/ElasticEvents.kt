@@ -51,8 +51,9 @@ class ElasticEvents : EventsProvider {
                 }
             }
         } catch (e: Exception) {
-            logger.error("Cannot retrieve events from elastic search $host:$port", e)
-            return emptyList()
+            val msg = "Cannot retrieve events from elastic search $host:$port"
+            logger.error(msg, e)
+            throw Exception(msg)
         }
     }
 

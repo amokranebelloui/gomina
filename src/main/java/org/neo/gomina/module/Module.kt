@@ -36,6 +36,7 @@ import org.neo.gomina.persistence.model.InventoryFile
 import org.neo.gomina.persistence.model.ProjectsFile
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
+import org.neo.gomina.plugins.events.EventsPlugin
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.scm.ScmPlugin
@@ -104,6 +105,9 @@ class GominaModule : AbstractModule() {
         bind(String::class.java).annotatedWith(named("elastic.host")).toInstance(config.events.host)
         bind(Int::class.java).annotatedWith(named("elastic.port")).toInstance(config.events.port)
         bind(ElasticEvents::class.java).annotatedWith(named("releases")).to(ElasticEvents::class.java).`in`(Scopes.SINGLETON)
+
+        // Events
+        bind(EventsPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // API
         bind(EnvBuilder::class.java).`in`(Scopes.SINGLETON)

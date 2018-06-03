@@ -16,7 +16,8 @@ class EnvApp extends React.Component {
             services: [],
             filterId: 'all',
             highlight: instance => true,
-            events: []
+            events: [],
+            eventsErrors: []
         };
         this.connect = this.connect.bind(this);
         this.switch = this.switch.bind(this);
@@ -112,11 +113,13 @@ class EnvApp extends React.Component {
         axios.get('/data/events/' + env)
             .then(response => {
                 console.log("envApp data events", response.data);
-                thisComponent.setState({events: response.data});
+                thisComponent.setState({events: response.data.events});
+                thisComponent.setState({eventsErrors: response.data.errors});
             })
             .catch(function (error) {
                 console.log("envApp error events", error);
                 thisComponent.setState({events: []});
+                thisComponent.setState({eventsErrors: ["Could not retrieve data"]});
             });
     }
     reloadInventory() {
@@ -184,6 +187,7 @@ class EnvApp extends React.Component {
         const envsByType = groupBy(this.state.envs, 'type');
         const instances = flatMap(this.state.services, svc => svc.instances)
         const events = this.state.events;
+        const eventsErrors = this.state.eventsErrors;
 
         const iterable = instances.map(instance => instance.host);
         const hosts = [...new Set(iterable)].sort();
@@ -229,6 +233,11 @@ class EnvApp extends React.Component {
                             <div className='side-secondary'>
                                 <Container>
                                     <div ref={node => this.eventsList = node}></div>
+                                    {eventsErrors.map(error =>
+                                        <li>
+                                            {error}
+                                        </li>
+                                    )}
                                     <ul>
                                     {events.map(event =>
                                         <li>
