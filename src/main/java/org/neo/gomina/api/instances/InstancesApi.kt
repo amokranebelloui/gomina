@@ -113,7 +113,12 @@ class InstancesApi {
         val expected = ext.instance != null
         val id = envId + "-" + ext.id
         val instance = InstanceDetail(id = id, env = envId, type = ext.service.type, service = ext.service.svc, name = ext.id, unexpected = !expected)
-        ext.instance?.let { instance.applyInventory(ext.service, ext.instance) }
+        ext.instance?.let {
+            instance.applyInventory(ext.service, ext.instance)
+            if (ext.indicators == null) {
+                instance.status = "NOINFO"
+            }
+        }
         ext.indicators?.let {
             instance.applyMonitoring(ext.indicators)
             instance.applyCluster(ext.indicators)

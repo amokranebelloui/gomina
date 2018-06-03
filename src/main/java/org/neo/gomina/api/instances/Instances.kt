@@ -23,7 +23,7 @@ class InstanceDetail(
 
         var pid: String? = null,
         var host: String? = null,
-        var status: String? = "NOINFO",
+        var status: String? = null,
 
         var project: String? = null,
         var deployHost: String? = null,
