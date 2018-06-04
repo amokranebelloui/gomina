@@ -13,9 +13,9 @@ fun main(args: Array<String>) {
     val session = sshClient.getSession("localhost", sshAuth)
     //sshClient.whoami(session);
     session.connect(1000)
-    println(sshClient.executeCommand(session, "whoami"))
-    println(sshClient.executeCommand(session, "whoami"))
-    println(sshClient.executeCommand(session, "who am i"))
+    println(session.execute("whoami"))
+    println(session.execute("whoami"))
+    println(session.execute("who am i"))
 
     session.disconnect()
 }

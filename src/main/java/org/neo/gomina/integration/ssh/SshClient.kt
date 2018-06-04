@@ -7,6 +7,30 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import java.io.ByteArrayOutputStream
 
+private val logger = LogManager.getLogger(Session::class.java)
+
+fun Session.sudo(user: String?, cmd: String): String {
+    val sudoPrefix = if (user?.isNotBlank() == true) "sudo -u " + user else ""
+    return execute(sudoPrefix + cmd)
+}
+
+fun Session.execute(cmd: String): String {
+    logger.debug("#CMD[${this.host}]: $cmd")
+    val start = System.nanoTime()
+    val channel = this.openChannel("exec") as ChannelExec
+    channel.setPty(true)
+    channel.setCommand(cmd)
+    val baos = ByteArrayOutputStream()
+    channel.outputStream = baos
+    channel.connect()
+    while (!channel.isClosed) {
+        Thread.sleep(2)
+    }
+    val res = String(baos.toByteArray())
+    logger.debug("#RES: $res in ${(System.nanoTime() - start)} nano")
+    return res
+}
+
 class SshClient {
 
     private val jsch = JSch()
@@ -19,23 +43,6 @@ class SshClient {
         }
         session.setConfig("StrictHostKeyChecking", "no")
         return session
-    }
-
-    fun executeCommand(session: Session, cmd: String): String {
-        logger.debug("#CMD[${session.host}]: $cmd")
-        val start = System.nanoTime()
-        val channel = session.openChannel("exec") as ChannelExec
-        channel.setPty(true)
-        channel.setCommand(cmd)
-        val baos = ByteArrayOutputStream()
-        channel.outputStream = baos
-        channel.connect()
-        while (!channel.isClosed) {
-            Thread.sleep(2)
-        }
-        val res = String(baos.toByteArray())
-        logger.debug("#RES: $res in ${(System.nanoTime() - start)} nano")
-        return res
     }
 
     companion object {

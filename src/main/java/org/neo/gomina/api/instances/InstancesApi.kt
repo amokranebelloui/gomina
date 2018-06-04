@@ -144,8 +144,11 @@ class InstancesApi {
 
     private fun buildExtInstances(env: Environment): List<ExtInstance> {
         val services = env ?. services ?. associateBy { it.svc }
-        val inventory = env.services.flatMap { svc -> svc.instances.map { Pair(svc, it) } }.associateBy { it.second.id }
-        val monitoring = monitoringPlugin.monitoring.instancesFor(env.id).associateBy { it.instanceId }
+        val inventory = env.services
+                .flatMap { svc -> svc.instances.map { instance -> svc to instance } }
+                .associateBy { (_, instance) -> instance.id }
+        val monitoring = monitoringPlugin.monitoring.instancesFor(env.id)
+                .associateBy { it.instanceId }
         return merge(inventory, monitoring)
                 .map { (id, instance, indicators) ->
                     val svc = instance?.first?.svc ?: indicators?.get("SERVICE") ?: "x"

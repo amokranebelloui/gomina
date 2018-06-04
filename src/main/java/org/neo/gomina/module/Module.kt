@@ -7,6 +7,7 @@ import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvBuilder
 import org.neo.gomina.api.envs.EnvsApi
 import org.neo.gomina.api.events.EventsApi
+import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
@@ -157,6 +158,7 @@ class GominaModule : AbstractModule() {
         bind(ProjectsApi::class.java).`in`(Scopes.SINGLETON)
         bind(InstancesApi::class.java).`in`(Scopes.SINGLETON)
 
+        bind(HostsApi::class.java).`in`(Scopes.SINGLETON)
         bind(EventsApi::class.java).`in`(Scopes.SINGLETON)
         bind(DiagramApi::class.java).`in`(Scopes.SINGLETON)
         bind(NotificationsApi::class.java).`in`(Scopes.SINGLETON)
