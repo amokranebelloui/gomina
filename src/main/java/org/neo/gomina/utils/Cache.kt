@@ -20,6 +20,15 @@ class Cache<T>(val prefix:String, val fixFunction:(T) -> Unit = {}) {
 
     fun get(id: String): T? = getOrLoad(id) {null}
 
+    fun get(id: String, fromCache: Boolean, retrieve:(String) -> T? = { null }): T? {
+        return if (fromCache) {
+            this.getOrLoad(id, retrieve)
+        }
+        else {
+            retrieve(id)?.also { data -> this.cache(id, data) }
+        }
+    }
+
     fun getOrLoad(id: String, retrieve:(String) -> T? = { null }): T? {
         val file = fileNameFor(id)
 

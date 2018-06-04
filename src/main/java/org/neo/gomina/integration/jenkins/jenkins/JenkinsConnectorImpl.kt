@@ -11,7 +11,13 @@ import org.apache.http.util.EntityUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 
-data class BuildStatus (val id:String, val building:Boolean, val result:String?, val timestamp:Long)
+data class BuildStatus (
+        val id:String,
+        val building:Boolean,
+        val result:String?,
+        val timestamp:Long,
+        var url: String
+)
 
 class JenkinsConnectorImpl : JenkinsConnector {
 
@@ -29,6 +35,7 @@ class JenkinsConnectorImpl : JenkinsConnector {
                     val entity1 = it.entity
                     val data = mapper.readValue<BuildStatus>(entity1.content)
                     EntityUtils.consume(entity1)
+                    data.url = url
                     return data
                 }
             }

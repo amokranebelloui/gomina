@@ -5,8 +5,13 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.integration.elasticsearch.ElasticEvents
+import org.neo.gomina.integration.elasticsearch.ElasticEventsProviderConfig
+import org.neo.gomina.integration.eventrepo.InternalEvents
+import org.neo.gomina.integration.eventrepo.InternalEventsProviderConfig
 import org.neo.gomina.model.event.Event
-import org.neo.gomina.plugins.events.EventsPlugin
+import org.neo.gomina.model.event.EventsProvider
+import org.neo.gomina.model.event.EventsProviderConfig
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.*
@@ -21,7 +26,8 @@ class EventsApi {
     val vertx: Vertx
     val router: Router
 
-    @Inject lateinit var eventsPlugin: EventsPlugin
+    @Inject lateinit var factory: EventsProviderFactory
+    @JvmSuppressWildcards @Inject lateinit var config: List<EventsProviderConfig>
 
     private val mapper = ObjectMapper()
 
@@ -40,7 +46,7 @@ class EventsApi {
             val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
 
             val errors = mutableListOf<String>()
-            val events = eventsPlugin.eventProviders()
+            val events = eventProviders()
                     .flatMap {
                         try {
                             it.events(since)
@@ -62,7 +68,23 @@ class EventsApi {
         }
     }
 
+    private fun eventProviders(): List<EventsProvider> {
+        return config.mapNotNull {
+            when (it) {
+                is InternalEventsProviderConfig -> factory.create(it)
+                is ElasticEventsProviderConfig -> factory.create(it)
+                else -> null
+            }
+        }
+    }
+    
 }
+
+interface EventsProviderFactory {
+    fun create(config: InternalEventsProviderConfig): InternalEvents
+    fun create(config: ElasticEventsProviderConfig): ElasticEvents
+}
+
 
 fun Event.toEventDetail() = EventDetail(
         timestamp = Date.from(this.timestamp.atZone(ZoneOffset.UTC).toInstant()),

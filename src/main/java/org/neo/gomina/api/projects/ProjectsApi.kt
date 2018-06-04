@@ -7,9 +7,10 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.integration.jenkins.JenkinsService
+import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.sonar.SonarPlugin
 import javax.inject.Inject
@@ -28,7 +29,8 @@ class ProjectsApi {
     // FIXME Plugins
     @Inject lateinit private var scmPlugin: ScmPlugin
     @Inject lateinit private var sonarPlugin: SonarPlugin
-    @Inject lateinit private var jenkinsPlugin: JenkinsPlugin
+    @Inject private lateinit var jenkinsService: JenkinsService
+
 
     private val mapper = ObjectMapper()
 
@@ -104,19 +106,8 @@ class ProjectsApi {
             apply(project)
             scmPlugin.enrich(project, this)
             sonarPlugin.enrich(project, this)
-            jenkinsPlugin.enrich(project, this)
+            apply(jenkinsService.getStatus(project, fromCache = true))
         }
-    }
-
-    private fun ProjectDetail.apply(project: Project) {
-        this.label = project.label ?: project.id
-        this.type = project.type
-        this.tags = project.tags
-        this.scmRepo = project.svnRepo
-        this.scmLocation = project.svnUrl
-        this.mvn = project.maven
-        this.jenkinsServer = project.jenkinsServer
-        this.jenkinsJob = project.jenkinsJob
     }
 
     private fun reloadProject(ctx: RoutingContext) {
@@ -124,7 +115,11 @@ class ProjectsApi {
             val projectId = ctx.request().getParam("projectId")
             logger.info("Reloading Project data $projectId ...")
             scmPlugin.reloadProject(projectId)
-            jenkinsPlugin.reload(projectId) // FIXME Jenkins in it's own, or rename API
+            // FIXME Jenkins in it's own, or rename API
+            logger.info("Reload Jenkins data for $projectId ...")
+            projects.getProject(projectId)?.let { project ->
+                jenkinsService.getStatus(project, fromCache = false)
+            }
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
@@ -151,4 +146,22 @@ class ProjectsApi {
         }
     }
 
+}
+
+private fun ProjectDetail.apply(project: Project) {
+    this.label = project.label ?: project.id
+    this.type = project.type
+    this.tags = project.tags
+    this.scmRepo = project.svnRepo
+    this.scmLocation = project.svnUrl
+    this.mvn = project.maven
+    this.jenkinsServer = project.jenkinsServer
+    this.jenkinsJob = project.jenkinsJob
+}
+
+private fun ProjectDetail.apply(status: BuildStatus?) {
+    this.jenkinsUrl = status?.url
+    this.buildNumber = status?.id
+    this.buildStatus = if (status?.building == true) "BUILDING" else status?.result
+    this.buildTimestamp = status?.timestamp
 }

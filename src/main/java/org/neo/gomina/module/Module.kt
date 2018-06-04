@@ -9,6 +9,7 @@ import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvBuilder
 import org.neo.gomina.api.envs.EnvsApi
 import org.neo.gomina.api.events.EventsApi
+import org.neo.gomina.api.events.EventsProviderFactory
 import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
@@ -16,6 +17,7 @@ import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.integration.eventrepo.InternalEvents
 import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
+import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
 import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.scm.ScmRepos
@@ -39,9 +41,6 @@ import org.neo.gomina.persistence.model.InventoryFile
 import org.neo.gomina.persistence.model.ProjectsFile
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
-import org.neo.gomina.plugins.events.EventsPlugin
-import org.neo.gomina.plugins.events.EventsProviderFactory
-import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.sonar.SonarPlugin
@@ -90,7 +89,7 @@ class GominaModule : AbstractModule() {
         // Jenkins
         bind(JenkinsConfig::class.java).toProvider(JenkinsConfigProvider::class.java)
         bind(JenkinsConnector::class.java).to(JenkinsConnectorImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(JenkinsPlugin::class.java).`in`(Scopes.SINGLETON)
+        bind(JenkinsService::class.java).`in`(Scopes.SINGLETON)
 
         // Sonar
         bind(SonarConfig::class.java).toProvider(SonarConfigProvider::class.java)
@@ -111,8 +110,6 @@ class GominaModule : AbstractModule() {
                 //.implement(EventsProvider::class.java, ElasticEvents::class.java)
                 .build(EventsProviderFactory::class.java))
 
-        // Events
-        bind(EventsPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // API
         bind(EnvBuilder::class.java).`in`(Scopes.SINGLETON)
