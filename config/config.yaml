@@ -15,8 +15,17 @@ monitoring:
   timeout: 8
 
 events:
-  host: "localhost"
-  port: 9200
+  internal:
+    - id: 'internal'
+  elasticSearch:
+    - id: 'releases'
+      host: 'localhost'
+      port: 9200
+      envId: 'env'
+      instanceId: 'instance'
+    - id: 'logs'
+      host: 'localhost'
+      port: 9300
 
 ##### Deprecated #####
 

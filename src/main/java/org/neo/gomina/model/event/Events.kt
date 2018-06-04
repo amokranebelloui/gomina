@@ -12,7 +12,10 @@ data class Event (
         val version: String? = null
 )
 
+interface EventsProviderConfig
+
 interface EventsProvider {
-    fun getEvents(since: LocalDateTime): List<Event>
+    fun name(): String
+    fun events(since: LocalDateTime): List<Event>
 }
 

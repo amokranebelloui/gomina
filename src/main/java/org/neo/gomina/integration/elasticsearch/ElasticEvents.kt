@@ -1,6 +1,6 @@
 package org.neo.gomina.integration.elasticsearch
 
-import com.google.inject.name.Named
+import com.google.inject.assistedinject.Assisted
 import org.apache.http.HttpHost
 import org.apache.logging.log4j.LogManager
 import org.elasticsearch.action.search.SearchRequest
@@ -10,25 +10,37 @@ import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.neo.gomina.model.event.Event
 import org.neo.gomina.model.event.EventsProvider
+import org.neo.gomina.model.event.EventsProviderConfig
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
+data class ElasticEventsProviderConfig(
+        var id: String,
+        var host: String = "localhost",
+        var port: Int = 9200,
+        var timestamp: String = "timestamp",
+        var type: String = "type",
+        var message: String = "message",
+        var envId: String = "envId",
+        var instanceId: String = "instanceId",
+        var version: String = "version"
+) : EventsProviderConfig
 
 class ElasticEvents : EventsProvider {
 
-
-    @Inject @Named("elastic.host") lateinit var host: String
-    @Inject @Named("elastic.port") var port: Int = 9200
-
-    private lateinit var client: RestHighLevelClient
+    private val config: ElasticEventsProviderConfig
+    private val client: RestHighLevelClient
 
     @Inject
-    fun init() {
-        client = RestHighLevelClient(RestClient.builder(HttpHost(host, port, "http")))
+    constructor(@Assisted config: ElasticEventsProviderConfig) {
+        this.config = config
+        this.client = RestHighLevelClient(RestClient.builder(HttpHost(config.host, config.port, "http")))
     }
 
-    override fun getEvents(since: LocalDateTime): List<Event> {
+    override fun name(): String = config.id
+
+    override fun events(since: LocalDateTime): List<Event> {
         try {
             val query = SearchRequest().source(SearchSourceBuilder()
                     .query(QueryBuilders.rangeQuery("timestamp").gte(since)))
@@ -39,19 +51,19 @@ class ElasticEvents : EventsProvider {
                 val map = it.sourceAsMap
                 try {
                     Event(
-                            LocalDateTime.parse(map["timestamp"] as String, pattern),
-                            map["type"] as String?,
-                            map["message"] as String?,
-                            map["env"] as String?,
-                            map["instance"] as String?,
-                            map["version"] as String?
+                            timestamp = LocalDateTime.parse(map[config.timestamp] as String, pattern),
+                            type = map[config.type] as String?,
+                            message = map[config.message] as String?,
+                            envId = map[config.envId] as String?,
+                            instanceId = map[config.instanceId] as String?,
+                            version = map[config.version] as String?
                     )
                 } catch (e: Exception) {
                     null
                 }
             }
         } catch (e: Exception) {
-            val msg = "Cannot retrieve events from elastic search $host:$port"
+            val msg = "Cannot retrieve events from elastic search '${config.id}' '${config.host}:${config.port}'"
             logger.error(msg, e)
             throw Exception(msg)
         }

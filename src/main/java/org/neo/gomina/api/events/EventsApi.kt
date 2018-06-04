@@ -37,13 +37,13 @@ class EventsApi {
         try {
             val envId = ctx.request().getParam("envId")
             logger.info("Events for $envId")
-            val since = LocalDate.now().minusDays(1).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
+            val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
 
             val errors = mutableListOf<String>()
             val events = eventsPlugin.eventProviders()
                     .flatMap {
                         try {
-                            it.getEvents(since)
+                            it.events(since)
                         } catch (e: Exception) {
                             errors.add(e.message ?: "Unknown error")
                             emptyList<Event>()

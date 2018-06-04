@@ -2,6 +2,8 @@ package org.neo.gomina.module
 
 import com.google.inject.AbstractModule
 import com.google.inject.Scopes
+import com.google.inject.TypeLiteral
+import com.google.inject.assistedinject.FactoryModuleBuilder
 import com.google.inject.name.Names.named
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvBuilder
@@ -11,8 +13,7 @@ import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
-import org.neo.gomina.integration.elasticsearch.ElasticEvents
-import org.neo.gomina.integration.eventrepo.EventRepo
+import org.neo.gomina.integration.eventrepo.InternalEvents
 import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
@@ -25,6 +26,7 @@ import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.integration.ssh.SshClient
 import org.neo.gomina.integration.ssh.SshOnDemandConnector
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
+import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.Hosts
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.project.Projects
@@ -38,6 +40,7 @@ import org.neo.gomina.persistence.model.ProjectsFile
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
 import org.neo.gomina.plugins.events.EventsPlugin
+import org.neo.gomina.plugins.events.EventsProviderFactory
 import org.neo.gomina.plugins.jenkins.JenkinsPlugin
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.scm.ScmPlugin
@@ -100,12 +103,13 @@ class GominaModule : AbstractModule() {
         bind(SshPlugin::class.java).`in`(Scopes.SINGLETON)
 
         // EventRepo
-        bind(EventRepo::class.java).`in`(Scopes.SINGLETON)
+        bind(InternalEvents::class.java).`in`(Scopes.SINGLETON)
 
         // Elastic
-        bind(String::class.java).annotatedWith(named("elastic.host")).toInstance(config.events.host)
-        bind(Int::class.java).annotatedWith(named("elastic.port")).toInstance(config.events.port)
-        bind(ElasticEvents::class.java).annotatedWith(named("releases")).to(ElasticEvents::class.java).`in`(Scopes.SINGLETON)
+        bind(typeLiteral<List<@JvmSuppressWildcards EventsProviderConfig>>()).toInstance(config.events.all())
+        install(FactoryModuleBuilder()
+                //.implement(EventsProvider::class.java, ElasticEvents::class.java)
+                .build(EventsProviderFactory::class.java))
 
         // Events
         bind(EventsPlugin::class.java).`in`(Scopes.SINGLETON)
@@ -165,3 +169,5 @@ class GominaModule : AbstractModule() {
     }
 
 }
+
+inline fun <reified T> typeLiteral() = object : TypeLiteral<T>() { }
