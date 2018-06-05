@@ -8,6 +8,8 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.monitoring.Indicators
+import org.neo.gomina.integration.scm.ScmDetails
+import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.inventory.Inventory
@@ -18,8 +20,6 @@ import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.applyCluster
 import org.neo.gomina.plugins.monitoring.applyMonitoring
 import org.neo.gomina.plugins.monitoring.applyRedis
-import org.neo.gomina.plugins.scm.ScmPlugin
-import org.neo.gomina.plugins.scm.applyScm
 import org.neo.gomina.plugins.ssh.SshPlugin
 import javax.inject.Inject
 
@@ -35,8 +35,9 @@ class InstancesApi {
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var projects: Projects
 
+    @Inject lateinit private var scmService: ScmService 
+
     @Inject lateinit private var monitoringPlugin: MonitoringPlugin
-    @Inject lateinit private var scmPlugin: ScmPlugin
     @Inject lateinit private var sshPlugin: SshPlugin
 
     private val mapper = ObjectMapper()
@@ -118,27 +119,18 @@ class InstancesApi {
             if (ext.indicators == null) {
                 instance.status = "NOINFO"
             }
+            sshPlugin.enrich(ext.instance, instance)
         }
         ext.indicators?.let {
             instance.applyMonitoring(ext.indicators)
             instance.applyCluster(ext.indicators)
             instance.applyRedis(ext.indicators)
         }
-
-        ext.project?.let { instance.applyScm(scmPlugin.getSvnDetails(it.svnRepo, it.svnUrl)) }
-        ext.instance?.let { sshPlugin.enrich(ext.instance, instance) }
+        ext.project?.let {
+            scmService.getScmDetails(it, fromCache = true)?.let { instance.applyScm(it) }
+        }
         return instance
     }
-
-    private fun InstanceDetail.applyInventory(service: Service, envInstance: Instance) {
-        this.unexpected = false
-        this.type = service.type
-        this.service = service.svc
-        this.project = service.project
-        this.deployHost = envInstance.host
-        this.deployFolder = envInstance.folder
-    }
-
 
     private data class ExtInstance(val id:String, val service:Service, val project:Project?, val instance: Instance?, val indicators: Indicators?)
 
@@ -163,7 +155,8 @@ class InstancesApi {
             vertx.executeBlocking({future: Future<Void> ->
                 val envId = ctx.request().getParam("envId")
                 logger.info("Reloading SCM data $envId ...")
-                scmPlugin.reloadInstances(envId)
+                projects.getProjects()
+                        .forEach { scmService.getScmDetails(it, fromCache = false) }
                 future.complete()
             }, false)
             {res: AsyncResult<Void> ->
@@ -230,4 +223,20 @@ fun main(args: Array<String>) {
 
 fun Service.toServiceDetail(): ServiceDetail {
     return ServiceDetail(svc = this.svc, type = this.type, project = this.project)
+}
+
+private fun InstanceDetail.applyInventory(service: Service, envInstance: Instance) {
+    this.unexpected = false
+    this.type = service.type
+    this.service = service.svc
+    this.project = service.project
+    this.deployHost = envInstance.host
+    this.deployFolder = envInstance.folder
+}
+
+private fun InstanceDetail.applyScm(scmDetails: ScmDetails) {
+    this.latestVersion = scmDetails.latest
+    this.latestRevision = scmDetails.latestRevision
+    this.releasedVersion = scmDetails.released
+    this.releasedRevision = scmDetails.releasedRevision
 }

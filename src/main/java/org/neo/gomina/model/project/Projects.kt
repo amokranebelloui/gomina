@@ -4,15 +4,15 @@ data class ScmLocation (var svnRepo: String = "", var svnUrl: String = "")
 
 data class Project (
     var id: String,
-    var label: String?,
-    var type: String?,
-    var tags: String?,
+    var label: String? = null,
+    var type: String? = null,
+    var tags: String? = null,
     var svnRepo: String = "",
     var svnUrl: String = "",
-    var maven: String?,
+    var maven: String? = null,
     var sonarServer: String = "",
     var jenkinsServer: String = "",
-    var jenkinsJob: String?
+    var jenkinsJob: String? = null
 )
 
 interface Projects {

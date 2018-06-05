@@ -3,7 +3,8 @@ package org.neo.gomina.plugins.scm.impl
 import org.junit.Test
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmRepos
-import org.neo.gomina.plugins.scm.ScmPlugin
+import org.neo.gomina.integration.scm.ScmService
+import org.neo.gomina.model.project.Project
 
 class ScmPluginTest {
 
@@ -20,13 +21,16 @@ class ScmPluginTest {
 
         }
 
-        val connector = ScmPlugin(FileScmReposOverride())
+        val connector = ScmService()
+        connector.scmRepos = FileScmReposOverride()
 
-        connector.getSvnDetails("repo", "OMS/Server/tradex-fixin")
-        connector.getSvnDetails("repo", "OMS/Server/tradex-fixin")
 
-        connector.getSvnDetails("repo", "OMS/Server/tradex-fixin")
-        connector.getSvnDetails("repo", "OMS/Server/tradex-basketmanager")
+
+        connector.getScmDetails(Project(id = "fixin", svnRepo = "repo", svnUrl = "OMS/Server/tradex-fixin"))
+        connector.getScmDetails(Project(id = "fixin", svnRepo = "repo", svnUrl = "OMS/Server/tradex-fixin"))
+
+        connector.getScmDetails(Project(id = "fixin", svnRepo = "repo", svnUrl = "OMS/Server/tradex-fixin"))
+        connector.getScmDetails(Project(id = "basket", svnRepo = "repo", svnUrl = "OMS/Server/tradex-basketmanager"))
     }
 
 }

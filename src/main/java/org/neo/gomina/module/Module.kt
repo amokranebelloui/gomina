@@ -21,6 +21,7 @@ import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
 import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.scm.ScmRepos
+import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.scm.impl.ScmConfig
 import org.neo.gomina.integration.scm.impl.ScmReposImpl
 import org.neo.gomina.integration.sonar.SonarConfig
@@ -42,7 +43,6 @@ import org.neo.gomina.persistence.model.ProjectsFile
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
-import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.sonar.SonarPlugin
 import org.neo.gomina.plugins.ssh.SshPlugin
 import org.neo.gomina.web.PluginAssembler
@@ -84,7 +84,7 @@ class GominaModule : AbstractModule() {
         // SCM
         bind(ScmConfig::class.java).toProvider(ScmConfigProvider::class.java)
         bind(ScmRepos::class.java).to(ScmReposImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(ScmPlugin::class.java).`in`(Scopes.SINGLETON)
+        bind(ScmService::class.java).`in`(Scopes.SINGLETON)
 
         // Jenkins
         bind(JenkinsConfig::class.java).toProvider(JenkinsConfigProvider::class.java)

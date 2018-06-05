@@ -25,6 +25,7 @@ class Cache<T>(val prefix:String, val fixFunction:(T) -> Unit = {}) {
             this.getOrLoad(id, retrieve)
         }
         else {
+            logger.info("$prefix: Retrieving Data from Underlying Service, $id")
             retrieve(id)?.also { data -> this.cache(id, data) }
         }
     }

@@ -9,9 +9,10 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
+import org.neo.gomina.integration.scm.ScmDetails
+import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.plugins.scm.ScmPlugin
 import org.neo.gomina.plugins.sonar.SonarPlugin
 import javax.inject.Inject
 
@@ -27,8 +28,8 @@ class ProjectsApi {
     @Inject private lateinit var projects: Projects
 
     // FIXME Plugins
-    @Inject lateinit private var scmPlugin: ScmPlugin
-    @Inject lateinit private var sonarPlugin: SonarPlugin
+    @Inject private lateinit var scmService: ScmService
+    @Inject private lateinit var sonarPlugin: SonarPlugin
     @Inject private lateinit var jenkinsService: JenkinsService
 
 
@@ -79,7 +80,10 @@ class ProjectsApi {
         val docId = ctx.request().getParam("docId")
         try {
             logger.info("Get doc for $projectId $docId")
-            val doc = scmPlugin.getDocument(projectId, docId) //.joinToString(separator = "")
+            var doc: String? = null
+            projects.getProject(projectId)?.let {
+                doc = scmService.getDocument(it, docId) //.joinToString(separator = "")
+            }
             if (doc != null) {
                 ctx.response().putHeader("content-type", "text/html")
                         .end(doc)
@@ -104,20 +108,20 @@ class ProjectsApi {
     private fun build(project: Project): ProjectDetail {
         return ProjectDetail(project.id).apply {
             apply(project)
-            scmPlugin.enrich(project, this)
+            scmService.getScmDetails(project, fromCache = true)?.let { apply(it) }
             sonarPlugin.enrich(project, this)
-            apply(jenkinsService.getStatus(project, fromCache = true))
+            jenkinsService.getStatus(project, fromCache = true)?.let { apply(it) }
         }
     }
 
     private fun reloadProject(ctx: RoutingContext) {
         try {
             val projectId = ctx.request().getParam("projectId")
-            logger.info("Reloading Project data $projectId ...")
-            scmPlugin.reloadProject(projectId)
-            // FIXME Jenkins in it's own, or rename API
-            logger.info("Reload Jenkins data for $projectId ...")
             projects.getProject(projectId)?.let { project ->
+                logger.info("Reload SCM data for $projectId ...")
+                scmService.getScmDetails(project, fromCache = false)
+                // FIXME Jenkins in it's own, or rename API
+                logger.info("Reload Jenkins data for $projectId ...")
                 jenkinsService.getStatus(project, fromCache = false)
             }
             ctx.response().putHeader("content-type", "text/javascript").end()
@@ -157,6 +161,27 @@ private fun ProjectDetail.apply(project: Project) {
     this.mvn = project.maven
     this.jenkinsServer = project.jenkinsServer
     this.jenkinsJob = project.jenkinsJob
+}
+
+private fun ProjectDetail.apply(scmDetails: ScmDetails) {
+    this.owner = scmDetails.owner
+    this.critical = scmDetails.critical
+    if (!scmDetails.mavenId.isNullOrBlank()) {
+        this.mvn = scmDetails.mavenId
+    }
+    this.scmUrl = scmDetails.url
+    this.docFiles = scmDetails.docFiles
+    this.changes = scmDetails.changes
+    this.latest = scmDetails.latest
+    this.released = scmDetails.released
+    this.commitLog = scmDetails.commitLog.map {
+        CommitLogEntry(
+                revision = it.revision,
+                date = it.date,
+                author = it.author,
+                message = it.message
+        )
+    }
 }
 
 private fun ProjectDetail.apply(status: BuildStatus?) {
