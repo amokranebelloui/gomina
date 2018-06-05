@@ -1,14 +1,9 @@
-package org.neo.gomina.plugins.ssh
+package org.neo.gomina.integration.ssh
 
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
-import org.apache.logging.log4j.LogManager
-import org.neo.gomina.api.instances.InstanceDetail
-import org.neo.gomina.integration.ssh.SshOnDemandConnector
-import org.neo.gomina.integration.ssh.getFor
-import org.neo.gomina.integration.ssh.sudo
+import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Instance
-import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.utils.Cache
 import javax.inject.Inject
 
@@ -21,46 +16,41 @@ data class SshDetails (
         var confRevision: String? = null
 )
 
-class SshPlugin {
+class SshService {
+
+    // FIXME Implementation specificities should be in a plugin
 
     @Inject private lateinit var sshConnector: SshOnDemandConnector
-    @Inject private lateinit var inventory: Inventory
-
     private val sshCache = Cache<SshDetails>("ssh")
 
-    fun enrich(instance: Instance, detail: InstanceDetail) {
+    fun getDetails(instance: Instance): SshDetails? {
         if (!instance.host.isNullOrBlank() && !instance.folder.isNullOrBlank()) {
-            sshCache.get("${instance.host}-${instance.folder}")?. let { detail.applySsh(it) }
+            return sshCache.get("${instance.host}-${instance.folder}")
         }
+        return null
     }
 
-    fun init() {
-        logger.info("Initializing instances SSH data")
-    }
-
-    fun reloadInstances(envId: String) {
-        inventory.getEnvironment(envId)?.let { env ->
-            val analysis = sshConnector.analyze(env) { instance, session, sudo ->
-                SshDetails(
+    fun processEnv(env: Environment) {
+        val analysis = sshConnector.analyze(env) { instance, session, sudo ->
+            SshDetails(
                     analyzed = true,
                     deployedVersion = deployedVersion(session, sudo, instance.folder),
                     deployedRevision = null,
                     confRevision = confRevision(session, sudo, instance.folder),
                     confCommitted = checkConfCommited(session, sudo, instance.folder),
                     confUpToDate = null
-                )
-            }
-            env.services
-                    .flatMap { it.instances }
-                    .filter { !it.host.isNullOrBlank() }
-                    .filter { !it.folder.isNullOrBlank() }
-                    .forEach {
-                        val sshDetails = analysis.getFor(it.host, it.folder) ?: SshDetails()
-                        val host = it.host!!
-                        val folder = it.folder!!
-                        sshCache.cache("$host-$folder", sshDetails)
-                    }
+            )
         }
+        env.services
+                .flatMap { it.instances }
+                .filter { !it.host.isNullOrBlank() }
+                .filter { !it.folder.isNullOrBlank() }
+                .forEach {
+                    val sshDetails = analysis.getFor(it.host, it.folder) ?: SshDetails()
+                    val host = it.host!!
+                    val folder = it.folder!!
+                    sshCache.cache("$host-$folder", sshDetails)
+                }
     }
 
     fun unexpectedFolders(host: String): List<String> {
@@ -107,17 +97,5 @@ class SshPlugin {
         }
         return result
     }
-
-    companion object {
-        private val logger = LogManager.getLogger(SshPlugin::class.java)
-    }
+    
 }
-
-fun InstanceDetail.applySsh(sshDetails: SshDetails) {
-    this.deployVersion = sshDetails.deployedVersion
-    this.deployRevision = sshDetails.deployedRevision
-    this.confCommited = sshDetails.confCommitted
-    this.confUpToDate = sshDetails.confUpToDate
-    this.confRevision = sshDetails.confRevision
-}
-

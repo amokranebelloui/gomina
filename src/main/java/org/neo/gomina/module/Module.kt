@@ -28,6 +28,7 @@ import org.neo.gomina.integration.sonar.SonarConfig
 import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.integration.ssh.SshClient
 import org.neo.gomina.integration.ssh.SshOnDemandConnector
+import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.Hosts
@@ -44,7 +45,6 @@ import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
 import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.sonar.SonarPlugin
-import org.neo.gomina.plugins.ssh.SshPlugin
 import org.neo.gomina.web.PluginAssembler
 import java.io.File
 
@@ -99,7 +99,7 @@ class GominaModule : AbstractModule() {
         // SSH
         bind(SshClient::class.java).`in`(Scopes.SINGLETON)
         bind(SshOnDemandConnector::class.java).`in`(Scopes.SINGLETON)
-        bind(SshPlugin::class.java).`in`(Scopes.SINGLETON)
+        bind(SshService::class.java).`in`(Scopes.SINGLETON)
 
         // EventRepo
         bind(InternalEvents::class.java).`in`(Scopes.SINGLETON)

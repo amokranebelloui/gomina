@@ -10,6 +10,8 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.monitoring.Indicators
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmService
+import org.neo.gomina.integration.ssh.SshDetails
+import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.inventory.Inventory
@@ -20,7 +22,6 @@ import org.neo.gomina.plugins.monitoring.MonitoringPlugin
 import org.neo.gomina.plugins.monitoring.applyCluster
 import org.neo.gomina.plugins.monitoring.applyMonitoring
 import org.neo.gomina.plugins.monitoring.applyRedis
-import org.neo.gomina.plugins.ssh.SshPlugin
 import javax.inject.Inject
 
 class InstancesApi {
@@ -36,9 +37,9 @@ class InstancesApi {
     @Inject private lateinit var projects: Projects
 
     @Inject lateinit private var scmService: ScmService 
+    @Inject lateinit private var sshService: SshService
 
     @Inject lateinit private var monitoringPlugin: MonitoringPlugin
-    @Inject lateinit private var sshPlugin: SshPlugin
 
     private val mapper = ObjectMapper()
 
@@ -119,7 +120,7 @@ class InstancesApi {
             if (ext.indicators == null) {
                 instance.status = "NOINFO"
             }
-            sshPlugin.enrich(ext.instance, instance)
+            sshService.getDetails(ext.instance)?.let { instance.applySsh(it) }
         }
         ext.indicators?.let {
             instance.applyMonitoring(ext.indicators)
@@ -174,7 +175,7 @@ class InstancesApi {
             vertx.executeBlocking({future: Future<Void> ->
                 val envId = ctx.request().getParam("envId")
                 logger.info("Reloading SSH data $envId ...")
-                sshPlugin.reloadInstances(envId)
+                inventory.getEnvironment(envId)?.let { sshService.processEnv(it) }
                 future.complete()
             }, false)
             {res: AsyncResult<Void> ->
@@ -239,4 +240,12 @@ private fun InstanceDetail.applyScm(scmDetails: ScmDetails) {
     this.latestRevision = scmDetails.latestRevision
     this.releasedVersion = scmDetails.released
     this.releasedRevision = scmDetails.releasedRevision
+}
+
+fun InstanceDetail.applySsh(sshDetails: SshDetails) {
+    this.deployVersion = sshDetails.deployedVersion
+    this.deployRevision = sshDetails.deployedRevision
+    this.confCommited = sshDetails.confCommitted
+    this.confUpToDate = sshDetails.confUpToDate
+    this.confRevision = sshDetails.confRevision
 }

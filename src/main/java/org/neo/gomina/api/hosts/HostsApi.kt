@@ -5,9 +5,9 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.model.host.Host
 import org.neo.gomina.model.host.Hosts
-import org.neo.gomina.plugins.ssh.SshPlugin
 import javax.inject.Inject
 
 class HostsApi {
@@ -20,7 +20,7 @@ class HostsApi {
     val router: Router
 
     @Inject lateinit var hosts: Hosts
-    @Inject lateinit var sshPlugin: SshPlugin
+    @Inject lateinit var sshService: SshService
 
     private val mapper = ObjectMapper()
 
@@ -38,7 +38,7 @@ class HostsApi {
             val host = ctx.request().getParam("host")
             logger.info("Host '$host' details")
             val hosts = hosts.getHosts().map {
-                val unexpected = sshPlugin.unexpectedFolders(it.host)
+                val unexpected = sshService.unexpectedFolders(it.host)
                 it.map(unexpected)
             }
             ctx.response()
@@ -55,7 +55,7 @@ class HostsApi {
         try {
             val hostId = ctx.request().getParam("hostId")
             logger.info("Host '$hostId' details")
-            val unexpected = sshPlugin.unexpectedFolders(hostId)
+            val unexpected = sshService.unexpectedFolders(hostId)
             val host = hosts.getHost(hostId)?.map(unexpected)
             ctx.response()
                     .putHeader("content-type", "text/javascript")
