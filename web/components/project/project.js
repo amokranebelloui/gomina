@@ -181,13 +181,14 @@ class ScmLog extends React.Component {
         const instancesByRevision = groupBy(instances, 'revision');
         const log = {};
         sortedCommits.map(commit => {
-            log[commit.revision] = {message: commit.message, instances: []};
+            log[commit.revision] =  Object.assign({instances: []}, commit);
         });
         Object.keys(instancesByRevision).map(revision => {
             log[revision] = log[revision] || {};
             log[revision].instances = instancesByRevision[revision] || [];
             log[revision].version = instancesByRevision[revision][0].version;
         });
+        console.info(log);
         return (
             <div>
                 <b>SVN Log</b>
@@ -195,11 +196,14 @@ class ScmLog extends React.Component {
                 {Object.keys(log).sort((a,b) => b-a).map(revision =>
                     <Well block key={revision}>
                         <div style={{overflow: 'auto'}}>
-                                    <span style={{float: 'left', marginRight: '2px'}}>
-                                        {revision || '-'}
-                                    </span>
+                            <span style={{float: 'left', marginRight: '2px'}}>
+                                {revision + ' ' || '-'}
+                                {log[revision].author + ' ' || '-'}
+                                {new Date(log[revision].date).toLocaleDateString() + ' ' || '-'}
+                                {new Date(log[revision].date).toLocaleTimeString() + ' ' || '-'}
+                            </span>
                             <span style={{display: 'block', marginLeft: '60px', minHeight: '20px', paddingLeft: '1px', paddingRight: '1px'}}>
-                                        {log[revision].message || '-'}
+                                        {log[revision].message + ' ' || '-'}
 
                                 <span style={{float: 'right', position: 'top'}}>
                                             {log[revision].version &&
@@ -216,7 +220,7 @@ class ScmLog extends React.Component {
                                     )}
 
                                         </span>
-                                    </span>
+                            </span>
 
                         </div>
                     </Well>
