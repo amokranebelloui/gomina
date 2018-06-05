@@ -7,7 +7,8 @@ import javax.inject.Inject
 class SonarIndicators (
     var code: String,
     var loc: Double? = null,
-    var coverage: Double? = null
+    var coverage: Double? = null,
+    var sonarUrl: String = ""
 )
 
 interface SonarConnector {

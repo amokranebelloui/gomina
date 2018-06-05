@@ -11,9 +11,10 @@ import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmService
+import org.neo.gomina.integration.sonar.SonarIndicators
+import org.neo.gomina.integration.sonar.SonarService
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.plugins.sonar.SonarPlugin
 import javax.inject.Inject
 
 class ProjectsApi {
@@ -27,9 +28,8 @@ class ProjectsApi {
 
     @Inject private lateinit var projects: Projects
 
-    // FIXME Plugins
     @Inject private lateinit var scmService: ScmService
-    @Inject private lateinit var sonarPlugin: SonarPlugin
+    @Inject private lateinit var sonarService: SonarService
     @Inject private lateinit var jenkinsService: JenkinsService
 
 
@@ -109,7 +109,7 @@ class ProjectsApi {
         return ProjectDetail(project.id).apply {
             apply(project)
             scmService.getScmDetails(project, fromCache = true)?.let { apply(it) }
-            sonarPlugin.enrich(project, this)
+            sonarService.getSonar(project, fromCache = true)?.let { apply(it) }
             jenkinsService.getStatus(project, fromCache = true)?.let { apply(it) }
         }
     }
@@ -137,7 +137,13 @@ class ProjectsApi {
             vertx.executeBlocking({future: Future<Void> ->
                 //val envId = ctx.request().getParam("envId")
                 logger.info("Reloading Sonar data ...")
-                sonarPlugin.reload()
+                projects.getProjects()
+                        .map { it.sonarServer }
+                        .distinct()
+                        .forEach { sonarServer ->
+                            sonarService.reload(sonarServer)
+                        }
+
                 future.complete()
             }, false)
             {res: AsyncResult<Void> ->
@@ -182,6 +188,12 @@ private fun ProjectDetail.apply(scmDetails: ScmDetails) {
                 message = it.message
         )
     }
+}
+
+private fun ProjectDetail.apply(sonarIndicators: SonarIndicators?) {
+    this.sonarUrl = sonarIndicators?.sonarUrl
+    this.loc = sonarIndicators?.loc
+    this.coverage = sonarIndicators?.coverage
 }
 
 private fun ProjectDetail.apply(status: BuildStatus?) {

@@ -18,7 +18,7 @@ data class SshDetails (
 
 class SshService {
 
-    // FIXME Implementation specificities should be in a plugin
+    // FIXME Implementation specifics should be in a plugin
 
     @Inject private lateinit var sshConnector: SshOnDemandConnector
     private val sshCache = Cache<SshDetails>("ssh")
