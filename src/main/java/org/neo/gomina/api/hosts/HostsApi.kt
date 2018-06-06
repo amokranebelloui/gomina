@@ -89,6 +89,9 @@ private fun Host.map(details: HostSshDetails?): HostDetail {
     return HostDetail(
             host = host,
             dataCenter = dataCenter,
+            group = group,
+            type = type,
+            tags = tags,
             username = username,
             passwordAlias = passwordAlias,
             sudo = sudo,

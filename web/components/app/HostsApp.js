@@ -64,6 +64,14 @@ function Host(props) {
                 {host.username} / {host.passwordAlias}
                 {host.sudo && <span> ({host.sudo})</span>}
             </div>
+            <div>
+                {host.type} {host.group}
+            </div>
+            <div>
+                {host.tags.map(tag =>
+                    <span style={{color: 'blue'}}>{tag} </span>
+                )}
+            </div>
         </div>
     )
 }
