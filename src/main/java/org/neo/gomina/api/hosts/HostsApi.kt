@@ -87,8 +87,11 @@ class HostsApi {
 
 private fun Host.map(details: HostSshDetails?): HostDetail {
     return HostDetail(
-            host = this.host,
-            dataCenter = this.dataCenter,
+            host = host,
+            dataCenter = dataCenter,
+            username = username,
+            passwordAlias = passwordAlias,
+            sudo = sudo,
             unexpected = details?.unexpectedFolders ?: emptyList()
     )
 }

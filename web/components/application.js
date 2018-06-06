@@ -2,15 +2,14 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {createBrowserHistory} from "history";
 import {Route, Router, Switch} from "react-router";
-import {Link} from "react-router-dom";
 import {Index} from "./app/index-app";
 import {EnvApp} from "./app/env-app";
 import {ArchiDiagramApp} from "./app/archi-diagram-app";
 import {PipelineApp} from "./app/pipeline-app";
-import {ProjectsApp} from "./app/projects-app";
 import {ProjectApp} from "./app/project-app";
 import {SandboxApp} from "./app/sandbox-app";
 import "./application.css"
+import {HostsApp} from "./app/HostsApp";
 
 const history = createBrowserHistory();
 
@@ -25,6 +24,7 @@ class Blocker extends React.Component {
             <Switch>
                 <Route exact path="/" component={Index}/>
                 <Route path="/archi" component={ArchiDiagramApp}/>
+                <Route path="/hosts" render={props => <HostsApp {...props} />}/>
                 <Route path="/envs/:id" render={props => <EnvApp {...props} />}/>
                 <Route path="/envs" render={props => <EnvApp {...props} />}/>
                 <Route path="/pipeline" render={props => <PipelineApp {...props} />}/>
