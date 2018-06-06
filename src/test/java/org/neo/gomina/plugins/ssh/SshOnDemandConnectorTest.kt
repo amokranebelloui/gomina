@@ -28,7 +28,7 @@ class SshOnDemandConnectorTest {
 
         inventory.getEnvironment("UAT") ?. let {
             sshConnector.analyze(it) { instance, session, sudo ->
-                SshDetails(
+                InstanceSshDetails(
                     analyzed = true,
                     deployedVersion = session.execute("whoami")
                 )

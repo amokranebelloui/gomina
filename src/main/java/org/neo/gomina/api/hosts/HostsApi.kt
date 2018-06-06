@@ -5,6 +5,7 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.integration.ssh.HostSshDetails
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.model.host.Host
 import org.neo.gomina.model.host.Hosts
@@ -31,6 +32,7 @@ class HostsApi {
 
         router.get("/").handler(this::hosts)
         router.get("/:hostId").handler(this::host)
+        router.post("/:hostId/reload").handler(this::reload)
     }
 
     private fun hosts(ctx: RoutingContext) {
@@ -38,8 +40,7 @@ class HostsApi {
             val host = ctx.request().getParam("host")
             logger.info("Host '$host' details")
             val hosts = hosts.getHosts().map {
-                val unexpected = sshService.unexpectedFolders(it.host)
-                it.map(unexpected)
+                it.map(sshService.getDetails(it.host))
             }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
@@ -55,8 +56,9 @@ class HostsApi {
         try {
             val hostId = ctx.request().getParam("hostId")
             logger.info("Host '$hostId' details")
-            val unexpected = sshService.unexpectedFolders(hostId)
-            val host = hosts.getHost(hostId)?.map(unexpected)
+            val host = hosts.getHost(hostId)?.let {
+                it.map(sshService.getDetails(hostId))
+            }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(host))
@@ -67,12 +69,26 @@ class HostsApi {
         }
     }
 
+    private fun reload(ctx: RoutingContext) {
+        try {
+            val hostId = ctx.request().getParam("hostId")
+            logger.info("Host '$hostId' details")
+            sshService.processHost(hostId)
+            ctx.response()
+                    .putHeader("content-type", "text/javascript")
+                    .end("Reload host SSH info done!")
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+    }
 }
 
-private fun Host.map(unexpected: List<String>): HostDetail {
+private fun Host.map(details: HostSshDetails?): HostDetail {
     return HostDetail(
             host = this.host,
             dataCenter = this.dataCenter,
-            unexpected = unexpected
+            unexpected = details?.unexpectedFolders ?: emptyList()
     )
 }

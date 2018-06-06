@@ -11,7 +11,7 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.monitoring.*
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmService
-import org.neo.gomina.integration.ssh.SshDetails
+import org.neo.gomina.integration.ssh.InstanceSshDetails
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.model.host.resolveHostname
 import org.neo.gomina.model.inventory.Environment
@@ -255,12 +255,12 @@ private fun InstanceDetail.applyScm(scmDetails: ScmDetails) {
     this.releasedRevision = scmDetails.releasedRevision
 }
 
-private fun InstanceDetail.applySsh(sshDetails: SshDetails) {
-    this.deployVersion = sshDetails.deployedVersion
-    this.deployRevision = sshDetails.deployedRevision
-    this.confCommited = sshDetails.confCommitted
-    this.confUpToDate = sshDetails.confUpToDate
-    this.confRevision = sshDetails.confRevision
+private fun InstanceDetail.applySsh(instanceSshDetails: InstanceSshDetails) {
+    this.deployVersion = instanceSshDetails.deployedVersion
+    this.deployRevision = instanceSshDetails.deployedRevision
+    this.confCommited = instanceSshDetails.confCommitted
+    this.confUpToDate = instanceSshDetails.confUpToDate
+    this.confRevision = instanceSshDetails.confRevision
 }
 
 private fun InstanceDetail.applyMonitoring(indicators: Indicators) {

@@ -26,6 +26,7 @@ import org.neo.gomina.integration.scm.impl.ScmReposImpl
 import org.neo.gomina.integration.sonar.SonarConfig
 import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.integration.sonar.SonarService
+import org.neo.gomina.integration.ssh.SshAnalysis
 import org.neo.gomina.integration.ssh.SshClient
 import org.neo.gomina.integration.ssh.SshOnDemandConnector
 import org.neo.gomina.integration.ssh.SshService
@@ -43,6 +44,7 @@ import org.neo.gomina.persistence.model.InventoryFile
 import org.neo.gomina.persistence.model.ProjectsFile
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
+import org.neo.gomina.plugins.CustomSshAnalysis
 import org.neo.gomina.plugins.PluginAssembler
 import java.io.File
 
@@ -107,8 +109,9 @@ class GominaModule : AbstractModule() {
                 //.implement(EventsProvider::class.java, ElasticEvents::class.java)
                 .build(EventsProviderFactory::class.java))
 
-        // Plugin
+        // Custom
         bind(PluginAssembler::class.java).`in`(Scopes.SINGLETON)
+        bind(SshAnalysis::class.java).to(CustomSshAnalysis::class.java).`in`(Scopes.SINGLETON)
 
         // Vertx API
         bind(ProjectsApi::class.java).`in`(Scopes.SINGLETON)
