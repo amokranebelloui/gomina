@@ -8,6 +8,7 @@ class PluginAssembler {
     @Inject lateinit var monitoringPlugin: MonitoringPlugin
 
     fun init() {
+        monitoringPlugin.prepare()
         monitoringPlugin.init()
     }
 }

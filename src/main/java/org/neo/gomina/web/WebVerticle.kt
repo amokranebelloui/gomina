@@ -9,9 +9,9 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.StaticHandler
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvsApi
+import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
@@ -33,11 +33,7 @@ class WebVerticle : AbstractVerticle() {
         val router = Router.router(vertx)
         router.route().handler(BodyHandler.create())
 
-        val pluginAssembler = injector.getInstance(PluginAssembler::class.java)
-        pluginAssembler.init()
-
-        val notificationsApi = injector.getInstance(NotificationsApi::class.java)
-        notificationsApi.start()
+        injector.getInstance(PluginAssembler::class.java).init()
 
         router
                 .mountSubRouter("/data/envs", injector.getInstance(EnvsApi::class.java).router)
@@ -46,7 +42,7 @@ class WebVerticle : AbstractVerticle() {
                 .mountSubRouter("/data/hosts", injector.getInstance(HostsApi::class.java).router)
                 .mountSubRouter("/data/events", injector.getInstance(EventsApi::class.java).router)
                 .mountSubRouter("/data/diagram", injector.getInstance(DiagramApi::class.java).router)
-                .mountSubRouter("/realtime", notificationsApi.router)
+                .mountSubRouter("/realtime", injector.getInstance(NotificationsApi::class.java).apply { start() }.router)
 
         router.get("/*").pathRegex(".*\\.(js|ico|map)").handler(StaticHandler.create("dist").setCachingEnabled(false))
 

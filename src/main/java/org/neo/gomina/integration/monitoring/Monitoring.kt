@@ -48,6 +48,8 @@ class Monitoring {
 
     private val topology = ConcurrentHashMap<String, EnvMonitoring>()
     private var listener: MonitoringEventListener? = null
+    //private val listeners = CopyOnWriteArrayList<MonitoringEventListener>() // FIXME List rather than just 1 listener
+
     private var delayMessageGenerator: () -> Map<String, String> = { emptyMap() }
     private var rtFields: Set<String> = emptySet()
 

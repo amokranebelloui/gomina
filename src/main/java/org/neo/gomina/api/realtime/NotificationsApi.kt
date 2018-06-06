@@ -9,8 +9,9 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.api.instances.InstanceListener
-import org.neo.gomina.plugins.monitoring.MonitoringPlugin
+import org.neo.gomina.api.instances.InstanceRealTime
+import org.neo.gomina.integration.monitoring.Monitoring
+import org.neo.gomina.integration.monitoring.asBoolean
 import java.util.*
 import javax.inject.Inject
 
@@ -23,7 +24,7 @@ class NotificationsApi {
     val router: Router
     val sockets = ArrayList<SockJSSocket>()
 
-    @Inject lateinit var monitoringPlugin: MonitoringPlugin
+    @Inject private lateinit var monitoring: Monitoring
 
     @Inject
     constructor(vertx: Vertx) {
@@ -51,16 +52,23 @@ class NotificationsApi {
 
     fun start() {
         val mapper = ObjectMapper()
-        val instanceListener: InstanceListener = { instance ->
+        monitoring.onMessage { env, instanceId, newValues ->
+            val instanceRT = InstanceRealTime(env = env, id = instanceId, name = instanceId)
+            instanceRT.applyRealTime(newValues)
             try {
-                val message = mapper.writeValueAsString(instance)
-                logger.info("Real time Update $instance")
+                val message = mapper.writeValueAsString(instanceRT)
+                logger.info("Real time Update $instanceRT")
                 val buffer = Buffer.buffer(message)
                 this.sockets.forEach { socket -> socket.write(buffer) }
             } catch (e: JsonProcessingException) {
-                e.printStackTrace()
+                logger.error("", e)
             }
         }
-        monitoringPlugin.registerListener(instanceListener)
     }
+}
+
+private fun InstanceRealTime.applyRealTime(newValues: Map<String, String>) {
+    this.participating = newValues["PARTICIPATING"].asBoolean ?: false
+    this.leader = newValues["LEADER"].asBoolean ?: true
+    this.status = newValues["STATUS"]
 }

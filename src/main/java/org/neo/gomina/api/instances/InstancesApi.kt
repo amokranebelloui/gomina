@@ -6,22 +6,20 @@ import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
+import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.monitoring.Indicators
+import org.neo.gomina.integration.monitoring.*
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.ssh.SshDetails
 import org.neo.gomina.integration.ssh.SshService
+import org.neo.gomina.model.host.resolveHostname
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.plugins.monitoring.MonitoringPlugin
-import org.neo.gomina.plugins.monitoring.applyCluster
-import org.neo.gomina.plugins.monitoring.applyMonitoring
-import org.neo.gomina.plugins.monitoring.applyRedis
 import javax.inject.Inject
 
 class InstancesApi {
@@ -39,7 +37,7 @@ class InstancesApi {
     @Inject lateinit private var scmService: ScmService 
     @Inject lateinit private var sshService: SshService
 
-    @Inject lateinit private var monitoringPlugin: MonitoringPlugin
+    @Inject lateinit private var monitoring: Monitoring
 
     private val mapper = ObjectMapper()
 
@@ -140,7 +138,7 @@ class InstancesApi {
         val inventory = env.services
                 .flatMap { svc -> svc.instances.map { instance -> svc to instance } }
                 .associateBy { (_, instance) -> instance.id }
-        val monitoring = monitoringPlugin.monitoring.instancesFor(env.id)
+        val monitoring = monitoring.instancesFor(env.id)
                 .associateBy { it.instanceId }
         return merge(inventory, monitoring)
                 .map { (id, instance, indicators) ->
@@ -242,10 +240,48 @@ private fun InstanceDetail.applyScm(scmDetails: ScmDetails) {
     this.releasedRevision = scmDetails.releasedRevision
 }
 
-fun InstanceDetail.applySsh(sshDetails: SshDetails) {
+private fun InstanceDetail.applySsh(sshDetails: SshDetails) {
     this.deployVersion = sshDetails.deployedVersion
     this.deployRevision = sshDetails.deployedRevision
     this.confCommited = sshDetails.confCommitted
     this.confUpToDate = sshDetails.confUpToDate
     this.confRevision = sshDetails.confRevision
+}
+
+private fun InstanceDetail.applyMonitoring(indicators: Indicators) {
+    this.pid = indicators["PID"]
+    this.host = resolveHostname(indicators["IP"])
+    this.version = indicators["VERSION"]
+    this.revision = indicators["REVISION"]
+    this.unexpectedHost = StringUtils.isNotBlank(this.deployHost) && this.deployHost != this.host
+    this.status = indicators["STATUS"]
+
+    this.jmx = indicators["JMX"].asInt
+    this.busVersion = indicators["BUS"]
+    this.coreVersion = indicators["CORE"]
+    this.quickfixPersistence = indicators["QUICKFIX_MODE"]
+}
+
+private fun InstanceDetail.applyCluster(indicators: Indicators) {
+    this.cluster = indicators["ELECTION"].asBoolean ?: false
+    this.participating = indicators["PARTICIPATING"].asBoolean ?: false
+    this.leader = indicators["LEADER"].asBoolean ?: true // Historically we didn't have this field
+}
+
+private fun InstanceDetail.applyRedis(indicators: Indicators) {
+    this.redisHost = indicators["REDIS_HOST"]
+    this.redisPort = indicators["REDIS_PORT"].asInt
+    this.redisMasterHost = indicators["REDIS_MASTER_HOST"]
+    this.redisMasterPort = indicators["REDIS_MASTER_PORT"].asInt
+    this.redisMasterLink = "up" == indicators["REDIS_MASTER_LINK"]
+    this.redisMasterLinkDownSince = indicators["REDIS_MASTER_LINK_DOWN_SINCE"]
+    this.redisOffset = indicators["REDIS_OFFSET"].asLong
+    this.redisOffsetDiff = indicators["REDIS_OFFSET_DIFF"].asLong
+    this.redisMaster = indicators["REDIS_MASTER"].asBoolean
+    this.redisRole = indicators["REDIS_ROLE"]
+    this.redisRW = if ("yes".equals(indicators["REDIS_READONLY"], ignoreCase = true)) "ro" else "rw"
+    this.redisMode = if ("1" == indicators["REDIS_AOF"]) "AOF" else "RDB"
+    this.redisStatus = indicators["REDIS_STATE"]
+    this.redisSlaveCount = indicators["REDIS_SLAVES"].asInt
+    this.redisClientCount = indicators["REDIS_CLIENTS"].asInt
 }
