@@ -9,7 +9,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.junit.Test
 import java.time.LocalDateTime
 
-class ElasticEventsTest {
+class ElasticEventsProviderTest {
 
     @Test
     fun testElasticSearch() {

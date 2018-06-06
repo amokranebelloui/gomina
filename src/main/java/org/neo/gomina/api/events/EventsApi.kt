@@ -5,9 +5,9 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.elasticsearch.ElasticEvents
+import org.neo.gomina.integration.elasticsearch.ElasticEventsProvider
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProviderConfig
-import org.neo.gomina.integration.eventrepo.InternalEvents
+import org.neo.gomina.integration.eventrepo.InternalEventsProvider
 import org.neo.gomina.integration.eventrepo.InternalEventsProviderConfig
 import org.neo.gomina.model.event.Event
 import org.neo.gomina.model.event.EventsProvider
@@ -81,8 +81,8 @@ class EventsApi {
 }
 
 interface EventsProviderFactory {
-    fun create(config: InternalEventsProviderConfig): InternalEvents
-    fun create(config: ElasticEventsProviderConfig): ElasticEvents
+    fun create(config: InternalEventsProviderConfig): InternalEventsProvider
+    fun create(config: ElasticEventsProviderConfig): ElasticEventsProvider
 }
 
 

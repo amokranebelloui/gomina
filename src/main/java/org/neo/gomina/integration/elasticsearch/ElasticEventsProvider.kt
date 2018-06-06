@@ -27,7 +27,7 @@ data class ElasticEventsProviderConfig(
         var version: String = "version"
 ) : EventsProviderConfig
 
-class ElasticEvents : EventsProvider {
+class ElasticEventsProvider : EventsProvider {
 
     private val config: ElasticEventsProviderConfig
     private val client: RestHighLevelClient
@@ -70,7 +70,7 @@ class ElasticEvents : EventsProvider {
     }
 
     companion object {
-        private val logger = LogManager.getLogger(ElasticEvents::class.java)
+        private val logger = LogManager.getLogger(ElasticEventsProvider::class.java)
     }
 
 }
