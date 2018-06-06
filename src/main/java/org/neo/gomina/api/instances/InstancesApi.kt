@@ -20,6 +20,7 @@ import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
+import java.util.*
 import javax.inject.Inject
 
 class InstancesApi {
@@ -53,6 +54,20 @@ class InstancesApi {
         router.post("/:envId/reload-inventory").handler(this::reloadInv)
         router.post("/:envId/reload-scm").handler(this::reloadScm)
         router.post("/:envId/reload-ssh").handler(this::reloadSsh)
+    }
+
+    @Inject
+    fun prepare() {
+        fun mapStatus(status: String?) = if ("SHUTDOWN" == status) "DOWN" else status ?: "DOWN"
+        monitoring.enrich = { indicators ->
+            indicators.put("TIMESTAMP", Date().toString())
+            indicators["status"]?.let { status -> indicators.put("STATUS", mapStatus(status)) }
+        }
+        monitoring.include = { it["STATUS"] != null && it["VERSION"] != null }
+        monitoring.checkFields(setOf("PARTICIPATING", "LEADER", "STATUS"))
+        monitoring.onDelay {
+            mapOf("STATUS" to "NOINFO")
+        }
     }
 
     fun instances(ctx: RoutingContext) {

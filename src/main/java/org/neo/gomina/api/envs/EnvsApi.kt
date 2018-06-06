@@ -17,15 +17,6 @@ data class Env(
     val app:String
 )
 
-class EnvBuilder {
-    @Inject private lateinit var inventory: Inventory
-    fun getEnvs(): Collection<Env> {
-        return inventory.getEnvironments().map {
-            Env(it.id, it.type, "myproject") // FIXME project
-        }
-    }
-}
-
 class EnvsApi {
 
     companion object {
@@ -34,7 +25,7 @@ class EnvsApi {
 
     val router: Router
 
-    @Inject private lateinit var envBuilder: EnvBuilder
+    @Inject private lateinit var inventory: Inventory
     private val mapper = ObjectMapper()
 
     @Inject
@@ -46,8 +37,9 @@ class EnvsApi {
 
     fun data(ctx: RoutingContext) {
         try {
+            val envs = inventory.getEnvironments().map { Env(it.id, it.type, "myproject") } // FIXME project
             ctx.response().putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(envBuilder.getEnvs()))
+                    .end(mapper.writeValueAsString(envs))
         }
         catch (e: Exception) {
             logger.error("Cannot get projects", e)

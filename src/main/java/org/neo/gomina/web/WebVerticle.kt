@@ -17,6 +17,7 @@ import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.module.GominaModule
+import org.neo.gomina.plugins.PluginAssembler
 
 class WebVerticle : AbstractVerticle() {
 

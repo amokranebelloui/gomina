@@ -6,7 +6,6 @@ import com.google.inject.TypeLiteral
 import com.google.inject.assistedinject.FactoryModuleBuilder
 import com.google.inject.name.Names.named
 import org.neo.gomina.api.diagram.DiagramApi
-import org.neo.gomina.api.envs.EnvBuilder
 import org.neo.gomina.api.envs.EnvsApi
 import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.events.EventsProviderFactory
@@ -44,8 +43,7 @@ import org.neo.gomina.persistence.model.InventoryFile
 import org.neo.gomina.persistence.model.ProjectsFile
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
-import org.neo.gomina.plugins.monitoring.MonitoringPlugin
-import org.neo.gomina.web.PluginAssembler
+import org.neo.gomina.plugins.PluginAssembler
 import java.io.File
 
 class GominaModule : AbstractModule() {
@@ -77,7 +75,6 @@ class GominaModule : AbstractModule() {
 
         // Monitoring
         bind(Int::class.java).annotatedWith(named("monitoring.timeout")).toInstance(config.monitoring.timeout)
-        bind(MonitoringPlugin::class.java).`in`(Scopes.SINGLETON)
         bind(Monitoring::class.java).`in`(Scopes.SINGLETON)
         bind(ZmqMonitorThreadPool::class.java).`in`(Scopes.SINGLETON)
 
@@ -110,56 +107,14 @@ class GominaModule : AbstractModule() {
                 //.implement(EventsProvider::class.java, ElasticEvents::class.java)
                 .build(EventsProviderFactory::class.java))
 
-
-        // API
-        bind(EnvBuilder::class.java).`in`(Scopes.SINGLETON)
-
-        /*
-        bind(object : TypeLiteral<ArrayList<ProjectsExt>>() {
-
-        }).annotatedWith(Names.named("projects.plugins"))
-                .toProvider(object : Provider<ArrayList<ProjectsExt>> {
-                    @Inject private val projectPlugin: ProjectPlugin? = null
-                    @Inject private val jenkinsPlugin: JenkinsPlugin? = null
-                    @Inject private val sonarPlugin: SonarPlugin? = null
-                    @Inject private val scmPlugin: ScmPlugin? = null
-
-                    override fun get(): ArrayList<ProjectsExt> {
-                        return ArrayList(Arrays.asList<ProjectsExt>(
-                                projectPlugin,
-                                jenkinsPlugin,
-                                sonarPlugin,
-                                scmPlugin
-                        ))
-                    }
-                })
-        bind(object : TypeLiteral<ArrayList<InstancesExt>>() {
-
-        }).annotatedWith(Names.named("instances.plugins"))
-                .toProvider(object : Provider<ArrayList<InstancesExt>> {
-                    @Inject private val inventoryPlugin: InventoryPlugin? = null
-                    @Inject private val scmPlugin: ScmPlugin? = null
-                    @Inject private val sshConnector: SshPlugin? = null
-                    @Inject private val monitoringPlugin: MonitoringPlugin? = null
-
-                    override fun get(): ArrayList<InstancesExt> {
-                        return ArrayList(Arrays.asList<InstancesExt>(
-                                inventoryPlugin,
-                                scmPlugin,
-                                sshConnector,
-                                monitoringPlugin
-                        ))
-                    }
-                })
-*/
+        // Plugin
         bind(PluginAssembler::class.java).`in`(Scopes.SINGLETON)
 
         // Vertx API
-        bind(EnvsApi::class.java).`in`(Scopes.SINGLETON)
         bind(ProjectsApi::class.java).`in`(Scopes.SINGLETON)
-        bind(InstancesApi::class.java).`in`(Scopes.SINGLETON)
-
+        bind(EnvsApi::class.java).`in`(Scopes.SINGLETON)
         bind(HostsApi::class.java).`in`(Scopes.SINGLETON)
+        bind(InstancesApi::class.java).`in`(Scopes.SINGLETON)
         bind(EventsApi::class.java).`in`(Scopes.SINGLETON)
         bind(DiagramApi::class.java).`in`(Scopes.SINGLETON)
         bind(NotificationsApi::class.java).`in`(Scopes.SINGLETON)
