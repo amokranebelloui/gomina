@@ -45,7 +45,7 @@ class Monitoring {
                             logger.info("Instance $env $instanceId delayed")
                             val delay = indicators.copy(
                                     delayed = true,
-                                    process = indicators.process.copy(status = ServerStatus.NOINFO)
+                                    process = indicators.process.copy(status = ServerStatus.OFFLINE)
                             )
                             notify(env, instanceId, delay, touch = false)
                         }

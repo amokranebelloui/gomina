@@ -82,7 +82,7 @@ class CustomMonitoringMapper : MonitoringMapper {
             var status = mapStatus(indicators["STATUS"])
             // Sidecar managed processes
             if (indicators["TYPE"] == "redis") {
-                if (status == ServerStatus.LIVE) indicators["REDIS_STATE"] else ServerStatus.NOSIDECAR
+                if (status == ServerStatus.LIVE) indicators["REDIS_STATE"] else ServerStatus.DARK
             }
             RuntimeInfo(
                     instanceId = instanceId,

@@ -7,8 +7,8 @@ object ServerStatus {
     val LIVE = "LIVE"
     val LOADING = "LOADING"
     val DOWN = "DOWN"
-    val NOINFO = "NOINFO"
-    val NOSIDECAR = "NOSIDECAR"
+    val OFFLINE = "OFFLINE"
+    val DARK = "DARK"
 }
 
 data class RuntimeInfo(

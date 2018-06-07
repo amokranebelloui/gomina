@@ -128,7 +128,7 @@ class InstancesApi {
         ext.instance?.let {
             instance.applyInventory(ext.service, ext.instance)
             if (ext.indicators == null) {
-                instance.status = ServerStatus.NOINFO
+                instance.status = ServerStatus.OFFLINE
             }
             sshService.getDetails(ext.instance)?.let { instance.applySsh(it) }
         }
