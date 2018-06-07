@@ -5,6 +5,7 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.api.toDateUtc
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProvider
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProviderConfig
 import org.neo.gomina.integration.eventrepo.InternalEventsProvider
@@ -14,7 +15,6 @@ import org.neo.gomina.model.event.EventsProvider
 import org.neo.gomina.model.event.EventsProviderConfig
 import java.time.LocalDate
 import java.time.ZoneOffset
-import java.util.*
 import javax.inject.Inject
 
 class EventsApi {
@@ -87,7 +87,7 @@ interface EventsProviderFactory {
 
 
 fun Event.toEventDetail() = EventDetail(
-        timestamp = Date.from(this.timestamp.atZone(ZoneOffset.UTC).toInstant()),
+        timestamp = this.timestamp.toDateUtc,
         type = this.type,
         message = this.message,
         envId =  this.envId,

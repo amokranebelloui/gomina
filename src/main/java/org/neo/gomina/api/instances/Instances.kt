@@ -1,5 +1,7 @@
 package org.neo.gomina.api.instances
 
+import java.util.*
+
 data class ServiceDetail (
     val svc: String,
     val type: String? = null,
@@ -8,9 +10,9 @@ data class ServiceDetail (
 
 class InstanceDetail(
 
-        var env: String? = null ,
+        var env: String? = null,
         var id: String? = null, // Unique by env
-        var name: String? = null ,// X Replication
+        var name: String? = null,// X Replication
         var service: String? = null, // Z Partitioning
         var type: String? = null, // Y Functional
 
@@ -24,6 +26,8 @@ class InstanceDetail(
         var pid: String? = null,
         var host: String? = null,
         var status: String? = null,
+        var startTime: Date? = null,
+        var startDuration: Long? = null,
 
         var project: String? = null,
         var deployHost: String? = null,

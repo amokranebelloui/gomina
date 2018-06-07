@@ -2,10 +2,10 @@ package org.neo.gomina.plugins
 
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
-import org.joda.time.DateTimeZone
 import org.neo.gomina.integration.monitoring.asBoolean
 import org.neo.gomina.integration.monitoring.asInt
 import org.neo.gomina.integration.monitoring.asLong
+import org.neo.gomina.integration.monitoring.asTime
 import org.neo.gomina.integration.ssh.HostSshDetails
 import org.neo.gomina.integration.ssh.InstanceSshDetails
 import org.neo.gomina.integration.ssh.SshAnalysis
@@ -14,6 +14,8 @@ import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.model.host.resolveHostname
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.monitoring.*
+import java.time.Clock
+import java.time.LocalDateTime
 
 class CustomSshAnalysis : SshAnalysis {
 
@@ -81,12 +83,14 @@ class CustomMonitoringMapper : MonitoringMapper {
                     instanceId = instanceId,
                     type = indicators["TYPE"],
                     service = indicators["SERVICE"],
-                    lastTime = org.joda.time.LocalDateTime(DateTimeZone.UTC),
+                    lastTime = LocalDateTime.now(Clock.systemUTC()),
                     delayed = false,
                     process = ProcessInfo(
                             pid = indicators["PID"],
                             host = resolveHostname(indicators["IP"]),
-                            status = mapStatus(indicators["STATUS"])
+                            status = mapStatus(indicators["STATUS"]),
+                            startTime = indicators["START_TIME"].asTime,
+                            startDuration = indicators["START_DURATION"].asLong
                     ),
                     jvm = JvmInfo(
                             jmx = indicators["JMX"].asInt

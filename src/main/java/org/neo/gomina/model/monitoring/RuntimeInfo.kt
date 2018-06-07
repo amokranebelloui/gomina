@@ -1,13 +1,14 @@
 package org.neo.gomina.model.monitoring
 
-import org.joda.time.DateTimeZone
+import java.time.Clock
+import java.time.LocalDateTime
 
 data class RuntimeInfo(
         val instanceId: String,
         val service: String?,
         val type: String?,
-        private var lastTime:org.joda.time.LocalDateTime = org.joda.time.LocalDateTime(DateTimeZone.UTC),
-        private var delayed:Boolean = false,
+        val lastTime:LocalDateTime,
+        var delayed:Boolean = false,
 
         val process: ProcessInfo,
         val jvm: JvmInfo,
@@ -17,10 +18,6 @@ data class RuntimeInfo(
         val version: VersionInfo,
         val dependencies: DependenciesInfo
 ) {
-    fun touch() {
-        lastTime = org.joda.time.LocalDateTime(DateTimeZone.UTC)
-        delayed = false
-    }
     fun checkDelayed(timeoutSeconds: Int = 5, notification: () -> Unit) {
         if (this.isLastTimeTooOld(timeoutSeconds) && !delayed) {
             delayed = true
@@ -29,14 +26,16 @@ data class RuntimeInfo(
 
     }
     private fun isLastTimeTooOld(timeoutSeconds: Int): Boolean {
-        return org.joda.time.LocalDateTime(DateTimeZone.UTC).isAfter(lastTime.plusSeconds(timeoutSeconds))
+        return LocalDateTime.now(Clock.systemUTC()).isAfter(lastTime.plusSeconds(timeoutSeconds.toLong()))
     }
 }
 
 data class ProcessInfo(
         var pid: String? = null,
         var host: String? = null,
-        var status: String? = null
+        var status: String? = null,
+        var startTime: LocalDateTime? = null,
+        var startDuration: Long? = null
 )
 
 data class JvmInfo(

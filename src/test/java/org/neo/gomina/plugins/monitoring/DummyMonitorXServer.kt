@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.apache.logging.log4j.LogManager
-import org.joda.time.DateTimeZone
-import org.joda.time.LocalDateTime
 import org.zeromq.ZMQ
 import java.io.File
+import java.time.Clock
+import java.time.LocalDateTime
 import java.util.*
 import java.util.regex.Pattern
 
@@ -41,7 +41,7 @@ class DummyMonitorData {
             val file = File("datadummy/mon.$env.yaml")
             val data = if (file.exists()) mapper.readValue<List<MutableMap<String, Any>>>(file) else emptyList()
             data.forEach { indicators ->
-                indicators.put("timestamp", LocalDateTime(DateTimeZone.UTC))
+                indicators.put("timestamp", LocalDateTime.now(Clock.systemUTC()))
                 monitoring.put(indicators["name"] as String, indicators)
             }
             monitoring

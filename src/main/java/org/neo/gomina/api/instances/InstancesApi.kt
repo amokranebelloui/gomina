@@ -8,6 +8,7 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.api.toDateUtc
 import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmService
@@ -266,6 +267,8 @@ private fun InstanceDetail.applyMonitoring(indicators: RuntimeInfo) {
     this.version = indicators.version.version
     this.revision = indicators.version.revision
     this.status = indicators.process.status
+    this.startTime = indicators.process.startTime?.toDateUtc
+    this.startDuration = indicators.process.startDuration
 
     this.jmx = indicators.jvm.jmx
     this.busVersion = indicators.dependencies.busVersion
