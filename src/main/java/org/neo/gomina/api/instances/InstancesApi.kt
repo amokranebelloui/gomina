@@ -8,7 +8,7 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.monitoring.*
+import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.ssh.InstanceSshDetails
@@ -18,9 +18,9 @@ import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
+import org.neo.gomina.model.monitoring.RuntimeInfo
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
-import java.util.*
 import javax.inject.Inject
 
 class InstancesApi {
@@ -58,15 +58,10 @@ class InstancesApi {
 
     @Inject
     fun prepare() {
-        fun mapStatus(status: String?) = if ("SHUTDOWN" == status) "DOWN" else status ?: "DOWN"
-        monitoring.enrich = { indicators ->
-            indicators.put("TIMESTAMP", Date().toString())
-            indicators["status"]?.let { status -> indicators.put("STATUS", mapStatus(status)) }
-        }
-        monitoring.include = { it["STATUS"] != null && it["VERSION"] != null }
-        monitoring.checkFields(setOf("PARTICIPATING", "LEADER", "STATUS"))
-        monitoring.onDelay {
-            mapOf("STATUS" to "NOINFO")
+        monitoring.fieldsChanged { a, b ->
+            a.cluster.participating != b.cluster.participating ||
+            a.cluster.leader != b.cluster.leader ||
+            a.process.status != b.process.status
         }
     }
 
@@ -139,6 +134,7 @@ class InstancesApi {
             instance.applyMonitoring(ext.indicators)
             instance.applyCluster(ext.indicators)
             instance.applyRedis(ext.indicators)
+            instance.unexpectedHost = StringUtils.isNotBlank(instance.deployHost) && instance.deployHost != instance.host
         }
         ext.project?.let {
             scmService.getScmDetails(it, fromCache = true)?.let { instance.applyScm(it) }
@@ -146,7 +142,7 @@ class InstancesApi {
         return instance
     }
 
-    private data class ExtInstance(val id:String, val service:Service, val project:Project?, val instance: Instance?, val indicators: Indicators?)
+    private data class ExtInstance(val id:String, val service:Service, val project:Project?, val instance: Instance?, val indicators: RuntimeInfo?)
 
     private fun buildExtInstances(env: Environment): List<ExtInstance> {
         val services = env ?. services ?. associateBy { it.svc }
@@ -157,8 +153,8 @@ class InstancesApi {
                 .associateBy { it.instanceId }
         return merge(inventory, monitoring)
                 .map { (id, instance, indicators) ->
-                    val svc = instance?.first?.svc ?: indicators?.get("SERVICE") ?: "x"
-                    val service = services[svc] ?: Service(svc = svc, type = indicators?.get("TYPE"))
+                    val svc = instance?.first?.svc ?: indicators?.service ?: "x"
+                    val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
                     val project = service.project?.let { projects.getProject(it) }
                     ExtInstance(id, service, project, instance?.second, indicators)
                 }
@@ -263,40 +259,40 @@ private fun InstanceDetail.applySsh(instanceSshDetails: InstanceSshDetails) {
     this.confRevision = instanceSshDetails.confRevision
 }
 
-private fun InstanceDetail.applyMonitoring(indicators: Indicators) {
-    this.pid = indicators["PID"]
-    this.host = resolveHostname(indicators["IP"])
-    this.version = indicators["VERSION"]
-    this.revision = indicators["REVISION"]
-    this.unexpectedHost = StringUtils.isNotBlank(this.deployHost) && this.deployHost != this.host
-    this.status = indicators["STATUS"]
+// FIXME Redundant
+private fun InstanceDetail.applyMonitoring(indicators: RuntimeInfo) {
+    this.pid = indicators.process.pid
+    this.host = resolveHostname(indicators.process.host)
+    this.version = indicators.version.version
+    this.revision = indicators.version.revision
+    this.status = indicators.process.status
 
-    this.jmx = indicators["JMX"].asInt
-    this.busVersion = indicators["BUS"]
-    this.coreVersion = indicators["CORE"]
-    this.quickfixPersistence = indicators["QUICKFIX_MODE"]
+    this.jmx = indicators.jvm.jmx
+    this.busVersion = indicators.dependencies.busVersion
+    this.coreVersion = indicators.dependencies.coreVersion
+    this.quickfixPersistence = indicators.fix.quickfixPersistence
 }
 
-private fun InstanceDetail.applyCluster(indicators: Indicators) {
-    this.cluster = indicators["ELECTION"].asBoolean ?: false
-    this.participating = indicators["PARTICIPATING"].asBoolean ?: false
-    this.leader = indicators["LEADER"].asBoolean ?: true // Historically we didn't have this field
+private fun InstanceDetail.applyCluster(indicators: RuntimeInfo) {
+    this.cluster = indicators.cluster.cluster
+    this.participating = indicators.cluster.participating
+    this.leader = indicators.cluster.leader
 }
 
-private fun InstanceDetail.applyRedis(indicators: Indicators) {
-    this.redisHost = indicators["REDIS_HOST"]
-    this.redisPort = indicators["REDIS_PORT"].asInt
-    this.redisMasterHost = indicators["REDIS_MASTER_HOST"]
-    this.redisMasterPort = indicators["REDIS_MASTER_PORT"].asInt
-    this.redisMasterLink = "up" == indicators["REDIS_MASTER_LINK"]
-    this.redisMasterLinkDownSince = indicators["REDIS_MASTER_LINK_DOWN_SINCE"]
-    this.redisOffset = indicators["REDIS_OFFSET"].asLong
-    this.redisOffsetDiff = indicators["REDIS_OFFSET_DIFF"].asLong
-    this.redisMaster = indicators["REDIS_MASTER"].asBoolean
-    this.redisRole = indicators["REDIS_ROLE"]
-    this.redisRW = if ("yes".equals(indicators["REDIS_READONLY"], ignoreCase = true)) "ro" else "rw"
-    this.redisMode = if ("1" == indicators["REDIS_AOF"]) "AOF" else "RDB"
-    this.redisStatus = indicators["REDIS_STATE"]
-    this.redisSlaveCount = indicators["REDIS_SLAVES"].asInt
-    this.redisClientCount = indicators["REDIS_CLIENTS"].asInt
+private fun InstanceDetail.applyRedis(indicators: RuntimeInfo) {
+    this.redisHost = indicators.redis.redisHost
+    this.redisPort = indicators.redis.redisPort
+    this.redisMasterHost = indicators.redis.redisMasterHost
+    this.redisMasterPort = indicators.redis.redisMasterPort
+    this.redisMasterLink = indicators.redis.redisMasterLink
+    this.redisMasterLinkDownSince = indicators.redis.redisMasterLinkDownSince
+    this.redisOffset = indicators.redis.redisOffset
+    this.redisOffsetDiff = indicators.redis.redisOffsetDiff
+    this.redisMaster = indicators.redis.redisMaster
+    this.redisRole = indicators.redis.redisRole
+    this.redisRW = indicators.redis.redisRW
+    this.redisMode = indicators.redis.redisMode
+    this.redisStatus = indicators.redis.redisStatus
+    this.redisSlaveCount = indicators.redis.redisSlaveCount
+    this.redisClientCount = indicators.redis.redisClientCount
 }

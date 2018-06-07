@@ -30,6 +30,7 @@ import org.neo.gomina.integration.ssh.SshAnalysis
 import org.neo.gomina.integration.ssh.SshClient
 import org.neo.gomina.integration.ssh.SshOnDemandConnector
 import org.neo.gomina.integration.ssh.SshService
+import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.Hosts
@@ -44,6 +45,7 @@ import org.neo.gomina.persistence.model.InventoryFile
 import org.neo.gomina.persistence.model.ProjectsFile
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
+import org.neo.gomina.plugins.CustomMonitoringMapper
 import org.neo.gomina.plugins.CustomSshAnalysis
 import org.neo.gomina.plugins.PluginAssembler
 import java.io.File
@@ -112,6 +114,7 @@ class GominaModule : AbstractModule() {
         // Custom
         bind(PluginAssembler::class.java).`in`(Scopes.SINGLETON)
         bind(SshAnalysis::class.java).to(CustomSshAnalysis::class.java).`in`(Scopes.SINGLETON)
+        bind(MonitoringMapper::class.java).to(CustomMonitoringMapper::class.java).`in`(Scopes.SINGLETON)
 
         // Vertx API
         bind(ProjectsApi::class.java).`in`(Scopes.SINGLETON)

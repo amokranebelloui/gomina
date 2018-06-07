@@ -11,7 +11,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSSocket
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.instances.InstanceRealTime
 import org.neo.gomina.integration.monitoring.Monitoring
-import org.neo.gomina.integration.monitoring.asBoolean
+import org.neo.gomina.model.monitoring.RuntimeInfo
 import java.util.*
 import javax.inject.Inject
 
@@ -67,8 +67,8 @@ class NotificationsApi {
     }
 }
 
-private fun InstanceRealTime.applyRealTime(newValues: Map<String, String>) {
-    this.participating = newValues["PARTICIPATING"].asBoolean ?: false
-    this.leader = newValues["LEADER"].asBoolean ?: true
-    this.status = newValues["STATUS"]
+private fun InstanceRealTime.applyRealTime(newValues: RuntimeInfo) {
+    this.participating = newValues.cluster.participating
+    this.leader = newValues.cluster.leader
+    this.status = newValues.process.status
 }

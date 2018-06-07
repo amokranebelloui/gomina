@@ -2,66 +2,30 @@ package org.neo.gomina.integration.monitoring
 
 import com.google.inject.name.Named
 import org.apache.logging.log4j.LogManager
-import org.joda.time.DateTimeZone
-import org.joda.time.LocalDateTime
+import org.neo.gomina.model.monitoring.RuntimeInfo
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.concurrent.thread
-
-class Indicators(val instanceId: String, private val timeoutSeconds: Int = 5) : ConcurrentHashMap<String, String>() {
-    private var lastTime = LocalDateTime(DateTimeZone.UTC)
-    private var delayed = false
-    fun touch() {
-        lastTime = LocalDateTime(DateTimeZone.UTC)
-        delayed = false
-    }
-    fun checkDelayed(notification: () -> Unit) {
-        if (this.isLastTimeTooOld() && !delayed) {
-            delayed = true
-            notification()
-        }
-
-    }
-    private fun isLastTimeTooOld(): Boolean {
-        return LocalDateTime(DateTimeZone.UTC).isAfter(lastTime.plusSeconds(timeoutSeconds))
-    }
-}
 
 private fun String?.clean() = if (this == "null") null else this
 val String?.asInt: Int? get() = this.clean()?.toInt()
 val String?.asLong: Long? get() = this.clean()?.toLong()
 val String?.asBoolean: Boolean? get() = this.clean()?.toBoolean()
 
-
-private class EnvMonitoring(private val timeoutSeconds: Int) {
-    val instances: MutableMap<String, Indicators> = ConcurrentHashMap()
-    fun getForInstance(name: String): Indicators {
-        return instances.getOrPut(name) { Indicators(name, timeoutSeconds) }
-    }
-}
-
-typealias MonitoringEventListener = (env: String, instanceId: String, newValues: Map<String, String>) -> Unit
+typealias MonitoringEventListener = (env: String, instanceId: String, newValues: RuntimeInfo) -> Unit
 
 class Monitoring {
 
     @Inject @Named("monitoring.timeout") var timeoutSeconds: Int = 5
 
-    private val topology = ConcurrentHashMap<String, EnvMonitoring>()
+    private val topology = ConcurrentHashMap<String, MutableMap<String, RuntimeInfo>>()
     private var listener: MonitoringEventListener? = null
     //private val listeners = CopyOnWriteArrayList<MonitoringEventListener>() // FIXME List rather than just 1 listener
 
-    private var delayMessageGenerator: () -> Map<String, String> = { emptyMap() }
-    private var rtFields: Set<String> = emptySet()
+    private var fieldsChanged: (a: RuntimeInfo, b: RuntimeInfo) -> Boolean = { _, _ -> false }
 
-    var include:(indicators: Map<String, String>) -> Boolean = { true }
-    var enrich:(indicators: MutableMap<String, String>) -> Unit = {}
-
-    fun checkFields(rtFields: Set<String>) {
-        this.rtFields = rtFields
-    }
-
-    fun onDelay(delayMessageGenerator:() -> Map<String, String>) {
-        this.delayMessageGenerator = delayMessageGenerator
+    fun fieldsChanged(fieldsChanged: (a: RuntimeInfo, b:RuntimeInfo) -> Boolean) {
+        this.fieldsChanged = fieldsChanged
     }
 
     fun onMessage(listener:MonitoringEventListener) {
@@ -72,10 +36,14 @@ class Monitoring {
         thread(start = true, name = "mon-ditcher") {
             while (!Thread.currentThread().isInterrupted) {
                 topology.forEach { env, envMon ->
-                    envMon.instances.forEach { instanceId, indicators ->
-                        indicators.checkDelayed {
+                    envMon.forEach { instanceId, indicators ->
+                        indicators.checkDelayed(timeoutSeconds) {
                             logger.info("Instance $env $instanceId delayed")
-                            notify(env, instanceId, delayMessageGenerator().toMutableMap(), touch = false)
+                            val delay = indicators.copy(
+                                    delayed = true,
+                                    process = indicators.process.copy(status = "NOINFO")
+                            )
+                            notify(env, instanceId, delay, touch = false)
                         }
                     }
                 }
@@ -84,28 +52,30 @@ class Monitoring {
         }
     }
 
-    fun notify(env: String, instanceId: String, newValues: MutableMap<String, String>, touch: Boolean = true) {
+    fun notify(env: String, instanceId: String, newValues: RuntimeInfo, touch: Boolean = true) {
         try {
-            enrich(newValues)
-            if (include(newValues)) {
-                val envMonitoring = topology.getOrPut(env) { EnvMonitoring(timeoutSeconds) }
-                val indicators = envMonitoring.getForInstance(instanceId)
-                if (touch) {
-                    indicators.touch()
+            val envMonitoring = topology.getOrPut(env) { ConcurrentHashMap() }
+            val indicators = envMonitoring[instanceId]
+            /*
+            if (touch) {
+                indicators.touch()
+            }
+            */
+            logger.trace("Notify $newValues")
+            var rt = indicators != null && fieldsChanged(indicators, newValues)
+            /*
+            for ((key, value) in newValues) {
+                if (rtFields.contains(key)) {
+                    val oldValue = indicators[key]
+                    rt = rt || oldValue != value
                 }
-                logger.trace("Notify $newValues")
-                var rt = false
-                for ((key, value) in newValues) {
-                    if (rtFields.contains(key)) {
-                        val oldValue = indicators[key]
-                        rt = rt || oldValue != value
-                    }
-                    if (value != null) indicators.put(key, value) else indicators.remove(key)
-                }
+                if (value != null) indicators.put(key, value) else indicators.remove(key)
+            }
+            */
+            envMonitoring.put(instanceId, newValues)
 
-                if (rt) {
-                    listener?. let { listener -> listener(env, instanceId, newValues) }
-                }
+            if (rt) {
+                listener?. let { listener -> listener(env, instanceId, newValues) }
             }
         }
         catch (e: Exception) {
@@ -113,8 +83,8 @@ class Monitoring {
         }
     }
 
-    fun instancesFor(envId: String): Collection<Indicators> {
-        return topology[envId]?.instances?.values ?: emptyList()
+    fun instancesFor(envId: String): Collection<RuntimeInfo> {
+        return topology[envId]?.values ?: emptyList()
     }
     
     companion object {

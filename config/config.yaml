@@ -12,7 +12,7 @@ inventory:
   #inventoryFilter: 'env\.(.*i.*?)\.yaml'
 
 monitoring:
-  timeout: 8
+  timeout: 4
 
 events:
   internal:

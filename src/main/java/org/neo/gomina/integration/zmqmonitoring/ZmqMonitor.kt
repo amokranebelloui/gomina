@@ -2,16 +2,22 @@ package org.neo.gomina.integration.zmqmonitoring
 
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.monitoring.Monitoring
+import org.neo.gomina.model.monitoring.RuntimeInfo
 import org.zeromq.ZMQ
 import javax.inject.Inject
 
+interface MonitoringMapper {
+    fun map(instanceId: String, indicators: Map<String, String>): RuntimeInfo?
+}
+
 class ZmqMonitorThreadPool {
     @Inject lateinit var monitoring: Monitoring
+    @Inject lateinit var monitoringMapper: MonitoringMapper
     val map = mutableMapOf<String, ZmqMonitorThread>()
 
     fun add(url: String, subscriptions: Collection<String>) {
         val thread = map.getOrPut(url) {
-            ZmqMonitorThread(monitoring, url).apply { start() }
+            ZmqMonitorThread(monitoring, url, monitoringMapper).apply { start() }
         }
         subscriptions.forEach { thread.subscribe(it) }
     }
@@ -19,7 +25,8 @@ class ZmqMonitorThreadPool {
 
 class ZmqMonitorThread(
         private val monitoring: Monitoring,
-        private val url: String
+        private val url: String,
+        private val monitoringMapper: MonitoringMapper
     ) : Thread() {
 
     private val subscriptions = mutableSetOf<String>()
@@ -50,7 +57,10 @@ class ZmqMonitorThread(
             logger.trace("Received " + obj)
             try {
                 val message = MessageParser.parse(obj)
-                monitoring.notify(message.env, message.instanceId, message.indicators, touch = true)
+                val info = monitoringMapper.map(message.instanceId, message.indicators)
+                info?.let {
+                    monitoring.notify(message.env, message.instanceId, info, touch = true)
+                }
                 logger.trace(message)
             }
             catch (e: Exception) {
@@ -68,9 +78,9 @@ class ZmqMonitorThread(
 
 }
 
-data class Message(val env: String, val instanceId: String, val indicators: MutableMap<String, String>)
+internal data class Message(val env: String, val instanceId: String, val indicators: MutableMap<String, String>)
 
-object MessageParser {
+internal object MessageParser {
     fun parse(obj: String): Message {
         val i = obj.indexOf(";")
         val (_, _, env, instanceId) = obj.substring(0, i).split(".")

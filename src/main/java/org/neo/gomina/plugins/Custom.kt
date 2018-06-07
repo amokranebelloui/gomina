@@ -2,11 +2,18 @@ package org.neo.gomina.plugins
 
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
+import org.joda.time.DateTimeZone
+import org.neo.gomina.integration.monitoring.asBoolean
+import org.neo.gomina.integration.monitoring.asInt
+import org.neo.gomina.integration.monitoring.asLong
 import org.neo.gomina.integration.ssh.HostSshDetails
-import org.neo.gomina.integration.ssh.SshAnalysis
 import org.neo.gomina.integration.ssh.InstanceSshDetails
+import org.neo.gomina.integration.ssh.SshAnalysis
 import org.neo.gomina.integration.ssh.sudo
+import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
+import org.neo.gomina.model.host.resolveHostname
 import org.neo.gomina.model.inventory.Instance
+import org.neo.gomina.model.monitoring.*
 
 class CustomSshAnalysis : SshAnalysis {
 
@@ -66,3 +73,63 @@ class CustomSshAnalysis : SshAnalysis {
     }
 
 }
+
+class CustomMonitoringMapper : MonitoringMapper {
+    override fun map(instanceId: String, indicators: Map<String, String>): RuntimeInfo? {
+        return if (indicators["STATUS"] != null && indicators["VERSION"] != null) {
+            RuntimeInfo(
+                    instanceId = instanceId,
+                    type = indicators["TYPE"],
+                    service = indicators["SERVICE"],
+                    lastTime = org.joda.time.LocalDateTime(DateTimeZone.UTC),
+                    delayed = false,
+                    process = ProcessInfo(
+                            pid = indicators["PID"],
+                            host = resolveHostname(indicators["IP"]),
+                            status = mapStatus(indicators["STATUS"])
+                    ),
+                    jvm = JvmInfo(
+                            jmx = indicators["JMX"].asInt
+                    ),
+                    cluster = ClusterInfo(
+                            cluster = indicators["ELECTION"].asBoolean ?: false,
+                            participating = indicators["PARTICIPATING"].asBoolean ?: false,
+                            leader = indicators["LEADER"].asBoolean ?: true // Historically we didn't have this field
+                    ),
+                    fix = FixInfo(
+                            quickfixPersistence = indicators["QUICKFIX_MODE"]
+                    ),
+                    redis = RedisInfo(
+                            redisHost = indicators["REDIS_HOST"],
+                            redisPort = indicators["REDIS_PORT"].asInt,
+                            redisMasterHost = indicators["REDIS_MASTER_HOST"],
+                            redisMasterPort = indicators["REDIS_MASTER_PORT"].asInt,
+                            redisMasterLink = "up" == indicators["REDIS_MASTER_LINK"],
+                            redisMasterLinkDownSince = indicators["REDIS_MASTER_LINK_DOWN_SINCE"],
+                            redisOffset = indicators["REDIS_OFFSET"].asLong,
+                            redisOffsetDiff = indicators["REDIS_OFFSET_DIFF"].asLong,
+                            redisMaster = indicators["REDIS_MASTER"].asBoolean,
+                            redisRole = indicators["REDIS_ROLE"],
+                            redisRW = if ("yes".equals(indicators["REDIS_READONLY"], ignoreCase = true)) "ro" else "rw",
+                            redisMode = if ("1" == indicators["REDIS_AOF"]) "AOF" else "RDB",
+                            redisStatus = indicators["REDIS_STATE"],
+                            redisSlaveCount = indicators["REDIS_SLAVES"].asInt,
+                            redisClientCount = indicators["REDIS_CLIENTS"].asInt
+                    ),
+                    version = VersionInfo(
+                            version = indicators["VERSION"],
+                            revision = indicators["REVISION"]
+                    ),
+                    dependencies = DependenciesInfo(
+                            busVersion = indicators["BUS"],
+                            coreVersion = indicators["CORE"]
+                    )
+            )
+        }
+        else {
+            null
+        }
+    }
+}
+
+fun mapStatus(status: String?) = if ("SHUTDOWN" == status) "DOWN" else status ?: "DOWN"

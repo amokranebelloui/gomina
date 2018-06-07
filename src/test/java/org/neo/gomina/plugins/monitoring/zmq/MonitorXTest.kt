@@ -34,25 +34,21 @@ class MonitorXTest {
             println("received $env $instanceId $indicators")
             assertThat(env).isEqualTo("UAT")
             assertThat(instanceId).isEqualTo("kernel")
-            assertThat(indicators["status"]).isNotEmpty
+            assertThat(indicators.process.status).isNotEmpty
             //assertThat(newValues.containsKey("quickfixPersistence")).isTrue()
             counter.incrementAndGet()
         }
 
         // Prepare
-        fun mapStatus(status: String?) = if ("SHUTDOWN" == status) "DOWN" else status ?: "DOWN"
-        monitoring.enrich = { indicators ->
-            indicators.put("TIMESTAMP", Date().toString())
-            indicators["status"]?.let { status -> indicators.put("STATUS", mapStatus(status)) }
-        }
-        monitoring.include = { it["STATUS"] != null && it["VERSION"] != null }
-        monitoring.checkFields(setOf("PARTICIPATING", "LEADER", "STATUS"))
-        monitoring.onDelay {
-            mapOf("STATUS" to "NOINFO")
+        monitoring.fieldsChanged { a, b ->
+            a.cluster.participating != b.cluster.participating ||
+                    a.cluster.leader != b.cluster.leader ||
+                    a.process.status != b.process.status
         }
 
         val url = "tcp://localhost:7073"
         val pool = ZmqMonitorThreadPool()
+        // set mapper
         pool.monitoring = monitoring
         pool.add(url, Arrays.asList(""))
 
@@ -61,10 +57,10 @@ class MonitorXTest {
         subscriber.bind(url)
         Thread.sleep(1000) // Connection to be established
 
-        subscriber.send(".#HB.UAT.kernel.*.0;status=DOWN;quickfixPersistence=ORACLE;VERSION=12")
+        subscriber.send(".#HB.UAT.kernel.*.0;STATUS=DOWN;QUICKFIX_MODE=ORACLE;VERSION=12")
         println("Sent 1")
         Thread.sleep(1400)
-        subscriber.send(".#HB.UAT.kernel.*.0;status=LIVE;quickfixPersistence=ORACLE;VERSION=12")
+        subscriber.send(".#HB.UAT.kernel.*.0;STATUS=LIVE;QUICKFIX_MODE=ORACLE;VERSION=12")
         println("Sent 2")
         Thread.sleep(200)
 
