@@ -59,6 +59,13 @@ class HostsApp extends React.Component {
                         <Well block>
                             <h3>Detail {host && host.host}</h3>
                             {host && <Host host={host}></Host>}
+                            <hr/>
+                            <b>Should not be there</b>
+                            {host && host.unexpected && host.unexpected.length > 0 &&
+                                host.unexpected.map(f =>
+                                    <div>{f}</div>
+                                )
+                            }
                         </Well>
                     </div>
                 </PrimarySecondaryLayout>
