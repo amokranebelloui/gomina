@@ -20,6 +20,7 @@ import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.monitoring.RuntimeInfo
+import org.neo.gomina.model.monitoring.ServerStatus
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
 import javax.inject.Inject
@@ -127,7 +128,7 @@ class InstancesApi {
         ext.instance?.let {
             instance.applyInventory(ext.service, ext.instance)
             if (ext.indicators == null) {
-                instance.status = "NOINFO"
+                instance.status = ServerStatus.NOINFO
             }
             sshService.getDetails(ext.instance)?.let { instance.applySsh(it) }
         }

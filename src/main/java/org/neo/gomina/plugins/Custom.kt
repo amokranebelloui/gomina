@@ -79,6 +79,11 @@ class CustomSshAnalysis : SshAnalysis {
 class CustomMonitoringMapper : MonitoringMapper {
     override fun map(instanceId: String, indicators: Map<String, String>): RuntimeInfo? {
         return if (indicators["STATUS"] != null && indicators["VERSION"] != null) {
+            var status = mapStatus(indicators["STATUS"])
+            // Sidecar managed processes
+            if (indicators["TYPE"] == "redis") {
+                if (status == ServerStatus.LIVE) indicators["REDIS_STATE"] else ServerStatus.NOSIDECAR
+            }
             RuntimeInfo(
                     instanceId = instanceId,
                     type = indicators["TYPE"],
@@ -88,7 +93,7 @@ class CustomMonitoringMapper : MonitoringMapper {
                     process = ProcessInfo(
                             pid = indicators["PID"],
                             host = resolveHostname(indicators["IP"]),
-                            status = mapStatus(indicators["STATUS"]),
+                            status = status,
                             startTime = indicators["START_TIME"].asTime,
                             startDuration = indicators["START_DURATION"].asLong
                     ),
@@ -136,4 +141,5 @@ class CustomMonitoringMapper : MonitoringMapper {
     }
 }
 
-fun mapStatus(status: String?) = if ("SHUTDOWN" == status) "DOWN" else status ?: "DOWN"
+fun mapStatus(status: String?) =
+        if ("SHUTDOWN" == status) ServerStatus.DOWN else status ?: ServerStatus.DOWN

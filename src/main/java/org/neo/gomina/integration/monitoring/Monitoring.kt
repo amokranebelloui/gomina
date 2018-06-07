@@ -3,6 +3,7 @@ package org.neo.gomina.integration.monitoring
 import com.google.inject.name.Named
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.monitoring.RuntimeInfo
+import org.neo.gomina.model.monitoring.ServerStatus
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.ConcurrentHashMap
@@ -44,7 +45,7 @@ class Monitoring {
                             logger.info("Instance $env $instanceId delayed")
                             val delay = indicators.copy(
                                     delayed = true,
-                                    process = indicators.process.copy(status = "NOINFO")
+                                    process = indicators.process.copy(status = ServerStatus.NOINFO)
                             )
                             notify(env, instanceId, delay, touch = false)
                         }

@@ -3,6 +3,14 @@ package org.neo.gomina.model.monitoring
 import java.time.Clock
 import java.time.LocalDateTime
 
+object ServerStatus {
+    val LIVE = "LIVE"
+    val LOADING = "LOADING"
+    val DOWN = "DOWN"
+    val NOINFO = "NOINFO"
+    val NOSIDECAR = "NOSIDECAR"
+}
+
 data class RuntimeInfo(
         val instanceId: String,
         val service: String?,
