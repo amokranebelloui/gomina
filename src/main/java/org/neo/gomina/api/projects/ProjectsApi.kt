@@ -185,7 +185,8 @@ private fun ProjectDetail.apply(scmDetails: ScmDetails) {
                 revision = it.revision,
                 date = it.date,
                 author = it.author,
-                message = it.message
+                message = it.message,
+                version = it.release ?: it.newVersion
         )
     }
 }

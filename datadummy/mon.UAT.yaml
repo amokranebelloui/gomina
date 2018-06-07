@@ -52,7 +52,7 @@
   HOST: '10.2.3.56'
   folder: '/home/svc/uat-basket'
   VERSION: '5.1.3-SNAPSHOT'
-  REVISION: 35014
+  REVISION: 35015
   STATUS: 'DOWN'
 
   BUS: "2.0"

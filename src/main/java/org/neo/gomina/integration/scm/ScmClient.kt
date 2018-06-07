@@ -8,7 +8,7 @@ data class Commit (
     var author: String? = null,
     var message: String? = null,
 
-    var release: String? = null, // new version: if the commit is a post release version change
+    var release: String? = null, // new version: if the commit is a prepare release version change
     var newVersion: String? = null // version: if the commit is a release
 )
 

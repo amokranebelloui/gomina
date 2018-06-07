@@ -33,7 +33,9 @@ data class CommitLogEntry (
         var revision: String?,
         var date: Date?,
         var author: String?,
-        var message: String?
+        var message: String?,
+
+        var version: String? = null
 )
 
 /*
