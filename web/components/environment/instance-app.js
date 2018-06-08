@@ -27,6 +27,7 @@ class AppInstance extends React.Component {
                         </Badge>
                     </li>
                     <li><Version version={instance.version} revision={instance.revision} {...{color:'black', backgroundColor:'lightgray'}} /></li>
+                    <li><Version version={instance.deployVersion} revision={instance.deployRevision} {...{color:'black', backgroundColor:'lightgray'}} /></li>
                     <li><Badge title={'Conf SVN revision'} backgroundColor='red' color='white'>{instance.confRevision}</Badge></li>
                     <li><ConfCommited commited={instance.confCommited}/></li>
                     <li><Expected expected={!instance.unexpected}/></li>
