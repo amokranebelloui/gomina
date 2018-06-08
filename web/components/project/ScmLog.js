@@ -3,12 +3,8 @@ import {Badge, groupBy, Well} from "../common/component-library";
 import {Version} from "../common/version";
 
 class ScmLog extends React.Component {
-    render() {
-        //const project = this.props.project;
-        const sortedCommits = this.props.commits;
-        const instances = this.props.instances;
-        
-        const logByRevision = {};
+
+    indexByRevision(sortedCommits, instances, logByRevision, unknown) {
         const logByVersion = {};
         sortedCommits.map(commit => {
             const o = Object.assign({instances: [], deployments: []}, commit);
@@ -20,22 +16,6 @@ class ScmLog extends React.Component {
             }
         });
 
-        const unknown = [];
-
-        function addToInstances(line, i) {
-            if (line) {
-                (line.instances = line.instances || []).push(i);
-                return true
-            }
-            return false
-        }
-        function addToDeployments(line, i) { // Deployed but not yet running
-            if (line) {
-                (line.deployments = line.deployments || []).push(i);
-                return true
-            }
-            return false
-        }
 
         instances.forEach(i => {
             console.info('aaa--->', i);
@@ -43,18 +23,18 @@ class ScmLog extends React.Component {
             if (i.revision) {
                 logByRevision[i.revision] = logByRevision[i.revision] || {};
                 logByRevision[i.revision].version2 = i.version;
-                added = addToInstances(logByRevision[i.revision], i);
+                added = this.addToInstances(logByRevision[i.revision], i);
             }
             if (!added && i.deployRevision) {
                 logByRevision[i.deployRevision] = logByRevision[i.deployRevision] || {};
                 logByRevision[i.deployRevision].version2 = i.version;
-                added = addToDeployments(logByRevision[i.deployRevision], i);
+                added = this.addToDeployments(logByRevision[i.deployRevision], i);
             }
             if (!added && i.version) {
-                added = addToInstances(logByVersion[i.version], i);
+                added = this.addToInstances(logByVersion[i.version], i);
             }
             if (!added && i.deployVersion && i.version != i.deployVersion) {
-                added = addToDeployments(logByVersion[i.deployVersion], i);
+                added = this.addToDeployments(logByVersion[i.deployVersion], i);
             }
             if (!added) {
                 unknown.push(i)
@@ -62,6 +42,32 @@ class ScmLog extends React.Component {
         });
 
         console.info(logByRevision);
+    }
+
+    addToInstances(line, i) {
+        if (line) {
+            (line.instances = line.instances || []).push(i);
+            return true
+        }
+        return false
+    }
+
+    addToDeployments(line, i) { // Deployed but not yet running
+        if (line) {
+            (line.deployments = line.deployments || []).push(i);
+            return true
+        }
+        return false
+    }
+    
+    render() {
+        const sortedCommits = this.props.commits;
+        const instances = this.props.instances;
+
+        const logByRevision = {};
+        const unknown = [];
+        this.indexByRevision(sortedCommits, instances, logByRevision, unknown);
+
         return (
             <div>
                 <b>SCM Log</b>
