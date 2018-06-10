@@ -4,10 +4,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.inventory.Environment
-import org.neo.gomina.model.inventory.Instance
-import org.neo.gomina.model.inventory.Inventory
-import org.neo.gomina.model.inventory.Service
+import org.neo.gomina.model.inventory.*
 import java.io.File
 import java.util.regex.Pattern
 
@@ -59,7 +56,7 @@ class InventoryFile : Inventory, AbstractFileRepo {
                 .groupBy { i -> i.svc }
                 .map { (svc, instances) -> Triple(svc, instances.first(), instances) }
                 .map { (svc, i, instances) ->
-                    Service(svc, i.type, i.project, instances.map { Instance(it.id, it.host, it.folder) })
+                    Service(svc = svc, type = i.type, project = i.project, instances = instances.map { Instance(it.id, it.host, it.folder) })
                 }
 
         return Environment(old.code, old.name, old.type, old.monitoringUrl, old.active, services)

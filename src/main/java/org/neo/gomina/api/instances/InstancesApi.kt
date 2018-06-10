@@ -50,7 +50,7 @@ class InstancesApi {
         this.router = Router.router(vertx)
 
         router.get("/").handler(this::instances)
-        router.get("/:envId").handler(this::forEnv)
+        //router.get("/:envId").handler(this::forEnv)
         router.get("/:envId/services").handler(this::servicesForEnv)
 
         router.post("/:envId/reload-inventory").handler(this::reloadInv)
@@ -67,7 +67,7 @@ class InstancesApi {
         }
     }
 
-    fun instances(ctx: RoutingContext) {
+    private fun instances(ctx: RoutingContext) {
         try {
             val instances = inventory.getEnvironments().flatMap { env ->
                 buildExtInstances(env).map { build(env.id, it) }
@@ -81,7 +81,8 @@ class InstancesApi {
         }
     }
 
-    fun forEnv(ctx: RoutingContext) {
+    /*
+    private fun forEnv(ctx: RoutingContext) {
         try {
             val envId = ctx.request().getParam("envId")
             val instances = inventory.getEnvironment(envId) ?. let {
@@ -96,8 +97,9 @@ class InstancesApi {
             ctx.fail(500)
         }
     }
+    */
 
-    fun servicesForEnv(ctx: RoutingContext) {
+    private fun servicesForEnv(ctx: RoutingContext) {
         try {
             val envId = ctx.request().getParam("envId")
 
@@ -234,7 +236,12 @@ fun main(args: Array<String>) {
 
 
 fun Service.toServiceDetail(): ServiceDetail {
-    return ServiceDetail(svc = this.svc, type = this.type, project = this.project)
+    return ServiceDetail(
+            svc = this.svc,
+            type = this.type,
+            mode = this.mode,
+            activeCount = this.activeCount,
+            project = this.project)
 }
 
 private fun InstanceDetail.applyInventory(service: Service, envInstance: Instance) {

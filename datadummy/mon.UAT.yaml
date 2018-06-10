@@ -1,4 +1,29 @@
 
+
+- id: uat1
+  env: 'UAT'
+  name: 'viewkernel1'
+  type: 'app'
+  service: 'viewkernel'
+  HOST: '10.2.29.42'
+  folder: '/home/svc/uat-viewkernel'
+  VERSION: '2.3.0-SNAPSHOT'
+  REVISION: 34561
+  STATUS: 'LIVE'
+  LEADER: true
+
+- id: uat2
+  env: 'UAT'
+  name: 'viewkernel2'
+  type: 'app'
+  service: 'viewkernel'
+  HOST: '10.2.29.43'
+  folder: '/home/svc/uat-viewkernel'
+  VERSION: '2.3.0-SNAPSHOT'
+  REVISION: 34561
+  STATUS: 'LIVE'
+  LEADER: true
+
 - id: 7
   env: 'UAT'
   name: 'kernel'

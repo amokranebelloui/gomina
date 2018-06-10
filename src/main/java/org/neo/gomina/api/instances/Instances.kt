@@ -1,11 +1,14 @@
 package org.neo.gomina.api.instances
 
+import org.neo.gomina.model.inventory.ServiceMode
 import java.util.*
 
 data class ServiceDetail (
-    val svc: String,
-    val type: String? = null,
-    val project: String? = null
+        val svc: String,
+        val type: String? = null,
+        val mode: ServiceMode? = ServiceMode.ONE_ONLY,
+        val activeCount: Int = 1,
+        val project: String? = null
 )
 
 class InstanceDetail(

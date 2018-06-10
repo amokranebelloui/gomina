@@ -5,7 +5,7 @@ import {AppInstance} from "./instance-app";
 import {RedisInstance} from "./instance-redis";
 import {Status} from "./instance-common";
 import './env.css'
-import {Service} from "./service";
+import {Service} from "./Service";
 
 class Instance extends React.Component {
     render() {
