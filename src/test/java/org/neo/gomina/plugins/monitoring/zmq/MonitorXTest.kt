@@ -30,11 +30,11 @@ class MonitorXTest {
         //plugin.monitoring = monitoring
 
         val counter = AtomicInteger(0)
-        monitoring.onMessage { env, instanceId, indicators ->
-            println("received $env $instanceId $indicators")
+        monitoring.onMessage { env, instanceId, oldValues, newValues ->
+            println("received $env $instanceId $newValues")
             assertThat(env).isEqualTo("UAT")
             assertThat(instanceId).isEqualTo("kernel")
-            assertThat(indicators.process.status).isNotEmpty
+            assertThat(newValues.process.status).isNotEmpty
             //assertThat(newValues.containsKey("quickfixPersistence")).isTrue()
             counter.incrementAndGet()
         }

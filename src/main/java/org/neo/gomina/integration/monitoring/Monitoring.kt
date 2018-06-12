@@ -7,6 +7,7 @@ import org.neo.gomina.model.monitoring.ServerStatus
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
 import kotlin.concurrent.thread
 
@@ -16,15 +17,15 @@ val String?.asLong: Long? get() = this.clean()?.toLong()
 val String?.asBoolean: Boolean? get() = this.clean()?.toBoolean()
 val String?.asTime: LocalDateTime? get() = this.clean()?.let { LocalDateTime.parse(it, DateTimeFormatter.ISO_DATE_TIME) }
 
-typealias MonitoringEventListener = (env: String, instanceId: String, newValues: RuntimeInfo) -> Unit
+typealias MonitoringEventListener = (env: String, instanceId: String, oldValues: RuntimeInfo?, newValues: RuntimeInfo) -> Unit
 
 class Monitoring {
 
     @Inject @Named("monitoring.timeout") var timeoutSeconds: Int = 5
 
     private val topology = ConcurrentHashMap<String, MutableMap<String, RuntimeInfo>>()
-    private var listener: MonitoringEventListener? = null
-    //private val listeners = CopyOnWriteArrayList<MonitoringEventListener>() // FIXME List rather than just 1 listener
+    //private var listener: MonitoringEventListener? = null
+    private val listeners = CopyOnWriteArrayList<MonitoringEventListener>() // FIXME List rather than just 1 listener
 
     private var fieldsChanged: (a: RuntimeInfo, b: RuntimeInfo) -> Boolean = { _, _ -> false }
 
@@ -33,7 +34,7 @@ class Monitoring {
     }
 
     fun onMessage(listener:MonitoringEventListener) {
-        this.listener = listener
+        this.listeners.add(listener)
     }
 
     init {
@@ -59,27 +60,27 @@ class Monitoring {
     fun notify(env: String, instanceId: String, newValues: RuntimeInfo, touch: Boolean = true) {
         try {
             val envMonitoring = topology.getOrPut(env) { ConcurrentHashMap() }
-            val indicators = envMonitoring[instanceId]
+            val oldValues = envMonitoring[instanceId]
             /*
             if (touch) {
-                indicators.touch()
+                oldValues.touch()
             }
             */
             logger.trace("Notify $newValues")
-            var rt = indicators != null && fieldsChanged(indicators, newValues)
+            var rt = oldValues != null && fieldsChanged(oldValues, newValues)
             /*
             for ((key, value) in newValues) {
                 if (rtFields.contains(key)) {
-                    val oldValue = indicators[key]
+                    val oldValue = oldValues[key]
                     rt = rt || oldValue != value
                 }
-                if (value != null) indicators.put(key, value) else indicators.remove(key)
+                if (value != null) oldValues.put(key, value) else oldValues.remove(key)
             }
             */
             envMonitoring.put(instanceId, newValues)
 
             if (rt) {
-                listener?. let { listener -> listener(env, instanceId, newValues) }
+                listeners.forEach { listener -> listener(env, instanceId, oldValues, newValues) }
             }
         }
         catch (e: Exception) {

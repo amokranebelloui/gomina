@@ -13,7 +13,7 @@ import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
-import org.neo.gomina.integration.eventrepo.InternalEventsProvider
+import org.neo.gomina.integration.monitoring.MonitoringEventsProvider
 import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.JenkinsService
@@ -103,7 +103,7 @@ class GominaModule : AbstractModule() {
         bind(SshService::class.java).`in`(Scopes.SINGLETON)
 
         // EventRepo
-        bind(InternalEventsProvider::class.java).`in`(Scopes.SINGLETON)
+        //bind(MonitoringEventsProvider::class.java).`in`(Scopes.SINGLETON)
 
         // Elastic
         bind(typeLiteral<List<@JvmSuppressWildcards EventsProviderConfig>>()).toInstance(config.events.all())

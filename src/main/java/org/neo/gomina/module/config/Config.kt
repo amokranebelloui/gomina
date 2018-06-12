@@ -7,7 +7,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProviderConfig
-import org.neo.gomina.integration.eventrepo.InternalEventsProviderConfig
+import org.neo.gomina.integration.monitoring.MonitoringEventsProviderConfig
 import java.io.File
 
 data class InventoryConfig(var projectsFile: String = "",
@@ -17,9 +17,9 @@ data class InventoryConfig(var projectsFile: String = "",
 data class MonitoringConfig(var timeout: Int = 5)
 data class EventsConfig(
         var elasticSearch: List<ElasticEventsProviderConfig> = emptyList(),
-        var internal: List<InternalEventsProviderConfig> = emptyList()
+        var internalMonitoring: List<MonitoringEventsProviderConfig> = emptyList()
 ) {
-    fun all() = internal + elasticSearch
+    fun all() = internalMonitoring + elasticSearch
 }
 
 data class Config (

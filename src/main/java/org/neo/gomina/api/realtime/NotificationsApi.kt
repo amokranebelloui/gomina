@@ -52,7 +52,7 @@ class NotificationsApi {
 
     fun start() {
         val mapper = ObjectMapper()
-        monitoring.onMessage { env, instanceId, newValues ->
+        monitoring.onMessage { env, instanceId, oldValues, newValues ->
             val instanceRT = InstanceRealTime(env = env, id = instanceId, name = instanceId)
             instanceRT.applyRealTime(newValues)
             try {

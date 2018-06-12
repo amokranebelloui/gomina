@@ -8,8 +8,8 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.toDateUtc
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProvider
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProviderConfig
-import org.neo.gomina.integration.eventrepo.InternalEventsProvider
-import org.neo.gomina.integration.eventrepo.InternalEventsProviderConfig
+import org.neo.gomina.integration.monitoring.MonitoringEventsProvider
+import org.neo.gomina.integration.monitoring.MonitoringEventsProviderConfig
 import org.neo.gomina.model.event.Event
 import org.neo.gomina.model.event.EventsProvider
 import org.neo.gomina.model.event.EventsProviderConfig
@@ -31,6 +31,8 @@ class EventsApi {
 
     private val mapper = ObjectMapper()
 
+    lateinit var eventProviders: List<EventsProvider>
+
     @Inject
     constructor(vertx: Vertx) {
         this.vertx = vertx
@@ -39,6 +41,17 @@ class EventsApi {
         router.get("/:envId").handler(this::eventsForEnv)
     }
 
+    @Inject
+    fun init() {
+        eventProviders = config.mapNotNull {
+            when (it) {
+                is MonitoringEventsProviderConfig -> factory.create(it)
+                is ElasticEventsProviderConfig -> factory.create(it)
+                else -> null
+            }
+        }
+    }
+    
     private fun eventsForEnv(ctx: RoutingContext) {
         try {
             val envId = ctx.request().getParam("envId")
@@ -69,19 +82,13 @@ class EventsApi {
     }
 
     private fun eventProviders(): List<EventsProvider> {
-        return config.mapNotNull {
-            when (it) {
-                is InternalEventsProviderConfig -> factory.create(it)
-                is ElasticEventsProviderConfig -> factory.create(it)
-                else -> null
-            }
-        }
+        return eventProviders
     }
     
 }
 
 interface EventsProviderFactory {
-    fun create(config: InternalEventsProviderConfig): InternalEventsProvider
+    fun create(config: MonitoringEventsProviderConfig): MonitoringEventsProvider
     fun create(config: ElasticEventsProviderConfig): ElasticEventsProvider
 }
 

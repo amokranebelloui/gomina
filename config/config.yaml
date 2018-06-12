@@ -15,7 +15,7 @@ monitoring:
   timeout: 4
 
 events:
-  internal:
+  internalMonitoring:
     - id: 'internal'
   elasticSearch:
     - id: 'releases'
