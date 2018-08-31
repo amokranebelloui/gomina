@@ -1,0 +1,92 @@
+
+.dsm-table {
+    /*
+    border: solid 1px red
+    */
+}
+
+/*
+.dsm-table > tr {
+    background-color: yellow
+}
+*/
+
+.dsm-table .dsm-header {
+    background-color: #f6f6f6;
+    padding-bottom: 3px;
+    padding-top: 5px;
+}
+
+.dsm-table .dsm-header-label {
+    /*
+    transform-origin: left top 0;
+    -ms-writing-mode: vertical-lr;
+    height: 75px;
+    text-anchor: middle;
+    */
+    /*
+    float: left;
+    background-color: lightgray;
+    */
+    writing-mode: vertical-rl;
+    transform: rotate(-180deg);
+    text-align: center;
+    /*
+    margin-top: auto;
+    position:absolute;
+    bottom:0;
+
+    vertical-align: bottom;
+    text-orientation: mixed;
+    text-align: left;
+    justify-content: left;
+    align-items: left;
+    -webkit-writing-mode: vertical-lr;
+    */
+}
+
+.dsm-table .dsm-component {
+    background-color: #f6f6f6;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+.dsm-table .dsm-component.selected {
+    background-color: #202020;
+    color: white;
+}
+
+.dsm-table .dsm-cell {
+    border: 1px solid lightgray;
+    background-color: lightgray;
+    text-align: center;
+    height: 20px;
+    width: 20px;
+}
+
+.dsm-table .dsm-cell.selected {
+    border: 1px solid red;
+}
+
+.dsm-table .dsm-cell-nodep {
+    background-color: lightgray;
+}
+
+.dsm-table .dsm-cell-dep {
+    background-color: dodgerblue;
+}
+
+.dsm-table .dsm-cell-nodep.dsm-cell-self {
+    background-color: #b8b8b8;
+}
+
+.dsm-table .dsm-cell-dep.dsm-cell-self {
+    background-color: steelblue;
+}
+
+/*
+.dsm-table > td {
+    border: solid 1px red;
+    background-color: goldenrod
+}
+*/

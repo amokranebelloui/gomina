@@ -3,6 +3,7 @@ import {LoggingButton, MyComponent, Posts, Toggle2, WarningBanner} from "../sand
 import C1 from "../sandbox/module";
 import {Toggle} from "../common/component-library";
 import {AppLayout} from "./common/layout";
+import {DSM} from "../dependency/DSM";
 
 class SandboxApp extends React.Component {
     constructor(props) {
@@ -25,11 +26,28 @@ class SandboxApp extends React.Component {
         else {
             status = <span>Hi buddy</span>
         }
+
+        const components = [
+            "fixin",
+            "rfq",
+            "posttrade",
+            "order"
+        ];
+        const dependencies = [
+            {from: "fixin", to: "rfq", count: 1, detail: "send RFQs"},
+            {from: "fixin", to: "order", count: 6, detail: "send orders"},
+            {from: "order", to: "order", count: 4, detail: ""},
+            {from: "posttrade", to: "order", count: 11, detail: "analyze orders"},
+            {from: "order", to: "posttrade", count: 11, detail: "analyze orders"}
+        ];
+
         return (
             <AppLayout title='Sandbox'>
                 <span>{status}</span>&nbsp;
                 {this.state.logged && <span>Logged in</span>}
                 <br/>
+
+                <DSM components={components} dependencies={dependencies} />
 
                 Linked toggles
                 <Toggle toggled={this.state.logged} onToggleChanged={e => {
