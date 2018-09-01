@@ -1,92 +1,93 @@
-
-.dsm-table {
-    /*
-    border: solid 1px red
-    */
+.dsm {
 }
 
-/*
-.dsm-table > tr {
-    background-color: yellow
+.dsm .dsm-table {
 }
-*/
 
-.dsm-table .dsm-header {
+/* Header */
+.dsm .dsm-header {
     background-color: #f6f6f6;
     padding-bottom: 3px;
     padding-top: 5px;
 }
-
-.dsm-table .dsm-header-label {
-    /*
-    transform-origin: left top 0;
-    -ms-writing-mode: vertical-lr;
-    height: 75px;
-    text-anchor: middle;
-    */
-    /*
-    float: left;
-    background-color: lightgray;
-    */
+.dsm .dsm-header-label {
     writing-mode: vertical-rl;
     transform: rotate(-180deg);
     text-align: center;
-    /*
-    margin-top: auto;
-    position:absolute;
-    bottom:0;
 
-    vertical-align: bottom;
-    text-orientation: mixed;
-    text-align: left;
-    justify-content: left;
-    align-items: left;
-    -webkit-writing-mode: vertical-lr;
-    */
 }
 
-.dsm-table .dsm-component {
+/* Component */
+.dsm .dsm-component {
     background-color: #f6f6f6;
     padding-left: 3px;
     padding-right: 3px;
 }
-
-.dsm-table .dsm-component.selected {
+.dsm .dsm-component.selected {
     background-color: #202020;
     color: white;
 }
 
-.dsm-table .dsm-cell {
-    border: 1px solid lightgray;
-    background-color: lightgray;
+/* Component Selection Deps */
+.dsm .dsm-component.cycle {
+    background-color: red;
+}
+.dsm .dsm-component.cycle.internal {
+    background-color: darkred;
+}
+.dsm .dsm-component.used {
+    background-color: gold;
+}
+.dsm .dsm-component.used.internal {
+    background-color: goldenrod;
+}
+.dsm .dsm-component.uses {
+    background-color: green;
+}
+.dsm .dsm-component.uses.internal {
+    background-color: darkgreen;
+}
+.dsm .dsm-component.internal {
+    background-color: #444444;
+}
+
+/* Cell */
+.dsm .dsm-cell {
+    border: 2px solid lightgray;
     text-align: center;
     height: 20px;
     width: 20px;
 }
 
-.dsm-table .dsm-cell.selected {
-    border: 1px solid red;
+/* Cell Selection Deps */
+.dsm .dsm-cell.selected {
+    border-color: purple !important;
+}
+.dsm .dsm-cell.uses {
+    border-color: green !important;
+}
+.dsm .dsm-cell.used {
+    border-color: gold !important;
 }
 
-.dsm-table .dsm-cell-nodep {
+/* Cell Global Deps */
+.dsm .dsm-cell {
+    border-color: lightgray;
     background-color: lightgray;
 }
-
-.dsm-table .dsm-cell-dep {
-    background-color: dodgerblue;
+.dsm .dsm-cell.nodep {
+    border-color: lightgray;
+    background-color: lightgray;
 }
-
-.dsm-table .dsm-cell-nodep.dsm-cell-self {
+.dsm .dsm-cell.nodep.self {
+    border-color: #b8b8b8;
     background-color: #b8b8b8;
 }
-
-.dsm-table .dsm-cell-dep.dsm-cell-self {
+.dsm .dsm-cell.dep {
+    border-color: dodgerblue;
+    background-color: dodgerblue;
+}
+.dsm .dsm-cell.dep.self {
+    border-color: steelblue;
     background-color: steelblue;
 }
-
-/*
-.dsm-table > td {
-    border: solid 1px red;
-    background-color: goldenrod
-}
-*/

@@ -7,18 +7,47 @@ class DSM extends React.Component {
         this.state = {selectedComponents: [], selectedDependencies: []};
         //this.onComponentClicked = this.onComponentClicked.bind(this); // This binding is necessary to make `this` work in the callback
     }
+
     isComponentSelected(comp) {
         return this.state.selectedComponents.indexOf(comp) !== -1;
     }
-    doesComponentUsesSelected(comp) {
-        return this.props.dependencies.find(d => d.from === comp && this.state.selectedComponents.includes(d.to));
+    statusToSelectedComponent(comp) {
+        let uses = this.props.dependencies.find(d => d.from !== d.to && d.from === comp && this.state.selectedComponents.includes(d.to));
+        let used = this.props.dependencies.find(d => d.from !== d.to && d.to === comp && this.state.selectedComponents.includes(d.from));
+        let internal = this.props.dependencies.find(d => d.from === d.to && d.from == comp && d.to == comp && this.state.selectedComponents.includes(comp));
+        if (uses && used) {
+            return "cycle" + (internal ? " internal" : "")
+        }
+        else if (uses) {
+            return "uses" + (internal ? " internal" : "")
+        }
+        else if (used) {
+            return "used" + (internal ? " internal" : "")
+        }
+        return internal && "internal"
     }
-    isComponentUsedBySelected(comp) {
-        return this.props.dependencies.find(d =>  this.state.selectedComponents.includes(d.from) && d.to === comp);
-    }
+
     isDependencySelected(from, to) {
         return this.state.selectedDependencies.find(dep => dep.from === from && dep.to === to) && true;
     }
+    statusToSelectedDependencies(from, to) {
+        if (this.state.selectedDependencies.find(d => to === d.from)) {
+            return "uses"
+        }
+        else if (this.state.selectedDependencies.find(d => from === d.to)) {
+            return "used"
+        }
+        /**/
+        else if (this.state.selectedDependencies.find(d => from === d.from)) {
+            return "uses"
+        }
+        else if (this.state.selectedDependencies.find(d => to === d.to)) {
+            return "used"
+        }
+        /**/
+        return "none";
+    }
+
     checked(from, to) {
         const d = this.props.dependencies.find(d => d.from === from && d.to === to);
         const count = d ? d.count : null;
@@ -58,38 +87,40 @@ class DSM extends React.Component {
         this.setState({selectedDependencies: newList})
     }
     render() {
-        // Selected {this.state.selectedDependencies.map(i => <li>{i}</li>)}
         return (
-            <div>
-                DSM<br/>
+            <div className="dsm">
                 <table className="dsm-table">
-                    <tr>
+                    <tbody>
+                    <tr key="head">
                         <td colSpan={2}></td>
                         {this.props.components.map(comp =>
-                        <td className="dsm-header" align="center" valign="bottom">
+                        <td key={comp} className="dsm-header" align="center" valign="bottom">
                             <span className="dsm-header-label"><b>{comp}</b></span>
                         </td>
                         )}
                     </tr>
                     {this.props.components.map(to =>
-                        <tr>
-                            <DSMComponent comp={to}
-                                          selected={this.isComponentSelected(to)}
-                                          usesSelected={this.doesComponentUsesSelected(to)}
-                                          usedBySelected={this.isComponentUsedBySelected(to)}
-                                          onClick={e => this.onComponentClicked(to, e)} />
+                        <tr key={to}>
+                            <DSMComponent
+                                comp={to}
+                                selected={this.isComponentSelected(to)}
+                                status={this.statusToSelectedComponent(to)}
+                                onClick={e => this.onComponentClicked(to, e)} />
                             {this.props.components.map(from =>
                                 <DSMCell
+                                    key={from + '->' + to}
                                     from={from}
                                     to={to}
                                     count={this.checked(from, to)}
                                     selected={this.isDependencySelected(from, to)}
+                                    status={this.statusToSelectedDependencies(from, to)}
                                     onClick={e => this.onDependencyClicked(from, to, e)}/>
                             )}
                         </tr>
                     )}
+                    </tbody>
                 </table>
-                Selected {this.state.selectedDependencies.map(i => <li>{i.from} -> {i.to}</li>)}
+                {this.props.legend === "true" && <DSMLegend/>}
             </div>
         );
     }
@@ -100,42 +131,41 @@ function DSMComponent(props) {
     if (props.selected) {
         clazz = clazz + " selected"
     }
-    let color = null;
-    if (props.usesSelected && props.usedBySelected && props.selected) {
-        color = 'orange'
-    }
-    else if (props.usesSelected && props.usedBySelected) {
-        color = 'red'
-    }
-    else if (props.usesSelected) {
-        color = 'green'
-    }
-    else if (props.usedBySelected) {
-        color = 'goldenrod'
+
+    let depClazz = "dsm-component";
+    if (props.status) {
+        depClazz = depClazz + " " + props.status
     }
     return ([
-        <td align="right"
+        <td key="component" align="right"
             className={clazz}
             onClick={e => props.onClick && props.onClick(e)}>
             <b>{props.comp}</b>
         </td>,
-        <td style={{width: '3px', backgroundColor: color}} className="dsm-component"></td>,
+        <td key="depStatus" style={{width: '3px'}} className={depClazz}></td>,
     ])
 }
 
 function DSMCell(props) {
     let clazz = "dsm-cell";
-    if (props.count) {
-        clazz = clazz + " dsm-cell-dep";
-    }
-    else {
-        clazz = clazz + " dsm-cell-nodep";
-    }
-    if (props.from === props.to) {
-        clazz = clazz + " dsm-cell-self"
-    }
+
+    // Selection
     if (props.selected) {
         clazz = clazz + " selected"
+    }
+    else if (props.status) {
+        clazz = clazz + " " + props.status
+    }
+
+    // Global
+    if (props.count) {
+        clazz = clazz + " dep";
+    }
+    else {
+        clazz = clazz + " nodep";
+    }
+    if (props.from === props.to) {
+        clazz = clazz + " self"
     }
     //style={{cursor: props.count && 'pointer'}}
     return (
@@ -146,5 +176,39 @@ function DSMCell(props) {
     )
 }
 
+
+function DSMLegend(props) {
+    return (
+        <table>
+            <tbody>
+            <tr>
+                <td className="dsm-component uses"
+                    title="Uses selected components">
+                    uses
+                </td>
+                <td className="dsm-component uses internal"
+                    title="">
+                    uses<br/>internal
+                </td>
+                <td className="dsm-component used">
+                    used
+                </td>
+                <td className="dsm-component used internal">
+                    used<br/>internal
+                </td>
+                <td className="dsm-component cycle">
+                    cycle
+                </td>
+                <td className="dsm-component cycle internal">
+                    cycle<br/>internal
+                </td>
+                <td className="dsm-component internal">
+                    internal
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    )
+}
 
 export { DSM }

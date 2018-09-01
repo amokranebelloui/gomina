@@ -30,14 +30,18 @@ class SandboxApp extends React.Component {
         const components = [
             "fixin",
             "rfq",
+            "ioi",
             "posttrade",
             "order"
         ];
         const dependencies = [
+            {from: "fixin", to: "fixin", count: 1, detail: "send RFQs"},
             {from: "fixin", to: "rfq", count: 1, detail: "send RFQs"},
             {from: "fixin", to: "order", count: 6, detail: "send orders"},
             {from: "order", to: "order", count: 4, detail: ""},
+            {from: "ioi", to: "ioi", count: 4, detail: "internal"},
             {from: "posttrade", to: "order", count: 11, detail: "analyze orders"},
+            {from: "posttrade", to: "posttrade", count: 11, detail: "analyze orders"},
             {from: "order", to: "posttrade", count: 11, detail: "analyze orders"}
         ];
 
@@ -47,7 +51,7 @@ class SandboxApp extends React.Component {
                 {this.state.logged && <span>Logged in</span>}
                 <br/>
 
-                <DSM components={components} dependencies={dependencies} />
+                <DSM components={components} dependencies={dependencies} legend="true" />
 
                 Linked toggles
                 <Toggle toggled={this.state.logged} onToggleChanged={e => {
