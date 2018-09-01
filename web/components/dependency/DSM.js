@@ -23,6 +23,9 @@ class DSM extends React.Component {
         }
         this.setState({selectedComponents: newList})
     }
+    unselectComponents() {
+        this.setState({selectedComponents: []})
+    }
     isComponentSelected(comp) {
         const selected =
             this.state.selectedComponents.indexOf(comp) !== -1 ||
@@ -65,6 +68,9 @@ class DSM extends React.Component {
         }
         this.setState({selectedDependencies: newList})
     }
+    unselectDependencies() {
+        this.setState({selectedDependencies: []})
+    }
     isDependencySelected(from, to) {
         return this.state.selectedDependencies.find(dep => dep.from === from && dep.to === to) && true;
     }
@@ -87,12 +93,15 @@ class DSM extends React.Component {
     }
     
     onComponentClicked(comp, e) {
-        console.log('comp', comp);
-        this.selectComponent(comp, e.metaKey || e.ctrlKey);
+        let multi = e.metaKey || e.ctrlKey;
+        !multi && this.unselectDependencies();
+        this.selectComponent(comp, multi);
     }
     onDependencyClicked(from, to, e) {
-        console.log('dep', from, to, e.metaKey, e.altKey);
-        this.selectDependency(from, to, e.metaKey || e.ctrlKey);
+        //console.log('dep', from, to, e.metaKey, e.altKey);
+        let multi = e.metaKey || e.ctrlKey;
+        !multi && this.unselectComponents();
+        this.selectDependency(from, to, multi);
     }
     
     render() {
@@ -108,19 +117,20 @@ class DSM extends React.Component {
                         </td>
                         )}
                     </tr>
-                    {this.props.components.map(to =>
+                    {this.props.components.map((to, j) =>
                         <tr key={to}>
                             <DSMComponent
                                 comp={to}
                                 selected={this.isComponentSelected(to)}
                                 status={this.statusToSelectedComponent(to)}
                                 onClick={e => this.onComponentClicked(to, e)} />
-                            {this.props.components.map(from =>
+                            {this.props.components.map((from, i) =>
                                 <DSMCell
                                     key={from + '->' + to}
                                     from={from}
                                     to={to}
                                     dependency={this.getDependency(from, to)}
+                                    cycle={(i > j)}
                                     selected={this.isDependencySelected(from, to)}
                                     status={this.statusToSelectedDependencies(from, to)}
                                     onClick={e => this.onDependencyClicked(from, to, e)}/>
@@ -157,7 +167,8 @@ function DSMComponent(props) {
 
 function DSMCell(props) {
     const d = props.dependency;
-    
+    const c = props.cycle;
+
     let clazz = "dsm-cell";
 
     // Selection
@@ -169,15 +180,20 @@ function DSMCell(props) {
     }
 
     // Global
-    if (d) {
-        clazz = clazz + " dep";
+    if (c) {
+        if (d) {
+            clazz = clazz + " cycle";
+        }
     }
     else {
-        clazz = clazz + " nodep";
+        if (d) {
+            clazz = clazz + " dep";
+        }
+        if (props.from === props.to) {
+            clazz = clazz + " self"
+        }
     }
-    if (props.from === props.to) {
-        clazz = clazz + " self"
-    }
+
     return (
         <td className={clazz} title={d && d.detail}
             onClick={e => props.onClick && props.onClick(e)}>

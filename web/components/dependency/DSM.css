@@ -75,11 +75,7 @@
     border-color: lightgray;
     background-color: lightgray;
 }
-.dsm .dsm-cell.nodep {
-    border-color: lightgray;
-    background-color: lightgray;
-}
-.dsm .dsm-cell.nodep.self {
+.dsm .dsm-cell.self {
     border-color: #b8b8b8;
     background-color: #b8b8b8;
 }
@@ -91,3 +87,8 @@
     border-color: steelblue;
     background-color: steelblue;
 }
+.dsm .dsm-cell.cycle {
+    border-color: red;
+    background-color: red;
+}
+
