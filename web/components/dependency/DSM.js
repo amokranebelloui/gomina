@@ -8,13 +8,32 @@ class DSM extends React.Component {
         //this.onComponentClicked = this.onComponentClicked.bind(this); // This binding is necessary to make `this` work in the callback
     }
 
+    selectComponent(comp, multi) {
+        let newList;
+        if (multi) {
+            if (this.isComponentSelected(comp)) {
+                newList = this.state.selectedComponents.filter(i => i !== comp)
+            }
+            else {
+                newList = this.state.selectedComponents.concat([comp])
+            }
+        }
+        else {
+            newList = [comp]
+        }
+        this.setState({selectedComponents: newList})
+    }
     isComponentSelected(comp) {
-        return this.state.selectedComponents.indexOf(comp) !== -1;
+        const selected =
+            this.state.selectedComponents.indexOf(comp) !== -1 ||
+            //this.state.selectedComponents.includes(d.to) ||
+            this.state.selectedDependencies.find(d => d.from === comp || d.to === comp);
+        return selected;
     }
     statusToSelectedComponent(comp) {
-        let uses = this.props.dependencies.find(d => d.from !== d.to && d.from === comp && this.state.selectedComponents.includes(d.to));
-        let used = this.props.dependencies.find(d => d.from !== d.to && d.to === comp && this.state.selectedComponents.includes(d.from));
-        let internal = this.props.dependencies.find(d => d.from === d.to && d.from == comp && d.to == comp && this.state.selectedComponents.includes(comp));
+        let uses = this.props.dependencies.find(d => d.from !== d.to && d.from === comp && this.isComponentSelected(d.to));
+        let used = this.props.dependencies.find(d => d.from !== d.to && d.to === comp && this.isComponentSelected(d.from));
+        let internal = this.props.dependencies.find(d => d.from === d.to && d.from == comp && d.to == comp && this.isComponentSelected(comp));
         if (uses && used) {
             return "cycle" + (internal ? " internal" : "")
         }
@@ -27,6 +46,25 @@ class DSM extends React.Component {
         return internal && "internal"
     }
 
+    getDependency(from, to) {
+        return this.props.dependencies.find(d => d.from === from && d.to === to);
+    }
+    selectDependency(from, to, multi) {
+        const dep = {from: from, to: to};
+        let newList;
+        if (multi) {
+            if (this.isDependencySelected(from, to)) {
+                newList = this.state.selectedDependencies.filter(i => i.from !== dep.from || i.to !== dep.to)
+            }
+            else {
+                newList = this.state.selectedDependencies.concat([dep])
+            }
+        }
+        else {
+            newList = [dep]
+        }
+        this.setState({selectedDependencies: newList})
+    }
     isDependencySelected(from, to) {
         return this.state.selectedDependencies.find(dep => dep.from === from && dep.to === to) && true;
     }
@@ -47,45 +85,16 @@ class DSM extends React.Component {
         /**/
         return "none";
     }
-
-    checked(from, to) {
-        const d = this.props.dependencies.find(d => d.from === from && d.to === to);
-        const count = d ? d.count : null;
-        return count
-    }
+    
     onComponentClicked(comp, e) {
         console.log('comp', comp);
-        let newList;
-        if (e.metaKey || e.ctrlKey) {
-            if (this.isComponentSelected(comp)) {
-                newList = this.state.selectedComponents.filter(i => i !== comp)
-            }
-            else {
-                newList = this.state.selectedComponents.concat([comp])
-            }
-        }
-        else {
-            newList =  [comp]
-        }
-        this.setState({selectedComponents: newList})
+        this.selectComponent(comp, e.metaKey || e.ctrlKey);
     }
     onDependencyClicked(from, to, e) {
-        const dep = {from: from, to: to};
-        console.log('dep', from, to, dep, e.metaKey, e.altKey);
-        let newList;
-        if (e.metaKey || e.ctrlKey) {
-            if (this.isDependencySelected(from, to)) {
-                newList = this.state.selectedDependencies.filter(i => i.from !== dep.from || i.to !== dep.to)
-            }
-            else {
-                newList = this.state.selectedDependencies.concat([dep])
-            }
-        }
-        else {
-            newList = [dep]
-        }
-        this.setState({selectedDependencies: newList})
+        console.log('dep', from, to, e.metaKey, e.altKey);
+        this.selectDependency(from, to, e.metaKey || e.ctrlKey);
     }
+    
     render() {
         return (
             <div className="dsm">
@@ -111,7 +120,7 @@ class DSM extends React.Component {
                                     key={from + '->' + to}
                                     from={from}
                                     to={to}
-                                    count={this.checked(from, to)}
+                                    dependency={this.getDependency(from, to)}
                                     selected={this.isDependencySelected(from, to)}
                                     status={this.statusToSelectedDependencies(from, to)}
                                     onClick={e => this.onDependencyClicked(from, to, e)}/>
@@ -142,11 +151,13 @@ function DSMComponent(props) {
             onClick={e => props.onClick && props.onClick(e)}>
             <b>{props.comp}</b>
         </td>,
-        <td key="depStatus" style={{width: '3px'}} className={depClazz}></td>,
+        <td key="depStatus" style={{width: '3px'}} className={depClazz}>&nbsp;</td>,
     ])
 }
 
 function DSMCell(props) {
+    const d = props.dependency;
+    
     let clazz = "dsm-cell";
 
     // Selection
@@ -158,7 +169,7 @@ function DSMCell(props) {
     }
 
     // Global
-    if (props.count) {
+    if (d) {
         clazz = clazz + " dep";
     }
     else {
@@ -167,11 +178,10 @@ function DSMCell(props) {
     if (props.from === props.to) {
         clazz = clazz + " self"
     }
-    //style={{cursor: props.count && 'pointer'}}
     return (
-        <td className={clazz}
+        <td className={clazz} title={d && d.detail}
             onClick={e => props.onClick && props.onClick(e)}>
-            {props.count}
+            {d && d.count}
         </td>
     )
 }
