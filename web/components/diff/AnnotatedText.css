@@ -1,0 +1,17 @@
+.annotated-text {
+    font-size: 12px;
+    overflow: scroll;
+    padding: 2px;
+}
+
+.annotated-text .comment {
+    color: #a8a8a8;
+}
+
+.annotated-text .key {
+    color: orange;
+}
+
+.annotated-text .value {
+    color: #598e43;
+}

@@ -4,11 +4,24 @@ import C1 from "../sandbox/module";
 import {Toggle} from "../common/component-library";
 import {AppLayout} from "./common/layout";
 import {DSM} from "../dependency/DSM";
+import {AnnotatedText} from "../diff/AnnotatedText";
+import {Diff} from "../diff/Diff";
 
 class SandboxApp extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {logged: true, user: "amo"}
+        this.state = {
+            logged: true,
+            user: "amo",
+            config: `Sample document
+to display
+
+# First property dsdfs sdfzsd  sfsdd sfserfdfq sd sf dfsdfser
+prop1 = true
+# AUTO, MANUAL                
+prop2 = AUTO
+`
+        }
     }
 
     render() {
@@ -21,10 +34,10 @@ class SandboxApp extends React.Component {
 
         let status;
         if (this.state.logged) {
-            status = <span>Hello '{this.state.user}'</span>
+            status = 'Hello ' + this.state.user + '!'
         }
         else {
-            status = <span>Hi buddy</span>
+            status = 'Hi buddy!'
         }
 
         const components = [
@@ -44,12 +57,13 @@ class SandboxApp extends React.Component {
             {from: "posttrade", to: "posttrade", count: 11, detail: "analyze orders"},
             {from: "order", to: "posttrade", count: 11, detail: "analyze orders"}
         ];
-
+        
         return (
-            <AppLayout title='Sandbox'>
-                <span>{status}</span>&nbsp;
-                {this.state.logged && <span>Logged in</span>}
-                <br/>
+            <AppLayout title={'Sandbox:  ' + status + ' ' + (this.state.logged ? 'you\'re logged in' : '')}>
+
+                <Diff left={this.state.config} right={this.state.config} format="properties" />
+                
+                <AnnotatedText text={this.state.config} format="properties" />
 
                 <DSM components={components} dependencies={dependencies} legend="true" />
 

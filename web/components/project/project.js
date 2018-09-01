@@ -174,7 +174,8 @@ function ProjectBadge(props) {
 
 
 class Documentation extends React.Component {
-    componentWillReceiveProps(nextProps) {
+    // FIXME Initial values?
+    componentWillReceiveProps(nextProps) { // Only on changes
         this.content.innerHTML = nextProps.doc;
     }
     render() {
