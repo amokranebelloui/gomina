@@ -1,0 +1,37 @@
+.text-lines {
+    font-size: 12px;
+    overflow: scroll;
+    padding: 2px;
+}
+
+/* Highlighting */
+.text-lines .line {
+    width: 100%;
+}
+.text-lines .highlighted-modified {
+    background-color: #d5ecff;
+}
+.text-lines .highlighted-added {
+    background-color: #c4f3c4;
+}
+.text-lines .highlighted-removed {
+    background-color: #ffdddc;
+}
+
+.text-lines .line-num {
+    color: lightgray;
+    padding-right: 3px;
+    user-select: none;
+}
+
+
+/* Properties file */
+.text-lines .comment {
+    color: #a8a8a8;
+}
+.text-lines .key {
+    color: #cf8700;
+}
+.text-lines .value {
+    color: #4e8141;
+}

@@ -4,23 +4,15 @@ import C1 from "../sandbox/module";
 import {Toggle} from "../common/component-library";
 import {AppLayout} from "./common/layout";
 import {DSM} from "../dependency/DSM";
-import {AnnotatedText} from "../diff/AnnotatedText";
-import {Diff} from "../diff/Diff";
+import {DiffView} from "../diff/DiffView";
+import {TextLines} from "../diff/TextLines";
 
 class SandboxApp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             logged: true,
-            user: "amo",
-            config: `Sample document
-to display
-
-# First property dsdfs sdfzsd  sfsdd sfserfdfq sd sf dfsdfser
-prop1 = true
-# AUTO, MANUAL                
-prop2 = AUTO
-`
+            user: "amo"
         }
     }
 
@@ -57,13 +49,49 @@ prop2 = AUTO
             {from: "posttrade", to: "posttrade", count: 11, detail: "analyze orders"},
             {from: "order", to: "posttrade", count: 11, detail: "analyze orders"}
         ];
-        
+
+        const config = `# Sample configuration
+# to display
+
+# First property dsdfs sdfzsd  sfsdd sfserfdfq sd sf dfsdfser
+prop1 = true
+# AUTO, MANUAL                
+prop2 = MANUAL
+
+some.action.enabled=true`;
+        const config2 = `# Sample configuration to display
+
+# First property dsdfs sdfzsd  sfsdd sfserfdfq sd sf dfsdfser
+prop1 = true
+# AUTO, MANUAL                
+prop2 = AUTO
+
+some.other.action.enabled=true
+some.action.enabled=true
+
+timeout=12
+
+`;
+        let highlights = [
+            {num: 1, highlight: 'removed'},
+            {num: 6, highlight: 'modified'},
+            {num: 9, highlight: 'added'},
+            {num: 11, highlight: 'added'}
+        ];
+        function highlightFor(num) {
+            const line = highlights && highlights.find(h => h.num === num);
+            return line ? line.highlight : null
+        }
+        const lines = config2.split('\n').map((line, i) => {
+            return {num: i+1, text: line, highlight: highlightFor(i + 1)}
+        });
+
         return (
             <AppLayout title={'Sandbox:  ' + status + ' ' + (this.state.logged ? 'you\'re logged in' : '')}>
 
-                <Diff left={this.state.config} right={this.state.config} format="properties" />
-                
-                <AnnotatedText text={this.state.config} format="properties" />
+                <DiffView left={config} right={config2} format="properties" />
+
+                <TextLines lines={lines} />
 
                 <DSM components={components} dependencies={dependencies} legend="true" />
 
