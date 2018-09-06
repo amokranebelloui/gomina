@@ -1,6 +1,6 @@
 import React from "react";
 import {AppLayout} from "./common/layout";
-import {ProjectSummary} from "../project/project";
+import {ProjectSummary} from "../project/Project";
 import axios from "axios/index";
 
 // TODO Remove me, use ProjectApp instead
