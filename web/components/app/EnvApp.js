@@ -2,11 +2,12 @@ import React from "react";
 import SockJS from "sockjs-client";
 import axios from "axios/index";
 import {groupBy} from "../common/utils";
-import {EnvironmentLogical, InstanceFilter} from "../environment/env";
+import {EnvironmentLogical} from "../environment/Environment";
 import {AppLayout} from "./common/layout";
 import {Link} from "react-router-dom";
 import {Toggle} from "../common/Toggle";
 import {Container} from "../common/Container";
+import {InstanceFilter} from "../environment/InstanceFilter";
 
 class EnvApp extends React.Component {
     constructor(props) {

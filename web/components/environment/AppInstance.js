@@ -1,10 +1,12 @@
 import React from "react";
 import {BuildLink} from "../project/project";
-import {ConfCommited, Expected, Host} from "./instance-common";
-import './instance.css'
+import {Host} from "./misc/Host";
+import './Instance.css'
 import {Version} from "../common/Version";
 import {CopyButton} from "../common/CopyButton";
 import {Badge} from "../common/Badge";
+import {ConfCommited} from "./misc/ConfCommited";
+import {Expected} from "./misc/Expected";
 
 class AppInstance extends React.Component {
     render() {
