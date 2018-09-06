@@ -3,6 +3,7 @@ import {AppLayout} from "./common/layout";
 import {ProjectSummary} from "../project/project";
 import axios from "axios/index";
 
+// TODO Remove me, use ProjectApp instead
 class ProjectsApp extends React.Component {
 
     constructor(props) {

@@ -2,12 +2,12 @@ import React from "react";
 import ReactDOM from "react-dom";
 import {createBrowserHistory} from "history";
 import {Route, Router, Switch} from "react-router";
-import {Index} from "./app/index-app";
-import {EnvApp} from "./app/env-app";
+import {Index} from "./app/Index";
+import {EnvApp} from "./app/EnvApp";
 import {ArchitectureApp} from "./app/ArchitectureApp";
-import {PipelineApp} from "./app/pipeline-app";
-import {ProjectApp} from "./app/project-app";
-import {SandboxApp} from "./app/sandbox-app";
+import {PipelineApp} from "./app/PipelineApp";
+import {ProjectApp} from "./app/ProjectApp";
+import {SandboxApp} from "./app/SandboxApp";
 import "./application.css"
 import {HostsApp} from "./app/HostsApp";
 
