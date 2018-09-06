@@ -2,7 +2,7 @@ import React from "react";
 import {CopyButton} from "../common/utils";
 import {ConfCommited, Expected, Host, Leader, Port, RedisLink, Versions} from "./instance-common";
 import './instance.css'
-import {Version} from "../common/Versions";
+import {Version} from "../common/Version";
 import {Badge} from "../common/Badge";
 
 class RedisInstance extends React.Component {

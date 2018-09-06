@@ -2,7 +2,7 @@ import React from "react";
 import {BuildLink} from "../project/project";
 import {ConfCommited, Expected, Host} from "./instance-common";
 import './instance.css'
-import {Version} from "../common/Versions";
+import {Version} from "../common/Version";
 import {CopyButton} from "../common/CopyButton";
 import {Badge} from "../common/Badge";
 

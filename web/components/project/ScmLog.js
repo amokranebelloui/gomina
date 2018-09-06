@@ -1,6 +1,6 @@
 import React from "react";
 import {groupBy} from "../common/utils";
-import {Version} from "../common/Versions";
+import {Version} from "../common/Version";
 import {Badge} from "../common/Badge";
 import {Well} from "../common/Well";
 

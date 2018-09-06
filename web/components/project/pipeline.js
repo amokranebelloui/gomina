@@ -4,7 +4,7 @@ import React from 'react';
 import {groupBy} from '../common/utils';
 import {compareVersions} from "../common/version-utils";
 import {Well} from "../common/Well";
-import {Version} from "../common/Versions";
+import {Version} from "../common/Version";
 
 class ProjectPipeline extends React.Component {
     render() {

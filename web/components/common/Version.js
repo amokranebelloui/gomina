@@ -24,6 +24,6 @@ function Version(props) {
             {isSnapshot && <span style={{fontSize: "7px"}}>({revision})</span>}
         </Badge>
     )
-}
+}                     
 
 export {Version}
