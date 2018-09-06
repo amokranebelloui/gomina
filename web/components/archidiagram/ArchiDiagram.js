@@ -1,7 +1,7 @@
 import React from "react";
 import * as d3 from "d3";
 import {Toggle} from "../common/component-library";
-import "./archi-diagram.css";
+import "./ArchiDiagram.css";
 
 function index(list) {
     return list.reduce((result, obj) => {
@@ -10,7 +10,7 @@ function index(list) {
     }, {});
 }
 
-class Diagram extends React.Component {
+class ArchiDiagram extends React.Component {
     constructor(props){
         super(props);
         this.createDiagram = this.createDiagram.bind(this);
@@ -177,4 +177,4 @@ class Diagram extends React.Component {
     }
 }
 
-export {Diagram};
+export {ArchiDiagram};

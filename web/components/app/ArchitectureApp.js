@@ -1,9 +1,9 @@
 import React from "react";
 import axios from "axios/index";
 import {AppLayout} from "./common/layout";
-import {Diagram} from "../archidiagram/archi-diagram";
+import {ArchiDiagram} from "../archidiagram/ArchiDiagram";
 
-class ArchiDiagramApp extends React.Component {
+class ArchitectureApp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {components: [], dependencies: []};
@@ -56,13 +56,13 @@ class ArchiDiagramApp extends React.Component {
             <AppLayout title="Architecture Diagram">
                 <button onClick={this.addData}>Add</button>
                 <button onClick={this.removeData}>Remove</button>
-                <Diagram components={this.state.components}
-                         dependencies={this.state.dependencies}
-                         onLinkSelected={d => console.info("selected", d)}
-                         onComponentMoved={this.componentMoved}/>
+                <ArchiDiagram components={this.state.components}
+                              dependencies={this.state.dependencies}
+                              onLinkSelected={d => console.info("selected", d)}
+                              onComponentMoved={this.componentMoved}/>
             </AppLayout>
         );
     }
 }
 
-export { ArchiDiagramApp };
+export { ArchitectureApp };

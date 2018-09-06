@@ -4,7 +4,7 @@ import {createBrowserHistory} from "history";
 import {Route, Router, Switch} from "react-router";
 import {Index} from "./app/index-app";
 import {EnvApp} from "./app/env-app";
-import {ArchiDiagramApp} from "./app/archi-diagram-app";
+import {ArchitectureApp} from "./app/ArchitectureApp";
 import {PipelineApp} from "./app/pipeline-app";
 import {ProjectApp} from "./app/project-app";
 import {SandboxApp} from "./app/sandbox-app";
@@ -23,7 +23,7 @@ class Blocker extends React.Component {
         return (
             <Switch>
                 <Route exact path="/" component={Index}/>
-                <Route path="/archi" component={ArchiDiagramApp}/>
+                <Route path="/archi" component={ArchitectureApp}/>
                 <Route path="/hosts" render={props => <HostsApp {...props} />}/>
                 <Route path="/host/:id" render={props => <HostsApp {...props} />}/>
                 <Route path="/envs/:id" render={props => <EnvApp {...props} />}/>
