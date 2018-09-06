@@ -1,9 +1,10 @@
 import React from "react";
-import {Badge, CopyButton} from "../common/component-library";
 import {BuildLink} from "../project/project";
-import {ConfCommited, Expected, Host, Leader, Versions} from "./instance-common";
+import {ConfCommited, Expected, Host} from "./instance-common";
 import './instance.css'
-import {Version} from "../common/version";
+import {Version} from "../common/Versions";
+import {CopyButton} from "../common/CopyButton";
+import {Badge} from "../common/Badge";
 
 class AppInstance extends React.Component {
     render() {

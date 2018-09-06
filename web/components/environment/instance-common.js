@@ -1,6 +1,7 @@
 import React from "react";
-import {compareVersions, compareVersionsRevisions, Version} from "../common/version";
-import {Badge} from "../common/component-library";
+import {compareVersions, compareVersionsRevisions} from "../common/version-utils";
+import {Badge} from "../common/Badge";
+import {Version} from "../common/Versions";
 
 function isRunning(status) {
     return status == 'LIVE' || status == 'LOADING';

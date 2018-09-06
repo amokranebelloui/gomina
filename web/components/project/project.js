@@ -1,7 +1,7 @@
 import React from "react";
 import {Link} from "react-router-dom";
-import {Badge} from "../common/component-library";
-import {Version} from "../common/version";
+import {Badge} from "../common/Badge";
+import {Version} from "../common/Versions";
 import sonarIcon from "./sonar.ico"
 
 class LinesOfCode extends React.Component {

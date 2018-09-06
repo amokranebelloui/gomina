@@ -1,7 +1,7 @@
 import React from "react";
 import * as d3 from "d3";
-import {Toggle} from "../common/component-library";
 import "./ArchiDiagram.css";
+import {Toggle} from "../common/Toggle";
 
 function index(list) {
     return list.reduce((result, obj) => {

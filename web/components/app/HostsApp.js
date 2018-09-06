@@ -1,8 +1,9 @@
 import axios from "axios/index";
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import React from "react";
-import {Badge, Well} from "../common/component-library";
+import {Well} from "../common/Well";
 import Link from "react-router-dom/es/Link";
+import {Badge} from "../common/Badge";
 
 class HostsApp extends React.Component {
 

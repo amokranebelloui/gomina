@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge} from "../common/component-library";
+import {Badge} from "../common/Badge";
 import {BuildLink} from "../project/project";
 
 class Service extends React.Component {

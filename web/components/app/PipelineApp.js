@@ -1,5 +1,5 @@
 import React from "react";
-import {groupBy} from "../common/component-library";
+import {groupBy} from "../common/utils";
 import {AppLayout} from "./common/layout";
 import {ProjectPipeline} from "../project/pipeline";
 import axios from "axios";

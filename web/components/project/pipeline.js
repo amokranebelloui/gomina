@@ -1,8 +1,10 @@
 
 import React from 'react';
 
-import {groupBy, Well} from '../common/component-library';
-import {compareVersions, Version} from "../common/version";
+import {groupBy} from '../common/utils';
+import {compareVersions} from "../common/version-utils";
+import {Well} from "../common/Well";
+import {Version} from "../common/Versions";
 
 class ProjectPipeline extends React.Component {
     render() {

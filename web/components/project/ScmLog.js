@@ -1,6 +1,8 @@
 import React from "react";
-import {Badge, groupBy, Well} from "../common/component-library";
-import {Version} from "../common/version";
+import {groupBy} from "../common/utils";
+import {Version} from "../common/Versions";
+import {Badge} from "../common/Badge";
+import {Well} from "../common/Well";
 
 class ScmLog extends React.Component {
 

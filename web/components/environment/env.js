@@ -1,11 +1,12 @@
 import React from "react";
-import {groupBy, Well} from "../common/component-library";
-import {isSnapshot} from "../common/version";
+import {groupBy} from "../common/utils";
+import {isSnapshot} from "../common/version-utils";
 import {AppInstance} from "./instance-app";
 import {RedisInstance} from "./instance-redis";
 import {Status} from "./instance-common";
 import './env.css'
 import {Service} from "./Service";
+import {Well} from "../common/Well";
 
 class Instance extends React.Component {
     render() {

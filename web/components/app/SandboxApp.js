@@ -1,11 +1,11 @@
 import React from "react";
 import {LoggingButton, MyComponent, Posts, Toggle2, WarningBanner} from "../sandbox/sandbox";
 import C1 from "../sandbox/module";
-import {Toggle} from "../common/component-library";
 import {AppLayout} from "./common/layout";
 import {DSM} from "../dependency/DSM";
 import {DiffView} from "../diff/DiffView";
 import {TextLines} from "../diff/TextLines";
+import {Toggle} from "../common/Toggle";
 
 class SandboxApp extends React.Component {
     constructor(props) {

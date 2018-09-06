@@ -2,9 +2,10 @@ import React from "react";
 import axios from "axios/index";
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import {Documentation, ProjectBadge, ProjectSummary} from "../project/project";
-import {Container, Well} from "../common/component-library";
+import {Well} from "../common/Well";
 import "../project/project.css"
 import {ScmLog} from "../project/ScmLog";
+import {Container} from "../common/Container";
 
 class ProjectApp extends React.Component {
     
