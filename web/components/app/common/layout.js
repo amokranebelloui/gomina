@@ -91,5 +91,5 @@ class PrimarySecondaryLayout extends React.Component {
 }
 
 
-export { AppLayout, PrimarySecondaryLayout };
+export { AppLayout, PrimarySecondaryLayout, Clock };
 

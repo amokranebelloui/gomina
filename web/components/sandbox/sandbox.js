@@ -1,15 +1,5 @@
-
-
 import React from 'react';
 import PropTypes from 'proptypes';
-
-function Clock1(props) {
-    return (
-        <span>
-                <b>It's {props.date.toLocaleTimeString()}.</b>
-            </span>
-    )
-}
 
 class MyComponent extends React.Component {
     render() {
@@ -47,34 +37,6 @@ class Toggle2 extends React.Component {
     }
 }
 
-class LoggingButton extends React.Component {
-
-    handleClick() {
-        console.log('this is:', this);
-    }
-
-    render() {
-        return (
-            <button onClick={e => this.handleClick(e)}>
-                Click me
-            </button>
-        );
-    }
-}
-
-function WarningBanner(props) {
-    if (!props.warn) {
-        return null;
-    }
-
-    return (
-        <div className="warning">
-            Warning! {props.warn}
-        </div>
-    );
-}
-
-
 
 class Posts extends React.Component {
     constructor(props) {
@@ -92,4 +54,4 @@ class Posts extends React.Component {
     }
 }
 
-export {MyComponent, Clock1, Toggle2, LoggingButton, Posts, WarningBanner}
+export {MyComponent, Toggle2, Posts}

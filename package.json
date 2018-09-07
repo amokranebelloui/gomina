@@ -5,9 +5,12 @@
     "sample": "echo \"Error: no test specified\"",
     "build": "node_modules/webpack/bin/webpack.js --progress --colors",
     "build-watch": "node_modules/webpack/bin/webpack.js --progress --colors --watch",
-    "test": "jest --watch"
+    "test": "jest --watch",
+    "storybook": "start-storybook -p 9001 -c .storybook"
   },
   "devDependencies": {
+    "@storybook/addon-actions": "^3.4.10",
+    "@storybook/react": "^3.4.10",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.0",
