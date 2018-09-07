@@ -1,8 +1,8 @@
 import React from "react";
-import {groupBy} from "../common/utils";
 import {Version} from "../common/Version";
 import {Badge} from "../common/Badge";
 import {Well} from "../common/Well";
+import PropTypes from 'prop-types';
 
 class ScmLog extends React.Component {
 
@@ -128,5 +128,10 @@ class ScmLog extends React.Component {
         )
     }
 }
+
+ScmLog.propTypes = {
+    commits: PropTypes.array.isRequired,
+    instances: PropTypes.array
+};
 
 export {ScmLog};
