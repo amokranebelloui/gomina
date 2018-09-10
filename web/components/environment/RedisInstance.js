@@ -1,14 +1,14 @@
 import React from "react";
 import {CopyButton} from "../common/utils";
-import {Port} from "./misc/Port";
+import {Port} from "../misc/Port";
 import './Instance.css'
 import {Version} from "../common/Version";
 import {Badge} from "../common/Badge";
-import {ConfCommited} from "./misc/ConfCommited";
-import {Expected} from "./misc/Expected";
-import {Leader} from "./misc/Leader";
-import {RedisLink} from "./misc/RedisLink";
-import {Host} from "./misc/Host";
+import {ConfCommited} from "../misc/ConfCommited";
+import {Expected} from "../misc/Expected";
+import {Leader} from "../misc/Leader";
+import {RedisLink} from "../misc/RedisLink";
+import {Host} from "../misc/Host";
 
 class RedisInstance extends React.Component {
     render() {

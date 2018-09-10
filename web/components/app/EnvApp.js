@@ -8,6 +8,7 @@ import {Link} from "react-router-dom";
 import {Toggle} from "../common/Toggle";
 import {Container} from "../common/Container";
 import {InstanceFilter} from "../environment/InstanceFilter";
+import {Events} from "../environment/Events";
 
 class EnvApp extends React.Component {
     constructor(props) {
@@ -33,7 +34,7 @@ class EnvApp extends React.Component {
         this.sock = new SockJS('/realtime');
 
         const thisComponent = this;
-        var eventsDiv = this.eventsList;
+        //var eventsDiv = this.eventsList;
         this.sock.onopen = function() {
             console.log('open');
             thisComponent.setState({realtime: true});
@@ -235,21 +236,7 @@ class EnvApp extends React.Component {
                             </div>
                             <div className='side-secondary'>
                                 <Container>
-                                    <div ref={node => this.eventsList = node}></div>
-                                    {eventsErrors.map(error =>
-                                        <li>
-                                            {error}
-                                        </li>
-                                    )}
-                                    <ul>
-                                    {events.map(event =>
-                                        <li>
-                                            {new Date(event.timestamp).toLocaleString()}&nbsp;
-                                            {event.type}&nbsp;
-                                            {event.message}
-                                        </li>
-                                    )}
-                                    </ul>
+                                    <Events events={events} errors={eventsErrors} />
                                 </Container>
                             </div>
                         </div>

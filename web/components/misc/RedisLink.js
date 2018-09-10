@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge} from "../../common/Badge";
+import {Badge} from "../common/Badge";
 
 class RedisLink extends React.Component {
     render() {
@@ -11,7 +11,7 @@ class RedisLink extends React.Component {
                 <b>&rarr;</b>
             </Badge>
         );
-    }
+    }    
 }
 
 export {RedisLink}

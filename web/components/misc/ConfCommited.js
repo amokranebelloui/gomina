@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge} from "../../common/Badge";
+import {Badge} from "../common/Badge";
 
 class ConfCommited extends React.Component {
     render() {

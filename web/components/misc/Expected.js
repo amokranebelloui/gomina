@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge} from "../../common/Badge";
+import {Badge} from "../common/Badge";
 
 class Expected extends React.Component {
     render() {

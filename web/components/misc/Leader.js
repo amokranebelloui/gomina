@@ -1,5 +1,5 @@
 import React from "react";
-import {Badge} from "../../common/Badge";
+import {Badge} from "../common/Badge";
 
 function Leader(props) {
     const leader = props.leader == true;
