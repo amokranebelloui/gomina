@@ -10,6 +10,7 @@ import { action } from '@storybook/addon-actions';
 import C1 from "../web/components/sandbox/module";
 import {Clock} from "../web/components/app/common/layout";
 import {CommitLog} from "../web/components/commitlog/CommitLog";
+import {Documentation} from "../web/components/documentation/Documentation";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -84,6 +85,25 @@ storiesOf('CommitLog', module)
         ];
         return (
             <CommitLog commits={commits} instances={instances} />
+        )
+    });
+
+storiesOf('Documentation', module)
+    .add('Documentation', () => {
+        const doc = `<h1>Sample documentation</h1>
+description of the project
+<h2>Features</h2>
+<li>Handling the cart</li>
+<li>analysis of why users remove articles from cart</li>
+<h3>Resiliency characteristics</h3>
+description
+<br/>
+<br/>
+<h3>Dependencies</h3>
+<li>database</li>
+`;
+        return (
+            <Documentation doc={doc} />
         )
     });
 

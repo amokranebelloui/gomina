@@ -1,4 +1,4 @@
-import {compareVersions, compareVersionsRevisions} from "../version-utils";
+import {compareVersions, compareVersionsRevisions} from "./version-utils";
 
 test('Version compare', () => {
     expect(compareVersions("2.2.1", "2.2.2")).toBe(-1);

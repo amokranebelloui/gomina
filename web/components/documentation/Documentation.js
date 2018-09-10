@@ -1,7 +1,10 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 class Documentation extends React.Component {
-    // FIXME Initial values?
+    componentDidMount() {
+        this.content.innerHTML = this.props.doc;
+    }
     componentWillReceiveProps(nextProps) { // Only on changes
         this.content.innerHTML = nextProps.doc;
     }
@@ -16,5 +19,9 @@ class Documentation extends React.Component {
         )
     }
 }
+
+Documentation.propTypes = {
+    doc: PropTypes.string.isRequired
+};
 
 export {Documentation}

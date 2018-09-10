@@ -6,7 +6,7 @@ import {Well} from "../common/Well";
 import "../project/Project.css"
 import {CommitLog} from "../commitlog/CommitLog";
 import {Container} from "../common/Container";
-import {Documentation} from "../project/Documentation";
+import {Documentation} from "../documentation/Documentation";
 
 class ProjectApp extends React.Component {
     
