@@ -9,6 +9,7 @@ import {Toggle} from "../web/components/common/Toggle";
 import { action } from '@storybook/addon-actions';
 import C1 from "../web/components/sandbox/module";
 import {Clock} from "../web/components/app/common/layout";
+import {CommitLog} from "../web/components/commitlog/CommitLog";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -63,6 +64,26 @@ storiesOf('Dependency', module)
         ];
         return (
             <DSM components={components} dependencies={dependencies} legend="true" />
+        )
+    });
+
+storiesOf('CommitLog', module)
+    .add('CommitLog', () => {
+        const commits = [
+            { revision: 45691, date: 1507987656241, author: 'amokrane', message: 'bug fix'},
+            { revision: 45690, date: 1507187656241, author: 'amokrane', message: 'bug fix'},
+            { revision: 45679, date: 1507177656241, author: 'amokrane', message: 'post release', version: '2.5.1-SNAPSHOT' },
+            { revision: 45678, date: 1507177656241, author: 'amokrane', message: 'release', version: '2.5.0' },
+            { revision: 45675, date: 1507077656241, author: 'amokrane', message: 'Implement using event sourcing' }
+        ];
+        const instances = [
+            { id: 'uat-cart', env: 'uat', name: 'cart', deployVersion: '', deployRevision: '', version: '2.5.1-SNAPSHOT', revision: '45680' },
+            { id: 'uat-cart', env: 'uat', name: 'cart2', deployVersion: '2.5.1-SNAPSHOT', deployRevision: '' },
+            { id: 'stg-cart', env: 'staging', name: 'cart' },
+            { id: 'prod-cart', env: 'prod', name: 'cart', deployVersion: '', deployRevision: '', version: '2.5.0', revision: '45678' }
+        ];
+        return (
+            <CommitLog commits={commits} instances={instances} />
         )
     });
 
@@ -165,4 +186,4 @@ storiesOf('Layout', module)
                 </div>
             </div>
         )
-    })
+    });

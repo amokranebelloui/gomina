@@ -4,7 +4,7 @@ import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import {ProjectBadge, ProjectSummary} from "../project/Project";
 import {Well} from "../common/Well";
 import "../project/Project.css"
-import {ScmLog} from "../project/ScmLog";
+import {CommitLog} from "../commitlog/CommitLog";
 import {Container} from "../common/Container";
 import {Documentation} from "../project/Documentation";
 
@@ -164,8 +164,8 @@ class ProjectApp extends React.Component {
                     </Well>
                     <Container>
                         {docId
-                            ? <Documentation doc={this.state.doc} />
-                            : <ScmLog commits={commits} instances={instances} />
+                            ? [<b>Doc</b>,<Documentation doc={this.state.doc} />]
+                            : [<b>Commit Log</b>,<CommitLog commits={commits} instances={instances} />]
                         }
                     </Container>
                 </PrimarySecondaryLayout>

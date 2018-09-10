@@ -9,8 +9,6 @@ class Documentation extends React.Component {
     render() {
         return (
             <div>
-                <b>Doc</b>
-                <br/>
                 <div ref={(ref) => {
                     this.content = ref;
                 }}></div>

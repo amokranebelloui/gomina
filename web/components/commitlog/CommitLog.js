@@ -4,7 +4,7 @@ import {Badge} from "../common/Badge";
 import {Well} from "../common/Well";
 import PropTypes from 'prop-types';
 
-class ScmLog extends React.Component {
+class CommitLog extends React.Component {
 
     indexByRevision(sortedCommits, instances, logByRevision, unknown) {
         const logByVersion = {};
@@ -72,8 +72,6 @@ class ScmLog extends React.Component {
 
         return (
             <div>
-                <b>SCM Log</b>
-                <br/>
                 {unknown.map(instance =>
                     <Badge key={instance.id} backgroundColor="#EEEEAA">
                         {instance.env} {instance.name}&nbsp;
@@ -84,7 +82,7 @@ class ScmLog extends React.Component {
                         <div style={{overflow: 'auto'}}>
                             <span style={{float: 'left', marginRight: '2px'}}>
                                 {revision + ' ' || '-'}
-                                {logByRevision[revision].author + ' ' || '-'}
+                                {(logByRevision[revision].author || '') + ' ' || '-'}
                                 {new Date(logByRevision[revision].date).toLocaleDateString() + ' ' || '-'}
                                 {new Date(logByRevision[revision].date).toLocaleTimeString() + ' ' || '-'}
                             </span>
@@ -95,7 +93,7 @@ class ScmLog extends React.Component {
                                 paddingLeft: '1px',
                                 paddingRight: '1px'
                             }}>
-                                {logByRevision[revision].message + ' ' || '-'}
+                                {(logByRevision[revision].message || '') + ' ' || '-'}
 
                                 <span style={{float: 'right', position: 'top'}}>
                                     {logByRevision[revision].version && <i style={{opacity: .5}}>{logByRevision[revision].version}</i>}
@@ -129,9 +127,9 @@ class ScmLog extends React.Component {
     }
 }
 
-ScmLog.propTypes = {
+CommitLog.propTypes = {
     commits: PropTypes.array.isRequired,
     instances: PropTypes.array
 };
 
-export {ScmLog};
+export {CommitLog};
