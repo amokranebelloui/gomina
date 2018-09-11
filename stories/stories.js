@@ -43,7 +43,7 @@ storiesOf('Components', module)
     .add('My Component', () => <MyComponent label="hello world" />)
     .add('My Component Highlighted', () => <MyComponent label="hello world" highlighted={true} />)
     .add('Test Default Export', () => <C1/>)
-    .add('Badge with props', () => <Badge title='Here' color="green" border='green' backgroundColor='lightgreen'>Here!</Badge>)
+    .add('Badge with props', () => <Badge title='Here' color="green" border='green' backgroundColor='lightgreen'>Here!<br/>and there</Badge>)
     .add('Badge with style overrides', () => <Badge title='Here' color="blue" style={{backgroundColor: 'orange', color: 'red', fontStyle: 'italic', fontWeight: 'bold', borderRadius: '9px'}}>Here!</Badge>)
 ;
 
