@@ -11,6 +11,7 @@ import C1 from "../web/components/sandbox/module";
 import {Clock} from "../web/components/app/common/layout";
 import {CommitLog} from "../web/components/commitlog/CommitLog";
 import {Documentation} from "../web/components/documentation/Documentation";
+import {Badge} from "../web/components/common/Badge";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -42,6 +43,8 @@ storiesOf('Components', module)
     .add('My Component', () => <MyComponent label="hello world" />)
     .add('My Component Highlighted', () => <MyComponent label="hello world" highlighted={true} />)
     .add('Test Default Export', () => <C1/>)
+    .add('Badge with props', () => <Badge title='Here' color="green" border='green' backgroundColor='lightgreen'>Here!</Badge>)
+    .add('Badge with style overrides', () => <Badge title='Here' color="blue" style={{backgroundColor: 'orange', color: 'red', fontStyle: 'italic', fontWeight: 'bold', borderRadius: '9px'}}>Here!</Badge>)
 ;
 
 storiesOf('Dependency', module)

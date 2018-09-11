@@ -72,11 +72,13 @@ class CommitLog extends React.Component {
 
         return (
             <div>
-                {unknown.map(instance =>
-                    <Badge key={instance.id} backgroundColor="#EEEEAA">
-                        {instance.env} {instance.name}&nbsp;
-                    </Badge>
-                )}
+                <div style={{padding: '2px'}}>
+                    {unknown.map(instance =>
+                        <Badge key={instance.id} backgroundColor="#EEEEAA" style={{marginRight: '2px'}}>
+                            {instance.env} {instance.name}&nbsp;
+                        </Badge>
+                    )}
+                </div>
                 {Object.keys(logByRevision).sort((a, b) => b - a).map(revision =>
                     <Well block key={revision}>
                         <div style={{overflow: 'auto'}}>

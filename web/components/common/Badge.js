@@ -1,5 +1,7 @@
 import React from "react";
 
+import './Badge.css'
+import PropTypes from "prop-types";
 
 class Badge extends React.Component {
     constructor(props) {
@@ -7,18 +9,27 @@ class Badge extends React.Component {
     }
 
     render() {
+        const baseStyle = {
+            color: this.props.color,
+            backgroundColor: this.props.backgroundColor,
+            border: this.props.border ? '1px solid ' + this.props.border : ''
+        };
+        const style = Object.assign({}, baseStyle, this.props.style);
         return (
-            <span title={this.props.title}
-                  style={{
-                      padding: "1px", fontSize: '10px',
-                      color: this.props.color, backgroundColor: this.props.backgroundColor,
-                      border: this.props.border ? '1px solid ' + this.props.border : '',
-                      borderRadius: "5px", display: "inline-block"
-                  }}>
-                    {this.props.children}
-                </span>
+            <span title={this.props.title} className='badge' style={style}>
+                {this.props.children}
+            </span>
         )
     }
 }
+
+Badge.propTypes = {
+    title: PropTypes.string,
+    style: PropTypes.object,
+    color: PropTypes.string,
+    backgroundColor: PropTypes.string,
+    border: PropTypes.string,
+    children: PropTypes.element.isRequired
+};
 
 export {Badge}
