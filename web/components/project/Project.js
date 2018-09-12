@@ -14,6 +14,8 @@ import {Badge} from "../common/Badge";
 class ProjectSummary extends React.Component {
     render() {
         const project = this.props.project;
+        const tags = project.tags || [];
+        const languages = project.languages || [];
         return (
             <div className='project-row'>
                 <div className='summary'>
@@ -24,7 +26,12 @@ class ProjectSummary extends React.Component {
                         &nbsp;
                         <UnreleasedChangeCount changes={project.changes} />
                         <span style={{fontSize: 8, marginLeft: 2}}>({project.type})</span>
-                        {project.tags && <span style={{fontSize: 8, marginLeft: 2}}>({project.tags})</span>}
+                        {languages.map(tag =>
+                            <span style={{fontSize: 8, marginLeft: 2}}>{tag}</span>
+                        )}
+                        {tags.map(tag =>
+                                <span style={{fontSize: 8, marginLeft: 2}}>{tag}</span>
+                        )}
                     </span>
                     <br/>
                     <span style={{fontSize: 8}}>{project.mvn}</span>

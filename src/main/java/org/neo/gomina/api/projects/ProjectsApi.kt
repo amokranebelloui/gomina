@@ -164,6 +164,7 @@ class ProjectsApi {
 private fun ProjectDetail.apply(project: Project) {
     this.label = project.label ?: project.id
     this.type = project.type
+    this.languages = project.languages
     this.tags = project.tags
     this.scmRepo = project.svnRepo
     this.scmLocation = project.svnUrl

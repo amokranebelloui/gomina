@@ -7,6 +7,8 @@ import "../project/Project.css"
 import {CommitLog} from "../commitlog/CommitLog";
 import {Container} from "../common/Container";
 import {Documentation} from "../documentation/Documentation";
+import {flatMap, uniq, uniqCount} from "../common/utils";
+import {Badge} from "../common/Badge";
 
 class ProjectApp extends React.Component {
     
@@ -140,6 +142,10 @@ class ProjectApp extends React.Component {
             case 'unreleased-changes' : projects = this.state.projects.sort((a, b) => (b.changes - a.changes) * 10 + (a.label > b.label ? 1 : -1)); break;
             default : projects = this.state.projects
         }
+        const languages = uniqCount(flatMap(this.state.projects, p => p.languages))
+            .sort((i1, i2) => i2.count - i1.count);
+        const tags = uniqCount(flatMap(this.state.projects, p => p.tags))
+            .sort((i1, i2) => i2.count - i1.count);
         const project = this.state.project;
         const commits = project.commitLog || [];
         const instances = this.state.instances.filter(instance => instance.project == project.id);
@@ -155,6 +161,8 @@ class ProjectApp extends React.Component {
                         &nbsp;
                         Sorted by {this.state.sortBy}
                         <br/>
+                        Languages: {languages.map(language => <Badge>{language.value}({language.count})</Badge>)}<br/>
+                        Tags: {tags.map(tag => <Badge>{tag.value}({tag.count})</Badge>)}<br/>
                         <button disabled={this.state.sortBy === 'alphabetical'} onClick={e => this.changeSelected('alphabetical')}>Alphabetical</button>
                         <button disabled={this.state.sortBy === 'unreleased-changes'} onClick={e => this.changeSelected('unreleased-changes')}>Unreleased Changes</button>
                         <button disabled={this.state.sortBy === 'loc'} onClick={e => this.changeSelected('loc')}>LOC</button>
@@ -198,8 +206,13 @@ class ProjectApp extends React.Component {
     }
 
     matchesSearch(project) {
-        return project.label && project.label.match(new RegExp(this.state.search, "i")) ||
-            project.tags && project.tags.match(new RegExp(this.state.search, "i"));
+        let label = (project.label || "");
+        let languages = (project.languages || []);
+        let tags = (project.tags || []);
+        let regExp = new RegExp(this.state.search, "i");
+        return label.match(regExp) ||
+            (languages.filter(item => item.match(regExp))||[]).length > 0 ||
+            (tags.filter(item => item.match(regExp))||[]).length > 0;
         //return project.label && project.label.indexOf(this.state.search) !== -1;
     }
 }

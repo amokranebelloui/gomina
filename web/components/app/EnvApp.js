@@ -1,7 +1,7 @@
 import React from "react";
 import SockJS from "sockjs-client";
 import axios from "axios/index";
-import {groupBy} from "../common/utils";
+import {flatMap, groupBy} from "../common/utils";
 import {EnvironmentLogical} from "../environment/Environment";
 import {AppLayout} from "./common/layout";
 import {Link} from "react-router-dom";
@@ -186,10 +186,8 @@ class EnvApp extends React.Component {
         this.setState({filterId: filterId, highlight: highlightFunction})
     }
     render() {
-        const flatMap = (arr, f) => arr.map(f).reduce((x,y) => x.concat(y), [])
-
         const envsByType = groupBy(this.state.envs, 'type');
-        const instances = flatMap(this.state.services, svc => svc.instances)
+        const instances = flatMap(this.state.services, svc => svc.instances);
         const events = this.state.events;
         const eventsErrors = this.state.eventsErrors;
 
