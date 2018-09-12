@@ -26,7 +26,9 @@ data class ProjectDetail (
         var released: String? = null,
         var loc: Double? = null,
         var coverage: Double? = null,
-        var commitLog: List<CommitLogEntry> = emptyList()
+        var commitLog: List<CommitLogEntry> = emptyList(),
+        var lastCommit: Date? = null,
+        var commitActivity: Int? = null
 )
 
 data class CommitLogEntry (

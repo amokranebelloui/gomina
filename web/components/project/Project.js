@@ -8,6 +8,8 @@ import {UnreleasedChangeCount} from "./UnreleasedChangeCount";
 import {ScmLink} from "./ScmLink";
 import {BuildLink} from "./BuildLink";
 import {ImageLink} from "./ImageLink";
+import {DateTime} from "../common/DateTime";
+import {Badge} from "../common/Badge";
 
 class ProjectSummary extends React.Component {
     render() {
@@ -32,6 +34,12 @@ class ProjectSummary extends React.Component {
                 <div className='loc'><LinesOfCode loc={project.loc} /></div>
                 <div className='coverage'><Coverage coverage={project.coverage} /></div>
                 <div className='scm'><ScmLink projectId={project.id} url={project.scmUrl} changes={project.changes} /></div>
+                <div className='last-commit'>
+                    <DateTime date={project.lastCommit} />&nbsp;
+                    {(project.commitActivity != undefined && project.commitActivity != 0) &&
+                        <Badge backgroundColor='#EAA910' color='white'>{project.commitActivity}</Badge>
+                    }
+                </div>
                 <div className='build'><BuildLink server={project.jenkinsServer} url={project.jenkinsUrl} /></div>
             </div>
         )

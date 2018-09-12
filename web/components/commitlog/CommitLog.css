@@ -1,0 +1,28 @@
+.commit-log {
+
+}
+
+.commit-log .commit-log-table {
+    width: 100%;
+    /*border: 1px solid blue;*/
+    border-collapse: collapse;
+}
+
+.commit-log .commit-log-table tr {
+    /*
+    background-color: lightgray;
+    height: 100px;
+    height: 30px;
+    */
+    border-bottom: 1px solid gray;
+}
+
+.commit-log .commit-log-table tr td {
+    padding: 1px 3px;
+    vertical-align: middle;
+    box-sizing: content-box;
+    /*
+    background-color: lightgray;
+    border-right: 1px solid gray;
+    */
+}

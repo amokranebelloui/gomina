@@ -17,7 +17,7 @@
     /*min-width: 50px;*/
 }
 
-.project-row > .released, .latest, .scm, .build {
+.project-row > .released, .latest, .scm, .last-commit, .build {
     text-align: center;
 }
 

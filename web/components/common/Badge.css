@@ -1,8 +1,8 @@
 
 .badge {
-    padding: 3px;
+    padding: 1px 3px;
     font-size: 10px;
     border-radius: 2px;
-    display: table-cell;
+    display: inline-block;
     vertical-align: middle;
 }

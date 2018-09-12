@@ -15,6 +15,9 @@ import org.neo.gomina.integration.sonar.SonarIndicators
 import org.neo.gomina.integration.sonar.SonarService
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
+import java.time.Clock
+import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.inject.Inject
 
 class ProjectsApi {
@@ -188,6 +191,29 @@ private fun ProjectDetail.apply(scmDetails: ScmDetails) {
                 message = it.message,
                 version = it.release ?: it.newVersion
         )
+    }
+    this.lastCommit = scmDetails.commitLog?.firstOrNull()?.date
+    try {
+        val sixMonthAgo = LocalDateTime.now(Clock.systemUTC()).minusMonths(6)
+        val aMonthAgo = LocalDateTime.now(Clock.systemUTC()).minusMonths(1)
+        val aWeekAgo = LocalDateTime.now(Clock.systemUTC()).minusWeeks(1)
+        val aDayAgo = LocalDateTime.now(Clock.systemUTC()).minusDays(1)
+        this.commitActivity = scmDetails.commitLog
+                .mapNotNull { it.date }
+                .mapNotNull { LocalDateTime.from(it.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDateTime()) }
+                .filter { it.isAfter(sixMonthAgo) }
+                .map {
+                    when {
+                        it.isAfter(aDayAgo) -> 7
+                        it.isAfter(aWeekAgo) -> 5
+                        it.isAfter(aMonthAgo) -> 3
+                        it.isAfter(sixMonthAgo) -> 1
+                        else -> 0
+                    }
+                }
+                .sumBy { it }
+    } catch (e: Exception) {
+        e.printStackTrace()
     }
 }
 

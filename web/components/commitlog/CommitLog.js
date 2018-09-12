@@ -1,8 +1,10 @@
 import React from "react";
 import {Version} from "../common/Version";
 import {Badge} from "../common/Badge";
-import {Well} from "../common/Well";
 import PropTypes from 'prop-types';
+
+import './CommitLog.css'
+import {DateTime} from "../common/DateTime";
 
 class CommitLog extends React.Component {
 
@@ -20,7 +22,6 @@ class CommitLog extends React.Component {
 
 
         instances.forEach(i => {
-            console.info('aaa--->', i);
             let added = false;
             if (i.revision) {
                 logByRevision[i.revision] = logByRevision[i.revision] || {};
@@ -71,7 +72,7 @@ class CommitLog extends React.Component {
         this.indexByRevision(sortedCommits, instances, logByRevision, unknown);
 
         return (
-            <div>
+            <div className="commit-log">
                 <div style={{padding: '2px'}}>
                     {unknown.map(instance =>
                         <Badge key={instance.id} backgroundColor="#EEEEAA" style={{marginRight: '2px'}}>
@@ -79,51 +80,49 @@ class CommitLog extends React.Component {
                         </Badge>
                     )}
                 </div>
-                {Object.keys(logByRevision).sort((a, b) => b - a).map(revision =>
-                    <Well block key={revision}>
-                        <div style={{overflow: 'auto'}}>
-                            <span style={{float: 'left', marginRight: '2px'}}>
-                                {revision + ' ' || '-'}
-                                {(logByRevision[revision].author || '') + ' ' || '-'}
-                                {new Date(logByRevision[revision].date).toLocaleDateString() + ' ' || '-'}
-                                {new Date(logByRevision[revision].date).toLocaleTimeString() + ' ' || '-'}
-                            </span>
-                            <span style={{
-                                display: 'block',
-                                marginLeft: '60px',
-                                minHeight: '20px',
-                                paddingLeft: '1px',
-                                paddingRight: '1px'
-                            }}>
-                                {(logByRevision[revision].message || '') + ' ' || '-'}
+                <table className="commit-log-table">
+                    <tbody>
+                    {Object.keys(logByRevision).sort((a, b) => b - a).map(revision =>
+                        <tr block key={revision}>
+                            <td style={{width: '30px'}}>{revision + ' ' || '-'}</td>
+                            <td style={{width: '20px'}}>{(logByRevision[revision].author || '') + ' ' || '-'}</td>
+                            <td style={{width: '80px'}}>
+                                <DateTime date={logByRevision[revision].date}/>
+                            </td>
+                            <td>
+                                <span>
+                                    {(logByRevision[revision].message || '') + ' ' || '-'}
+                                </span>
+                                <span style={{float: 'right'}}>
 
-                                <span style={{float: 'right', position: 'top'}}>
-                                    {logByRevision[revision].version && <i style={{opacity: .5}}>{logByRevision[revision].version}</i>}
                                     {logByRevision[revision].version2 &&
-                                    <span style={{paddingLeft: '2px', paddingRight: '2px'}}>
-                                        <Version version={logByRevision[revision].version2}/>
-                                    </span>
+                                        <span style={{paddingLeft: '2px', paddingRight: '2px'}}>
+                                            <Version version={logByRevision[revision].version2}/>
+                                        </span>
                                     }
                                     {logByRevision[revision].instances.map(instance =>
                                         <span key={instance.id} style={{paddingLeft: '2px', paddingRight: '2px'}}>
                                             <Badge backgroundColor="#AABBAA">
                                                 {instance.env} {instance.name}&nbsp;
                                             </Badge>
-                                        </span>
+                                            </span>
                                     )}
                                     {(logByRevision[revision].deployments||[]).map(instance =>
                                         <span key={instance.id} style={{paddingLeft: '2px', paddingRight: '2px'}}>
                                             <Badge backgroundColor="#EEEEAA">
                                                 {instance.env} {instance.name}&nbsp;
                                             </Badge>
-                                        </span>
+                                            </span>
                                     )}
                                 </span>
-                            </span>
-
-                        </div>
-                    </Well>
-                )}
+                                {logByRevision[revision].version &&
+                                    <span style={{float: 'right', verticalAlign: 'middle'}}><i style={{opacity: .5}}>{logByRevision[revision].version}</i></span>
+                                }
+                            </td>
+                        </tr>
+                    )}
+                    </tbody>
+                </table>
             </div>
         )
     }

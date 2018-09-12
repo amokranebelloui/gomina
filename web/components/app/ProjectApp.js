@@ -13,6 +13,7 @@ class ProjectApp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            sortBy: 'alphabetical',
             projects: [],
             projectId: this.props.match.params.id,
             project: {},
@@ -123,10 +124,22 @@ class ProjectApp extends React.Component {
             this.retrieveDoc(newProject, newDoc);
         }
     }
+    changeSelected(sortBy) {
+        this.setState({sortBy: sortBy});
+    }
     render() {
         //console.info("!render ", this.props.match.params.id);
         console.info("RRR", this.state.search);
-        const projects = this.state.projects.sort((a, b) => a.label > b.label ? 1 : -1);
+        let projects;
+        switch (this.state.sortBy) {
+            case 'alphabetical' : projects = this.state.projects.sort((a, b) => a.label > b.label ? 1 : -1); break;
+            case 'loc' : projects = this.state.projects.sort((a, b) => (b.loc - a.loc) * 10 + (a.label > b.label ? 1 : -1)); break;
+            case 'coverage' : projects = this.state.projects.sort((a, b) => (b.coverage - a.coverage) * 10 + (a.label > b.label ? 1 : -1)); break;
+            case 'last-commit' : projects = this.state.projects.sort((a, b) => (b.lastCommit - a.lastCommit) * 10 + (a.label > b.label ? 1 : -1)); break;
+            case 'commit-activity' : projects = this.state.projects.sort((a, b) => (b.commitActivity - a.commitActivity) * 10 + (a.label > b.label ? 1 : -1)); break;
+            case 'unreleased-changes' : projects = this.state.projects.sort((a, b) => (b.changes - a.changes) * 10 + (a.label > b.label ? 1 : -1)); break;
+            default : projects = this.state.projects
+        }
         const project = this.state.project;
         const commits = project.commitLog || [];
         const instances = this.state.instances.filter(instance => instance.project == project.id);
@@ -139,6 +152,15 @@ class ProjectApp extends React.Component {
                     <Container>
                         {this.state.search && <span>Search: {this.state.search}</span>}
                         {!this.state.search && <span>All</span>}
+                        &nbsp;
+                        Sorted by {this.state.sortBy}
+                        <br/>
+                        <button disabled={this.state.sortBy === 'alphabetical'} onClick={e => this.changeSelected('alphabetical')}>Alphabetical</button>
+                        <button disabled={this.state.sortBy === 'unreleased-changes'} onClick={e => this.changeSelected('unreleased-changes')}>Unreleased Changes</button>
+                        <button disabled={this.state.sortBy === 'loc'} onClick={e => this.changeSelected('loc')}>LOC</button>
+                        <button disabled={this.state.sortBy === 'coverage'} onClick={e => this.changeSelected('coverage')}>Coverage</button>
+                        <button disabled={this.state.sortBy === 'last-commit'} onClick={e => this.changeSelected('last-commit')}>Last Commit</button>
+                        <button disabled={this.state.sortBy === 'commit-activity'} onClick={e => this.changeSelected('commit-activity')}>Commit Activity</button>
                         <div className='project-list'>
                             <div className='project-row'>
                                 <div className='summary'><b>Project</b></div>
@@ -147,6 +169,7 @@ class ProjectApp extends React.Component {
                                 <div className='loc'><b>LOC</b></div>
                                 <div className='coverage'><b>Coverage</b></div>
                                 <div className='scm'><b>SCM</b></div>
+                                <div className='last-commit'><b>LastCommit/Activity</b></div>
                                 <div className='build'><b>Build</b></div>
                             </div>
                             {projects
