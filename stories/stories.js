@@ -12,6 +12,8 @@ import {Clock} from "../web/components/app/common/layout";
 import {CommitLog} from "../web/components/commitlog/CommitLog";
 import {Documentation} from "../web/components/documentation/Documentation";
 import {Badge} from "../web/components/common/Badge";
+import {TagCloud} from "../web/components/common/TagCloud";
+import {Tags} from "../web/components/common/Tags";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -45,6 +47,14 @@ storiesOf('Components', module)
     .add('Test Default Export', () => <C1/>)
     .add('Badge with props', () => <Badge title='Here' color="green" border='green' backgroundColor='lightgreen'>Here!<br/>and there</Badge>)
     .add('Badge with style overrides', () => <Badge title='Here' color="blue" style={{backgroundColor: 'orange', color: 'red', fontStyle: 'italic', fontWeight: 'bold', borderRadius: '9px'}}>Here!</Badge>)
+    .add('Tags', () => {
+        const tags = [{value: "java", count: 13}, {value: ".net", count: 8}];
+        return <Tags tags={tags} />
+    })
+    .add('TagCloud', () => {
+        const tags = [{value: "java", count: 13}, {value: ".net", count: 8}];
+        return <TagCloud tags={tags} />
+    })
 ;
 
 storiesOf('Dependency', module)

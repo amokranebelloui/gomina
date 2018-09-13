@@ -9,6 +9,7 @@ import {Container} from "../common/Container";
 import {Documentation} from "../documentation/Documentation";
 import {flatMap, uniq, uniqCount} from "../common/utils";
 import {Badge} from "../common/Badge";
+import {TagCloud} from "../common/TagCloud";
 
 class ProjectApp extends React.Component {
     
@@ -161,8 +162,8 @@ class ProjectApp extends React.Component {
                         &nbsp;
                         Sorted by {this.state.sortBy}
                         <br/>
-                        Languages: {languages.map(language => <Badge>{language.value}({language.count})</Badge>)}<br/>
-                        Tags: {tags.map(tag => <Badge>{tag.value}({tag.count})</Badge>)}<br/>
+                        Languages: <TagCloud tags={languages} /><br/>
+                        Tags: <TagCloud tags={tags} /><br/>
                         <button disabled={this.state.sortBy === 'alphabetical'} onClick={e => this.changeSelected('alphabetical')}>Alphabetical</button>
                         <button disabled={this.state.sortBy === 'unreleased-changes'} onClick={e => this.changeSelected('unreleased-changes')}>Unreleased Changes</button>
                         <button disabled={this.state.sortBy === 'loc'} onClick={e => this.changeSelected('loc')}>LOC</button>

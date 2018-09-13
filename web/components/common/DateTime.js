@@ -21,7 +21,7 @@ function DateTime(props) {
 }
 
 DateTime.propTypes = {
-    date: PropTypes.number.isRequired
+    date: PropTypes.number
 };
 
 export {DateTime}
