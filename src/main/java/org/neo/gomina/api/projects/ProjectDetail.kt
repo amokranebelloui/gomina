@@ -8,6 +8,7 @@ data class ProjectDetail (
         var type: String? = null,
         var owner: String? = null,
         var critical: Int? = null,
+        var systems: List<String> = emptyList(),
         var languages: List<String> = emptyList(),
         var tags: List<String> = emptyList(),
         var scmRepo: String? = null,

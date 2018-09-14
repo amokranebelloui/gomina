@@ -6,6 +6,7 @@ data class Project (
     var id: String,
     var label: String? = null,
     var type: String? = null,
+    var systems: List<String> = emptyList(),
     var languages: List<String> = emptyList(),
     var tags: List<String> = emptyList(),
     var svnRepo: String = "",
