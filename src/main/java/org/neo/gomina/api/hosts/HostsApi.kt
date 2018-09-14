@@ -47,7 +47,7 @@ class HostsApi {
                     .end(mapper.writeValueAsString(hosts))
         }
         catch (e: Exception) {
-            logger.error("Cannot get instances", e)
+            logger.error("Cannot get hosts", e)
             ctx.fail(500)
         }
     }
@@ -64,7 +64,7 @@ class HostsApi {
                     .end(mapper.writeValueAsString(host))
         }
         catch (e: Exception) {
-            logger.error("Cannot get instances", e)
+            logger.error("Cannot get host", e)
             ctx.fail(500)
         }
     }
@@ -79,7 +79,7 @@ class HostsApi {
                     .end("Reload host SSH info done!")
         }
         catch (e: Exception) {
-            logger.error("Cannot get instances", e)
+            logger.error("Cannot reload host", e)
             ctx.fail(500)
         }
     }

@@ -1,7 +1,11 @@
-
 import React from 'react';
 import {Link} from "react-router-dom";
 import "./layout.css"
+import Cookies from "js-cookie";
+import {LoginForm} from "../../common/LoginForm";
+import axios from "axios/index";
+
+const LoggedUserContext = React.createContext("");
 
 class Clock extends React.Component {
     constructor(props) {
@@ -32,37 +36,64 @@ class Clock extends React.Component {
 }
 
 class AppLayout extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {user: Cookies.get('gomina-user')}
+    }
+    login(username, password) {
+        axios.post('/authenticate', {username: username, password: password})
+            .then(response => {
+                console.info("Logged in", response.data);
+                Cookies.set('gomina-user', username);
+                this.setState({'user': username})
+            })
+            .catch(function (error) {
+                console.log("Login error", error.response);
+            });
+    }
+    logout() {
+        Cookies.remove('gomina-user');
+        this.setState({'user': null})
+    }
     render() {
         return (
-            <div className="container">
-                <div className="header">
-                    <div className="menu">
-                        <h3 className="title">
-                            {this.props.title}
-                        </h3>
-                        <span>
-                            <Link to="/">index</Link> -&nbsp;
-                            <Link to="/projects">projects</Link> -&nbsp;
-                            <Link to="/envs">envs</Link> -&nbsp;
-                            <Link to="/hosts">hosts</Link> -&nbsp;
-                            <Link to="/archi">archi</Link> -&nbsp;
-                            <Link to="/pipeline">pipeline</Link> -&nbsp;
-                            <Link to="/sandbox">sandbox</Link> -&nbsp;
-                            <Link to="/unknown">unknown page</Link>&nbsp;
-                            <br/>
-                        </span>
-                        <span className="clock"><Clock /></span>
+            <LoggedUserContext.Provider value={this.state.user}>
+                <div className="container">
+                    <div className="header">
+                        <div className="menu">
+                            <h3 className="title">
+                                {this.props.title}
+                            </h3>
+                            <span className="items">
+                                <Link to="/">index</Link> -&nbsp;
+                                <Link to="/projects">projects</Link> -&nbsp;
+                                <Link to="/envs">envs</Link> -&nbsp;
+                                <Link to="/hosts">hosts</Link> -&nbsp;
+                                <Link to="/archi">archi</Link> -&nbsp;
+                                <Link to="/pipeline">pipeline</Link> -&nbsp;
+                                <Link to="/sandbox">sandbox</Link> -&nbsp;
+                                <Link to="/unknown">unknown page</Link>&nbsp;
+                                <br/>
+                            </span>
+                            <span className="context">
+                                {this.state.user}
+                                {this.state.user && <input type="button" onClick={e => this.logout()} value="Logout" />}
+                                {!this.state.user && <LoginForm onAuthenticate={e => this.login(e.username, e.password)} />}
+
+                                <Clock />
+                            </span>
+                        </div>
+                    </div>
+                    <div className="content">
+                        <div className="content-wrapper">
+                            {this.props.children}
+                        </div>
+                    </div>
+                    <div className="footer">
+                        Gomina!
                     </div>
                 </div>
-                <div className="content">
-                    <div className="content-wrapper">
-                        {this.props.children}
-                    </div>
-                </div>
-                <div className="footer">
-                    Gomina!
-                </div>
-            </div>
+            </LoggedUserContext.Provider>
         );
     }
 }
@@ -91,5 +122,5 @@ class PrimarySecondaryLayout extends React.Component {
 }
 
 
-export { AppLayout, PrimarySecondaryLayout, Clock };
+export { AppLayout, PrimarySecondaryLayout, Clock, LoggedUserContext};
 

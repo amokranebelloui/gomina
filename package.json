@@ -33,10 +33,11 @@
     "d3": "^4.10.2",
     "diff": "^3.5.0",
     "history": "^4.7.2",
+    "js-cookie": "^2.2.0",
     "prop-types": "^15.6.2",
     "proptypes": "^1.1.0",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0",
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "sockjs-client": "^1.1.4"

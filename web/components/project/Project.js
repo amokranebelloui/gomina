@@ -48,6 +48,9 @@ class ProjectSummary extends React.Component {
                     }
                 </div>
                 <div className='build'><BuildLink server={project.jenkinsServer} url={project.jenkinsUrl} /></div>
+                {this.props.loggedUser &&
+                    <div>(Level)</div>
+                }
             </div>
         )
     }

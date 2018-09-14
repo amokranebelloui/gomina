@@ -9,6 +9,7 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.StaticHandler
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.api.auth.AuthApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvsApi
 import org.neo.gomina.api.events.EventsApi
@@ -16,6 +17,7 @@ import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
+import org.neo.gomina.api.users.UsersApi
 import org.neo.gomina.module.GominaModule
 import org.neo.gomina.plugins.PluginAssembler
 
@@ -37,6 +39,8 @@ class WebVerticle : AbstractVerticle() {
         injector.getInstance(PluginAssembler::class.java).init()
 
         router
+                .mountSubRouter("/authenticate", injector.getInstance(AuthApi::class.java).router)
+                .mountSubRouter("/data/users", injector.getInstance(UsersApi::class.java).router)
                 .mountSubRouter("/data/envs", injector.getInstance(EnvsApi::class.java).router)
                 .mountSubRouter("/data/projects", injector.getInstance(ProjectsApi::class.java).router)
                 .mountSubRouter("/data/instances", injector.getInstance(InstancesApi::class.java).router)

@@ -28,12 +28,18 @@
     text-align: left;
     padding-left: 10px;
     padding-right: 10px;
-    width: 50%;
+    width: 30%;
     margin: 0px;
 }
 
-.menu > .clock {
-    width: 120px;
+.menu > .items {
+    text-align: right;
+    width: auto;
+}
+
+.menu > .context {
+    width: 340px;
+    text-align: right;
 }
 
 .header {

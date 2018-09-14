@@ -14,6 +14,7 @@ import {Documentation} from "../web/components/documentation/Documentation";
 import {Badge} from "../web/components/common/Badge";
 import {TagCloud} from "../web/components/common/TagCloud";
 import {Tags} from "../web/components/common/Tags";
+import {LoginForm} from "../web/components/common/LoginForm";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -177,6 +178,11 @@ timeout=12
     });
 
 storiesOf('Layout', module)
+    .add('Login Form', () => {
+        return (
+            <LoginForm onAuthenticate={action("authenticate")} />
+        )
+    })
     .add('Containers', () => {
         return (
             <div>

@@ -1,14 +1,13 @@
 import React from "react";
 import axios from "axios/index";
-import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
+import {LoggedUserContext, AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import {ProjectBadge, ProjectSummary} from "../project/Project";
 import {Well} from "../common/Well";
 import "../project/Project.css"
 import {CommitLog} from "../commitlog/CommitLog";
 import {Container} from "../common/Container";
 import {Documentation} from "../documentation/Documentation";
-import {flatMap, uniq, uniqCount} from "../common/utils";
-import {Badge} from "../common/Badge";
+import {flatMap, uniqCount} from "../common/utils";
 import {TagCloud} from "../common/TagCloud";
 
 class ProjectApp extends React.Component {
@@ -154,7 +153,8 @@ class ProjectApp extends React.Component {
         const docId = this.props.match.params.docId;
         return (
             <AppLayout title={title}>
-
+            <LoggedUserContext.Consumer>
+            {loggedUser => (
                 <PrimarySecondaryLayout>
                     <Container>
                         {this.state.search && <span>Search: {this.state.search}</span>}
@@ -184,7 +184,7 @@ class ProjectApp extends React.Component {
                             {projects
                                 .map(project => {console.info(project.label, this.state.search); return project})
                                 .filter(project => this.matchesSearch(project))
-                                .map(project => <ProjectSummary key={project.id} project={project}/>)
+                                .map(project => <ProjectSummary key={project.id} project={project} loggedUser={loggedUser} />)
                             }
                         </div>
                     </Container>
@@ -201,7 +201,8 @@ class ProjectApp extends React.Component {
                         }
                     </Container>
                 </PrimarySecondaryLayout>
-
+            )}
+            </LoggedUserContext.Consumer>
             </AppLayout>
         );
     }
