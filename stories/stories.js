@@ -46,15 +46,23 @@ storiesOf('Components', module)
     .add('My Component', () => <MyComponent label="hello world" />)
     .add('My Component Highlighted', () => <MyComponent label="hello world" highlighted={true} />)
     .add('Test Default Export', () => <C1/>)
-    .add('Badge with props', () => <Badge title='Here' color="green" border='green' backgroundColor='lightgreen'>Here!<br/>and there</Badge>)
+    .add('Badge with props', () =>
+        <Badge title='Here' color="green" border='green' backgroundColor='lightgreen'>Here!<br/>and there</Badge>
+    )
     .add('Badge with style overrides', () => <Badge title='Here' color="blue" style={{backgroundColor: 'orange', color: 'red', fontStyle: 'italic', fontWeight: 'bold', borderRadius: '9px'}}>Here!</Badge>)
+    .add('Badge with selection', () =>
+        [
+            <Badge title='Clojure' value='clojure' onSelected={action('selected')}>Clojure</Badge>,
+            <Badge title='Kotlin' value='kotlin' onSelected={action('selected')}>Kotlin</Badge>
+        ]
+    )
     .add('Tags', () => {
         const tags = [{value: "java", count: 13}, {value: ".net", count: 8}];
         return <Tags tags={tags} />
     })
     .add('TagCloud', () => {
         const tags = [{value: "java", count: 13}, {value: ".net", count: 8}];
-        return <TagCloud tags={tags} />
+        return <TagCloud tags={tags} selectionChanged={action("selectionChanged")} />
     })
 ;
 
