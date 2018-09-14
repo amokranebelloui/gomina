@@ -22,7 +22,11 @@ class ProjectApp extends React.Component {
             instances: [],
             docId: this.props.match.params.docId,
             doc: null,
-            search: ""};
+            search: "",
+            selectedSystems: [],
+            selectedLanguages: [],
+            selectedTags: []
+            };
         this.retrieveProjects = this.retrieveProjects.bind(this);
         this.retrieveProject = this.retrieveProject.bind(this);
         this.retrieveInstances= this.retrieveInstances.bind(this);
@@ -130,8 +134,6 @@ class ProjectApp extends React.Component {
         this.setState({sortBy: sortBy});
     }
     render() {
-        //console.info("!render ", this.props.match.params.id);
-        console.info("RRR", this.state.search);
         let projects;
         switch (this.state.sortBy) {
             case 'alphabetical' : projects = this.state.projects.sort((a, b) => a.label > b.label ? 1 : -1); break;
@@ -142,6 +144,8 @@ class ProjectApp extends React.Component {
             case 'unreleased-changes' : projects = this.state.projects.sort((a, b) => (b.changes - a.changes) * 10 + (a.label > b.label ? 1 : -1)); break;
             default : projects = this.state.projects
         }
+        const systems = uniqCount(flatMap(this.state.projects, p => p.systems))
+            .sort((i1, i2) => i2.count - i1.count);
         const languages = uniqCount(flatMap(this.state.projects, p => p.languages))
             .sort((i1, i2) => i2.count - i1.count);
         const tags = uniqCount(flatMap(this.state.projects, p => p.tags))
@@ -151,25 +155,25 @@ class ProjectApp extends React.Component {
         const instances = this.state.instances.filter(instance => instance.project == project.id);
         const title = (<span>Projects &nbsp;&nbsp;&nbsp; <input type="text" name="search" onChange={e => this.setState({search: e.target.value})}/></span>);
         const docId = this.props.match.params.docId;
+        /* {this.state.search && <span>Search: {this.state.search}</span>}
+        {!this.state.search && <span>All</span>} */
         return (
             <AppLayout title={title}>
             <LoggedUserContext.Consumer>
             {loggedUser => (
                 <PrimarySecondaryLayout>
                     <Container>
-                        {this.state.search && <span>Search: {this.state.search}</span>}
-                        {!this.state.search && <span>All</span>}
-                        &nbsp;
-                        Sorted by {this.state.sortBy}
-                        <br/>
-                        Languages: <TagCloud tags={languages} /><br/>
-                        Tags: <TagCloud tags={tags} /><br/>
+                        Systems: <TagCloud tags={systems} selectionChanged={values => this.setState({selectedSystems: values})} /><br/>
+                        Languages: <TagCloud tags={languages} selectionChanged={values => this.setState({selectedLanguages: values})} /><br/>
+                        Tags: <TagCloud tags={tags} selectionChanged={values => this.setState({selectedTags: values})} /><br/>
+                        Sort:
                         <button disabled={this.state.sortBy === 'alphabetical'} onClick={e => this.changeSelected('alphabetical')}>Alphabetical</button>
                         <button disabled={this.state.sortBy === 'unreleased-changes'} onClick={e => this.changeSelected('unreleased-changes')}>Unreleased Changes</button>
                         <button disabled={this.state.sortBy === 'loc'} onClick={e => this.changeSelected('loc')}>LOC</button>
                         <button disabled={this.state.sortBy === 'coverage'} onClick={e => this.changeSelected('coverage')}>Coverage</button>
                         <button disabled={this.state.sortBy === 'last-commit'} onClick={e => this.changeSelected('last-commit')}>Last Commit</button>
                         <button disabled={this.state.sortBy === 'commit-activity'} onClick={e => this.changeSelected('commit-activity')}>Commit Activity</button>
+                        <hr/>
                         <div className='project-list'>
                             <div className='project-row'>
                                 <div className='summary'><b>Project</b></div>
@@ -182,7 +186,6 @@ class ProjectApp extends React.Component {
                                 <div className='build'><b>Build</b></div>
                             </div>
                             {projects
-                                .map(project => {console.info(project.label, this.state.search); return project})
                                 .filter(project => this.matchesSearch(project))
                                 .map(project => <ProjectSummary key={project.id} project={project} loggedUser={loggedUser} />)
                             }
@@ -209,13 +212,23 @@ class ProjectApp extends React.Component {
 
     matchesSearch(project) {
         let label = (project.label || "");
-        let languages = (project.languages || []);
-        let tags = (project.tags || []);
         let regExp = new RegExp(this.state.search, "i");
-        return label.match(regExp) ||
-            (languages.filter(item => item.match(regExp))||[]).length > 0 ||
-            (tags.filter(item => item.match(regExp))||[]).length > 0;
+        let matchesLabel = label.match(regExp);
+        let matchesSystems = this.matchesList(project.systems, this.state.selectedSystems);
+        let matchesLanguages = this.matchesList(project.languages, this.state.selectedLanguages);
+        let matchesTags = this.matchesList(project.tags, this.state.selectedTags);
+        //console.info("MATCH", project.id, matchesLabel, matchesSystems, matchesLanguages, matchesTags);
+        return matchesLabel && matchesSystems && matchesLanguages && matchesTags
+            //(languages.filter(item => item.match(regExp))||[]).length > 0 ||
+            //(tags.filter(item => item.match(regExp))||[]).length > 0;
         //return project.label && project.label.indexOf(this.state.search) !== -1;
+    }
+    matchesList(projectValues, selectedValues) {
+        if (selectedValues && selectedValues.length > 0) {
+            const values = (projectValues||[]);
+            return (selectedValues||[]).find(value => values.indexOf(value) !== -1);
+        }
+        return true
     }
 }
 
