@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 
 import './CommitLog.css'
 import {DateTime} from "../common/DateTime";
+import {Revision} from "./Revision";
 
 class CommitLog extends React.Component {
 
@@ -44,7 +45,7 @@ class CommitLog extends React.Component {
             }
         });
 
-        console.info(logByRevision);
+        //console.info(logByRevision);
     }
 
     addToInstances(line, i) {
@@ -83,8 +84,8 @@ class CommitLog extends React.Component {
                 <table className="commit-log-table">
                     <tbody>
                     {Object.keys(logByRevision).sort((a, b) => b - a).map(revision =>
-                        <tr block key={revision}>
-                            <td style={{width: '30px'}}>{revision + ' ' || '-'}</td>
+                        <tr block="true" key={revision}>
+                            <td style={{width: '30px'}}><Revision revision={revision} type={this.props.type}></Revision></td>
                             <td style={{width: '20px'}}>{(logByRevision[revision].author || '') + ' ' || '-'}</td>
                             <td style={{width: '80px'}}>
                                 <DateTime date={logByRevision[revision].date}/>
@@ -130,7 +131,8 @@ class CommitLog extends React.Component {
 
 CommitLog.propTypes = {
     commits: PropTypes.array.isRequired,
-    instances: PropTypes.array
+    instances: PropTypes.array,
+    type: PropTypes.string
 };
 
 export {CommitLog};

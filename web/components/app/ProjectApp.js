@@ -186,7 +186,7 @@ class ProjectApp extends React.Component {
                     <Container>
                         {docId
                             ? [<b>Doc</b>,<Documentation doc={this.state.doc} />]
-                            : [<b>Commit Log</b>,<CommitLog commits={commits} instances={instances} />]
+                            : [<b>Commit Log</b>,<CommitLog type={project.scmType} commits={commits} instances={instances} />]
                         }
                     </Container>
                 </PrimarySecondaryLayout>
