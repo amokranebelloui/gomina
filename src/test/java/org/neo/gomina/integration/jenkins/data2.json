@@ -1,0 +1,46 @@
+{
+  "_class": "hudson.maven.MavenModuleSetBuild",
+  "actions": [
+    {
+      "_class": "hudson.model.CauseAction",
+      "causes": [
+        {
+          "_class": "hudson.model.Cause$UserIdCause",
+          "shortDescription": "Started by user admin",
+          "userId": "admin",
+          "userName": "admin"
+        }
+      ]
+    },
+    {},
+    {
+      "_class": "hudson.maven.reporters.MavenAggregatedArtifactRecord"
+    },
+    {},
+    {}
+  ],
+  "artifacts": [],
+  "building": false,
+  "description": null,
+  "displayName": "#7",
+  "duration": 14918,
+  "estimatedDuration": 13937,
+  "executor": null,
+  "fullDisplayName": "torkjell #7",
+  "id": "7",
+  "keepLog": false,
+  "number": 7,
+  "queueId": 26,
+  "result": "SUCCESS",
+  "timestamp": 1527363674337,
+  "url": "http://localhost:8081/job/torkjell/7/",
+  "builtOn": "",
+  "changeSet": {
+    "_class": "hudson.plugins.filesystem_scm.ChangelogSet",
+    "items": [],
+    "kind": "fs_scm"
+  },
+  "culprits": [],
+  "mavenArtifacts": {},
+  "mavenVersionUsed": "3.1.1"
+}

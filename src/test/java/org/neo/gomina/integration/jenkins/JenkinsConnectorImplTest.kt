@@ -9,7 +9,7 @@ class JenkinsConnectorImplTest {
     @Test
     fun testJenkinsConnector() {
         //val url = "https://builds.apache.org/job/kafka-1.1-jdk7/"
-        val url = "http://localhost:8081/job/gomina/"
+        val url = "http://localhost:8081/job/torkjell/"
         val status = JenkinsConnectorImpl().getStatus(url)
         println(status)
         status?.let { println(Date(it.timestamp)) }

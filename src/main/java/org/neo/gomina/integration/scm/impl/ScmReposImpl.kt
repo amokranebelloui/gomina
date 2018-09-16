@@ -3,11 +3,9 @@ package org.neo.gomina.integration.scm.impl
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.MavenUtils
-import org.neo.gomina.integration.scm.Commit
-import org.neo.gomina.integration.scm.ScmClient
-import org.neo.gomina.integration.scm.ScmDetails
-import org.neo.gomina.integration.scm.ScmRepos
+import org.neo.gomina.integration.scm.*
 import org.neo.gomina.integration.scm.dummy.DummyScmClient
+import org.neo.gomina.integration.scm.git.GitClient
 import org.neo.gomina.integration.scm.metadata.ProjectMetadataMapper
 import org.neo.gomina.integration.scm.none.NoneScmClient
 import org.neo.gomina.integration.scm.svn.TmateSoftSvnClient
@@ -64,7 +62,7 @@ class ScmReposImpl : ScmRepos {
     override fun getScmDetails(id: String, svnUrl: String): ScmDetails {
         val scmClient = this.getClient(id)
         val mavenReleaseFlagger = MavenReleaseFlagger(scmClient, svnUrl) // FIXME Detect build system
-        val log = scmClient.getLog(svnUrl, "0", 100).map { mavenReleaseFlagger.flag(it) }
+        val log = scmClient.getLog(svnUrl, Trunk, "0", 100).map { mavenReleaseFlagger.flag(it) }
         return computeScmDetails(id, svnUrl, log, scmClient)
     }
 
@@ -127,6 +125,7 @@ class ScmReposImpl : ScmRepos {
     private fun buildScmClient(repo: ScmRepo, passwords: Passwords): ScmClient? {
         return when (repo.type) {
             "svn" -> TmateSoftSvnClient(repo.location, repo.username, passwords.getRealPassword(repo.passwordAlias))
+            "git" -> GitClient(repo.location)
             "dummy" -> DummyScmClient()
             else -> null
         }

@@ -103,20 +103,26 @@ class ProjectsApi {
     }
 
     private fun getProjects(): Collection<ProjectDetail> {
-        return projects.getProjects().map { build(it) }
+        return projects.getProjects().mapNotNull { build(it) }
     }
 
     private fun getProject(projectId: String): ProjectDetail? {
         return projects.getProject(projectId)?.let { build(it) }
     }
 
-    private fun build(project: Project): ProjectDetail {
-        return ProjectDetail(project.id).apply {
-            apply(project, scmRepos)
-            scmService.getScmDetails(project, fromCache = true)?.let { apply(it) }
-            sonarService.getSonar(project, fromCache = true)?.let { apply(it) }
-            jenkinsService.getStatus(project, fromCache = true)?.let { apply(it) }
+    private fun build(project: Project): ProjectDetail? {
+        try {
+            return ProjectDetail(project.id).apply {
+                apply(project, scmRepos)
+                scmService.getScmDetails(project, fromCache = true)?.let { apply(it) }
+                sonarService.getSonar(project, fromCache = true)?.let { apply(it) }
+                jenkinsService.getStatus(project, fromCache = true)?.let { apply(it) }
+            }
         }
+        catch (e: Exception) {
+            logger.error("", e)
+        }
+        return null
     }
 
     private fun reloadProject(ctx: RoutingContext) {

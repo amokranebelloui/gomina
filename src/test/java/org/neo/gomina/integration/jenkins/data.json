@@ -1,0 +1,72 @@
+{
+  "_class": "hudson.maven.MavenModuleSetBuild",
+  "actions": [
+    {
+      "_class": "hudson.model.CauseAction",
+      "causes": [
+        {
+          "_class": "hudson.model.Cause$UserIdCause",
+          "shortDescription": "Started by user admin",
+          "userId": "admin",
+          "userName": "admin"
+        }
+      ]
+    },
+    {},
+    {
+      "_class": "hudson.maven.reporters.SurefireAggregatedReport",
+      "failCount": 5,
+      "skipCount": 0,
+      "totalCount": 23,
+      "urlName": "testReport"
+    },
+    {
+      "_class": "hudson.maven.reporters.MavenAggregatedArtifactRecord"
+    },
+    {},
+    {}
+  ],
+  "artifacts": [],
+  "building": false,
+  "description": null,
+  "displayName": "#19",
+  "duration": 60803,
+  "estimatedDuration": 41207,
+  "executor": null,
+  "fullDisplayName": "gomina #19",
+  "id": "19",
+  "keepLog": false,
+  "number": 19,
+  "queueId": 22,
+  "result": "UNSTABLE",
+  "timestamp": 1527290278019,
+  "url": "http://localhost:8081/job/gomina/19/",
+  "builtOn": "",
+  "changeSet": {
+    "_class": "hudson.plugins.filesystem_scm.ChangelogSet",
+    "items": [
+      {
+        "_class": "hudson.plugins.filesystem_scm.Changelog",
+        "affectedPaths": [
+          "npm-debug.log"
+        ],
+        "author": {
+          "absoluteUrl": "http://localhost:8081/user/unknown",
+          "fullName": "unknown"
+        },
+        "commitId": null,
+        "msg": "1 new file",
+        "timestamp": -1
+      }
+    ],
+    "kind": "fs_scm"
+  },
+  "culprits": [
+    {
+      "absoluteUrl": "http://localhost:8081/user/unknown",
+      "fullName": "unknown"
+    }
+  ],
+  "mavenArtifacts": {},
+  "mavenVersionUsed": "3.1.1"
+}

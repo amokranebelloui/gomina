@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import org.apache.commons.io.IOUtils
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.jenkins.JenkinsConnector
+import java.nio.charset.Charset
 
 data class BuildStatus (
         val id:String,
@@ -33,7 +35,9 @@ class JenkinsConnectorImpl : JenkinsConnector {
                 logger.info("-> Result " + it.statusLine)
                 if (it.statusLine.statusCode == 200) {
                     val entity1 = it.entity
-                    val data = mapper.readValue<BuildStatus>(entity1.content)
+                    val content = IOUtils.toString(entity1.content, Charset.defaultCharset())
+                    //logger.info("-> Content " + content)
+                    val data = mapper.readValue<BuildStatus>(content)
                     EntityUtils.consume(entity1)
                     data.url = url
                     return data
@@ -41,7 +45,7 @@ class JenkinsConnectorImpl : JenkinsConnector {
             }
         }
         catch (e: Exception) {
-            logger.error("", e)
+            logger.error(e.message)
         }
         return null
     }

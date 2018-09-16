@@ -2,9 +2,11 @@ package org.neo.gomina.integration.scm.svn
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.scm.Commit
-import org.neo.gomina.integration.scm.ScmClient
-import org.tmatesoft.svn.core.*
+import org.neo.gomina.integration.scm.*
+import org.tmatesoft.svn.core.SVNDirEntry
+import org.tmatesoft.svn.core.SVNLogEntry
+import org.tmatesoft.svn.core.SVNProperties
+import org.tmatesoft.svn.core.SVNURL
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory
 import org.tmatesoft.svn.core.io.SVNRepository
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory
@@ -19,7 +21,7 @@ class TmateSoftSvnClient : ScmClient {
     }
     
     private val url: String
-    private val repository: SVNRepository
+    internal val repository: SVNRepository
 
     constructor(url: String, username: String? = null, password: String? = null) {
         this.url = url
@@ -34,16 +36,32 @@ class TmateSoftSvnClient : ScmClient {
 
     constructor(url: String) : this(url, null, null)
 
-    override fun getLog(url: String, rev: String, count: Int): List<Commit> {
-        logger.info("Retrieve SVN log from '$url' from rev '$rev' max:$count")
+    override fun getLog(url: String, scope: Scope, startRev: String, count: Int): List<Commit> {
+        logger.info("Retrieve SVN log from '$url' from rev '$startRev' max:$count")
         val logEntries = ArrayList<SVNLogEntry>()
-        repository.log(arrayOf(url + "/trunk"), -1, java.lang.Long.valueOf(rev), true, true, count.toLong(), ISVNLogEntryHandler { logEntries.add(it) })
+        val svnProperties = arrayOf<String>()
+
+        val path = when (scope) {
+            Trunk -> "$url/trunk"
+            is Branch -> "$url/branches/${scope.name}"
+            else -> null
+        }
+
+        repository.log(arrayOf(path), -1, startRev.toLong(),
+                false, // changedPath
+                true, // strictNode
+                count.toLong(),
+                false, // include merged
+                svnProperties,
+                { logEntries.add(it) })
+        //val info = repository.info(path, logEntries.last().revision)
         return logEntries.map {
             Commit(
                     revision = revAsString(it.revision) ?: "",
                     date = it.date,
                     author = it.author,
                     message = StringUtils.replaceChars(it.message, "\n", " ")
+                    //extra = it.changedPaths.toString() + it.isNonInheritable + it.isSubtractiveMerge
             )
         }
     }
