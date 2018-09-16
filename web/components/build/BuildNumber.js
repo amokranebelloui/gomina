@@ -10,7 +10,7 @@ function BuildNumber(props) {
 }
 
 BuildNumber.propTypes = {
-    number: PropTypes.number
+    number: PropTypes.string
 };
 
 export {BuildNumber}

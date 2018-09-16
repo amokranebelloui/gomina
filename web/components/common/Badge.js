@@ -36,7 +36,7 @@ Badge.propTypes = {
     color: PropTypes.string,
     backgroundColor: PropTypes.string,
     border: PropTypes.string,
-    children: PropTypes.element.isRequired,
+    children: PropTypes.any.isRequired,
     onSelected: PropTypes.func
 };
 

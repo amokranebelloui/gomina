@@ -6,11 +6,11 @@ function DateTime(props) {
     if (props.date) {
         const date = new Date(props.date);
         return ([
-            <span style={{lineHeight: '1px'}}>
+            <span key="date" style={{lineHeight: '1px'}}>
                     {date.toLocaleDateString()}
                 </span>,
-            <span>&nbsp;</span>,
-            <span style={{color: 'gray', fontSize: '7px', lineHeight: '-10px'}}>
+            <span key="sep">&nbsp;</span>,
+            <span key="time" style={{color: 'gray', fontSize: '7px', lineHeight: '-10px'}}>
                     {date.toLocaleTimeString()}
                 </span>
         ])
