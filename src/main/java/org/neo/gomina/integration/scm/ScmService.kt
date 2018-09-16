@@ -14,12 +14,14 @@ class ScmService {
     @Inject lateinit var scmRepos: ScmRepos
 
     fun getScmDetails(project: Project, fromCache: Boolean = false): ScmDetails? {
+        // TODO Consider scmType, noSCM
         val svnRepo: String = project.svnRepo
         val svnUrl: String = project.svnUrl
         return scmCache.get("$svnRepo-$svnUrl", fromCache) { scmRepos.getScmDetails(svnRepo, svnUrl) }
     }
 
     fun getDocument(project: Project, docId: String): String? {
+        // TODO Consider scmType, noSCM
         val file = scmRepos.getDocument(project.svnRepo, project.svnUrl, docId)
         return Processor.process(file)
     }

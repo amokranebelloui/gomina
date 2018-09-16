@@ -1,6 +1,7 @@
 import React from "react"
 import PropTypes from "prop-types"
 import {Badge} from "./Badge";
+import {uniqCount} from "./utils";
 
 /**
  * Tag cloud, with the size or color representing the importance of a tag.
@@ -37,7 +38,22 @@ class TagCloud extends React.Component {
         return this.state.selected.indexOf(value) > -1
     }
     render() {
-        const tags = this.props.tags.sort((i1, i2) => i2.count - i1.count);
+        let tags = uniqCount(this.props.tags);
+        if (this.props.sortByCount === true) {
+            tags = tags.sort((i1, i2) => {
+                const diff = i2.count - i1.count;
+                if (this.props.sortAlphabetically) {
+                    return diff !== 0 ? diff : i2.value > i1.value ? -1 : 1
+                }
+                else {
+                    return diff
+                }
+            });
+        }
+        else if (this.props.sortAlphabetically === true) {
+            tags = tags.sort((i1, i2) => i2.value > i1.value ? -1 : 1);
+        }
+
         return (
             tags.map(t =>
                 <Badge key={t.value} value={t.value}
@@ -52,7 +68,13 @@ class TagCloud extends React.Component {
 
 TagCloud.propTypes = {
     tags: PropTypes.array.isRequired,
+    sortByCount: PropTypes.bool,
+    sortAlphabetically: PropTypes.bool,
     selectionChanged: PropTypes.func
+};
+TagCloud.defaultProps = {
+    sortByCount: true,
+    sortAlphabetically: true
 };
 
 export { TagCloud }

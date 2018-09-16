@@ -10,17 +10,19 @@
 
 .project-row > * {
     display: table-cell;
+    vertical-align: middle;
+    /*height: 100%;*/
     padding: 3px;
 }
 
-.project-row > .loc, .coverage {
+.project-row > .loc, .coverage, .last-commit {
     /*min-width: 50px;*/
 }
 
-.project-row > .released, .latest, .scm, .last-commit, .build {
+.project-row > .released, .latest, .scm, .build {
     text-align: center;
 }
 
 .project-badge > * {
-    margin: 3px
+    margin-right: 3px
 }

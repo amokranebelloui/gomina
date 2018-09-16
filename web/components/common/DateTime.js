@@ -16,7 +16,7 @@ function DateTime(props) {
         ])
     }
     else {
-        return ("")
+        return null
     }
 }
 

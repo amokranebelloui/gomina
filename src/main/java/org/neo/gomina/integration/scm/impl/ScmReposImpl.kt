@@ -51,6 +51,8 @@ class ScmReposImpl : ScmRepos {
         }
     }
 
+    override fun get(id: String): ScmRepo? = repos[id]
+
     private fun getRepo(id: String): ScmRepo? {
         return repos[id]
     }
@@ -75,7 +77,7 @@ class ScmReposImpl : ScmRepos {
 
             val repo = this.getRepo(id)
             val root = repo?.location
-            val url = "$root$svnUrl"
+            val url = if (root != null && svnUrl != null) "$root$svnUrl" else null
 
             val metadataFile = scmClient.getFile("$svnUrl/trunk/project.yaml", "-1")
             val metadata = metadataFile?.let { metadataMapper.map(metadataFile) }

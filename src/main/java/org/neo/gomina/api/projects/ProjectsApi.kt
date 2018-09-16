@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
 import org.neo.gomina.integration.scm.ScmDetails
+import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.sonar.SonarIndicators
 import org.neo.gomina.integration.sonar.SonarService
@@ -32,6 +33,7 @@ class ProjectsApi {
     @Inject private lateinit var projects: Projects
 
     @Inject private lateinit var scmService: ScmService
+    @Inject private lateinit var scmRepos: ScmRepos
     @Inject private lateinit var sonarService: SonarService
     @Inject private lateinit var jenkinsService: JenkinsService
 
@@ -110,7 +112,7 @@ class ProjectsApi {
 
     private fun build(project: Project): ProjectDetail {
         return ProjectDetail(project.id).apply {
-            apply(project)
+            apply(project, scmRepos)
             scmService.getScmDetails(project, fromCache = true)?.let { apply(it) }
             sonarService.getSonar(project, fromCache = true)?.let { apply(it) }
             jenkinsService.getStatus(project, fromCache = true)?.let { apply(it) }
@@ -161,12 +163,13 @@ class ProjectsApi {
 
 }
 
-private fun ProjectDetail.apply(project: Project) {
+private fun ProjectDetail.apply(project: Project, scmRepos: ScmRepos) {
     this.label = project.label ?: project.id
     this.type = project.type
     this.systems = project.systems
     this.languages = project.languages
     this.tags = project.tags
+    this.scmType = scmRepos[project.svnRepo]?.type
     this.scmRepo = project.svnRepo
     this.scmLocation = project.svnUrl
     this.mvn = project.maven

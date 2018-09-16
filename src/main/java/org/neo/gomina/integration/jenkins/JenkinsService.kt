@@ -15,6 +15,7 @@ class JenkinsService {
     fun getStatus(project: Project, fromCache: Boolean = false): BuildStatus? {
         val root = jenkinsConfig.serverMap[project.jenkinsServer]?.location
         val url = "$root${project.jenkinsJob}"
+        // FIXME Return something when failing to retrieve status
         return jenkinsCache.get(url, fromCache) { jenkinsConnector.getStatus(url) }
     }
 

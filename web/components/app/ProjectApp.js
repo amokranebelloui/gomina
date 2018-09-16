@@ -1,14 +1,15 @@
 import React from "react";
 import axios from "axios/index";
-import {LoggedUserContext, AppLayout, PrimarySecondaryLayout} from "./common/layout";
-import {ProjectBadge, ProjectSummary} from "../project/Project";
+import {AppLayout, LoggedUserContext, PrimarySecondaryLayout} from "./common/layout";
+import {ProjectBadge, ProjectHeader, ProjectSummary} from "../project/Project";
 import {Well} from "../common/Well";
 import "../project/Project.css"
 import {CommitLog} from "../commitlog/CommitLog";
 import {Container} from "../common/Container";
 import {Documentation} from "../documentation/Documentation";
-import {flatMap, uniqCount} from "../common/utils";
+import {flatMap} from "../common/utils";
 import {TagCloud} from "../common/TagCloud";
+import PropTypes from "prop-types"
 
 class ProjectApp extends React.Component {
     
@@ -130,26 +131,15 @@ class ProjectApp extends React.Component {
             this.retrieveDoc(newProject, newDoc);
         }
     }
-    changeSelected(sortBy) {
+    sortChanged(sortBy) {
         this.setState({sortBy: sortBy});
     }
     render() {
-        let projects;
-        switch (this.state.sortBy) {
-            case 'alphabetical' : projects = this.state.projects.sort((a, b) => a.label > b.label ? 1 : -1); break;
-            case 'loc' : projects = this.state.projects.sort((a, b) => (b.loc - a.loc) * 10 + (a.label > b.label ? 1 : -1)); break;
-            case 'coverage' : projects = this.state.projects.sort((a, b) => (b.coverage - a.coverage) * 10 + (a.label > b.label ? 1 : -1)); break;
-            case 'last-commit' : projects = this.state.projects.sort((a, b) => (b.lastCommit - a.lastCommit) * 10 + (a.label > b.label ? 1 : -1)); break;
-            case 'commit-activity' : projects = this.state.projects.sort((a, b) => (b.commitActivity - a.commitActivity) * 10 + (a.label > b.label ? 1 : -1)); break;
-            case 'unreleased-changes' : projects = this.state.projects.sort((a, b) => (b.changes - a.changes) * 10 + (a.label > b.label ? 1 : -1)); break;
-            default : projects = this.state.projects
-        }
-        const systems = uniqCount(flatMap(this.state.projects, p => p.systems))
-            .sort((i1, i2) => i2.count - i1.count);
-        const languages = uniqCount(flatMap(this.state.projects, p => p.languages))
-            .sort((i1, i2) => i2.count - i1.count);
-        const tags = uniqCount(flatMap(this.state.projects, p => p.tags))
-            .sort((i1, i2) => i2.count - i1.count);
+
+        const projects = sortProjectsBy(this.state.sortBy, this.state.projects);
+        const systems = flatMap(this.state.projects, p => p.systems);
+        const languages = flatMap(this.state.projects, p => p.languages);
+        const tags = flatMap(this.state.projects, p => p.tags);
         const project = this.state.project;
         const commits = project.commitLog || [];
         const instances = this.state.instances.filter(instance => instance.project == project.id);
@@ -163,40 +153,36 @@ class ProjectApp extends React.Component {
             {loggedUser => (
                 <PrimarySecondaryLayout>
                     <Container>
-                        Systems: <TagCloud tags={systems} selectionChanged={values => this.setState({selectedSystems: values})} /><br/>
-                        Languages: <TagCloud tags={languages} selectionChanged={values => this.setState({selectedLanguages: values})} /><br/>
-                        Tags: <TagCloud tags={tags} selectionChanged={values => this.setState({selectedTags: values})} /><br/>
-                        Sort:
-                        <button disabled={this.state.sortBy === 'alphabetical'} onClick={e => this.changeSelected('alphabetical')}>Alphabetical</button>
-                        <button disabled={this.state.sortBy === 'unreleased-changes'} onClick={e => this.changeSelected('unreleased-changes')}>Unreleased Changes</button>
-                        <button disabled={this.state.sortBy === 'loc'} onClick={e => this.changeSelected('loc')}>LOC</button>
-                        <button disabled={this.state.sortBy === 'coverage'} onClick={e => this.changeSelected('coverage')}>Coverage</button>
-                        <button disabled={this.state.sortBy === 'last-commit'} onClick={e => this.changeSelected('last-commit')}>Last Commit</button>
-                        <button disabled={this.state.sortBy === 'commit-activity'} onClick={e => this.changeSelected('commit-activity')}>Commit Activity</button>
+                        <ProjectSort sortBy={this.state.sortBy} onSortChanged={sortBy => this.sortChanged(sortBy)} />
                         <hr/>
                         <div className='project-list'>
-                            <div className='project-row'>
-                                <div className='summary'><b>Project</b></div>
-                                <div className='released'><b>Released</b></div>
-                                <div className='latest'><b>Latest</b></div>
-                                <div className='loc'><b>LOC</b></div>
-                                <div className='coverage'><b>Coverage</b></div>
-                                <div className='scm'><b>SCM</b></div>
-                                <div className='last-commit'><b>LastCommit/Activity</b></div>
-                                <div className='build'><b>Build</b></div>
-                            </div>
+                            <ProjectHeader />
                             {projects
                                 .filter(project => this.matchesSearch(project))
                                 .map(project => <ProjectSummary key={project.id} project={project} loggedUser={loggedUser} />)
                             }
                         </div>
                     </Container>
-                    <Well block>
+                    <div>
+                        <Well block>
+                            Systems:
+                            <TagCloud tags={systems}
+                                      selectionChanged={values => this.setState({selectedSystems: values})} />
+                            <br/>
+                            Languages:
+                            <TagCloud tags={languages}
+                                      selectionChanged={values => this.setState({selectedLanguages: values})} />
+                            <br/>
+                            Tags:
+                            <TagCloud tags={tags}
+                                      selectionChanged={values => this.setState({selectedTags: values})} />
+                            <br/>
+                        </Well>
                         <ProjectBadge project={project}
                                       onReload={id => this.retrieveProject(id)}
                                       onReloadScm={id => this.reloadProject(id)}
                                       onReloadSonar={() => this.reloadSonar()} />
-                    </Well>
+                    </div>
                     <Container>
                         {docId
                             ? [<b>Doc</b>,<Documentation doc={this.state.doc} />]
@@ -230,6 +216,60 @@ class ProjectApp extends React.Component {
         }
         return true
     }
+}
+
+class ProjectSort extends React.Component {
+    constructor(props) {
+        super(props)
+    }
+    changeSelected(sortBy) {
+        this.props.onSortChanged && this.props.onSortChanged(sortBy)
+    }
+    render() {
+        return (
+            <div>
+                Sort:
+                <button disabled={this.props.sortBy === 'alphabetical'} onClick={e => this.changeSelected('alphabetical')}>Alphabetical</button>
+                <button disabled={this.props.sortBy === 'unreleased-changes'} onClick={e => this.changeSelected('unreleased-changes')}>Unreleased Changes</button>
+                <button disabled={this.props.sortBy === 'loc'} onClick={e => this.changeSelected('loc')}>LOC</button>
+                <button disabled={this.props.sortBy === 'coverage'} onClick={e => this.changeSelected('coverage')}>Coverage</button>
+                <button disabled={this.props.sortBy === 'last-commit'} onClick={e => this.changeSelected('last-commit')}>Last Commit</button>
+                <button disabled={this.props.sortBy === 'commit-activity'} onClick={e => this.changeSelected('commit-activity')}>Commit Activity</button>
+            </div>
+        )
+    }
+}
+
+ProjectSort.propTypes = {
+    sortBy: PropTypes.string,
+    onSortChanged: PropTypes.func
+};
+
+function sortProjectsBy(sortBy, projects) {
+    let result;
+    switch (sortBy) {
+        case 'alphabetical' :
+            result = projects.sort((a, b) => a.label > b.label ? 1 : -1);
+            break;
+        case 'loc' :
+            result = projects.sort((a, b) => (b.loc - a.loc) * 10 + (a.label > b.label ? 1 : -1));
+            break;
+        case 'coverage' :
+            result = projects.sort((a, b) => (b.coverage - a.coverage) * 10 + (a.label > b.label ? 1 : -1));
+            break;
+        case 'last-commit' :
+            result = projects.sort((a, b) => (b.lastCommit - a.lastCommit) * 10 + (a.label > b.label ? 1 : -1));
+            break;
+        case 'commit-activity' :
+            result = projects.sort((a, b) => (b.commitActivity - a.commitActivity) * 10 + (a.label > b.label ? 1 : -1));
+            break;
+        case 'unreleased-changes' :
+            result = projects.sort((a, b) => (b.changes - a.changes) * 10 + (a.label > b.label ? 1 : -1));
+            break;
+        default :
+            result = projects
+    }
+    return result;
 }
 
 export {ProjectApp};

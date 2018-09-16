@@ -1,5 +1,7 @@
 package org.neo.gomina.integration.scm
 
+import org.neo.gomina.integration.scm.impl.ScmRepo
+
 // FIXME encapsulate document, and include type matadata
 
 data class ScmDetails (
@@ -17,6 +19,7 @@ data class ScmDetails (
 )
 
 interface ScmRepos {
+    operator fun get(id: String): ScmRepo?
     fun getDocument(id: String, svnUrl: String, docId: String): String?
     fun getScmDetails(id: String, svnUrl: String): ScmDetails
 }

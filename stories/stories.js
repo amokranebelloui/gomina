@@ -15,6 +15,8 @@ import {Badge} from "../web/components/common/Badge";
 import {TagCloud} from "../web/components/common/TagCloud";
 import {Tags} from "../web/components/common/Tags";
 import {LoginForm} from "../web/components/common/LoginForm";
+import {BuildStatus} from "../web/components/build/BuildStatus";
+import {BuildLink} from "../web/components/build/BuildLink";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -61,7 +63,7 @@ storiesOf('Components', module)
         return <Tags tags={tags} />
     })
     .add('TagCloud', () => {
-        const tags = [{value: "java", count: 13}, {value: ".net", count: 8}];
+        const tags = ["java", ".net", "java", "java", "kotlin", "javascript", "java"];
         return <TagCloud tags={tags} selectionChanged={action("selectionChanged")} />
     })
 ;
@@ -110,6 +112,26 @@ storiesOf('CommitLog', module)
         )
     });
 
+storiesOf('Build', module)
+    .add('Build Link', () => {
+        return [
+            <BuildLink server="home" job="mylib" />,
+            <BuildLink server="home" job="mylib" url="http://jenkins.io" />,
+            <BuildLink server="home" />,
+            <BuildLink job="mylib"/>,
+            <BuildLink/>,
+        ]
+    })
+    .add('Build Status', () => {
+        return [
+            <BuildStatus status="SUCCESS"/>,
+            <BuildStatus status="success"/>,
+            <BuildStatus status="FAILURE"/>,
+            <BuildStatus status="UNKNOWN"/>,
+            <BuildStatus/>,
+        ]
+    })
+;
 storiesOf('Documentation', module)
     .add('Documentation', () => {
         const doc = `<h1>Sample documentation</h1>

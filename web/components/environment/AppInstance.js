@@ -1,5 +1,5 @@
 import React from "react";
-import {BuildLink} from "../project/BuildLink";
+import {BuildLink} from "../build/BuildLink";
 import {Host} from "../misc/Host";
 import './Instance.css'
 import {Version} from "../common/Version";

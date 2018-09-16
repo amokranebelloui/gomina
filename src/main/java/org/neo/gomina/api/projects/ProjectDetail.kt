@@ -11,6 +11,7 @@ data class ProjectDetail (
         var systems: List<String> = emptyList(),
         var languages: List<String> = emptyList(),
         var tags: List<String> = emptyList(),
+        var scmType: String? = null,
         var scmRepo: String? = null,
         var scmLocation: String? = null,
         var scmUrl: String? = null,
