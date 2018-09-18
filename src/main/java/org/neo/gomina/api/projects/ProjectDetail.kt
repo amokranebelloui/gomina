@@ -23,6 +23,7 @@ data class ProjectDetail (
         var buildNumber: String? = null,
         var buildStatus: String? = null,
         var buildTimestamp: Long? = null,
+        var branches: List<BranchDetail> = emptyList(),
         var docFiles: List<String> = emptyList(),
         var changes: Int? = null,
         var latest: String? = null,
@@ -32,6 +33,12 @@ data class ProjectDetail (
         var commitLog: List<CommitLogEntry> = emptyList(),
         var lastCommit: Date? = null,
         var commitActivity: Int? = null
+)
+
+data class BranchDetail (
+    var name: String,
+    var origin: String? = null,
+    var originRevision: String? = null
 )
 
 data class CommitLogEntry (

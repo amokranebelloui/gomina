@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.scm.Commit
 import org.neo.gomina.integration.scm.ScmClient
-import org.neo.gomina.integration.scm.Scope
 import java.io.File
 import java.util.*
 
@@ -23,7 +22,7 @@ class DummyScmClient : ScmClient {
             .registerKotlinModule()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-    override fun getLog(url: String, scope: Scope, rev: String, count: Int): List<Commit> {
+    override fun getLog(url: String, branch: String, rev: String, count: Int): List<Commit> {
         try {
             val projectData = getProjectData(url)
             if (projectData != null) {

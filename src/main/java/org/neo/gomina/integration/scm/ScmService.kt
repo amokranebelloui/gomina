@@ -8,6 +8,7 @@ import javax.inject.Inject
 class ScmService {
 
     private val scmCache = Cache<ScmDetails>("scm") {
+        it.branches = it.branches ?: emptyList()
         it.docFiles = it.docFiles ?: emptyList()
     }
 

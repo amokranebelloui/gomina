@@ -2,7 +2,9 @@ package org.neo.gomina.integration.scm.svn
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.scm.*
+import org.neo.gomina.integration.scm.Branch
+import org.neo.gomina.integration.scm.Commit
+import org.neo.gomina.integration.scm.ScmClient
 import org.tmatesoft.svn.core.SVNDirEntry
 import org.tmatesoft.svn.core.SVNLogEntry
 import org.tmatesoft.svn.core.SVNProperties
@@ -36,19 +38,40 @@ class TmateSoftSvnClient : ScmClient {
 
     constructor(url: String) : this(url, null, null)
 
-    override fun getLog(url: String, scope: Scope, startRev: String, count: Int): List<Commit> {
-        logger.info("Retrieve SVN log from '$url' from rev '$startRev' max:$count")
-        val logEntries = ArrayList<SVNLogEntry>()
-        val svnProperties = arrayOf<String>()
+    override fun getTrunk(url: String): String {
+        return "trunk"
+    }
 
-        val path = when (scope) {
-            Trunk -> "$url/trunk"
-            is Branch -> "$url/branches/${scope.name}"
-            else -> null
+    override fun getBranches(url: String): List<Branch> {
+        logger.info("Retrieve Branches")
+        val entries = arrayListOf<SVNDirEntry>()
+        repository.getDir("$url/branches", -1, null, entries)
+        val result = entries.map {
+            //this.getLog("$url/", Branch("${it.name}"), "0", 100).forEach { println(" " + it) }
+
+            val svnProperties = arrayOf<String>()
+            val logEntries = ArrayList<SVNLogEntry>()
+            repository.log(arrayOf("$url/branches/${it.name}"), -1, 0,
+                    true, // changedPath
+                    true, // strictNode
+                    -1,
+                    false, // include merged
+                    svnProperties,
+                    { logEntries.add(it) })
+            val copy = logEntries.lastOrNull()?.changedPaths?.values?.firstOrNull()
+            Branch(name = "branches/${it.name}", origin = copy?.copyPath, originRevision = copy?.copyRevision?.toString())
         }
+        logger.info("Retrieved ${result.size} Branches")
+        return result
+    }
 
+    override fun getLog(url: String, branch: String, startRev: String, count: Int): List<Commit> {
+        logger.info("Retrieve SVN log from '$url' from rev '$startRev' max:$count")
+        val path = "$url/$branch"
+        val svnProperties = arrayOf<String>()
+        val logEntries = ArrayList<SVNLogEntry>()
         repository.log(arrayOf(path), -1, startRev.toLong(),
-                false, // changedPath
+                true, // changedPath
                 true, // strictNode
                 count.toLong(),
                 false, // include merged
@@ -56,6 +79,11 @@ class TmateSoftSvnClient : ScmClient {
                 { logEntries.add(it) })
         //val info = repository.info(path, logEntries.last().revision)
         return logEntries.map {
+            /*
+            it.changedPaths.forEach { (k, p) ->
+                println("-->" + k + " " +  p.kind + " " + p.type + " " + p.path + " " + p.copyPath + " " + p.copyRevision)
+            }
+            */
             Commit(
                     revision = revAsString(it.revision) ?: "",
                     date = it.date,

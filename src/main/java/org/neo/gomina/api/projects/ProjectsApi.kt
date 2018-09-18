@@ -190,6 +190,9 @@ private fun ProjectDetail.apply(scmDetails: ScmDetails) {
         this.mvn = scmDetails.mavenId
     }
     this.scmUrl = scmDetails.url
+    this.branches = scmDetails.branches.map {
+        BranchDetail(name = it.name, origin = it.origin, originRevision = it.originRevision)
+    }
     this.docFiles = scmDetails.docFiles
     this.changes = scmDetails.changes
     this.latest = scmDetails.latest

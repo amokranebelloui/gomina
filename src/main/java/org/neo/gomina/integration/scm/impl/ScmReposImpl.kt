@@ -62,7 +62,8 @@ class ScmReposImpl : ScmRepos {
     override fun getScmDetails(id: String, svnUrl: String): ScmDetails {
         val scmClient = this.getClient(id)
         val mavenReleaseFlagger = MavenReleaseFlagger(scmClient, svnUrl) // FIXME Detect build system
-        val log = scmClient.getLog(svnUrl, Trunk, "0", 100).map { mavenReleaseFlagger.flag(it) }
+        val trunk = scmClient.getTrunk(svnUrl)
+        val log = scmClient.getLog(svnUrl, trunk, "0", 100).map { mavenReleaseFlagger.flag(it) }
         return computeScmDetails(id, svnUrl, log, scmClient)
     }
 
@@ -93,6 +94,7 @@ class ScmReposImpl : ScmRepos {
                             .filter { StringUtils.isNotBlank(it.release) }
                             .firstOrNull()?.release,
                     releasedRevision = lastReleasedRev,
+                    branches = scmClient.getBranches(svnUrl),
                     docFiles = scmClient.listFiles("$svnUrl/trunk/", "-1").filter { it.endsWith(".md") },
                     commitLog = logEntries,
                     changes = commitCountTo(logEntries, lastReleasedRev)

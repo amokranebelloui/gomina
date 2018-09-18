@@ -12,7 +12,7 @@ class Revision extends React.PureComponent {
     }
     render() {
         let revision = this.props.revision;
-        let rev = this.props.type === 'git' ? revision.substring(0, 7) : revision;
+        let rev = (this.props.type === 'git' && revision) ? revision.substring(0, 7) : revision;
         return (
             <span title={revision} onCopy={e => this.overrideCopy(e)}>{rev + ' ' || '-'}</span>
         )

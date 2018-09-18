@@ -11,6 +11,7 @@ import {Badge} from "../common/Badge";
 import {BuildStatus} from "../build/BuildStatus";
 import {BuildNumber} from "../build/BuildNumber";
 import {SonarLink} from "./SonarLink";
+import {Revision} from "../commitlog/Revision";
 
 function ProjectHeader(props) {
     return (
@@ -122,6 +123,16 @@ function ProjectBadge(props) {
                 
                 <Link to={'/project/' + props.project.id}>SVN Log</Link>
                 <span>|</span>
+                {project.branches
+                    .map(branch => [
+                        <Link key={branch.name} to={'/project/' + props.project.id + '/' + branch.name}>
+                            {branch.name}
+                        </Link>,
+                        <span>{branch.origin}</span>,
+                        <Revision type={project.scmType} revision={branch.originRevision}/>
+                    ])
+                }
+                <br/>
                 {project.docFiles
                     .map(doc => <Link key={doc} to={'/project/' + props.project.id + '/doc/' + doc}>{doc}</Link>)
                 }

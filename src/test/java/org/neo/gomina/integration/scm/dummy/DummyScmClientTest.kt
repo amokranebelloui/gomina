@@ -2,7 +2,6 @@ package org.neo.gomina.integration.scm.dummy
 
 import org.apache.logging.log4j.LogManager
 import org.junit.Test
-import org.neo.gomina.integration.scm.Trunk
 
 class DummyScmClientTest {
 
@@ -10,7 +9,7 @@ class DummyScmClientTest {
     @Throws(Exception::class)
     fun getLog() {
         val client = DummyScmClient()
-        val log = client.getLog("OMS/Server/tradex-basketmanager", Trunk, "0", 100)
+        val log = client.getLog("OMS/Server/tradex-basketmanager", "trunk", "0", 100)
         log.forEach { logger.info(it) }
     }
 

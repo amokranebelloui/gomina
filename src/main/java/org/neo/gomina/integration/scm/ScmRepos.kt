@@ -13,6 +13,7 @@ data class ScmDetails (
         var latestRevision: String? = null,
         var released: String? = null,
         var releasedRevision: String? = null,
+        var branches: List<Branch> = emptyList(),
         var docFiles: List<String> = emptyList(),
         var commitLog: List<Commit> = emptyList(),
         var changes: Int? = null
