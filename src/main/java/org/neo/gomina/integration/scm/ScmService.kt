@@ -21,6 +21,11 @@ class ScmService {
         return scmCache.get("$svnRepo-$svnUrl", fromCache) { scmRepos.getScmDetails(svnRepo, svnUrl) }
     }
 
+    fun getBranch(project: Project, branchId: String): List<Commit> {
+        // TODO Consider scmType, noSCM
+        return scmRepos.getBranch(project.svnRepo, project.svnUrl, branchId)
+    }
+
     fun getDocument(project: Project, docId: String): String? {
         // TODO Consider scmType, noSCM
         val file = scmRepos.getDocument(project.svnRepo, project.svnUrl, docId)

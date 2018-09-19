@@ -119,6 +119,11 @@ class ScmReposImpl : ScmRepos {
         return null
     }
 
+    override fun getBranch(id: String, svnUrl: String, branchId: String): List<Commit> {
+        val scmClient = this.getClient(id)
+        return scmClient.getLog(svnUrl, branchId, "0", -1)
+    }
+
     override fun getDocument(id: String, svnUrl: String, docId: String): String? {
         val scmClient = this.getClient(id)
         return scmClient.getFile("$svnUrl/trunk/$docId", "-1")

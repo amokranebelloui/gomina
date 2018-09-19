@@ -1,6 +1,7 @@
 package org.neo.gomina.plugins.scm.impl
 
 import org.junit.Test
+import org.neo.gomina.integration.scm.Commit
 import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.integration.scm.ScmService
@@ -24,6 +25,10 @@ class ScmPluginTest {
                 TODO("not implemented")
             }
 
+            override fun getBranch(id: String, svnUrl: String, branchId: String): List<Commit> {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+            
         }
 
         val connector = ScmService()

@@ -23,4 +23,5 @@ interface ScmRepos {
     operator fun get(id: String): ScmRepo?
     fun getDocument(id: String, svnUrl: String, docId: String): String?
     fun getScmDetails(id: String, svnUrl: String): ScmDetails
+    fun getBranch(id: String, svnUrl: String, branchId: String): List<Commit>
 }

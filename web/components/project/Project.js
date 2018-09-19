@@ -125,7 +125,7 @@ function ProjectBadge(props) {
                 <span>|</span>
                 {project.branches
                     .map(branch => [
-                        <Link key={branch.name} to={'/project/' + props.project.id + '/' + branch.name}>
+                        <Link key={branch.name} to={'/project/' + props.project.id + '/scm?branchId=' + branch.name}>
                             {branch.name}
                         </Link>,
                         <span>{branch.origin}</span>,

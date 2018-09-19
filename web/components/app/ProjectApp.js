@@ -10,17 +10,21 @@ import {Documentation} from "../documentation/Documentation";
 import {flatMap} from "../common/utils";
 import {TagCloud} from "../common/TagCloud";
 import PropTypes from "prop-types"
+import queryString from 'query-string'
 
 class ProjectApp extends React.Component {
     
     constructor(props) {
         super(props);
+        const queryParams = queryString.parse(this.props.location.search);
         this.state = {
             sortBy: 'alphabetical',
             projects: [],
             projectId: this.props.match.params.id,
             project: {},
             instances: [],
+            branchId: queryParams.branchId,
+            branch: null,
             docId: this.props.match.params.docId,
             doc: null,
             search: "",
@@ -31,9 +35,10 @@ class ProjectApp extends React.Component {
         this.retrieveProjects = this.retrieveProjects.bind(this);
         this.retrieveProject = this.retrieveProject.bind(this);
         this.retrieveInstances= this.retrieveInstances.bind(this);
+        this.retrieveBranch = this.retrieveBranch.bind(this);
         this.retrieveDoc = this.retrieveDoc.bind(this);
         this.reloadProject = this.reloadProject.bind(this);
-        console.info("projectApp !constructor ", this.props.match.params.id);
+        console.info("projectApp !constructor ", this.props.match.params);
     }
 
     retrieveProjects() {
@@ -80,6 +85,18 @@ class ProjectApp extends React.Component {
                 console.log("sonar reload error", error.response);
             });
     }
+    retrieveBranch(projectId, branchId) {
+        const thisComponent = this;
+        axios.get('/data/projects/' + projectId + '/scm?branchId=' + branchId)
+            .then(response => {
+                console.log("branch data", response.data);
+                thisComponent.setState({branch: response.data});
+            })
+            .catch(function (error) {
+                console.log("branch error", error.response);
+                thisComponent.setState({branch: null});
+            });
+    }
     retrieveDoc(projectId, docId) {
         const thisComponent = this;
         axios.get('/data/projects/' + projectId + '/doc/' + docId)
@@ -115,27 +132,38 @@ class ProjectApp extends React.Component {
             if (this.state.docId) {
                 this.retrieveDoc(this.state.projectId, this.state.docId);
             }
+            if (this.state.branchId) {
+                this.retrieveBranch(this.state.projectId, this.state.branchId);
+            }
         }
     }
     componentWillReceiveProps(nextProps) {
+        const queryParams = queryString.parse(this.props.location.search);
+        const nextQueryParams = queryString.parse(nextProps.location.search);
         const newProject = nextProps.match.params.id;
         const newDoc = nextProps.match.params.docId;
+        const newBranch = nextQueryParams.branchId;
         console.info("projectApp !props-chg ", this.props.match.params.id, newProject);
+        console.info("project branch", queryParams.branchId, newBranch);
         this.setState({projectId: newProject});
-        if (this.props.match.params.id != newProject && newProject) {
+        if (this.props.match.params.id !== newProject && newProject) {
             this.retrieveProject(newProject);
             this.retrieveInstances(newProject);
         }
         if (newProject && newDoc &&
-            (this.props.match.params.id != newProject || this.props.match.params.docId != newDoc)) {
+            (this.props.match.params.id !== newProject || this.props.match.params.docId !== newDoc)) {
             this.retrieveDoc(newProject, newDoc);
+        }
+        if (newProject && newBranch &&
+            (this.props.match.params.id !== newProject || queryParams.branchId !== newBranch)) {
+            this.retrieveBranch(newProject, newBranch);
         }
     }
     sortChanged(sortBy) {
         this.setState({sortBy: sortBy});
     }
     render() {
-
+        const queryParams = queryString.parse(this.props.location.search);
         const projects = sortProjectsBy(this.state.sortBy, this.state.projects);
         const systems = flatMap(this.state.projects, p => p.systems);
         const languages = flatMap(this.state.projects, p => p.languages);
@@ -145,6 +173,8 @@ class ProjectApp extends React.Component {
         const instances = this.state.instances.filter(instance => instance.project == project.id);
         const title = (<span>Projects &nbsp;&nbsp;&nbsp; <input type="text" name="search" onChange={e => this.setState({search: e.target.value})}/></span>);
         const docId = this.props.match.params.docId;
+        const branchId = queryParams.branchId;
+        console.info("---", docId, branchId);
         /* {this.state.search && <span>Search: {this.state.search}</span>}
         {!this.state.search && <span>All</span>} */
         return (
@@ -184,9 +214,12 @@ class ProjectApp extends React.Component {
                                       onReloadSonar={() => this.reloadSonar()} />
                     </div>
                     <Container>
-                        {docId
-                            ? [<b>Doc</b>,<Documentation doc={this.state.doc} />]
-                            : [<b>Commit Log</b>,<CommitLog type={project.scmType} commits={commits} instances={instances} />]
+                        {   branchId
+                            ? [<b>Branch</b>,<CommitLog type={project.scmType} commits={this.state.branch}  />]
+                            : (docId
+                                    ? [<b>Doc</b>,<Documentation doc={this.state.doc} />]
+                                    : [<b>Commit Log</b>,<CommitLog type={project.scmType} commits={commits} instances={instances} />]
+                            )
                         }
                     </Container>
                 </PrimarySecondaryLayout>

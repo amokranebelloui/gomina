@@ -47,6 +47,7 @@ class ProjectsApi {
 
         router.get("/").handler(this::projects)
         router.get("/:projectId").handler(this::project)
+        router.get("/:projectId/scm").handler(this::projectScm)
         router.get("/:projectId/doc/:docId").handler(this::projectDoc)
 
         router.post("/:projectId/reload-scm").handler(this::reloadProject)
@@ -76,6 +77,37 @@ class ProjectsApi {
             }
         } catch (e: Exception) {
             logger.error("Cannot get project", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun projectScm(ctx: RoutingContext) {
+        val projectId = ctx.request().getParam("projectId")
+        val branch = ctx.request().getParam("branchId")
+        try {
+            logger.info("Get SCM log for $projectId $branch")
+            var log: List<CommitLogEntry>? = null
+            projects.getProject(projectId)?.let {
+                log = scmService.getBranch(it, branch).map {
+                    CommitLogEntry(
+                            revision = it.revision,
+                            date = it.date,
+                            author = it.author,
+                            message = it.message,
+                            version = it.release ?: it.newVersion
+                    )
+                }
+            }
+            if (log != null) {
+                ctx.response().putHeader("content-type", "text/html")
+                        .end(mapper.writeValueAsString(log))
+            }
+            else {
+                logger.info("Cannot get SCM log $projectId $branch")
+                ctx.fail(404)
+            }
+        } catch (e: Exception) {
+            logger.error("Cannot get SCM log $projectId $branch")
             ctx.fail(500)
         }
     }
