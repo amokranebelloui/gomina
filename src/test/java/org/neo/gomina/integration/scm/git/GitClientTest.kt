@@ -57,7 +57,7 @@ class GitClientTest {
     @Test
     fun testLog() {
         val client = GitClient("/Users/Amokrane/Work/Code/Idea/rxjava-test/.git")
-        client.getLog("useless", "refs/heads/master", "0", 100).forEach { println(it) }
+        client.getLog("refs/heads/master", "0", 100).forEach { println(it) }
         //client.getLog("useless", Branch("branch_1"), "0", 100).forEach { println(it) }
         //client.getLog("useless", Branch("branch_2"), "0", 100).forEach { println(it) }
         //Assertions.assertThat(log.size).isEqualTo(10)
@@ -67,7 +67,7 @@ class GitClientTest {
     fun testBranches() {
         val client = GitClient("/Users/Amokrane/Work/Code/Idea/rxjava-test/.git")
 
-        client.getBranches("").forEach {
+        client.getBranches().forEach {
             println("branch: $it")
         }
     }

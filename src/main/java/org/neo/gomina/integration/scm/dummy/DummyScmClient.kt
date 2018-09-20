@@ -22,7 +22,13 @@ class DummyScmClient : ScmClient {
             .registerKotlinModule()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-    override fun getLog(url: String, branch: String, rev: String, count: Int): List<Commit> {
+    val url: String
+    
+    constructor(url: String) {
+        this.url = url
+    }
+
+    override fun getLog(branch: String, rev: String, count: Int): List<Commit> {
         try {
             val projectData = getProjectData(url)
             if (projectData != null) {

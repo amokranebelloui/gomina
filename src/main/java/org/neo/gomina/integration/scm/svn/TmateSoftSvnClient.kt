@@ -22,36 +22,44 @@ class TmateSoftSvnClient : ScmClient {
         private val logger = LogManager.getLogger(TmateSoftSvnClient::class.java)
     }
     
-    private val url: String
+    private val baseUrl: String
+    private val projectUrl: String
     internal val repository: SVNRepository
 
-    constructor(url: String, username: String? = null, password: String? = null) {
-        this.url = url
+    constructor(baseUrl: String, projectUrl: String, username: String? = null, password: String? = null) {
+        this.baseUrl = baseUrl
+        this.projectUrl = projectUrl
         DAVRepositoryFactory.setup()
-        repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(url))
+        repository = SVNRepositoryFactory.create(SVNURL.parseURIEncoded(baseUrl))
 
         if (StringUtils.isNotBlank(username)) {
-            logger.info("Connecting to $url, using $username/***${StringUtils.length(password)}")
+            logger.info("Connecting to $baseUrl, using $username/***${StringUtils.length(password)}")
             repository.authenticationManager = SVNWCUtil.createDefaultAuthenticationManager(username, password)
         }
     }
 
-    constructor(url: String) : this(url, null, null)
+    constructor(baseUrl: String, projectUrl: String) : this(baseUrl, projectUrl, null, null)
 
-    override fun getTrunk(url: String): String {
+    override fun getTrunk(): String {
         return "trunk"
     }
 
-    override fun getBranches(url: String): List<Branch> {
+    override fun getBranches(): List<Branch> {
         logger.info("Retrieve Branches")
+
         val entries = arrayListOf<SVNDirEntry>()
-        repository.getDir("$url/branches", -1, null, entries)
+        try {
+            repository.getDir("$projectUrl/branches", -1, null, entries)
+        }
+        catch (e: Exception) {
+            logger.info("No branches for $projectUrl")
+        }
         val result = entries.map {
             //this.getLog("$url/", Branch("${it.name}"), "0", 100).forEach { println(" " + it) }
 
             val svnProperties = arrayOf<String>()
             val logEntries = ArrayList<SVNLogEntry>()
-            repository.log(arrayOf("$url/branches/${it.name}"), -1, 0,
+            repository.log(arrayOf("$projectUrl/branches/${it.name}"), -1, 0,
                     true, // changedPath
                     true, // strictNode
                     -1,
@@ -65,9 +73,10 @@ class TmateSoftSvnClient : ScmClient {
         return result
     }
 
-    override fun getLog(url: String, branch: String, startRev: String, count: Int): List<Commit> {
-        logger.info("Retrieve SVN log from '$url' from rev '$startRev' max:$count")
-        val path = "$url/$branch"
+    override fun getLog(branch: String, startRev: String, count: Int): List<Commit> {
+        logger.info("Retrieve SVN log from '$projectUrl' from rev '$startRev' max:$count")
+        val path = "$projectUrl/$branch"
+        logger.info("Path: $path")
         val svnProperties = arrayOf<String>()
         val logEntries = ArrayList<SVNLogEntry>()
         repository.log(arrayOf(path), -1, startRev.toLong(),
@@ -94,20 +103,20 @@ class TmateSoftSvnClient : ScmClient {
         }
     }
 
-    override fun getFile(url: String, rev: String): String? {
+    override fun getFile(path: String, rev: String): String? {
         try {
             val baos = ByteArrayOutputStream()
-            repository.getFile(url, java.lang.Long.valueOf(rev), SVNProperties(), baos)
+            repository.getFile("$projectUrl/$path", java.lang.Long.valueOf(rev), SVNProperties(), baos)
             return String(baos.toByteArray())
         } catch (e: Exception) {
-            logger.info("Cannot find file $url")
+            logger.info("Cannot find file $path")
         }
         return null
     }
 
-    override fun listFiles(url: String, rev: String): List<String> {
+    override fun listFiles(path: String, rev: String): List<String> {
         val dirEntries = ArrayList<SVNDirEntry>()
-        repository.getDir(url, rev.toLong(), SVNProperties()) { dirEntries.add(it) }
+        repository.getDir("$projectUrl/$path", rev.toLong(), SVNProperties()) { dirEntries.add(it) }
         return dirEntries.map { it.relativePath }
     }
 
@@ -116,7 +125,7 @@ class TmateSoftSvnClient : ScmClient {
     }
 
     override fun toString(): String {
-        return "TmateSoftSvnClient{url='$url'}"
+        return "TmateSoftSvnClient{url='$baseUrl/$projectUrl'}"
     }
 
 }

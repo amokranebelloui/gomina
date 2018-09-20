@@ -7,6 +7,7 @@ import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.scm.impl.ScmRepo
 import org.neo.gomina.model.project.Project
+import org.neo.gomina.model.project.Scm
 
 class ScmPluginTest {
 
@@ -17,15 +18,15 @@ class ScmPluginTest {
                 TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
             }
 
-            override fun getDocument(id: String, svnUrl: String, docId: String): String? {
+            override fun getDocument(scm: Scm, docId: String): String? {
                 TODO("not implemented")
             }
 
-            override fun getScmDetails(id: String, svnUrl: String): ScmDetails {
+            override fun getScmDetails(scm: Scm): ScmDetails {
                 TODO("not implemented")
             }
 
-            override fun getBranch(id: String, svnUrl: String, branchId: String): List<Commit> {
+            override fun getBranch(scm: Scm, branchId: String): List<Commit> {
                 TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
             }
             
@@ -34,13 +35,11 @@ class ScmPluginTest {
         val connector = ScmService()
         connector.scmRepos = FileScmReposOverride()
 
+        connector.getScmDetails(Project(id = "fixin", scm = Scm(repo = "repo", url = "OMS/Server/tradex-fixin")))
+        connector.getScmDetails(Project(id = "fixin", scm = Scm(repo = "repo", url = "OMS/Server/tradex-fixin")))
 
-
-        connector.getScmDetails(Project(id = "fixin", svnRepo = "repo", svnUrl = "OMS/Server/tradex-fixin"))
-        connector.getScmDetails(Project(id = "fixin", svnRepo = "repo", svnUrl = "OMS/Server/tradex-fixin"))
-
-        connector.getScmDetails(Project(id = "fixin", svnRepo = "repo", svnUrl = "OMS/Server/tradex-fixin"))
-        connector.getScmDetails(Project(id = "basket", svnRepo = "repo", svnUrl = "OMS/Server/tradex-basketmanager"))
+        connector.getScmDetails(Project(id = "fixin", scm = Scm(repo = "repo", url = "OMS/Server/tradex-fixin")))
+        connector.getScmDetails(Project(id = "basket", scm = Scm(repo = "repo", url = "OMS/Server/tradex-basketmanager")))
     }
 
 }

@@ -207,9 +207,9 @@ private fun ProjectDetail.apply(project: Project, scmRepos: ScmRepos) {
     this.systems = project.systems
     this.languages = project.languages
     this.tags = project.tags
-    this.scmType = scmRepos[project.svnRepo]?.type
-    this.scmRepo = project.svnRepo
-    this.scmLocation = project.svnUrl
+    this.scmType = project.scm?.type
+    this.scmRepo = project.scm?.repo
+    this.scmLocation = project.scm?.url
     this.mvn = project.maven
     this.jenkinsServer = project.jenkinsServer
     this.jenkinsJob = project.jenkinsJob

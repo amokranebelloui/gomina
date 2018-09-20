@@ -3,13 +3,17 @@ package org.neo.gomina.integration.scm.impl
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.MavenUtils
-import org.neo.gomina.integration.scm.*
+import org.neo.gomina.integration.scm.Commit
+import org.neo.gomina.integration.scm.ScmClient
+import org.neo.gomina.integration.scm.ScmDetails
+import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.integration.scm.dummy.DummyScmClient
 import org.neo.gomina.integration.scm.git.GitClient
 import org.neo.gomina.integration.scm.metadata.ProjectMetadataMapper
 import org.neo.gomina.integration.scm.none.NoneScmClient
 import org.neo.gomina.integration.scm.svn.TmateSoftSvnClient
 import org.neo.gomina.integration.scm.versions.MavenReleaseFlagger
+import org.neo.gomina.model.project.Scm
 import org.neo.gomina.model.security.Passwords
 import java.util.*
 import javax.inject.Inject
@@ -33,55 +37,53 @@ class ScmReposImpl : ScmRepos {
 
     private val metadataMapper = ProjectMetadataMapper()
 
+    private val passwords: Passwords
+
     @Inject
     constructor(config: ScmConfig, passwords: Passwords) {
+        this.passwords = passwords
         for (repo in config.repos) {
-            try {
-                repos.put(repo.id, repo)
-                val client = buildScmClient(repo, passwords)
-                if (client != null) {
-                    clients.put(repo.id, client)
-                }
-                logger.info("Added ${repo.id} $client")
-            } catch (e: Exception) {
-                logger.info("Cannot build SCM client for " + repo.id, e)
-            }
+            repos.put(repo.id, repo)
         }
     }
 
     override fun get(id: String): ScmRepo? = repos[id]
 
-    private fun getRepo(id: String): ScmRepo? {
-        return repos[id]
+    private fun getRepo(scm: Scm): ScmRepo? {
+        return repos[scm.repo]
     }
 
-    private fun getClient(id: String): ScmClient {
-        return clients[id] ?: noOpScmClient
+    private fun getClient(scm: Scm): ScmClient {
+        return clients.getOrPut("${scm.repo}/${scm.url}") {
+            repos[scm.repo]?.let{ buildScmClient(scm, it, passwords) } ?: noOpScmClient
+        }
     }
 
-    override fun getScmDetails(id: String, svnUrl: String): ScmDetails {
-        val scmClient = this.getClient(id)
-        val mavenReleaseFlagger = MavenReleaseFlagger(scmClient, svnUrl) // FIXME Detect build system
-        val trunk = scmClient.getTrunk(svnUrl)
-        val log = scmClient.getLog(svnUrl, trunk, "0", 100).map { mavenReleaseFlagger.flag(it) }
-        return computeScmDetails(id, svnUrl, log, scmClient)
+    override fun getScmDetails(scm: Scm): ScmDetails {
+        val scmClient = this.getClient(scm)
+        val mavenReleaseFlagger = MavenReleaseFlagger(scmClient) // FIXME Detect build system
+        val trunk = scmClient.getTrunk()
+        val log = scmClient.getLog(trunk, "0", 100).map { mavenReleaseFlagger.flag(it) }
+        return computeScmDetails(scm, log, scmClient)
     }
 
-    private fun computeScmDetails(id: String, svnUrl: String, logEntries: List<Commit>, scmClient: ScmClient): ScmDetails {
-        logger.info("Svn Details for " + svnUrl)
+    private fun computeScmDetails(scm: Scm, logEntries: List<Commit>, scmClient: ScmClient): ScmDetails {
+        logger.info("Svn Details for " + scm)
         return try {
             val lastReleasedRev = logEntries
                     .filter { StringUtils.isNotBlank(it.newVersion) }
                     .firstOrNull()?.revision
 
-            val repo = this.getRepo(id)
+            val repo = this.getRepo(scm)
             val root = repo?.location
-            val url = if (root != null && svnUrl != null) "$root$svnUrl" else null
+            val url = if (root != null && scm.url != null) "$root${scm.url}" else null
+            // FIXME encapsulate
 
-            val metadataFile = scmClient.getFile("$svnUrl/trunk/project.yaml", "-1")
+            // FIXME there shouldn't be trunk in here
+            val metadataFile = scmClient.getFile("/trunk/project.yaml", "-1")
             val metadata = metadataFile?.let { metadataMapper.map(metadataFile) }
 
-            val pomFile = scmClient.getFile("$svnUrl/trunk/pom.xml", "-1")
+            val pomFile = scmClient.getFile("/trunk/pom.xml", "-1")
 
             val scmDetails = ScmDetails(
                     owner = metadata?.owner,
@@ -94,8 +96,8 @@ class ScmReposImpl : ScmRepos {
                             .filter { StringUtils.isNotBlank(it.release) }
                             .firstOrNull()?.release,
                     releasedRevision = lastReleasedRev,
-                    branches = scmClient.getBranches(svnUrl),
-                    docFiles = scmClient.listFiles("$svnUrl/trunk/", "-1").filter { it.endsWith(".md") },
+                    branches = scmClient.getBranches(),
+                    docFiles = scmClient.listFiles("/trunk/", "-1").filter { it.endsWith(".md") },
                     commitLog = logEntries,
                     changes = commitCountTo(logEntries, lastReleasedRev)
             )
@@ -103,7 +105,7 @@ class ScmReposImpl : ScmRepos {
             scmDetails
         }
         catch (e: Exception) {
-            logger.error("Cannot get SVN information for " + svnUrl, e)
+            logger.error("Cannot get SCM information for " + scm, e)
             ScmDetails()
         }
     }
@@ -119,21 +121,22 @@ class ScmReposImpl : ScmRepos {
         return null
     }
 
-    override fun getBranch(id: String, svnUrl: String, branchId: String): List<Commit> {
-        val scmClient = this.getClient(id)
-        return scmClient.getLog(svnUrl, branchId, "0", -1)
+    override fun getBranch(scm: Scm, branchId: String): List<Commit> {
+        val scmClient = this.getClient(scm)
+        return scmClient.getLog(branchId, "0", -1)
     }
 
-    override fun getDocument(id: String, svnUrl: String, docId: String): String? {
-        val scmClient = this.getClient(id)
-        return scmClient.getFile("$svnUrl/trunk/$docId", "-1")
+    override fun getDocument(scm: Scm, docId: String): String? {
+        val scmClient = this.getClient(scm)
+        // FIXME no TRUNK
+        return scmClient.getFile("/trunk/$docId", "-1")
     }
 
-    private fun buildScmClient(repo: ScmRepo, passwords: Passwords): ScmClient? {
+    private fun buildScmClient(scm: Scm, repo: ScmRepo, passwords: Passwords): ScmClient? {
         return when (repo.type) {
-            "svn" -> TmateSoftSvnClient(repo.location, repo.username, passwords.getRealPassword(repo.passwordAlias))
-            "git" -> GitClient(repo.location)
-            "dummy" -> DummyScmClient()
+            "svn" -> TmateSoftSvnClient("${repo.location}", "${scm.url}", repo.username, passwords.getRealPassword(repo.passwordAlias))
+            "git" -> GitClient("${repo.location}/${scm.url}")
+            "dummy" -> DummyScmClient("${scm.url}")
             else -> null
         }
     }

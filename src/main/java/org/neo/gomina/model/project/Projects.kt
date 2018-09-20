@@ -9,12 +9,17 @@ data class Project (
     var systems: List<String> = emptyList(),
     var languages: List<String> = emptyList(),
     var tags: List<String> = emptyList(),
-    var svnRepo: String = "",
-    var svnUrl: String = "",
+    var scm: Scm? = null,
     var maven: String? = null,
     var sonarServer: String = "",
     var jenkinsServer: String = "",
     var jenkinsJob: String? = null
+)
+
+data class Scm (
+    var type: String = "",
+    var repo: String = "",
+    var url: String = ""
 )
 
 interface Projects {

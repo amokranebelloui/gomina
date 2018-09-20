@@ -8,16 +8,16 @@ class DummyScmClientTest {
     @Test
     @Throws(Exception::class)
     fun getLog() {
-        val client = DummyScmClient()
-        val log = client.getLog("OMS/Server/tradex-basketmanager", "trunk", "0", 100)
+        val client = DummyScmClient("OMS/Server/tradex-basketmanager")
+        val log = client.getLog("trunk", "0", 100)
         log.forEach { logger.info(it) }
     }
 
     @Test
     @Throws(Exception::class)
     fun getFile() {
-        val client = DummyScmClient()
-        val file = client.getFile("OMS/Server/tradex-basketmanager", "-1")
+        val client = DummyScmClient("OMS/Server/tradex-basketmanager")
+        val file = client.getFile("doc.md", "-1")
         logger.info(file)
     }
 

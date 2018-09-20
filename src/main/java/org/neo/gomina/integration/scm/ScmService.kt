@@ -16,19 +16,21 @@ class ScmService {
 
     fun getScmDetails(project: Project, fromCache: Boolean = false): ScmDetails? {
         // TODO Consider scmType, noSCM
-        val svnRepo: String = project.svnRepo
-        val svnUrl: String = project.svnUrl
-        return scmCache.get("$svnRepo-$svnUrl", fromCache) { scmRepos.getScmDetails(svnRepo, svnUrl) }
+        return project.scm?.let { scm ->
+            scmCache.get("${scm.repo}-${scm.url}", fromCache) { scmRepos.getScmDetails(scm) }
+        }
     }
 
     fun getBranch(project: Project, branchId: String): List<Commit> {
         // TODO Consider scmType, noSCM
-        return scmRepos.getBranch(project.svnRepo, project.svnUrl, branchId)
+        return project.scm
+                ?.let { scmRepos.getBranch(it, branchId) } ?: emptyList()
     }
 
     fun getDocument(project: Project, docId: String): String? {
         // TODO Consider scmType, noSCM
-        val file = scmRepos.getDocument(project.svnRepo, project.svnUrl, docId)
-        return Processor.process(file)
+        return project.scm
+                ?.let{ scmRepos.getDocument(it, docId) }
+                ?.let { Processor.process(it) }
     }
 }

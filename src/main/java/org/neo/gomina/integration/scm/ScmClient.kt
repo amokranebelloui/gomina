@@ -20,12 +20,12 @@ data class Branch(
 
 interface ScmClient {
 
-    fun getTrunk(url: String): String = ""
+    fun getTrunk(): String = ""
 
-    fun getBranches(url: String): List<Branch> = arrayListOf()
+    fun getBranches(): List<Branch> = arrayListOf()
 
     /** Get log from HEAD to revision, max @count elements */
-    fun getLog(url: String, branch: String, rev: String, count: Int): List<Commit>
+    fun getLog(branch: String, rev: String, count: Int): List<Commit>
 
     /** get file for a revision, HEAD is -1 **/
     fun getFile(url: String, rev: String): String?

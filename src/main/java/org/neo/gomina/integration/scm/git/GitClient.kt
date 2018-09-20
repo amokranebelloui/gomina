@@ -29,11 +29,11 @@ class GitClient : ScmClient {
 
     private val masterName = "refs/heads/master"
 
-    override fun getTrunk(url: String): String {
+    override fun getTrunk(): String {
         return masterName
     }
 
-    override fun getBranches(url: String): List<Branch> {
+    override fun getBranches(): List<Branch> {
         logger.info("Retrieve Branches")
         val branches = git.branchList().call()
         val result = branches.map {
@@ -55,7 +55,7 @@ class GitClient : ScmClient {
         return result
     }
 
-    override fun getLog(url: String, branch: String, rev: String, count: Int): List<Commit> {
+    override fun getLog(branch: String, rev: String, count: Int): List<Commit> {
         //git.branchList().call().forEach { println("branch ${it.name}") }
         //val master = repository.getRef(folder)
         //println("$folder -> $master")
