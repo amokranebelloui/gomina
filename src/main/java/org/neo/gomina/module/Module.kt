@@ -6,6 +6,7 @@ import com.google.inject.TypeLiteral
 import com.google.inject.assistedinject.FactoryModuleBuilder
 import com.google.inject.name.Names.named
 import org.neo.gomina.api.auth.AuthApi
+import org.neo.gomina.api.dependencies.DependenciesApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvsApi
 import org.neo.gomina.api.events.EventsApi
@@ -33,6 +34,7 @@ import org.neo.gomina.integration.ssh.SshOnDemandConnector
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
+import org.neo.gomina.model.dependency.ProjectsDeps
 import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.Hosts
 import org.neo.gomina.model.inventory.Inventory
@@ -42,10 +44,7 @@ import org.neo.gomina.model.user.Users
 import org.neo.gomina.module.config.Config
 import org.neo.gomina.module.config.ConfigLoader
 import org.neo.gomina.persistence.jenkins.JenkinsConfigProvider
-import org.neo.gomina.persistence.model.HostsFile
-import org.neo.gomina.persistence.model.InventoryFile
-import org.neo.gomina.persistence.model.ProjectsFile
-import org.neo.gomina.persistence.model.UsersFile
+import org.neo.gomina.persistence.model.*
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
 import org.neo.gomina.plugins.CustomMonitoringMapper
@@ -75,11 +74,13 @@ class GominaModule : AbstractModule() {
         bind(Users::class.java).to(UsersFile::class.java).`in`(Scopes.SINGLETON)
 
         bind(File::class.java).annotatedWith(named("projects.file")).toInstance(File(config.inventory.projectsFile))
+        bind(File::class.java).annotatedWith(named("projects.deps.file")).toInstance(File(config.inventory.projectsDepsFile))
         bind(File::class.java).annotatedWith(named("hosts.file")).toInstance(File(config.inventory.hostsFile))
         bind(String::class.java).annotatedWith(named("inventory.dir")).toInstance(config.inventory.inventoryDir)
         bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
 
         bind(Projects::class.java).to(ProjectsFile::class.java).`in`(Scopes.SINGLETON)
+        bind(ProjectsDeps::class.java).to(ProjectsDepsFile::class.java).`in`(Scopes.SINGLETON)
         bind(Hosts::class.java).to(HostsFile::class.java).`in`(Scopes.SINGLETON)
         bind(Inventory::class.java).to(InventoryFile::class.java).`in`(Scopes.SINGLETON)
 
@@ -131,6 +132,7 @@ class GominaModule : AbstractModule() {
         bind(InstancesApi::class.java).`in`(Scopes.SINGLETON)
         bind(EventsApi::class.java).`in`(Scopes.SINGLETON)
         bind(DiagramApi::class.java).`in`(Scopes.SINGLETON)
+        bind(DependenciesApi::class.java).`in`(Scopes.SINGLETON)
         bind(NotificationsApi::class.java).`in`(Scopes.SINGLETON)
     }
 

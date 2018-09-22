@@ -80,7 +80,7 @@ class DiagramApi {
             logger.info("Get Diagram data")
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(diagramBuilder.getDiagram()))
         } catch (e: Exception) {
-            logger.error("Cannot get instances", e)
+            logger.error("Cannot get Diagram data", e)
             ctx.fail(500)
         }
     }
@@ -93,7 +93,7 @@ class DiagramApi {
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
-            logger.error("Cannot get instances", e)
+            logger.error("Cannot update Diagram data", e)
             ctx.fail(500)
         }
     }

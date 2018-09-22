@@ -1,5 +1,6 @@
 import React from "react";
 import './DSM.css'
+import PropTypes from 'prop-types'
 
 class DSM extends React.Component {
     constructor(props) {
@@ -93,12 +94,13 @@ class DSM extends React.Component {
     }
     
     onComponentClicked(comp, e) {
+        //console.info("DSM click", comp, e.metaKey, e.ctrlKey);
         let multi = e.metaKey || e.ctrlKey;
         !multi && this.unselectDependencies();
         this.selectComponent(comp, multi);
     }
     onDependencyClicked(from, to, e) {
-        //console.log('dep', from, to, e.metaKey, e.altKey);
+        //console.info("DSM click", from, to, e.metaKey, e.ctrlKey);
         let multi = e.metaKey || e.ctrlKey;
         !multi && this.unselectComponents();
         this.selectDependency(from, to, multi);
@@ -202,6 +204,11 @@ function DSMCell(props) {
     )
 }
 
+DSM.propTypes = {
+    "components": PropTypes.array.isRequired,
+    "dependencies": PropTypes.array.isRequired,
+    "legend": PropTypes.bool
+};
 
 function DSMLegend(props) {
     return (
