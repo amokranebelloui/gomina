@@ -117,7 +117,7 @@ class DSM extends React.Component {
                         <td colSpan={2}></td>
                         {this.props.components.map(comp =>
                         <td key={comp} className="dsm-header" align="center" valign="bottom">
-                            <span className="dsm-header-label"><b>{comp}</b></span>
+                            <span className="dsm-header-label"><b><span style={{whiteSpace: 'nowrap'}}>{comp}</span></b></span>
                         </td>
                         )}
                     </tr>
@@ -163,7 +163,7 @@ function DSMComponent(props) {
         <td key="component" align="right"
             className={clazz}
             onClick={e => props.onClick && props.onClick(e)}>
-            <b>{props.comp}</b>
+            <b><span style={{whiteSpace: 'nowrap'}}>{props.comp}</span></b>
         </td>,
         <td key="depStatus" style={{width: '3px'}} className={depClazz}>&nbsp;</td>,
     ])
