@@ -67,10 +67,12 @@ class DSM extends React.Component {
         else {
             newList = [dep]
         }
-        this.setState({selectedDependencies: newList})
+        this.setState({selectedDependencies: newList});
+        this.props.onSelectedDependenciesChanged && this.props.onSelectedDependenciesChanged(newList)
     }
     unselectDependencies() {
-        this.setState({selectedDependencies: []})
+        this.setState({selectedDependencies: []});
+        this.props.onSelectedDependenciesChanged && this.props.onSelectedDependenciesChanged([])
     }
     isDependencySelected(from, to) {
         return this.state.selectedDependencies.find(dep => dep.from === from && dep.to === to) && true;
@@ -207,6 +209,7 @@ function DSMCell(props) {
 DSM.propTypes = {
     "components": PropTypes.array.isRequired,
     "dependencies": PropTypes.array.isRequired,
+    "onSelectedDependenciesChanged": PropTypes.func,
     "legend": PropTypes.bool
 };
 

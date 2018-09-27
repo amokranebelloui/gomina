@@ -46,6 +46,7 @@ class ProjectsApi {
         this.router = Router.router(vertx)
 
         router.get("/").handler(this::projects)
+        router.get("/systems").handler(this::systems)
         router.get("/:projectId").handler(this::project)
         router.get("/:projectId/scm").handler(this::projectScm)
         router.get("/:projectId/doc/:docId").handler(this::projectDoc)
@@ -58,6 +59,17 @@ class ProjectsApi {
         try {
             ctx.response().putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(this.getProjects()))
+        } catch (e: Exception) {
+            logger.error("Cannot get projects", e)
+            ctx.fail(500)
+        }
+    }
+
+    fun systems(ctx: RoutingContext) {
+        try {
+            val systems = this.getProjects().flatMap { it.systems }.filter { it.isNotEmpty() }.toSet()
+            ctx.response().putHeader("content-type", "text/javascript")
+                    .end(mapper.writeValueAsString(systems))
         } catch (e: Exception) {
             logger.error("Cannot get projects", e)
             ctx.fail(500)

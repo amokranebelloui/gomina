@@ -3,15 +3,21 @@ import axios from "axios/index";
 import {AppLayout} from "./common/layout";
 import {ArchiDiagram} from "../archidiagram/ArchiDiagram";
 import {DSM} from "../dependency/DSM";
+import {Dependencies} from "../dependency/Dependencies";
+import {TagCloud} from "../common/TagCloud";
 
 class ArchitectureApp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            systems: [],
+            selectedSystems: [],
+            selectedFunctionTypes: [],
             components: [],
             dependencies: [],
+            selectedDependencies: [],
 
-            deps: {projects: [], dependencies: []}
+            deps: {projects: [], functionTypes: [], dependencies: []}
         };
         this.addData = this.addData.bind(this);
         this.removeData = this.removeData.bind(this);
@@ -19,8 +25,19 @@ class ArchitectureApp extends React.Component {
     }
 
     componentDidMount() {
+        this.retrieveSystems();
         this.retrieveDiagram();
         this.retrieveDependencies();
+    }
+    retrieveSystems() {
+        axios.get('/data/projects/systems')
+            .then(response => {
+                console.log("systems data", response.data);
+                this.setState({systems: response.data});
+            })
+            .catch(function (error) {
+                console.log("systems data error", error);
+            });
     }
     retrieveDiagram() {
         axios.get('/data/diagram/data')
@@ -32,8 +49,8 @@ class ArchitectureApp extends React.Component {
                 console.log("diagram data error", error.response);
             });
     }
-    retrieveDependencies() {
-        axios.get('/data/dependencies')
+    retrieveDependencies(systems, functionTypes) {
+        axios.get('/data/dependencies?systems=' + (systems || this.state.selectedSystems) + '&functionTypes=' + (functionTypes || this.state.selectedFunctionTypes) )
             .then(response => {
                 console.log("dependencies data", response.data);
                 this.setState({deps: response.data});
@@ -69,14 +86,37 @@ class ArchitectureApp extends React.Component {
             });
     }
 
+    selectedSystemsChanged(systems) {
+        console.info("selected systems", systems);
+        this.setState({selectedSystems: systems});
+        this.retrieveDependencies(systems, this.state.selectedFunctionTypes)
+    }
+    selectedFunctionTypesChanged(functionTypes) {
+        console.info("selected functionTypes", functionTypes);
+        this.setState({selectedFunctionTypes: functionTypes});
+        this.retrieveDependencies(this.state.selectedSystems, functionTypes)
+    }
+
+    onSelectedDependenciesChanged(selectedDeps) {
+        this.setState({selectedDependencies: selectedDeps})
+    }
     render() {
+        const selectedDeps = this.state.deps.dependencies.filter(d => this.state.selectedDependencies.find(s => s.from === d.from && s.to === d.to));
+        console.info("CC", selectedDeps);
         return (
             <AppLayout title="Architecture Diagram">
                 <div style={{width: '100%', verticalAlign: 'top'}}>
                     <div style={{width: '40%', display: "inline-block", verticalAlign: 'top'}}>
                         <button onClick={e => this.retrieveDependencies()}>Refresh</button>
+                        <br/>
+                        <TagCloud tags={this.state.systems} selectionChanged={e => this.selectedSystemsChanged(e)} />
+                        <br/>
+                        <TagCloud tags={this.state.deps.functionTypes} selectionChanged={e => this.selectedFunctionTypesChanged(e)} />
+
                         <DSM components={this.state.deps.projects}
-                             dependencies={this.state.deps.dependencies.map(d => {return {"from": d.from, "to": d.to, "count": d.functions.length, "detail": d.functions}})} />
+                             dependencies={this.state.deps.dependencies.map(d => {return {"from": d.from, "to": d.to, "count": d.functions.length, "detail": d.functions}})}
+                             onSelectedDependenciesChanged={e => this.onSelectedDependenciesChanged(e)}  />
+                        <Dependencies dependencies={selectedDeps} />
                     </div>
                     <div style={{width: '50%', boxSizing: 'border-box', display: "inline-block", verticalAlign: 'top'}}>
                         <button onClick={this.addData}>Add</button>

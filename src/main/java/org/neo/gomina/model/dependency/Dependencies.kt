@@ -34,7 +34,7 @@ data class Stakeholders(var users: MutableSet<Stakeholder> = mutableSetOf(), var
     }
     val exposed: Boolean get() = exposers.size > 0
     val exposedByMany: Boolean get() = exposers.size > 1
-    val usageExists: Boolean get() = users.size > 1
+    val usageExists: Boolean get() = users.size >= 1
 }
 
 data class Counts(val incoming: Int, val self: Int, val outgoing: Int)
@@ -45,12 +45,17 @@ object Dependencies {
         val result = mutableMapOf<Function, Stakeholders>()
         deps.forEach { dep ->
             dep.exposed.forEach { f ->
-                result.getOrPut(f) { Stakeholders() }
-                        .exposers.add(dep.projectId)
+                val stakeholders = result.getOrPut(f) { Stakeholders() }
+                stakeholders.exposers.add(dep.projectId)
             }
             dep.used.forEach { fUsage ->
-                result.getOrPut(fUsage.function) { Stakeholders() }
-                        .users.add(Stakeholder(dep.projectId, fUsage.usage))
+                val stakeholders = result.getOrPut(fUsage.function) { Stakeholders() }
+                stakeholders.users.add(Stakeholder(dep.projectId, fUsage.usage))
+            }
+        }
+        result.forEach { (f, stakeholders) ->
+            if (stakeholders.usageExists && !stakeholders.exposed) {
+                stakeholders.exposers.add("?")
             }
         }
         return result
