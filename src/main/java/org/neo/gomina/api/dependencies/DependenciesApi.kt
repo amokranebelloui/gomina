@@ -24,6 +24,7 @@ class DependenciesApi {
 
     @Inject lateinit var projects: Projects
     @Inject lateinit var projectsDeps: ProjectsDeps
+    @Inject lateinit var enrichDependencies: EnrichDependencies
 
 
     @Inject
@@ -47,28 +48,26 @@ class DependenciesApi {
                     ?: emptyList()
             logger.info("Get Dependencies $systems $functionTypes")
 
-            val allProjects = projects.getProjects()
-            val selectedProjects = allProjects
+            val allProjects = projects.getProjects().associateBy { it.id }
+
+            val all = this.projectsDeps.getAll()
+            val enriched = enrichDependencies.enrich(all)
+            val allProjectsDeps = (all + enriched).merge().associateBy { p -> p.projectId }
+
+            val selectedProjectsDeps = allProjects.values
                     .filter { systems.isEmpty() || systems.intersect(it.systems).isNotEmpty() }
                     .map { it.id }
-
-            val projectsDepsMap = projectsDeps.getAll().associateBy { p -> p.projectId }
-
-            val allProjectsDeps = selectedProjects
-                    //.map { it.id }
-                    .map { projectsDepsMap[it] ?: ProjectDeps(projectId = it) }
-
-            val projectsDeps = allProjectsDeps.map {
-                ProjectDeps(
-                        projectId = it.projectId,
-                        exposed = it.exposed.filter { functionTypes.isEmpty() || functionTypes.contains(it.type) },
-                        used = it.used.filter { functionTypes.isEmpty() || functionTypes.contains(it.function.type) }
-                )
-            }
-            val functions = Dependencies.functions(projectsDeps)
+                    .map { allProjectsDeps[it] ?: ProjectDeps(projectId = it) }
+                    .map { ProjectDeps(
+                                projectId = it.projectId,
+                                exposed = it.exposed.filter { functionTypes.isEmpty() || functionTypes.contains(it.type) },
+                                used = it.used.filter { functionTypes.isEmpty() || functionTypes.contains(it.function.type) }
+                    )}
+            val functions = Dependencies.functions(selectedProjectsDeps)
             val dependencies = Dependencies.dependencies(functions)
+
             // FIXME Usage with no exposing component
-            val g = TopologicalSort<Dependency>(projectsDeps.map { it.projectId } + listOf("?")).also {
+            val g = TopologicalSort<Dependency>(selectedProjectsDeps.map { it.projectId } + listOf("?")).also {
                 dependencies.forEach { dependency -> it.addEdge(dependency.from, dependency.to, dependency) }
             }
             val dependenciesDetails = dependencies.map {
@@ -81,7 +80,7 @@ class DependenciesApi {
             }
             val dependenciesDetail = DependenciesDetail(
                     projects = g.sort(),
-                    functionTypes = Dependencies.functions(allProjectsDeps).map { (f, _) -> f.type }.toSet(),
+                    functionTypes = Dependencies.functions(allProjectsDeps.values).map { (f, _) -> f.type }.toSet(),
                     dependencies = dependenciesDetails)
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(dependenciesDetail))
         } catch (e: Exception) {

@@ -11,6 +11,10 @@ import org.neo.gomina.integration.ssh.InstanceSshDetails
 import org.neo.gomina.integration.ssh.SshAnalysis
 import org.neo.gomina.integration.ssh.sudo
 import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
+import org.neo.gomina.model.dependency.Dependencies
+import org.neo.gomina.model.dependency.EnrichDependencies
+import org.neo.gomina.model.dependency.Function
+import org.neo.gomina.model.dependency.ProjectDeps
 import org.neo.gomina.model.host.resolveHostname
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.monitoring.*
@@ -143,3 +147,23 @@ class CustomMonitoringMapper : MonitoringMapper {
 
 fun mapStatus(status: String?) =
         if ("SHUTDOWN" == status) ServerStatus.DOWN else status ?: ServerStatus.DOWN
+
+
+class CustomEnrichDependencies : EnrichDependencies {
+    override fun enrich(projects: Collection<ProjectDeps>): Collection<ProjectDeps> {
+        val specialFunctions = projects
+                .map { p ->
+                    ProjectDeps(projectId = p.projectId,
+                            exposed = p.exposed,
+                            used = p.used.filter { it.function.type == "database" })
+                }
+                .let { Dependencies.functions(it) }
+                .filter { (f, stakeholders) -> stakeholders.usageExists }
+                .map { (f, stakeholders) ->
+                    Pair(Function(f.name, "read-write"), Dependencies.infer(stakeholders.users, "READ", "WRITE") { it?.usage })
+                }
+                .toMap()
+        return Dependencies.projectDeps(specialFunctions)
+    }
+
+}

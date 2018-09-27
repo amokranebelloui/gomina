@@ -1,5 +1,7 @@
 package org.neo.gomina.model.dependency
 
+import org.fest.assertions.Assertions
+import org.fest.assertions.Assertions.*
 import org.junit.Test
 
 class DependenciesTest {
@@ -28,6 +30,43 @@ class DependenciesTest {
     }
 
     @Test
+    fun testMerge() {
+        val p1 = ProjectDeps(projectId = "p1",
+                exposed = listOf(
+                        Function("f1", "command")
+                ),
+                used = listOf(
+                        FunctionUsage("f2", "request"),
+                        FunctionUsage("f3", "database", Usage(DbMode.WRITE))
+                )
+        )
+        val p1ext = ProjectDeps(projectId = "p1",
+                used = listOf(
+                        FunctionUsage("f5", "request")
+                )
+        )
+        val p2 = ProjectDeps(projectId = "p2",
+                exposed = listOf(
+                        Function("f2", "request"),
+                        Function("f4", "request")
+                )
+        )
+        val p2ext  = ProjectDeps(projectId = "p2",
+                exposed = listOf(
+                        Function("f5", "request")
+                )
+        )
+        val merge = listOf(p1, p1ext, p2, p2ext).merge().toList()
+
+        merge.forEach { println(it) }
+        assertThat(merge.size).isEqualTo(2)
+        assertThat(merge[0].used).hasSize(3)
+        assertThat(merge[0].exposed).hasSize(1)
+        assertThat(merge[1].used).hasSize(0)
+        assertThat(merge[1].exposed).hasSize(3)
+    }
+
+    @Test
     fun testSpecialUsageFunctions() { // Transitive implicit dependencies
         println("# Special Dependencies")
         val specialFunctions = projects
@@ -42,6 +81,9 @@ class DependenciesTest {
                     Dependencies.infer(stakeholders.users, DbMode.READ, DbMode.WRITE) { it?.usage }
                 }
         specialFunctions.forEach { println("$it")}
+
+        println("# Special Project Deps")
+        Dependencies.projectDeps(specialFunctions).forEach { println("$it") }
     }
 
     @Test

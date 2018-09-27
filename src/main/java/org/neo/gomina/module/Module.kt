@@ -34,6 +34,7 @@ import org.neo.gomina.integration.ssh.SshOnDemandConnector
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
+import org.neo.gomina.model.dependency.EnrichDependencies
 import org.neo.gomina.model.dependency.ProjectsDeps
 import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.Hosts
@@ -47,6 +48,7 @@ import org.neo.gomina.persistence.jenkins.JenkinsConfigProvider
 import org.neo.gomina.persistence.model.*
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
+import org.neo.gomina.plugins.CustomEnrichDependencies
 import org.neo.gomina.plugins.CustomMonitoringMapper
 import org.neo.gomina.plugins.CustomSshAnalysis
 import org.neo.gomina.plugins.PluginAssembler
@@ -122,6 +124,7 @@ class GominaModule : AbstractModule() {
         bind(PluginAssembler::class.java).`in`(Scopes.SINGLETON)
         bind(SshAnalysis::class.java).to(CustomSshAnalysis::class.java).`in`(Scopes.SINGLETON)
         bind(MonitoringMapper::class.java).to(CustomMonitoringMapper::class.java).`in`(Scopes.SINGLETON)
+        bind(EnrichDependencies::class.java).to(CustomEnrichDependencies::class.java).`in`(Scopes.SINGLETON)
 
         // Vertx API
         bind(AuthApi::class.java).`in`(Scopes.SINGLETON)

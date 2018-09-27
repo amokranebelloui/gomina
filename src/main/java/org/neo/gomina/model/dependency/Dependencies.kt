@@ -14,6 +14,14 @@ data class ProjectDeps (
         var used: List<FunctionUsage> = emptyList()
 )
 
+fun Collection<ProjectDeps>.merge(): Collection<ProjectDeps> {
+    val exposed = this.groupBy({ it.projectId }) { it.exposed }.mapValues { (p, exposed) -> exposed.flatMap { it } }
+    val used = this.groupBy({ it.projectId }) { it.used }.mapValues { (p, used) -> used.flatMap { it } }
+    return (used.keys + exposed.keys).map {
+        ProjectDeps(projectId = it, exposed = exposed[it] ?: emptyList(), used = used[it] ?: emptyList())
+    }
+}
+
 data class Link(val from: String, val to: String) {
     val isInternal: Boolean get() = from == to
     val isExternal: Boolean get() = from != to
@@ -41,7 +49,7 @@ data class Counts(val incoming: Int, val self: Int, val outgoing: Int)
 
 object Dependencies {
 
-    fun functions(deps: List<ProjectDeps>): Map<Function, Stakeholders> {
+    fun functions(deps: Collection<ProjectDeps>): Map<Function, Stakeholders> {
         val result = mutableMapOf<Function, Stakeholders>()
         deps.forEach { dep ->
             dep.exposed.forEach { f ->
@@ -59,6 +67,18 @@ object Dependencies {
             }
         }
         return result
+    }
+
+    fun projectDeps(functions: Map<Function, Stakeholders>): Collection<ProjectDeps> {
+        val exposed: Map<String, List<Function>> = functions
+                .flatMap { (f, stakeholders) -> stakeholders.exposers.map { Pair(it, f) } }
+                .groupBy( { (p,_) -> p }) { (_,v) -> v }
+        val used: Map<String, List<FunctionUsage>> = functions
+                .flatMap { (f, stakeholders) -> stakeholders.users.map { Pair(it.projectId, FunctionUsage(f, it.usage)) } }
+                .groupBy( { (p,_) -> p }) { (_,v) -> v }
+        return (exposed.keys + used.keys).map {
+            ProjectDeps(projectId = it, exposed = exposed[it] ?: emptyList(), used = used[it] ?: emptyList())
+        }
     }
 
     fun dependencies(functions: Map<Function, Stakeholders>): List<Dependency> {
@@ -98,3 +118,6 @@ object Dependencies {
 
 }
 
+interface EnrichDependencies {
+    fun enrich(projects: Collection<ProjectDeps>): Collection<ProjectDeps>
+}
