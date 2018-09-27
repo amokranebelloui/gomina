@@ -160,7 +160,7 @@ class CustomEnrichDependencies : EnrichDependencies {
                 .let { Dependencies.functions(it) }
                 .filter { (f, stakeholders) -> stakeholders.usageExists }
                 .map { (f, stakeholders) ->
-                    Pair(Function(f.name, "read-write"), Dependencies.infer(stakeholders.users, "READ", "WRITE") { it?.usage })
+                    Pair(Function(f.name, "database-write"), Dependencies.infer(stakeholders.users, "READ", "WRITE") { it?.usage })
                 }
                 .toMap()
         return Dependencies.projectDeps(specialFunctions)
