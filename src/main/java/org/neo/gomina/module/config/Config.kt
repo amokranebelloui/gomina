@@ -11,7 +11,7 @@ import org.neo.gomina.integration.monitoring.MonitoringEventsProviderConfig
 import java.io.File
 
 data class InventoryConfig(var projectsFile: String = "",
-                           var projectsDepsFile: String = "",
+                           var interactionsFile: String = "",
                            var hostsFile: String = "",
                            var inventoryDir: String = "",
                            var inventoryFilter: String = "")

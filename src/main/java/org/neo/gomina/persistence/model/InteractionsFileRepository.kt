@@ -4,21 +4,21 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.dependency.ProjectDeps
-import org.neo.gomina.model.dependency.ProjectsDeps
+import org.neo.gomina.model.dependency.Interactions
+import org.neo.gomina.model.dependency.InteractionsRepository
 import java.io.File
 
-class ProjectsDepsFile : ProjectsDeps, AbstractFileRepo() {
+class InteractionsFileRepository : InteractionsRepository, AbstractFileRepo() {
 
     companion object {
-        private val logger = LogManager.getLogger(ProjectsDepsFile.javaClass)
+        private val logger = LogManager.getLogger(InteractionsFileRepository.javaClass)
     }
 
     @Inject
-    @Named("projects.deps.file")
+    @Named("interactions.file")
     private lateinit var file: File
 
-    fun read(file: File): List<ProjectDeps> {
+    fun read(file: File): List<Interactions> {
         return when (file.extension) {
             "yaml" -> yamlMapper.readValue(file)
             "json" -> jsonMapper.readValue(file)
@@ -26,7 +26,7 @@ class ProjectsDepsFile : ProjectsDeps, AbstractFileRepo() {
         }
     }
 
-    override fun getAll(): List<ProjectDeps> {
+    override fun getAll(): List<Interactions> {
         return read(file)
     }
 }

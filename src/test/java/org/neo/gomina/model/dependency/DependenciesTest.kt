@@ -1,6 +1,5 @@
 package org.neo.gomina.model.dependency
 
-import org.fest.assertions.Assertions
 import org.fest.assertions.Assertions.*
 import org.junit.Test
 
@@ -31,7 +30,7 @@ class DependenciesTest {
 
     @Test
     fun testMerge() {
-        val p1 = ProjectDeps(projectId = "p1",
+        val p1 = Interactions(projectId = "p1",
                 exposed = listOf(
                         Function("f1", "command")
                 ),
@@ -40,18 +39,18 @@ class DependenciesTest {
                         FunctionUsage("f3", "database", Usage(DbMode.WRITE))
                 )
         )
-        val p1ext = ProjectDeps(projectId = "p1",
+        val p1ext = Interactions(projectId = "p1",
                 used = listOf(
                         FunctionUsage("f5", "request")
                 )
         )
-        val p2 = ProjectDeps(projectId = "p2",
+        val p2 = Interactions(projectId = "p2",
                 exposed = listOf(
                         Function("f2", "request"),
                         Function("f4", "request")
                 )
         )
-        val p2ext  = ProjectDeps(projectId = "p2",
+        val p2ext  = Interactions(projectId = "p2",
                 exposed = listOf(
                         Function("f5", "request")
                 )
@@ -71,7 +70,7 @@ class DependenciesTest {
         println("# Special Dependencies")
         val specialFunctions = projects
                 .map { p ->
-                    ProjectDeps(projectId = p.projectId,
+                    Interactions(projectId = p.projectId,
                             exposed = p.exposed,
                             used = p.used.filter { it.function.type == "database" })
                 }
@@ -82,8 +81,8 @@ class DependenciesTest {
                 }
         specialFunctions.forEach { println("$it")}
 
-        println("# Special Project Deps")
-        Dependencies.projectDeps(specialFunctions).forEach { println("$it") }
+        println("# Special Interactions")
+        Dependencies.interactions(specialFunctions).forEach { println("$it") }
     }
 
     @Test

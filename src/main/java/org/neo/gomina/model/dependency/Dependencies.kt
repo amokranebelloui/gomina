@@ -8,17 +8,17 @@ data class FunctionUsage(val function: Function, val usage: Usage? = null) {
     constructor(name: String, type: String, usage: Usage? = null): this(Function(name, type), usage)
 }
 
-data class ProjectDeps (
+data class Interactions(
         var projectId: String,
         var exposed: List<Function> = emptyList(),
         var used: List<FunctionUsage> = emptyList()
 )
 
-fun Collection<ProjectDeps>.merge(): Collection<ProjectDeps> {
+fun Collection<Interactions>.merge(): Collection<Interactions> {
     val exposed = this.groupBy({ it.projectId }) { it.exposed }.mapValues { (p, exposed) -> exposed.flatMap { it } }
     val used = this.groupBy({ it.projectId }) { it.used }.mapValues { (p, used) -> used.flatMap { it } }
     return (used.keys + exposed.keys).map {
-        ProjectDeps(projectId = it, exposed = exposed[it] ?: emptyList(), used = used[it] ?: emptyList())
+        Interactions(projectId = it, exposed = exposed[it] ?: emptyList(), used = used[it] ?: emptyList())
     }
 }
 
@@ -49,7 +49,7 @@ data class Counts(val incoming: Int, val self: Int, val outgoing: Int)
 
 object Dependencies {
 
-    fun functions(deps: Collection<ProjectDeps>): Map<Function, Stakeholders> {
+    fun functions(deps: Collection<Interactions>): Map<Function, Stakeholders> {
         val result = mutableMapOf<Function, Stakeholders>()
         deps.forEach { dep ->
             dep.exposed.forEach { f ->
@@ -69,7 +69,7 @@ object Dependencies {
         return result
     }
 
-    fun projectDeps(functions: Map<Function, Stakeholders>): Collection<ProjectDeps> {
+    fun interactions(functions: Map<Function, Stakeholders>): Collection<Interactions> {
         val exposed: Map<String, List<Function>> = functions
                 .flatMap { (f, stakeholders) -> stakeholders.exposers.map { Pair(it, f) } }
                 .groupBy( { (p,_) -> p }) { (_,v) -> v }
@@ -77,7 +77,7 @@ object Dependencies {
                 .flatMap { (f, stakeholders) -> stakeholders.users.map { Pair(it.projectId, FunctionUsage(f, it.usage)) } }
                 .groupBy( { (p,_) -> p }) { (_,v) -> v }
         return (exposed.keys + used.keys).map {
-            ProjectDeps(projectId = it, exposed = exposed[it] ?: emptyList(), used = used[it] ?: emptyList())
+            Interactions(projectId = it, exposed = exposed[it] ?: emptyList(), used = used[it] ?: emptyList())
         }
     }
 
@@ -119,5 +119,5 @@ object Dependencies {
 }
 
 interface EnrichDependencies {
-    fun enrich(projects: Collection<ProjectDeps>): Collection<ProjectDeps>
+    fun enrich(projects: Collection<Interactions>): Collection<Interactions>
 }

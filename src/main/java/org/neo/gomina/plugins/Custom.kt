@@ -14,7 +14,7 @@ import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.model.dependency.Dependencies
 import org.neo.gomina.model.dependency.EnrichDependencies
 import org.neo.gomina.model.dependency.Function
-import org.neo.gomina.model.dependency.ProjectDeps
+import org.neo.gomina.model.dependency.Interactions
 import org.neo.gomina.model.host.resolveHostname
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.monitoring.*
@@ -150,10 +150,10 @@ fun mapStatus(status: String?) =
 
 
 class CustomEnrichDependencies : EnrichDependencies {
-    override fun enrich(projects: Collection<ProjectDeps>): Collection<ProjectDeps> {
+    override fun enrich(projects: Collection<Interactions>): Collection<Interactions> {
         val specialFunctions = projects
                 .map { p ->
-                    ProjectDeps(projectId = p.projectId,
+                    Interactions(projectId = p.projectId,
                             exposed = p.exposed,
                             used = p.used.filter { it.function.type == "database" })
                 }
@@ -163,7 +163,7 @@ class CustomEnrichDependencies : EnrichDependencies {
                     Pair(Function(f.name, "database-write"), Dependencies.infer(stakeholders.users, "READ", "WRITE") { it?.usage })
                 }
                 .toMap()
-        return Dependencies.projectDeps(specialFunctions)
+        return Dependencies.interactions(specialFunctions)
     }
 
 }

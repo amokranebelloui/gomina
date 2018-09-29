@@ -23,7 +23,7 @@ class DependenciesApi {
     val router: Router
 
     @Inject lateinit var projects: Projects
-    @Inject lateinit var projectsDeps: ProjectsDeps
+    @Inject lateinit var interactionsRepository: InteractionsRepository
     @Inject lateinit var enrichDependencies: EnrichDependencies
 
 
@@ -50,24 +50,24 @@ class DependenciesApi {
 
             val allProjects = projects.getProjects().associateBy { it.id }
 
-            val all = this.projectsDeps.getAll()
+            val all = this.interactionsRepository.getAll()
             val enriched = enrichDependencies.enrich(all)
-            val allProjectsDeps = (all + enriched).merge().associateBy { p -> p.projectId }
+            val allInteractions = (all + enriched).merge().associateBy { p -> p.projectId }
 
-            val selectedProjectsDeps = allProjects.values
+            val selectedInteractions = allProjects.values
                     .filter { systems.isEmpty() || systems.intersect(it.systems).isNotEmpty() }
                     .map { it.id }
-                    .map { allProjectsDeps[it] ?: ProjectDeps(projectId = it) }
-                    .map { ProjectDeps(
+                    .map { allInteractions[it] ?: Interactions(projectId = it) }
+                    .map { Interactions(
                                 projectId = it.projectId,
                                 exposed = it.exposed.filter { functionTypes.isEmpty() || functionTypes.contains(it.type) },
                                 used = it.used.filter { functionTypes.isEmpty() || functionTypes.contains(it.function.type) }
                     )}
-            val functions = Dependencies.functions(selectedProjectsDeps)
+            val functions = Dependencies.functions(selectedInteractions)
             val dependencies = Dependencies.dependencies(functions)
 
             // FIXME Usage with no exposing component
-            val g = TopologicalSort<Dependency>(selectedProjectsDeps.map { it.projectId } + listOf("?")).also {
+            val g = TopologicalSort<Dependency>(selectedInteractions.map { it.projectId } + listOf("?")).also {
                 dependencies.forEach { dependency -> it.addEdge(dependency.from, dependency.to, dependency) }
             }
             val dependenciesDetails = dependencies.map {
@@ -80,7 +80,7 @@ class DependenciesApi {
             }
             val dependenciesDetail = DependenciesDetail(
                     projects = g.sort(),
-                    functionTypes = Dependencies.functions(allProjectsDeps.values).map { (f, _) -> f.type }.toSet(),
+                    functionTypes = Dependencies.functions(allInteractions.values).map { (f, _) -> f.type }.toSet(),
                     dependencies = dependenciesDetails)
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(dependenciesDetail))
         } catch (e: Exception) {
