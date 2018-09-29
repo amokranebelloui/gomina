@@ -116,7 +116,7 @@ class DependenciesApi {
             from = this.from,
             to = this.to,
             functions = this.functions.map {
-                FunctionDetail(name = it.function.name, type = it.function.type, usage = it.usage?.toString())
+                FunctionDetail(name = it.function.name, type = it.function.type, usage = it.usage?.usage?.toString())
             }
     )
 }

@@ -247,7 +247,7 @@ class ProjectApp extends React.Component {
                     <Container>
                         {   branchId ? [<b>Branch</b>,<CommitLog type={project.scmType} commits={this.state.branch}  />] :
                             docId ? [<b>Doc</b>,<Documentation doc={this.state.doc} />] :
-                            this.props.location.pathname.endsWith("dependencies") ? [<b>Deps</b>,<Dependencies dependencies={this.state.dependencies} />] :
+                            this.props.location.pathname.endsWith("dependencies") ? [<b>Dependencies</b>,<Dependencies dependencies={this.state.dependencies} />] :
                             this.props.location.pathname.endsWith("impacted") ? [<b>Impacted</b>,<Dependencies dependencies={this.state.impacted} />] :
                             [<b>Commit Log</b>,<CommitLog type={project.scmType} commits={commits} instances={instances} />]
 

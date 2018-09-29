@@ -15,7 +15,7 @@ class Dependencies extends React.Component {
                         <li><b>{sd.from} -> {sd.to}</b>
                             <ul>
                                 {sd.functions.map(f =>
-                                    <li>{f.name} <span style={{color: 'gray'}}>{f.type} {f.usage || ""}</span></li>
+                                    <li>&nbsp;&nbsp;{f.name} <span style={{color: 'gray'}}>{f.type} {f.usage || ""}</span></li>
                                 )}
                             </ul>
                         </li>
