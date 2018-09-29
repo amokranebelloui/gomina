@@ -136,6 +136,8 @@ function ProjectBadge(props) {
                 {project.docFiles
                     .map(doc => <Link key={doc} to={'/project/' + props.project.id + '/doc/' + doc}>{doc}</Link>)
                 }
+                <Link to={'/project/' + props.project.id + '/dependencies'}>Dependencies</Link>
+                <Link to={'/project/' + props.project.id + '/impacted'}>Impacted</Link>
             </div>
         )
     }

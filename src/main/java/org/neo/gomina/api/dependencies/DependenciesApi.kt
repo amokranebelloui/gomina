@@ -24,14 +24,14 @@ class DependenciesApi {
 
     @Inject lateinit var projects: Projects
     @Inject lateinit var interactionsRepository: InteractionsRepository
-    @Inject lateinit var enrichDependencies: EnrichDependencies
-
 
     @Inject
     constructor(vertx: Vertx) {
         this.router = Router.router(vertx)
 
         router.get("/").handler(this::get)
+        router.get("/outgoing/:projectId").handler(this::getOutgoing)
+        router.get("/incoming/:projectId").handler(this::getIncoming)
     }
 
     fun get(ctx: RoutingContext) {
@@ -50,9 +50,7 @@ class DependenciesApi {
 
             val allProjects = projects.getProjects().associateBy { it.id }
 
-            val all = this.interactionsRepository.getAll()
-            val enriched = enrichDependencies.enrich(all)
-            val allInteractions = (all + enriched).merge().associateBy { p -> p.projectId }
+            val allInteractions = interactionsRepository.getAll().associateBy { p -> p.projectId }
 
             val selectedInteractions = allProjects.values
                     .filter { systems.isEmpty() || systems.intersect(it.systems).isNotEmpty() }
@@ -70,14 +68,7 @@ class DependenciesApi {
             val g = TopologicalSort<Dependency>(selectedInteractions.map { it.projectId } + listOf("?")).also {
                 dependencies.forEach { dependency -> it.addEdge(dependency.from, dependency.to, dependency) }
             }
-            val dependenciesDetails = dependencies.map {
-                DependencyDetail(
-                        from = it.from,
-                        to = it.to,
-                        functions = it.functions.map {
-                            FunctionDetail(name = it.function.name, type = it.function.type, usage = it.usage?.toString())
-                        })
-            }
+            val dependenciesDetails = dependencies.map { it.map() }
             val dependenciesDetail = DependenciesDetail(
                     projects = g.sort(),
                     functionTypes = Dependencies.functions(allInteractions.values).map { (f, _) -> f.type }.toSet(),
@@ -89,4 +80,43 @@ class DependenciesApi {
         }
     }
 
+    private fun getOutgoing(ctx: RoutingContext) {
+        val projectId = ctx.request().getParam("projectId")
+        logger.info("Get Project Dependencies $projectId")
+        try {
+            val allInteractions = interactionsRepository.getAll().associateBy { p -> p.projectId }
+            val functions = Dependencies.functions(allInteractions.values)
+                    .filter { (f,stakeholders) -> stakeholders.users.find { it.projectId == projectId } != null }
+            val dependencies = Dependencies.dependencies(functions).filter { it.from == projectId }.map { it.map() }
+            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(dependencies))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get Project Dependencies $projectId", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun getIncoming(ctx: RoutingContext) {
+        val projectId = ctx.request().getParam("projectId")
+        logger.info("Get Project Dependencies $projectId")
+        try {
+            val allInteractions = interactionsRepository.getAll().associateBy { p -> p.projectId }
+            val functions = Dependencies.functions(allInteractions.values)
+                    .filter { (f,stakeholders) -> stakeholders.exposers.contains(projectId) }
+            val dependencies = Dependencies.dependencies(functions).filter { it.to == projectId }.map { it.map() }
+            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(dependencies))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get Project Dependencies $projectId", e)
+            ctx.fail(500)
+        }
+    }
+
+    fun Dependency.map() = DependencyDetail(
+            from = this.from,
+            to = this.to,
+            functions = this.functions.map {
+                FunctionDetail(name = it.function.name, type = it.function.type, usage = it.usage?.toString())
+            }
+    )
 }

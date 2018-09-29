@@ -11,6 +11,7 @@ import {flatMap} from "../common/utils";
 import {TagCloud} from "../common/TagCloud";
 import PropTypes from "prop-types"
 import queryString from 'query-string'
+import {Dependencies} from "../dependency/Dependencies";
 
 class ProjectApp extends React.Component {
     
@@ -23,6 +24,8 @@ class ProjectApp extends React.Component {
             projectId: this.props.match.params.id,
             project: {},
             instances: [],
+            dependencies: [],
+            impacted: [],
             branchId: queryParams.branchId,
             branch: null,
             docId: this.props.match.params.docId,
@@ -97,6 +100,30 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({branch: null});
             });
     }
+    retrieveDependencies(projectId) {
+        const thisComponent = this;
+        axios.get('/data/dependencies/outgoing/' + projectId)
+            .then(response => {
+                console.log("deps data");
+                thisComponent.setState({dependencies: response.data});
+            })
+            .catch(function (error) {
+                console.log("deps error", error.response);
+                thisComponent.setState({dependencies: null});
+            });
+    }
+    retrieveImpacted(projectId) {
+        const thisComponent = this;
+        axios.get('/data/dependencies/incoming/' + projectId)
+            .then(response => {
+                console.log("impacted data");
+                thisComponent.setState({impacted: response.data});
+            })
+            .catch(function (error) {
+                console.log("impacted error", error.response);
+                thisComponent.setState({impacted: null});
+            });
+    }
     retrieveDoc(projectId, docId) {
         const thisComponent = this;
         axios.get('/data/projects/' + projectId + '/doc/' + docId)
@@ -129,6 +156,8 @@ class ProjectApp extends React.Component {
         if (this.state.projectId) {
             this.retrieveProject(this.state.projectId);
             this.retrieveInstances(this.state.projectId);
+            this.retrieveDependencies(this.state.projectId);
+            this.retrieveImpacted(this.state.projectId);
             if (this.state.docId) {
                 this.retrieveDoc(this.state.projectId, this.state.docId);
             }
@@ -149,6 +178,8 @@ class ProjectApp extends React.Component {
         if (this.props.match.params.id !== newProject && newProject) {
             this.retrieveProject(newProject);
             this.retrieveInstances(newProject);
+            this.retrieveDependencies(newProject);
+            this.retrieveImpacted(newProject);
         }
         if (newProject && newDoc &&
             (this.props.match.params.id !== newProject || this.props.match.params.docId !== newDoc)) {
@@ -214,12 +245,12 @@ class ProjectApp extends React.Component {
                                       onReloadSonar={() => this.reloadSonar()} />
                     </div>
                     <Container>
-                        {   branchId
-                            ? [<b>Branch</b>,<CommitLog type={project.scmType} commits={this.state.branch}  />]
-                            : (docId
-                                    ? [<b>Doc</b>,<Documentation doc={this.state.doc} />]
-                                    : [<b>Commit Log</b>,<CommitLog type={project.scmType} commits={commits} instances={instances} />]
-                            )
+                        {   branchId ? [<b>Branch</b>,<CommitLog type={project.scmType} commits={this.state.branch}  />] :
+                            docId ? [<b>Doc</b>,<Documentation doc={this.state.doc} />] :
+                            this.props.location.pathname.endsWith("dependencies") ? [<b>Deps</b>,<Dependencies dependencies={this.state.dependencies} />] :
+                            this.props.location.pathname.endsWith("impacted") ? [<b>Impacted</b>,<Dependencies dependencies={this.state.impacted} />] :
+                            [<b>Commit Log</b>,<CommitLog type={project.scmType} commits={commits} instances={instances} />]
+
                         }
                     </Container>
                 </PrimarySecondaryLayout>

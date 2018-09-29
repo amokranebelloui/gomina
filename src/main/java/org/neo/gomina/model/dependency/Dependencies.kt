@@ -31,6 +31,7 @@ data class Link(val from: String, val to: String) {
 data class Dependency(var from: String, var to: String, var functions: List<FunctionUsage>) {
     val isInternal: Boolean get() = from == to
     val isExternal: Boolean get() = from != to
+    fun involves(projectId: String) = from == projectId || to == projectId;
     override fun toString() = "'$from' -> '$to'"
 }
 
