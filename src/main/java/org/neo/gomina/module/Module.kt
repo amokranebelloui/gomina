@@ -36,6 +36,7 @@ import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.model.dependency.EnrichDependencies
 import org.neo.gomina.model.dependency.InteractionsRepository
+import org.neo.gomina.model.dependency.ProviderBasedInteractionRepository
 import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.Hosts
 import org.neo.gomina.model.inventory.Inventory
@@ -48,10 +49,7 @@ import org.neo.gomina.persistence.jenkins.JenkinsConfigProvider
 import org.neo.gomina.persistence.model.*
 import org.neo.gomina.persistence.scm.ScmConfigProvider
 import org.neo.gomina.persistence.sonar.SonarConfigProvider
-import org.neo.gomina.plugins.CustomEnrichDependencies
-import org.neo.gomina.plugins.CustomMonitoringMapper
-import org.neo.gomina.plugins.CustomSshAnalysis
-import org.neo.gomina.plugins.PluginAssembler
+import org.neo.gomina.plugins.*
 import java.io.File
 
 class GominaModule : AbstractModule() {
@@ -82,7 +80,9 @@ class GominaModule : AbstractModule() {
         bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
 
         bind(Projects::class.java).to(ProjectsFile::class.java).`in`(Scopes.SINGLETON)
-        bind(InteractionsRepository::class.java).to(InteractionsFileRepository::class.java).`in`(Scopes.SINGLETON)
+        bind(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
+        bind(InteractionsRepository::class.java).to(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
+        bind(InteractionsFileProvider::class.java).asEagerSingleton()
         bind(Hosts::class.java).to(HostsFile::class.java).`in`(Scopes.SINGLETON)
         bind(Inventory::class.java).to(InventoryFile::class.java).`in`(Scopes.SINGLETON)
 
@@ -124,6 +124,7 @@ class GominaModule : AbstractModule() {
         bind(PluginAssembler::class.java).`in`(Scopes.SINGLETON)
         bind(SshAnalysis::class.java).to(CustomSshAnalysis::class.java).`in`(Scopes.SINGLETON)
         bind(MonitoringMapper::class.java).to(CustomMonitoringMapper::class.java).`in`(Scopes.SINGLETON)
+        bind(CustomInteractionProvider::class.java).asEagerSingleton()
         bind(EnrichDependencies::class.java).to(CustomEnrichDependencies::class.java).`in`(Scopes.SINGLETON)
 
         // Vertx API

@@ -1,5 +1,6 @@
 package org.neo.gomina.plugins
 
+import com.google.inject.Inject
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
 import org.neo.gomina.integration.monitoring.asBoolean
@@ -11,10 +12,8 @@ import org.neo.gomina.integration.ssh.InstanceSshDetails
 import org.neo.gomina.integration.ssh.SshAnalysis
 import org.neo.gomina.integration.ssh.sudo
 import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
-import org.neo.gomina.model.dependency.Dependencies
-import org.neo.gomina.model.dependency.EnrichDependencies
+import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
-import org.neo.gomina.model.dependency.Interactions
 import org.neo.gomina.model.host.resolveHostname
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.monitoring.*
@@ -148,6 +147,58 @@ class CustomMonitoringMapper : MonitoringMapper {
 fun mapStatus(status: String?) =
         if ("SHUTDOWN" == status) ServerStatus.DOWN else status ?: ServerStatus.DOWN
 
+
+
+val fixin = Interactions(projectId = "fixin",
+        used = listOf(
+                FunctionUsage("createOrder", "command"),
+                FunctionUsage("basketDb", "database", Usage("READ"))
+        )
+)
+val order = Interactions(projectId = "order",
+        exposed = listOf(
+                Function("createOrder", "command")
+        ),
+        used = listOf(
+                FunctionUsage("getCustomer", "request"),
+                FunctionUsage("createCustomer", "request")
+        )
+)
+val orderExt = Interactions(projectId = "orderExt",
+        exposed = listOf(
+                Function("createOrder", "command")
+        ),
+        used = listOf(
+                FunctionUsage("getCustomer", "request"),
+                FunctionUsage("createCustomer", "request")
+        )
+)
+val basket = Interactions(projectId = "basket",
+        exposed = listOf(
+                Function("checkBasket", "command")
+        ),
+        used = listOf(
+                FunctionUsage("createOrder", "command"),
+                FunctionUsage("checkBasket", "command"),
+                FunctionUsage("basketDb", "database", Usage("WRITE"))
+        )
+)
+val referential = Interactions(projectId = "tradex-referential",
+        exposed = listOf(
+                Function("getCustomer", "request"),
+                Function("createCustomer", "request")
+        )
+)
+
+class CustomInteractionProvider : InteractionsProvider {
+    @Inject lateinit var repository: ProviderBasedInteractionRepository
+    @Inject fun init() {
+        repository.providers.add(this)
+    }
+    override fun getAll(): List<Interactions> {
+        return listOf(fixin, order, orderExt, basket, referential)
+    }
+}
 
 class CustomEnrichDependencies : EnrichDependencies {
     override fun enrich(projects: Collection<Interactions>): Collection<Interactions> {
