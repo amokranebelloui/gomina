@@ -11,20 +11,24 @@ val fixin = Interactions(projectId = "fixin",
 )
 val order = Interactions(projectId = "order",
         exposed = listOf(
-                Function("createOrder", "command")
+                Function("createOrder", "command"),
+                Function("validateOrder", "command")
         ),
         used = listOf(
                 FunctionUsage("getCustomer", "request"),
-                FunctionUsage("createCustomer", "request")
+                FunctionUsage("createCustomer", "request"),
+                FunctionUsage("cancelOrder", "command")
         )
 )
 val orderExt = Interactions(projectId = "orderExt",
         exposed = listOf(
-                Function("createOrder", "command")
+                Function("createOrder", "command"),
+                Function("cancelOrder", "command")
         ),
         used = listOf(
                 FunctionUsage("getCustomer", "request"),
-                FunctionUsage("createCustomer", "request")
+                FunctionUsage("createCustomer", "request"),
+                FunctionUsage("validateOrder", "command")
         )
 )
 val basket = Interactions(projectId = "basket",

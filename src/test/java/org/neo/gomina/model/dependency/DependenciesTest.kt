@@ -66,6 +66,24 @@ class DependenciesTest {
     }
 
     @Test
+    fun testInvocationCallChain() {
+        val functions = Dependencies.functions(projects)
+        val dependencies = Dependencies.dependencies(functions)
+
+        dependencies.forEach { println(it) }
+        fun printNode(cc:CallChain, padding: String = "") {
+            println("$padding${cc.projectId}${if (cc.recursive) " @" else ""} ${cc.functions}")
+            cc.calls.forEach { printNode(it, "$padding ") }
+        }
+
+        println("# Invocation Chain")
+        printNode(Dependencies.invocationChain("basket", dependencies))
+
+        println("# Call Chain")
+        printNode(Dependencies.callChain("referential", dependencies))
+    }
+
+    @Test
     fun testSpecialUsageFunctions() { // Transitive implicit dependencies
         println("# Special Dependencies")
         val specialFunctions = projects

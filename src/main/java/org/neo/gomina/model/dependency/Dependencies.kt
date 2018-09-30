@@ -1,11 +1,17 @@
 package org.neo.gomina.model.dependency
 
-data class Function(var name: String, var type: String)
+data class Function(var name: String, var type: String) {
+    override fun toString() = "F('$name' '$type')"
+}
 
-data class Usage(var usage:Any)
+data class Usage(var usage:Any) {
+    override fun toString() = "Usage($usage)"
+}
 
 data class FunctionUsage(val function: Function, val usage: Usage? = null) {
     constructor(name: String, type: String, usage: Usage? = null): this(Function(name, type), usage)
+    override fun toString() = "FUsage(${function.name} ${function.type}${usage?.let {" ${usage.usage}"} ?: ""})"
+
 }
 
 data class Interactions(
@@ -31,8 +37,13 @@ data class Link(val from: String, val to: String) {
 data class Dependency(var from: String, var to: String, var functions: List<FunctionUsage>) {
     val isInternal: Boolean get() = from == to
     val isExternal: Boolean get() = from != to
-    fun involves(projectId: String) = from == projectId || to == projectId;
+    fun involves(projectId: String) = from == projectId || to == projectId
+    fun self(projectId: String) = from == projectId && to == projectId
     override fun toString() = "'$from' -> '$to'"
+}
+
+fun <T:Collection<Dependency>> T.invert(): T {
+    return this.map { Dependency(it.to, it.from, it.functions) } as T
 }
 
 data class Stakeholder(val projectId: String, val usage: Usage? = null)
@@ -45,6 +56,8 @@ data class Stakeholders(var users: MutableSet<Stakeholder> = mutableSetOf(), var
     val exposedByMany: Boolean get() = exposers.size > 1
     val usageExists: Boolean get() = users.size >= 1
 }
+
+data class CallChain(val projectId: String, val recursive: Boolean, val functions: List<FunctionUsage> = emptyList(), val calls: List<CallChain> = emptyList())
 
 data class Counts(val incoming: Int, val self: Int, val outgoing: Int)
 
@@ -89,6 +102,29 @@ object Dependencies {
                 .flatMap { (function, user, exposers) -> exposers.map { Triple(FunctionUsage(function, user.usage), user, it) } }
                 .groupBy { (fUsage, user, exposer ) -> Link(user.projectId, exposer) }
                 .map { (link, group) -> Dependency(link.from, link.to, group.map { it.first}) }
+    }
+
+    private fun buildCallChain(projectId: String, dependencies: List<Dependency>, parentFunctions: List<FunctionUsage> = emptyList(), projectsSeen: List<String>): CallChain {
+        val self = dependencies.find { it.self(projectId) }?.functions?: emptyList()
+        //projectsSeen.add(projectId)
+        val related = dependencies
+                .filter { it.from == projectId }
+                .map {
+                    when {
+                        it.self(projectId) -> CallChain(it.to, false, self)
+                        projectsSeen.contains(it.to) -> CallChain(it.to, true, it.functions)
+                        else -> buildCallChain(it.to, dependencies, it.functions, projectsSeen + projectId)
+                    }
+                }
+        return CallChain(projectId, false, parentFunctions, related)
+    }
+
+    fun invocationChain(projectId: String, dependencies: List<Dependency>): CallChain {
+        return buildCallChain(projectId, dependencies, projectsSeen = mutableListOf())
+    }
+
+    fun callChain(projectId: String, dependencies: List<Dependency>): CallChain {
+        return buildCallChain(projectId, dependencies.invert(), projectsSeen = mutableListOf())
     }
 
     fun infer(users: Set<Stakeholder>, from: Any?, to: Any?, usageSelector: (Usage?) -> Any?): Stakeholders {

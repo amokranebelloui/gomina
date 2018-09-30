@@ -12,6 +12,7 @@ import {TagCloud} from "../common/TagCloud";
 import PropTypes from "prop-types"
 import queryString from 'query-string'
 import {Dependencies} from "../dependency/Dependencies";
+import {CallChain} from "../dependency/CallChain";
 
 class ProjectApp extends React.Component {
     
@@ -24,8 +25,12 @@ class ProjectApp extends React.Component {
             projectId: this.props.match.params.id,
             project: {},
             instances: [],
+
             dependencies: [],
             impacted: [],
+            invocationChain: null,
+            callChain: null,
+
             branchId: queryParams.branchId,
             branch: null,
             docId: this.props.match.params.docId,
@@ -124,6 +129,30 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({impacted: null});
             });
     }
+    retrieveInvocationChain(projectId) {
+        const thisComponent = this;
+        axios.get('/data/dependencies/invocation/chain/' + projectId)
+            .then(response => {
+                console.log("invocation chain data", response.data);
+                thisComponent.setState({invocationChain: response.data});
+            })
+            .catch(function (error) {
+                console.log("invocation chain error", error.response);
+                thisComponent.setState({invocationChain: null});
+            });
+    }
+    retrieveCallChain(projectId) {
+        const thisComponent = this;
+        axios.get('/data/dependencies/call/chain/' + projectId)
+            .then(response => {
+                console.log("call chain data", response.data);
+                thisComponent.setState({callChain: response.data});
+            })
+            .catch(function (error) {
+                console.log("call chain error", error.response);
+                thisComponent.setState({callChain: null});
+            });
+    }
     retrieveDoc(projectId, docId) {
         const thisComponent = this;
         axios.get('/data/projects/' + projectId + '/doc/' + docId)
@@ -158,6 +187,8 @@ class ProjectApp extends React.Component {
             this.retrieveInstances(this.state.projectId);
             this.retrieveDependencies(this.state.projectId);
             this.retrieveImpacted(this.state.projectId);
+            this.retrieveInvocationChain(this.state.projectId);
+            this.retrieveCallChain(this.state.projectId);
             if (this.state.docId) {
                 this.retrieveDoc(this.state.projectId, this.state.docId);
             }
@@ -180,6 +211,8 @@ class ProjectApp extends React.Component {
             this.retrieveInstances(newProject);
             this.retrieveDependencies(newProject);
             this.retrieveImpacted(newProject);
+            this.retrieveInvocationChain(newProject);
+            this.retrieveCallChain(newProject);
         }
         if (newProject && newDoc &&
             (this.props.match.params.id !== newProject || this.props.match.params.docId !== newDoc)) {
@@ -247,8 +280,18 @@ class ProjectApp extends React.Component {
                     <Container>
                         {   branchId ? [<b>Branch</b>,<CommitLog type={project.scmType} commits={this.state.branch}  />] :
                             docId ? [<b>Doc</b>,<Documentation doc={this.state.doc} />] :
-                            this.props.location.pathname.endsWith("dependencies") ? [<b>Dependencies</b>,<Dependencies dependencies={this.state.dependencies} />] :
-                            this.props.location.pathname.endsWith("impacted") ? [<b>Impacted</b>,<Dependencies dependencies={this.state.impacted} />] :
+                            this.props.location.pathname.endsWith("dependencies") ? [
+                                <b>Invocation Chain</b>,
+                                <CallChain chain={this.state.invocationChain} />,
+                                <b>Dependencies</b>,
+                                <Dependencies dependencies={this.state.dependencies} />
+                            ] :
+                            this.props.location.pathname.endsWith("impacted") ? [
+                                <b>Call Chain</b>,
+                                <CallChain chain={this.state.callChain} />,
+                                <b>Impacted</b>,
+                                <Dependencies dependencies={this.state.impacted} />
+                            ] :
                             [<b>Commit Log</b>,<CommitLog type={project.scmType} commits={commits} instances={instances} />]
 
                         }
