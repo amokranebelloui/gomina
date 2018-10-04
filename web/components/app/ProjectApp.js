@@ -30,6 +30,7 @@ class ProjectApp extends React.Component {
             impacted: [],
             invocationChain: null,
             callChain: null,
+            chainSelectedDependencies: [],
 
             branchId: queryParams.branchId,
             branch: null,
@@ -152,6 +153,20 @@ class ProjectApp extends React.Component {
                 console.log("call chain error", error.response);
                 thisComponent.setState({callChain: null});
             });
+    }
+    selectChainDependency(child, parent, invert) {
+        if (child && parent) {
+            const dep = invert
+                ? {from: child.projectId, to: parent.projectId, functions: child.functions}
+                : {from: parent.projectId, to: child.projectId, functions: child.functions}
+                ;
+            //console.info("Call Selected", child, parent, dep);
+            this.setState({chainSelectedDependencies: [dep]});
+        }
+        else {
+            //console.info("Call NONE Selected", child, parent);
+            this.setState({chainSelectedDependencies: []});
+        }
     }
     retrieveDoc(projectId, docId) {
         const thisComponent = this;
@@ -282,13 +297,17 @@ class ProjectApp extends React.Component {
                             docId ? [<b>Doc</b>,<Documentation doc={this.state.doc} />] :
                             this.props.location.pathname.endsWith("dependencies") ? [
                                 <b>Invocation Chain</b>,
-                                <CallChain chain={this.state.invocationChain} />,
+                                <CallChain chain={this.state.invocationChain} displayFirst={true}
+                                           onDependencySelected={(child, parent) => this.selectChainDependency(child, parent, false)}/>,
+                                <Dependencies dependencies={this.state.chainSelectedDependencies} />,
                                 <b>Dependencies</b>,
                                 <Dependencies dependencies={this.state.dependencies} />
                             ] :
                             this.props.location.pathname.endsWith("impacted") ? [
                                 <b>Call Chain</b>,
-                                <CallChain chain={this.state.callChain} />,
+                                <CallChain chain={this.state.callChain} displayFirst={true}
+                                           onDependencySelected={(child, parent) => this.selectChainDependency(child, parent, true)} />,
+                                <Dependencies dependencies={this.state.chainSelectedDependencies} />,
                                 <b>Impacted</b>,
                                 <Dependencies dependencies={this.state.impacted} />
                             ] :

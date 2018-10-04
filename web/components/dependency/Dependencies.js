@@ -27,7 +27,7 @@ class Dependencies extends React.Component {
 }
 
 Dependencies.propTypes = {
-    dependencies: PropTypes.string
+    dependencies: PropTypes.object
 };
 
 export { Dependencies }
