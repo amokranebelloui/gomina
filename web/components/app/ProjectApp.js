@@ -204,6 +204,7 @@ class ProjectApp extends React.Component {
             this.retrieveImpacted(this.state.projectId);
             this.retrieveInvocationChain(this.state.projectId);
             this.retrieveCallChain(this.state.projectId);
+            this.selectChainDependency();
             if (this.state.docId) {
                 this.retrieveDoc(this.state.projectId, this.state.docId);
             }
@@ -228,6 +229,7 @@ class ProjectApp extends React.Component {
             this.retrieveImpacted(newProject);
             this.retrieveInvocationChain(newProject);
             this.retrieveCallChain(newProject);
+            this.selectChainDependency()
         }
         if (newProject && newDoc &&
             (this.props.match.params.id !== newProject || this.props.match.params.docId !== newDoc)) {
@@ -300,6 +302,7 @@ class ProjectApp extends React.Component {
                                 <CallChain chain={this.state.invocationChain} displayFirst={true}
                                            onDependencySelected={(child, parent) => this.selectChainDependency(child, parent, false)}/>,
                                 <Dependencies dependencies={this.state.chainSelectedDependencies} />,
+                                <hr />,
                                 <b>Dependencies</b>,
                                 <Dependencies dependencies={this.state.dependencies} />
                             ] :
@@ -308,6 +311,7 @@ class ProjectApp extends React.Component {
                                 <CallChain chain={this.state.callChain} displayFirst={true}
                                            onDependencySelected={(child, parent) => this.selectChainDependency(child, parent, true)} />,
                                 <Dependencies dependencies={this.state.chainSelectedDependencies} />,
+                                <hr />,
                                 <b>Impacted</b>,
                                 <Dependencies dependencies={this.state.impacted} />
                             ] :
