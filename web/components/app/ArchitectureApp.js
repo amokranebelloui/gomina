@@ -113,7 +113,7 @@ class ArchitectureApp extends React.Component {
                         <br/>
                         <TagCloud tags={this.state.deps.functionTypes} selectionChanged={e => this.selectedFunctionTypesChanged(e)} />
 
-                        <DSM components={this.state.deps.projects}
+                        <DSM components={this.state.deps.services}
                              dependencies={this.state.deps.dependencies.map(d => {return {"from": d.from, "to": d.to, "count": d.functions.length, "detail": d.functions}})}
                              onSelectedDependenciesChanged={e => this.onSelectedDependenciesChanged(e)}  />
                         <Dependencies dependencies={selectedDeps} />

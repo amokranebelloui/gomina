@@ -2,6 +2,8 @@ import React from "react";
 import './DSM.css'
 import PropTypes from 'prop-types'
 
+const outOfScopeOpacity = 0.35;
+
 class DSM extends React.Component {
     constructor(props) {
         super(props);
@@ -109,35 +111,44 @@ class DSM extends React.Component {
     }
     
     render() {
+        const components = this.props.components || [];
         return (
             <div className="dsm">
                 <table className="dsm-table">
                     <tbody>
                     <tr key="head">
                         <td colSpan={2}></td>
-                        {this.props.components.map(comp =>
-                        <td key={comp} className="dsm-header" align="center" valign="bottom">
-                            <span className="dsm-header-label"><b><span style={{whiteSpace: 'nowrap'}}>{comp}</span></b></span>
+                        {components.map(comp =>
+                        <td key={comp.serviceId} className="dsm-header"
+                            align="center" valign="bottom"
+                            style={{opacity: (comp.inScope ? null : outOfScopeOpacity)}}>
+                            <span className="dsm-header-label">
+                                <b><span style={{whiteSpace: 'nowrap'}}>{comp.serviceId}</span></b>
+                            </span>
                         </td>
                         )}
                     </tr>
-                    {this.props.components.map((to, j) =>
-                        <tr key={to}>
+                    {components.map((to, j) =>
+                        <tr key={to.serviceId}>
                             <DSMComponent
-                                comp={to}
-                                selected={this.isComponentSelected(to)}
-                                status={this.statusToSelectedComponent(to)}
-                                onClick={e => this.onComponentClicked(to, e)} />
-                            {this.props.components.map((from, i) =>
+                                comp={to.serviceId}
+                                selected={this.isComponentSelected(to.serviceId)}
+                                status={this.statusToSelectedComponent(to.serviceId)}
+                                onClick={e => this.onComponentClicked(to.serviceId, e)}
+                                inScope={to.inScope}
+                            />
+                            {components.map((from, i) =>
                                 <DSMCell
-                                    key={from + '->' + to}
-                                    from={from}
-                                    to={to}
-                                    dependency={this.getDependency(from, to)}
+                                    key={from.serviceId + '->' + to.serviceId}
+                                    from={from.serviceId}
+                                    to={to.serviceId}
+                                    dependency={this.getDependency(from.serviceId, to.serviceId)}
                                     cycle={(i > j)}
-                                    selected={this.isDependencySelected(from, to)}
-                                    status={this.statusToSelectedDependencies(from, to)}
-                                    onClick={e => this.onDependencyClicked(from, to, e)}/>
+                                    selected={this.isDependencySelected(from.serviceId, to.serviceId)}
+                                    status={this.statusToSelectedDependencies(from.serviceId, to.serviceId)}
+                                    onClick={e => this.onDependencyClicked(from.serviceId, to.serviceId, e)}
+                                    inScope={to.inScope && from.inScope}
+                                />
                             )}
                         </tr>
                     )}
@@ -162,10 +173,11 @@ function DSMComponent(props) {
     return ([
         <td key="component" align="right"
             className={clazz}
+            style={{opacity: (props.inScope ? null : outOfScopeOpacity)}}
             onClick={e => props.onClick && props.onClick(e)}>
             <b><span style={{whiteSpace: 'nowrap'}}>{props.comp}</span></b>
         </td>,
-        <td key="depStatus" style={{width: '3px'}} className={depClazz}>&nbsp;</td>,
+        <td key="depStatus" style={{width: '3px', opacity: (props.inScope ? null : outOfScopeOpacity)}} className={depClazz}>&nbsp;</td>,
     ])
 }
 
@@ -200,14 +212,15 @@ function DSMCell(props) {
 
     return (
         <td className={clazz} title={d && d.detail}
-            onClick={e => props.onClick && props.onClick(e)}>
+            onClick={e => props.onClick && props.onClick(e)}
+            style={{opacity: (props.inScope ? null : outOfScopeOpacity)}}>
             {d && d.count}
         </td>
     )
 }
 
 DSM.propTypes = {
-    "components": PropTypes.array.isRequired,
+    "components": PropTypes.array.isRequired, // {service: serviceId, inScope: boolean}
     "dependencies": PropTypes.array.isRequired,
     "onSelectedDependenciesChanged": PropTypes.func,
     "legend": PropTypes.bool

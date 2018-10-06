@@ -80,6 +80,7 @@ class TopologicalSort<M>
         while (stack.empty() == false) {
             res.add(stack.pop())
         }
+        if (res.remove("?")) res.add("?")
         return res
     }
 

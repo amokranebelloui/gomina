@@ -3,13 +3,13 @@ package org.neo.gomina.model.dependency
 
 enum class DbMode { WRITE, READ }
 
-val fixin = Interactions(projectId = "fixin",
+val fixin = Interactions(serviceId = "fixin",
         used = listOf(
                 FunctionUsage("createOrder", "command"),
                 FunctionUsage("basketDb", "database", Usage(DbMode.READ))
         )
 )
-val order = Interactions(projectId = "order",
+val order = Interactions(serviceId = "order",
         exposed = listOf(
                 Function("createOrder", "command"),
                 Function("validateOrder", "command")
@@ -20,7 +20,7 @@ val order = Interactions(projectId = "order",
                 FunctionUsage("cancelOrder", "command")
         )
 )
-val orderExt = Interactions(projectId = "orderExt",
+val orderExt = Interactions(serviceId = "orderExt",
         exposed = listOf(
                 Function("createOrder", "command"),
                 Function("cancelOrder", "command")
@@ -31,7 +31,7 @@ val orderExt = Interactions(projectId = "orderExt",
                 FunctionUsage("validateOrder", "command")
         )
 )
-val basket = Interactions(projectId = "basket",
+val basket = Interactions(serviceId = "basket",
         exposed = listOf(
                 Function("checkBasket", "command")
         ),
@@ -41,7 +41,7 @@ val basket = Interactions(projectId = "basket",
                 FunctionUsage("basketDb", "database", Usage(DbMode.WRITE))
         )
 )
-val referential = Interactions(projectId = "referential",
+val referential = Interactions(serviceId = "referential",
         exposed = listOf(
                 Function("getCustomer", "request"),
                 Function("createCustomer", "request")

@@ -72,6 +72,9 @@ class ProjectSummary extends React.Component {
                 </div>
                 <div className='build'>
                     <BuildLink server={project.jenkinsServer} url={project.jenkinsUrl} />
+                    <BuildStatus status={project.buildStatus}/>
+                    <br/>
+                    <DateTime date={project.buildTimestamp}/>
                 </div>
                 {this.props.loggedUser &&
                     <div>(Level)</div>

@@ -8,7 +8,7 @@ class DependenciesTest {
     @Test
     fun testProjectDependencies() {
         println("# Project Dependencies (order)")
-        println(order.projectId)
+        println(order.serviceId)
         println("Exposed ${order.exposed}")
         println("Used ${order.used}")
     }
@@ -30,7 +30,7 @@ class DependenciesTest {
 
     @Test
     fun testMerge() {
-        val p1 = Interactions(projectId = "p1",
+        val p1 = Interactions(serviceId = "p1",
                 exposed = listOf(
                         Function("f1", "command")
                 ),
@@ -39,18 +39,18 @@ class DependenciesTest {
                         FunctionUsage("f3", "database", Usage(DbMode.WRITE))
                 )
         )
-        val p1ext = Interactions(projectId = "p1",
+        val p1ext = Interactions(serviceId = "p1",
                 used = listOf(
                         FunctionUsage("f5", "request")
                 )
         )
-        val p2 = Interactions(projectId = "p2",
+        val p2 = Interactions(serviceId = "p2",
                 exposed = listOf(
                         Function("f2", "request"),
                         Function("f4", "request")
                 )
         )
-        val p2ext  = Interactions(projectId = "p2",
+        val p2ext  = Interactions(serviceId = "p2",
                 exposed = listOf(
                         Function("f5", "request")
                 )
@@ -72,7 +72,7 @@ class DependenciesTest {
 
         dependencies.forEach { println(it) }
         fun printNode(cc:CallChain, padding: String = "") {
-            println("$padding${cc.projectId}${if (cc.recursive) " @" else ""} ${cc.functions}")
+            println("$padding${cc.serviceId}${if (cc.recursive) " @" else ""} ${cc.functions}")
             cc.calls.forEach { printNode(it, "$padding ") }
         }
 
@@ -88,7 +88,7 @@ class DependenciesTest {
         println("# Special Dependencies")
         val specialFunctions = projects
                 .map { p ->
-                    Interactions(projectId = p.projectId,
+                    Interactions(serviceId = p.serviceId,
                             exposed = p.exposed,
                             used = p.used.filter { it.function.type == "database" })
                 }
@@ -110,7 +110,7 @@ class DependenciesTest {
         val outgoing = dependencies.groupBy { it.from }
 
         println("# Forward Dependencies")
-        projects.map { it.projectId }.forEach { project ->
+        projects.map { it.serviceId }.forEach { project ->
             println("$project")
             outgoing[project]?.apply { forEach { println("   ${it.to} : #${it.functions.size} ${it.functions}") } }
         }
@@ -123,7 +123,7 @@ class DependenciesTest {
         val incoming = dependencies.groupBy { it.to }
 
         println("# Reverse Dependencies")
-        projects.map { it.projectId }.forEach { project ->
+        projects.map { it.serviceId }.forEach { project ->
             println("$project")
             incoming[project]?.apply { forEach { println("   ${it.from} : #${it.functions.size} ${it.functions}") } }
         }
@@ -145,7 +145,7 @@ class DependenciesTest {
         val dependencies = Dependencies.dependencies(functions)
 
         println("# Dependency Matrix")
-        val g = TopologicalSort<Dependency>(projects.map { it.projectId }).also {
+        val g = TopologicalSort<Dependency>(projects.map { it.serviceId }).also {
                     dependencies.forEach { dependency -> it.addEdge(dependency.from, dependency.to, dependency) }
                 }
 

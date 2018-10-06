@@ -4,7 +4,7 @@ import com.google.inject.Inject
 
 interface InteractionsRepository {
     fun getAll(): List<Interactions>
-    fun getFor(projectId: String): Interactions
+    fun getFor(serviceId: String): Interactions
 }
 
 interface InteractionsProvider {
@@ -22,8 +22,8 @@ class ProviderBasedInteractionRepository : InteractionsRepository {
         val enriched = enrichDependencies.enrich(all)
         return (all + enriched).merge().toList()
     }
-    override fun getFor(projectId: String): Interactions {
-        return getAll().merge().find { it.projectId == projectId } ?: Interactions(projectId)
+    override fun getFor(serviceId: String): Interactions {
+        return getAll().merge().find { it.serviceId == serviceId } ?: Interactions(serviceId)
     }
 }
 

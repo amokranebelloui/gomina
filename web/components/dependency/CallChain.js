@@ -7,7 +7,7 @@ class CallChain extends React.Component {
         //console.info("chain constructor", this.props.chain);
         const open = {};
         if (this.props.chain) {
-            open[this.props.chain.projectId] = true;
+            open[this.props.chain.serviceId] = true;
         }
         this.state = {open: open};
         //this.state = {open: this.props.chain}
@@ -18,7 +18,7 @@ class CallChain extends React.Component {
             const chain = nextProps.chain;
             if (chain) {
                 const open = {};
-                open[chain.projectId] = true;
+                open[chain.serviceId] = true;
                 this.setState({open: open})
             }
         }
@@ -27,19 +27,19 @@ class CallChain extends React.Component {
         const openPaths = {};
         openPaths[path] = true;
         (chain.calls || []).forEach(call => {
-            Object.assign(openPaths, this.openAll(call, path + "/" + call.projectId))
+            Object.assign(openPaths, this.openAll(call, path + "/" + call.serviceId))
         });
         return openPaths
     }
     onOpenAll() {
         if (this.props.chain) {
-            const openPaths = this.openAll(this.props.chain, this.props.chain.projectId);
+            const openPaths = this.openAll(this.props.chain, this.props.chain.serviceId);
             this.setState({open: openPaths})
         }
     }
     onCloseAll() {
         if (this.props.chain) {
-            const open = {"chain.projectId": true};
+            const open = {"chain.serviceId": true};
             this.setState({open: open})
         }
     }
@@ -66,7 +66,7 @@ class CallChain extends React.Component {
             <Call chain={this.props.chain}
                   padding={0} displayNode={this.props.displayFirst}
                   openPaths={this.state.open}
-                  path={(this.props.chain||{}).projectId}
+                  path={(this.props.chain||{}).serviceId}
                   onPathOpened={e => this.onPathOpened1(e)}
                   onPathClosed={e => this.onPathClosed1(e)}
                   onDependencySelected={(child, parent) => this.dependencySelected(child, parent)}
@@ -83,7 +83,7 @@ CallChain.propTypes = {
 };
 
 
-/// projectId: String, val recursive: Boolean, val functions: List<FunctionDetail> = emptyList(), val calls
+/// serviceId: String, val recursive: Boolean, val functions: List<FunctionDetail> = emptyList(), val calls
 
 class Call extends React.Component {
     constructor(props) {
@@ -124,7 +124,7 @@ class Call extends React.Component {
                             : <span style={{display: 'inline-block', width: '12px'}} onClick={e => this.onPathOpened(this.props.path)}><b>&rarr;&nbsp;</b></span>
                         }
                         <span onDoubleClick={e => this.dependencySelected(this.props.chain, this.props.parent)}>
-                            {chain.projectId} {chain.recursive && '@'}
+                            {chain.serviceId} {chain.recursive && '@'}
                             </span>
                         <span style={{color: 'lightgray'}}>
                             {usageCount > 0 &&
@@ -137,12 +137,12 @@ class Call extends React.Component {
 
                 {(chain.calls||[]).map( call =>
                     this.isOpen(this.props.path) &&
-                            <Call key={call.projectId}
+                            <Call key={call.serviceId}
                                   chain={call}
                                   parent={chain}
                                   padding={nextPadding} displayNode={true}
                                   openPaths={this.props.openPaths}
-                                  path={this.props.path + "/" + call.projectId}
+                                  path={this.props.path + "/" + call.serviceId}
                                   onPathOpened={e => this.onPathOpened(e)}
                                   onPathClosed={e => this.onPathClosed(e)}
                                   onDependencySelected={(from, to) => this.dependencySelected(from, to)}

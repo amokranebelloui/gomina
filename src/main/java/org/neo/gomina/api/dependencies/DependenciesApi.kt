@@ -8,13 +8,17 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.project.Projects
+import org.neo.gomina.model.service.Service
+import org.neo.gomina.model.service.Services
 
 
 data class FunctionDetail(val name: String, val type: String, val usage: String? = null)
-data class DependencyDetail(var from: String, var to: String, var functions: List<FunctionDetail>)
-data class DependenciesDetail(val projects: List<String>, val functionTypes: Set<String>, val dependencies: List<DependencyDetail>)
 
-data class CallChainDetail(val projectId: String, val recursive: Boolean, val functions: List<FunctionDetail> = emptyList(), val calls: List<CallChainDetail> = emptyList())
+data class DependencyDetail(var from: String, var to: String, var functions: List<FunctionDetail>)
+data class DependencyService(val serviceId: String, val inScope: Boolean)
+data class DependenciesDetail(val services: List<DependencyService>, val functionTypes: Set<String>, val dependencies: List<DependencyDetail>)
+
+data class CallChainDetail(val serviceId: String, val recursive: Boolean, val functions: List<FunctionDetail> = emptyList(), val calls: List<CallChainDetail> = emptyList())
 
 class DependenciesApi {
 
@@ -25,6 +29,7 @@ class DependenciesApi {
     val router: Router
 
     @Inject lateinit var projects: Projects
+    @Inject lateinit var services: Services
     @Inject lateinit var interactionsRepository: InteractionsRepository
 
     @Inject
@@ -52,29 +57,36 @@ class DependenciesApi {
                     ?: emptyList()
             logger.info("Get Dependencies $systems $functionTypes")
 
-            val allProjects = projects.getProjects().associateBy { it.id }
+            // FIXME Manage Project/Services dependencies
+            //val allProjects = projects.getProjects().associateBy { it.id }
+            val allServices = (
+                    services.getServices() +
+                    projects.getProjects().map {
+                        Service(id = it.id, type = "unknown", systems = it.systems, projectId = it.id)
+                    })
+            val servicesInScope = allServices.filter { it.belongsToOneOf(systems) }.map { it.id }
 
-            val allInteractions = interactionsRepository.getAll().associateBy { p -> p.projectId }
+            val allInteractions = interactionsRepository.getAll().associateBy { p -> p.serviceId }
 
-            val selectedInteractions = allProjects.values
-                    .filter { systems.isEmpty() || systems.intersect(it.systems).isNotEmpty() }
-                    .map { it.id }
-                    .map { allInteractions[it] ?: Interactions(projectId = it) }
-                    .map { Interactions(
-                                projectId = it.projectId,
-                                exposed = it.exposed.filter { functionTypes.isEmpty() || functionTypes.contains(it.type) },
-                                used = it.used.filter { functionTypes.isEmpty() || functionTypes.contains(it.function.type) }
-                    )}
+            val selectedInteractions = allServices
+                    //.filter { it.belongsToOneOf(systems) }
+                    .map { allInteractions[it.id] ?: Interactions(serviceId = it.id) }
+                    .map { it.filterFunctionTypes(functionTypes) }
             val functions = Dependencies.functions(selectedInteractions)
             val dependencies = Dependencies.dependencies(functions)
+                    .filter { it.involves(servicesInScope) }
 
-            // FIXME Usage with no exposing component
-            val g = TopologicalSort<Dependency>(selectedInteractions.map { it.projectId } + listOf("?")).also {
+
+            val services = servicesInScope +
+                    dependencies.flatMap { arrayListOf(it.from, it.to) }
+                    //if (dependencies.any { it.from == "?" || it.to == "?" }) listOf("?") else emptyList()
+
+            val g = TopologicalSort<Dependency>(services.toSet().toList()).also {
                 dependencies.forEach { dependency -> it.addEdge(dependency.from, dependency.to, dependency) }
             }
             val dependenciesDetails = dependencies.map { it.toDetail() }
             val dependenciesDetail = DependenciesDetail(
-                    projects = g.sort(),
+                    services = g.sort().map { DependencyService(it, servicesInScope.contains(it)) },
                     functionTypes = Dependencies.functions(allInteractions.values).map { (f, _) -> f.type }.toSet(),
                     dependencies = dependenciesDetails)
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(dependenciesDetail))
@@ -88,7 +100,7 @@ class DependenciesApi {
         val projectId = ctx.request().getParam("projectId")
         logger.info("Get Project Dependencies $projectId")
         try {
-            val allInteractions = interactionsRepository.getAll().associateBy { p -> p.projectId }
+            val allInteractions = interactionsRepository.getAll().associateBy { p -> p.serviceId }
             val functions = Dependencies.functions(allInteractions.values)
                     //.filter { (f,stakeholders) -> stakeholders.users.find { it.projectId == projectId } != null }
             val dependencies = Dependencies.dependencies(functions).filter { it.from == projectId }.map { it.toDetail() }
@@ -104,7 +116,7 @@ class DependenciesApi {
         val projectId = ctx.request().getParam("projectId")
         logger.info("Get Project Dependencies $projectId")
         try {
-            val allInteractions = interactionsRepository.getAll().associateBy { p -> p.projectId }
+            val allInteractions = interactionsRepository.getAll().associateBy { p -> p.serviceId }
             val functions = Dependencies.functions(allInteractions.values)
                     //.filter { (f,stakeholders) -> stakeholders.exposers.contains(projectId) }
             val dependencies = Dependencies.dependencies(functions).filter { it.to == projectId }.map { it.toDetail() }
@@ -157,7 +169,7 @@ class DependenciesApi {
     )
 
     private fun CallChain.toDetail(): CallChainDetail = CallChainDetail(
-            projectId = this.projectId,
+            serviceId = this.serviceId,
             recursive = this.recursive,
             functions = this.functions.map { it.toDetail() },
             calls = this.calls.map { it.toDetail() }
