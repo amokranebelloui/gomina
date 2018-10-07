@@ -66,13 +66,12 @@ class AppLayout extends React.Component {
                             </h3>
                             <span className="items">
                                 <Link to="/">index</Link> -&nbsp;
-                                <Link to="/projects">projects</Link> -&nbsp;
+                                <Link to="/components">components</Link> -&nbsp;
+                                <Link to="/archi">archi</Link> -&nbsp;
                                 <Link to="/envs">envs</Link> -&nbsp;
                                 <Link to="/hosts">hosts</Link> -&nbsp;
-                                <Link to="/archi">archi</Link> -&nbsp;
                                 <Link to="/pipeline">pipeline</Link> -&nbsp;
-                                <Link to="/sandbox">sandbox</Link> -&nbsp;
-                                <Link to="/unknown">unknown page</Link>&nbsp;
+                                <Link to="/sandbox">sandbox</Link>
                                 <br/>
                             </span>
                             <span className="context">
