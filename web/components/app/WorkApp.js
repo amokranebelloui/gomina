@@ -70,7 +70,12 @@ class WorkApp extends React.Component {
                                     <td>{work.id}</td>
                                     <td>{work.label}</td>
                                     <td>{work.type}</td>
-                                    <td>{work.jira}</td>
+                                    <td>
+                                    {work.jiraUrl
+                                        ? (<a href={work.jiraUrl} target="_blank">{work.jira}</a>)
+                                        : (work.jira)
+                                    }
+                                    </td>
                                     <td>{work.status}</td>
                                     <td>
                                         {work.projects.map(p =>

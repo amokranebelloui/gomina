@@ -96,6 +96,9 @@ class GominaModule : AbstractModule() {
         bind(Hosts::class.java).to(HostsFile::class.java).`in`(Scopes.SINGLETON)
         bind(Inventory::class.java).to(InventoryFile::class.java).`in`(Scopes.SINGLETON)
 
+        // JIRA
+        bind(String::class.java).annotatedWith(named("jira.url")).toInstance(config.jiraUrl)
+
         // Monitoring
         bind(Int::class.java).annotatedWith(named("monitoring.timeout")).toInstance(config.monitoring.timeout)
         bind(Monitoring::class.java).`in`(Scopes.SINGLETON)
