@@ -7,6 +7,7 @@ import {TagCloud} from "../common/TagCloud";
 import {Well} from "../common/Well";
 import {flatMap} from "../common/utils";
 import {ProjectSort} from "../project/ProjectSort";
+import {extendSystems} from "../system/system-utils";
 
 class ProjectsApp extends React.Component {
 
@@ -16,10 +17,22 @@ class ProjectsApp extends React.Component {
             projects: [],
             sortBy: 'alphabetical'
         };
+        //this.retrieveSystems = this.retrieveSystems.bind(this);
         this.retrieveProjects = this.retrieveProjects.bind(this);
         console.info("projectApp !constructor ");
     }
-
+    /*
+    retrieveSystems() {
+        axios.get('/data/projects/systems')
+            .then(response => {
+                console.log("systems data", response.data);
+                this.setState({systems: response.data});
+            })
+            .catch(function (error) {
+                console.log("systems data error", error);
+            });
+    }
+    */
     retrieveProjects() {
         console.log("projectApp Retr Projects ... ");
         const thisComponent = this;
@@ -37,6 +50,7 @@ class ProjectsApp extends React.Component {
     componentDidMount() {
         console.info("projectsApp !mount ", this.props.match.params.id);
         //this.retrieveProject(this.props.match.params.id);
+        //this.retrieveSystems();
         this.retrieveProjects();
     }
     sortChanged(sortBy) {
@@ -44,7 +58,8 @@ class ProjectsApp extends React.Component {
     }
     render() {
         const projects = sortProjectsBy(this.state.sortBy, this.state.projects);
-        const systems = flatMap(this.state.projects, p => p.systems);
+        const systems = extendSystems(flatMap(this.state.projects, p => p.systems));
+        //const systems = this.state.systems;
         const languages = flatMap(this.state.projects, p => p.languages);
         const tags = flatMap(this.state.projects, p => p.tags);
         return (
@@ -72,15 +87,15 @@ class ProjectsApp extends React.Component {
                                 &nbsp;
                                 <br/>
                                 Systems:
-                                <TagCloud tags={systems}
+                                <TagCloud tags={systems} displayCount={true}
                                           selectionChanged={values => this.setState({selectedSystems: values})} />
                                 <br/>
                                 Languages:
-                                <TagCloud tags={languages}
+                                <TagCloud tags={languages} displayCount={true}
                                           selectionChanged={values => this.setState({selectedLanguages: values})} />
                                 <br/>
                                 Tags:
-                                <TagCloud tags={tags}
+                                <TagCloud tags={tags} displayCount={true}
                                           selectionChanged={values => this.setState({selectedTags: values})} />
                                 <br/>
                             </Well>
@@ -93,11 +108,12 @@ class ProjectsApp extends React.Component {
     }
 }
 
+
 function matchesSearch(project, search, systems, languages, tags) {
     let label = (project.label || "");
     let regExp = new RegExp(search, "i");
     let matchesLabel = label.match(regExp);
-    let matchesSystems = matchesList(project.systems, systems);
+    let matchesSystems = matchesList(extendSystems(project.systems), systems);
     let matchesLanguages = matchesList(project.languages, languages);
     let matchesTags = matchesList(project.tags, tags);
     //console.info("MATCH", project.id, matchesLabel, matchesSystems, matchesLanguages, matchesTags);

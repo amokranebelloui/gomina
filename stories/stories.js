@@ -64,7 +64,7 @@ storiesOf('Components', module)
     })
     .add('TagCloud', () => {
         const tags = ["java", ".net", "java", "java", "kotlin", "javascript", "java"];
-        return <TagCloud tags={tags} selectionChanged={action("selectionChanged")} />
+        return <TagCloud tags={tags} displayCount={true} selectionChanged={action("selectionChanged")} />
     })
 ;
 

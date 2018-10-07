@@ -40,7 +40,9 @@ import org.neo.gomina.model.dependency.ProviderBasedInteractionRepository
 import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.Hosts
 import org.neo.gomina.model.inventory.Inventory
+import org.neo.gomina.model.project.ProjectSystems
 import org.neo.gomina.model.project.Projects
+import org.neo.gomina.model.project.Systems
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.model.service.Services
 import org.neo.gomina.model.user.Users
@@ -82,6 +84,7 @@ class GominaModule : AbstractModule() {
         bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
 
         bind(Projects::class.java).to(ProjectsFile::class.java).`in`(Scopes.SINGLETON)
+        bind(Systems::class.java).to(ProjectSystems::class.java).`in`(Scopes.SINGLETON)
         bind(Services::class.java).to(ServicesFile::class.java).`in`(Scopes.SINGLETON)
         bind(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsRepository::class.java).to(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)

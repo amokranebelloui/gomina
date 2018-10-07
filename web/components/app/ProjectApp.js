@@ -30,11 +30,7 @@ class ProjectApp extends React.Component {
             branchId: queryParams.branchId,
             branch: null,
             docId: this.props.match.params.docId,
-            doc: null,
-            search: "",
-            selectedSystems: [],
-            selectedLanguages: [],
-            selectedTags: []
+            doc: null
             };
         //this.retrieveProjects = this.retrieveProjects.bind(this);
         this.retrieveProject = this.retrieveProject.bind(this);

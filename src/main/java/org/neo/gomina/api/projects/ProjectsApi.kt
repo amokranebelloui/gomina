@@ -16,6 +16,7 @@ import org.neo.gomina.integration.sonar.SonarIndicators
 import org.neo.gomina.integration.sonar.SonarService
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
+import org.neo.gomina.model.project.Systems
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -31,6 +32,7 @@ class ProjectsApi {
     val router: Router
 
     @Inject private lateinit var projects: Projects
+    @Inject private lateinit var systems: Systems
 
     @Inject private lateinit var scmService: ScmService
     @Inject private lateinit var scmRepos: ScmRepos
@@ -67,9 +69,8 @@ class ProjectsApi {
 
     fun systems(ctx: RoutingContext) {
         try {
-            val systems = this.getProjects().flatMap { it.systems }.filter { it.isNotEmpty() }.toSet()
             ctx.response().putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(systems))
+                    .end(mapper.writeValueAsString(systems.getSystems()))
         } catch (e: Exception) {
             logger.error("Cannot get projects", e)
             ctx.fail(500)

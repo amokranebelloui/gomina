@@ -59,7 +59,7 @@ class TagCloud extends React.Component {
                 <Badge key={t.value} value={t.value}
                        backgroundColor={this.isSelected(t.value) ? 'yellow' : null}
                        onSelected={(v, multi) => this.onSelected(v, multi)}>
-                    {t.value}({t.count})
+                    {t.value}{this.props.displayCount && "(" + t.count + ")"}
                 </Badge>
             )
         )
@@ -69,6 +69,7 @@ class TagCloud extends React.Component {
 TagCloud.propTypes = {
     tags: PropTypes.array.isRequired,
     sortByCount: PropTypes.bool,
+    displayCount: PropTypes.bool,
     sortAlphabetically: PropTypes.bool,
     selectionChanged: PropTypes.func
 };
