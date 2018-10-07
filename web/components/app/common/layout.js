@@ -70,6 +70,7 @@ class AppLayout extends React.Component {
                                 <Link to="/archi">archi</Link> -&nbsp;
                                 <Link to="/envs">envs</Link> -&nbsp;
                                 <Link to="/hosts">hosts</Link> -&nbsp;
+                                <Link to="/work">work</Link> -&nbsp;
                                 <Link to="/pipeline">pipeline</Link> -&nbsp;
                                 <Link to="/sandbox">sandbox</Link>
                                 <br/>

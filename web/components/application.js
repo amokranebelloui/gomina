@@ -11,6 +11,7 @@ import {SandboxApp} from "./app/SandboxApp";
 import "./application.css"
 import {HostsApp} from "./app/HostsApp";
 import {ProjectsApp} from "./app/ProjectsApp";
+import {WorkApp} from "./app/WorkApp";
 
 const history = createBrowserHistory();
 
@@ -35,6 +36,8 @@ class Blocker extends React.Component {
                 <Route path="/project/:id/doc/:docId" render={props => <ProjectApp {...props} />}/>
                 <Route path="/project/:id/scm" render={props => <ProjectApp {...props} />}/>
                 <Route path="/project/:id" render={props => <ProjectApp {...props} />}/>
+                <Route path="/work/:id" render={props => <WorkApp {...props} />}/>
+                <Route path="/work" render={props => <WorkApp {...props} />}/>
                 <Route path="/sandbox" component={() => <SandboxApp />}/>
                 <Route path="*" component={() => <div>I don't know you man!!!</div>} />
             </Switch>

@@ -16,6 +16,7 @@ import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.api.users.UsersApi
+import org.neo.gomina.api.work.WorkApi
 import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.JenkinsService
@@ -46,6 +47,7 @@ import org.neo.gomina.model.project.Systems
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.model.service.Services
 import org.neo.gomina.model.user.Users
+import org.neo.gomina.model.work.WorkList
 import org.neo.gomina.module.config.Config
 import org.neo.gomina.module.config.ConfigLoader
 import org.neo.gomina.persistence.jenkins.JenkinsConfigProvider
@@ -79,6 +81,7 @@ class GominaModule : AbstractModule() {
         bind(File::class.java).annotatedWith(named("projects.file")).toInstance(File(config.inventory.projectsFile))
         bind(File::class.java).annotatedWith(named("services.file")).toInstance(File(config.inventory.servicesFile))
         bind(File::class.java).annotatedWith(named("interactions.file")).toInstance(File(config.inventory.interactionsFile))
+        bind(File::class.java).annotatedWith(named("work.file")).toInstance(File(config.inventory.workFile))
         bind(File::class.java).annotatedWith(named("hosts.file")).toInstance(File(config.inventory.hostsFile))
         bind(String::class.java).annotatedWith(named("inventory.dir")).toInstance(config.inventory.inventoryDir)
         bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
@@ -89,6 +92,7 @@ class GominaModule : AbstractModule() {
         bind(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsRepository::class.java).to(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsFileProvider::class.java).asEagerSingleton()
+        bind(WorkList::class.java).to(WorkListFile::class.java).`in`(Scopes.SINGLETON)
         bind(Hosts::class.java).to(HostsFile::class.java).`in`(Scopes.SINGLETON)
         bind(Inventory::class.java).to(InventoryFile::class.java).`in`(Scopes.SINGLETON)
 
@@ -137,6 +141,7 @@ class GominaModule : AbstractModule() {
         bind(AuthApi::class.java).`in`(Scopes.SINGLETON)
         bind(UsersApi::class.java).`in`(Scopes.SINGLETON)
         bind(ProjectsApi::class.java).`in`(Scopes.SINGLETON)
+        bind(WorkApi::class.java).`in`(Scopes.SINGLETON)
         bind(EnvsApi::class.java).`in`(Scopes.SINGLETON)
         bind(HostsApi::class.java).`in`(Scopes.SINGLETON)
         bind(InstancesApi::class.java).`in`(Scopes.SINGLETON)

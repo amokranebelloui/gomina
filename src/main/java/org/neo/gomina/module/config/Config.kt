@@ -13,6 +13,7 @@ import java.io.File
 data class InventoryConfig(var projectsFile: String = "",
                            var servicesFile: String = "",
                            var interactionsFile: String = "",
+                           var workFile: String = "",
                            var hostsFile: String = "",
                            var inventoryDir: String = "",
                            var inventoryFilter: String = "")
