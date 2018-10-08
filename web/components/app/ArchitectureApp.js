@@ -1,23 +1,18 @@
 import React from "react";
 import axios from "axios/index";
-import {AppLayout} from "./common/layout";
+import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import {ArchiDiagram} from "../archidiagram/ArchiDiagram";
 import {DSM} from "../dependency/DSM";
 import {Dependencies} from "../dependency/Dependencies";
 import {TagCloud} from "../common/TagCloud";
+import {Container} from "../common/Container";
 
 class ArchitectureApp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            systems: [],
-            selectedSystems: [],
-            selectedFunctionTypes: [],
             components: [],
-            dependencies: [],
-            selectedDependencies: [],
-
-            deps: {projects: [], functionTypes: [], dependencies: []}
+            dependencies: []
         };
         this.addData = this.addData.bind(this);
         this.removeData = this.removeData.bind(this);
@@ -25,19 +20,7 @@ class ArchitectureApp extends React.Component {
     }
 
     componentDidMount() {
-        this.retrieveSystems();
         this.retrieveDiagram();
-        this.retrieveDependencies();
-    }
-    retrieveSystems() {
-        axios.get('/data/projects/systems')
-            .then(response => {
-                console.log("systems data", response.data);
-                this.setState({systems: response.data});
-            })
-            .catch(function (error) {
-                console.log("systems data error", error);
-            });
     }
     retrieveDiagram() {
         axios.get('/data/diagram/data')
@@ -47,16 +30,6 @@ class ArchitectureApp extends React.Component {
             })
             .catch(function (error) {
                 console.log("diagram data error", error.response);
-            });
-    }
-    retrieveDependencies(systems, functionTypes) {
-        axios.get('/data/dependencies?systems=' + (systems || this.state.selectedSystems) + '&functionTypes=' + (functionTypes || this.state.selectedFunctionTypes) )
-            .then(response => {
-                console.log("dependencies data", response.data);
-                this.setState({deps: response.data});
-            })
-            .catch(function (error) {
-                console.log("dependencies data error", error);
             });
     }
     addData() {
@@ -86,49 +59,27 @@ class ArchitectureApp extends React.Component {
             });
     }
 
-    selectedSystemsChanged(systems) {
-        console.info("selected systems", systems);
-        this.setState({selectedSystems: systems});
-        this.retrieveDependencies(systems, this.state.selectedFunctionTypes)
-    }
-    selectedFunctionTypesChanged(functionTypes) {
-        console.info("selected functionTypes", functionTypes);
-        this.setState({selectedFunctionTypes: functionTypes});
-        this.retrieveDependencies(this.state.selectedSystems, functionTypes)
-    }
-
-    onSelectedDependenciesChanged(selectedDeps) {
-        this.setState({selectedDependencies: selectedDeps})
-    }
     render() {
-        const selectedDeps = this.state.deps.dependencies.filter(d => this.state.selectedDependencies.find(s => s.from === d.from && s.to === d.to));
-        console.info("CC", selectedDeps);
         return (
             <AppLayout title="Architecture Diagram">
-                <div style={{width: '100%', verticalAlign: 'top'}}>
-                    <div style={{width: '40%', display: "inline-block", verticalAlign: 'top'}}>
-                        <button onClick={e => this.retrieveDependencies()}>Refresh</button>
-                        <br/>
-                        <TagCloud tags={this.state.systems} selectionChanged={e => this.selectedSystemsChanged(e)} />
-                        <br/>
-                        <TagCloud tags={this.state.deps.functionTypes} selectionChanged={e => this.selectedFunctionTypesChanged(e)} />
+                <PrimarySecondaryLayout>
+                    <Container>
+                        <div style={{width: '100%', verticalAlign: 'top'}}>
+                            <div style={{width: '50%', boxSizing: 'border-box', display: "inline-block", verticalAlign: 'top'}}>
+                                <ArchiDiagram components={this.state.components}
+                                              dependencies={this.state.dependencies}
+                                              onLinkSelected={d => console.info("selected", d)}
+                                              onComponentMoved={this.componentMoved}/>
+                            </div>
 
-                        <DSM components={this.state.deps.services}
-                             dependencies={this.state.deps.dependencies.map(d => {return {"from": d.from, "to": d.to, "count": d.functions.length, "detail": d.functions}})}
-                             onSelectedDependenciesChanged={e => this.onSelectedDependenciesChanged(e)}  />
-                        <Dependencies dependencies={selectedDeps} />
-                    </div>
-                    <div style={{width: '50%', boxSizing: 'border-box', display: "inline-block", verticalAlign: 'top'}}>
+                        </div>
+                    </Container>
+                    <div>
+                        <h3>Control Panel</h3>
                         <button onClick={this.addData}>Add</button>
                         <button onClick={this.removeData}>Remove</button>
-                        <ArchiDiagram components={this.state.components}
-                                      dependencies={this.state.dependencies}
-                                      onLinkSelected={d => console.info("selected", d)}
-                                      onComponentMoved={this.componentMoved}/>
                     </div>
-
-                </div>
-
+                </PrimarySecondaryLayout>
             </AppLayout>
         );
     }

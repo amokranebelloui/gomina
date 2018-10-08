@@ -55,19 +55,19 @@ class WorkApp extends React.Component {
                     <div>
                         <table width="100%">
                             <tr>
-                                <tr>
-                                    <td><b>id</b></td>
-                                    <td><b>label</b></td>
-                                    <td><b>type</b></td>
-                                    <td><b>jira</b></td>
-                                    <td><b>status</b></td>
-                                    <td><b>projects</b></td>
-                                    <td><b>people</b></td>
-                                </tr>
+                                <td><b>id</b></td>
+                                <td><b>label</b></td>
+                                <td><b>type</b></td>
+                                <td><b>jira</b></td>
+                                <td><b>status</b></td>
+                                <td><b>projects</b></td>
+                                <td><b>people</b></td>
                             </tr>
                             {workList.map(work =>
                                 <tr>
-                                    <td>{work.id}</td>
+                                    <td>
+                                        <Link to={"/work/" + work.id}>{work.id}</Link>
+                                    </td>
                                     <td>{work.label}</td>
                                     <td>{work.type}</td>
                                     <td>
@@ -79,7 +79,7 @@ class WorkApp extends React.Component {
                                     <td>{work.status}</td>
                                     <td>
                                         {work.projects.map(p =>
-                                            <span><Link to={"/project/" + p}>{p}</Link> </span>
+                                            <span><Link to={"/component/" + p}>{p}</Link> </span>
                                         )}
                                     </td>
                                     <td>

@@ -12,6 +12,7 @@ import "./application.css"
 import {HostsApp} from "./app/HostsApp";
 import {ProjectsApp} from "./app/ProjectsApp";
 import {WorkApp} from "./app/WorkApp";
+import {DependenciesApp} from "./app/DependenciesApp";
 
 const history = createBrowserHistory();
 
@@ -25,17 +26,17 @@ class Blocker extends React.Component {
         return (
             <Switch>
                 <Route exact path="/" component={Index}/>
-                <Route path="/archi" component={ArchitectureApp}/>
+                <Route path="/architecture" component={ArchitectureApp}/>
+                <Route path="/dependencies" component={DependenciesApp}/>
                 <Route path="/hosts" render={props => <HostsApp {...props} />}/>
                 <Route path="/host/:id" render={props => <HostsApp {...props} />}/>
                 <Route path="/envs/:id" render={props => <EnvApp {...props} />}/>
                 <Route path="/envs" render={props => <EnvApp {...props} />}/>
                 <Route path="/pipeline" render={props => <PipelineApp {...props} />}/>
                 <Route path="/components" render={props => <ProjectsApp {...props} />}/>
-                <Route path="/projects" render={props => <ProjectApp {...props} />}/>
-                <Route path="/project/:id/doc/:docId" render={props => <ProjectApp {...props} />}/>
-                <Route path="/project/:id/scm" render={props => <ProjectApp {...props} />}/>
-                <Route path="/project/:id" render={props => <ProjectApp {...props} />}/>
+                <Route path="/component/:id/doc/:docId" render={props => <ProjectApp {...props} />}/>
+                <Route path="/component/:id/scm" render={props => <ProjectApp {...props} />}/>
+                <Route path="/component/:id" render={props => <ProjectApp {...props} />}/>
                 <Route path="/work/:id" render={props => <WorkApp {...props} />}/>
                 <Route path="/work" render={props => <WorkApp {...props} />}/>
                 <Route path="/sandbox" component={() => <SandboxApp />}/>

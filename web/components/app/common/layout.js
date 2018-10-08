@@ -67,7 +67,8 @@ class AppLayout extends React.Component {
                             <span className="items">
                                 <Link to="/">index</Link> -&nbsp;
                                 <Link to="/components">components</Link> -&nbsp;
-                                <Link to="/archi">archi</Link> -&nbsp;
+                                <Link to="/dependencies">dependencies</Link> -&nbsp;
+                                <Link to="/architecture">architecture</Link> -&nbsp;
                                 <Link to="/envs">envs</Link> -&nbsp;
                                 <Link to="/hosts">hosts</Link> -&nbsp;
                                 <Link to="/work">work</Link> -&nbsp;

@@ -38,7 +38,7 @@ class ProjectSummary extends React.Component {
             <div className='project-row'>
                 <div className='summary'>
                     <span title={project.id}>
-                        <Link to={"/project/" + project.id}>
+                        <Link to={"/component/" + project.id}>
                             <span style={{fontSize: 14}}>{project.label}</span>
                         </Link>
                         &nbsp;
@@ -124,11 +124,11 @@ function ProjectBadge(props) {
                 
                 <hr />
                 
-                <Link to={'/project/' + props.project.id}>SVN Log</Link>
+                <Link to={'/component/' + props.project.id}>SVN Log</Link>
                 <span>|</span>
                 {project.branches
                     .map(branch => [
-                        <Link key={branch.name} to={'/project/' + props.project.id + '/scm?branchId=' + branch.name}>
+                        <Link key={branch.name} to={'/component/' + props.project.id + '/scm?branchId=' + branch.name}>
                             {branch.name}
                         </Link>,
                         <span>{branch.origin}</span>,
@@ -137,10 +137,10 @@ function ProjectBadge(props) {
                 }
                 <br/>
                 {project.docFiles
-                    .map(doc => <Link key={doc} to={'/project/' + props.project.id + '/doc/' + doc}>{doc}</Link>)
+                    .map(doc => <Link key={doc} to={'/component/' + props.project.id + '/doc/' + doc}>{doc}</Link>)
                 }
-                <Link to={'/project/' + props.project.id + '/dependencies'}>Dependencies</Link>
-                <Link to={'/project/' + props.project.id + '/impacted'}>Impacted</Link>
+                <Link to={'/component/' + props.project.id + '/dependencies'}>Dependencies</Link>
+                <Link to={'/component/' + props.project.id + '/impacted'}>Impacted</Link>
             </div>
         )
     }
