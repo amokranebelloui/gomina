@@ -1,0 +1,32 @@
+[
+  {
+    "id": "tradingDb",
+    "type": "redis",
+    "systems": ["tradex"]
+  },
+  {
+    "id": "basketDb",
+    "type": "redis",
+    "systems": ["tradex"]
+  },
+  {
+    "id": "orderDb",
+    "type": "redis",
+    "systems": ["tradex"]
+  },
+  {
+    "id": "referentialDb",
+    "type": "redis",
+    "systems": ["tradex"]
+  },
+  {
+    "id": "auditDb",
+    "type": "mongodb",
+    "systems": ["tradex"]
+  },
+  {
+    "id": "metrics",
+    "type": "elastic-search",
+    "systems": ["monitoring"]
+  }
+]

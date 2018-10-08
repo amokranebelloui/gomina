@@ -1,0 +1,28 @@
+[
+  {
+    "id": "poc",
+    "label": "Project POC",
+    "type": "Dev",
+    "jira": "DEMO-540",
+    "people": ["amokrane"],
+    "projects": ["kernel", "basket", "order"],
+    "status": "COMPLETED"
+  },
+  {
+    "id": "facilitation",
+    "label": "Facilitation",
+    "type": "Dev",
+    "jira": "DEMO-671",
+    "people": ["amokrane"],
+    "projects": ["facilitation", "order"],
+    "status": "DEV"
+  },
+  {
+    "id": "refacto",
+    "label": "refacto 1",
+    "type": "Dev",
+    "people": ["amokrane"],
+    "projects": ["libbus"],
+    "status": "DEV"
+  }
+]

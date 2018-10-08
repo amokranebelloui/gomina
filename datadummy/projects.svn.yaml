@@ -1,6 +1,6 @@
 # [maven-release-plugin] prepare release
 
-- url: 'OMS/Server/tradex-viewkernel'
+- url: 'dummy://OMS/Server/tradex-viewkernel'
   log:
     - revision: "35770"
       author: "amokrane"
@@ -15,7 +15,7 @@
       message: "view kernel commit"
       version: "0.1.O-SNAPSHOT"
 
-- url: 'OMS/Server/tradex-kernel'
+- url: 'dummy://OMS/Server/tradex-kernel'
   log:
     - revision: "35770"
       author: "amokrane"
@@ -31,7 +31,7 @@
       version: "2.3.O-SNAPSHOT"
 
 
-- url: 'OMS/Server/tradex-basketmanager'
+- url: 'dummy://OMS/Server/tradex-basketmanager'
   log:
     - revision: "35490"
       author: "amokrane"
@@ -65,7 +65,7 @@
       version: "5.1.2"
 
 
-- url: 'OMS/Server/tradex-ordermanager'
+- url: 'dummy://OMS/Server/tradex-ordermanager'
   log:
     - revision: "35490"
       author: "amokrane"
@@ -79,7 +79,7 @@
       author: "amokrane"
       message: "[JIRA-5409] feature 2"
 
-- url: 'OMS/Server/tradex-fixin'
+- url: 'dummy://OMS/Server/tradex-fixin'
   log:
     - revision: "35490"
       author: "amokrane"

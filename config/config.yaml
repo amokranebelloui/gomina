@@ -1,15 +1,17 @@
 
 name: 'My Governance Dashboard'
 passwordsFile: 'config/pass.properties'
+usersFile: 'data/users.json'
+jiraUrl: 'http://localhost/jira'
 
 inventory:
-  #projectsFile: 'data/projects.json'
-  projectsFile: 'data/projects.yaml'
-  hostsFile: 'data/hosts.yaml'
+  projectsFile: 'data/projects.json'
+  servicesFile: 'data/services.json'
+  interactionsFile: 'data/interactions.json'
+  workFile: 'data/work.json'
+  hostsFile: 'data/hosts.json'
   inventoryDir: 'data'
-  #inventoryFilter: 'env\.(.*?)\..*'
-  inventoryFilter: 'env\.(.*?)\.yaml'
-  #inventoryFilter: 'env\.(.*i.*?)\.yaml'
+  inventoryFilter: 'env\.(.*?)\.json'
 
 monitoring:
   timeout: 4
@@ -27,54 +29,26 @@ events:
       host: 'localhost'
       port: 9300
 
-##### Deprecated #####
-
-#scm:
-#  repos:
-#    - id: 'vac'
-#      type: 'svn'
-#      location: 'http://svn/actions/venteaction/vaction/Developpement/'
-#    - id: 'home'
-#      type: 'svn'
-#      location: 'file:////Users/Shared/SvnRepo/svn-repo-demo/'
-#      username: 'Test'
-#      passwordAlias: '@test'
-#    - id: 'dummy'
-#      type: 'dummy'
-#      location: 'dummy://'
-#
-#sonar:
-#  servers:
-#    - id: ''
-#      mode: 'http'
-#      url: 'http://localhost:9000'
-#    - id: 'main'
-#      mode: 'dummy'
-#    - id: 'dummy'
-#      mode: 'dummy'
-#
-#jenkins:
-#  servers:
-#    - id: ''
-#      location: 'http://default-jenkins/jenkins/'
-#    - id: 'principal'
-#      location: 'http://localhost:7111/jenkins/'
-#    - id: 'edge'
-#      location: 'https://jenkins.io/edge/'
-#    - id: 'apache'
-#      location: 'https://builds.apache.org/job/'
-#
-#ssh:
-#  hosts:
-#    - host: 'localhost'
-#      username: 'Test'
-#      passwordAlias: '@test'
-#      sudo: ''
-#
-#zmqMonitoring:
-#  connections:
-#    - url: 'tcp://localhost:7070'
-#      #type: 'SUB'
-#      #serializationClass: 'org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThread'
-#    - url: 'tcp://localhost:7071'
-#
+jenkins:
+  servers:
+    - id: ''
+      location: 'http://default-jenkins/jenkins/'
+    - id: 'principal'
+      location: 'http://localhost:7111/jenkins/'
+    - id: 'local'
+      location: 'http://localhost:8081/job/'
+    - id: 'edge'
+      location: 'https://jenkins.io/edge/'
+    - id: 'apache'
+      location: 'https://builds.apache.org/job/'
+    
+sonar:
+  servers:
+    - id: ''
+      mode: 'http'
+      url: 'http://localhost:9000'
+    - id: 'main'
+      mode: 'http'
+      url: 'http://localhost:9000'
+    - id: 'dummy'
+      mode: 'dummy'

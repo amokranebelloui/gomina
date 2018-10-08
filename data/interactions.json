@@ -1,0 +1,89 @@
+[
+  { "serviceId": "tradex-referential",
+    "exposed": [
+      {"name": "addCustomer", "type": "command"},
+      {"name": "getCustomer", "type": "request"}
+    ],
+    "used": [
+      {"function": {"name": "referentialDb", "type": "database"}}
+    ]
+  },
+  { "serviceId": "orderDb",
+    "exposed": [
+      {"name": "orderDb", "type": "database"}
+    ]
+  },
+  { "serviceId": "basketDb",
+    "exposed": [
+      {"name": "basketDb", "type": "database"}
+    ]
+  },
+  { "serviceId": "referentialDb",
+    "exposed": [
+      {"name": "referentialDb", "type": "database"}
+    ]
+  },
+  { "serviceId": "order",
+    "exposed": [
+      {"name": "createOrder", "type": "command"},
+      {"name": "validateOrder", "type": "command"}
+    ],
+    "used": [
+      {"function": {"name": "orderDb", "type": "database"}, "usage": {"usage": "WRITE"}},
+      {"function": {"name": "getCustomer", "type": "request"}}
+    ]
+  },
+  { "serviceId": "basket",
+    "exposed": [
+      {"name": "createBasket", "type": "command"}
+    ],
+    "used": [
+      {"function": {"name": "createBasket", "type": "command"}},
+      {"function": {"name": "bookBasket", "type": "command"}},
+      {"function": {"name": "orderDb", "type": "database"}, "usage": {"usage": "READ"}},
+      {"function": {"name": "validateOrder", "type": "command"}}
+    ]
+  },
+  { "serviceId": "fixin",
+    "exposed": [
+
+    ],
+    "used": [
+      {"function": {"name": "createBasket", "type": "command"}},
+      {"function": {"name": "createOrder", "type": "command"}}
+    ]
+  },
+  { "serviceId": "facilitation",
+    "exposed": [
+
+    ],
+    "used": [
+      {"function": {"name": "createMarketOrder", "type": "command"}},
+      {"function": {"name": "createOrder", "type": "command"}}
+    ]
+  },
+  { "serviceId": "market",
+    "exposed": [
+      {"name": "createMarketOrder", "type": "command"}
+    ],
+    "used": [
+
+    ]
+  },
+  { "serviceId": "torkjell",
+    "exposed": [
+      {"name": "ride-booked", "type": "event"}
+    ],
+    "used": [
+
+    ]
+  },
+  { "serviceId": "torkjell-dispatch",
+    "exposed": [
+
+    ],
+    "used": [
+      {"function": {"name": "ride-booked", "type": "event"}}
+    ]
+  }
+]

@@ -38,49 +38,20 @@ class InventoryFile : Inventory, AbstractFileRepo {
     }
 
     fun readEnv(file: File): Environment? {
-        try {
-            return when (file.extension) {
+        return try {
+            when (file.extension) {
                 "yaml" -> yamlMapper.readValue(java.io.File("$inventoryDir/${file.name}"))
-                "json" -> map(jsonMapper.readValue(java.io.File("$inventoryDir/${file.name}")))
+                "json" -> jsonMapper.readValue(java.io.File("$inventoryDir/${file.name}"))
                 else -> null
             }
         }
         catch (e: Exception) {
             logger.error("Cannot read env $file", e)
-            return null
+            null
         }
-    }
-
-    private fun map(old: DEnvironment): Environment {
-        val services = old.instances
-                .groupBy { i -> i.svc }
-                .map { (svc, instances) -> Triple(svc, instances.first(), instances) }
-                .map { (svc, i, instances) ->
-                    Service(svc = svc, type = i.type, project = i.project, instances = instances.map { Instance(it.id, it.host, it.folder) })
-                }
-
-        return Environment(old.code, old.name, old.type, old.monitoringUrl, old.active, services)
     }
 
     override fun getEnvironments(): Collection<Environment> = getAllEnvironments().values
     override fun getEnvironment(env: String): Environment? = getAllEnvironments()[env]
 
 }
-
-private data class DEnvironment (
-    val name: String,
-    val code: String,
-    val type: String = "UNKNOWN",
-    val monitoringUrl: String?,
-    val active: Boolean = false,
-    val instances: List<DInstance> = emptyList()
-)
-
-private data class DInstance (
-    val id: String,
-    val type: String?,
-    val svc: String,
-    val host: String?,
-    val folder: String?,
-    val project: String?
-)
