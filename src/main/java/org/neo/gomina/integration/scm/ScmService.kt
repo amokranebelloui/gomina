@@ -17,7 +17,7 @@ class ScmService {
     fun getScmDetails(project: Project, fromCache: Boolean = false): ScmDetails? {
         // TODO Consider scmType, noSCM
         return project.scm?.let { scm ->
-            scmCache.get("${scm.repo}-${scm.url}", fromCache) { scmRepos.getScmDetails(scm) }
+            scmCache.get("${scm.id}", fromCache) { scmRepos.getScmDetails(scm) }
         }
     }
 

@@ -7,7 +7,9 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProviderConfig
+import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.monitoring.MonitoringEventsProviderConfig
+import org.neo.gomina.integration.sonar.SonarConfig
 import java.io.File
 
 data class InventoryConfig(var projectsFile: String = "",
@@ -27,13 +29,15 @@ data class EventsConfig(
 
 data class Config (
 
-    var name: String? = null,
-    var passwordsFile: String? = null,
-    val usersFile: String?,
-    val jiraUrl: String = "",
-    var inventory: InventoryConfig = InventoryConfig(),
-    var monitoring: MonitoringConfig = MonitoringConfig(),
-    var events: EventsConfig = EventsConfig()
+        var name: String? = null,
+        var passwordsFile: String? = null,
+        val usersFile: String?,
+        val jiraUrl: String = "",
+        var inventory: InventoryConfig = InventoryConfig(),
+        var monitoring: MonitoringConfig = MonitoringConfig(),
+        var events: EventsConfig = EventsConfig(),
+        var jenkins: JenkinsConfig = JenkinsConfig(),
+        var sonar: SonarConfig = SonarConfig()
 )
 
 class ConfigLoader {

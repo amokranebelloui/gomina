@@ -5,18 +5,33 @@ import org.junit.Test
 
 class TmateSoftSvnClientTest {
 
+    val root = "file:////Users/Shared/SvnRepo/svn-repo-demo/"
+    val projectUrl = "svn-project1"
+
     @Test
     fun testSvn() {
-        val svnClient = TmateSoftSvnClient("file:////Users/Shared/SvnRepo/svn-repo-demo", "svn-project2")
+        val svnClient = TmateSoftSvnClient(root, projectUrl)
 
         val svnLog = svnClient.getLog("trunk", "0", 100)
         svnLog.forEach { println(it) }
-        Assertions.assertThat(svnLog.size).isEqualTo(10)
+        Assertions.assertThat(svnLog.size).isGreaterThan(16)
+    }
+
+    @Test
+    fun testListFiles() {
+        val svnClient = TmateSoftSvnClient(root, projectUrl)
+        svnClient.listFiles("/trunk/", "-1").forEach { println(it) }
+    }
+
+    @Test
+    fun testGetFile() {
+        val svnClient = TmateSoftSvnClient(root, projectUrl)
+        svnClient.getFile("trunk/README.md", "-1")?.let { println(it) }
     }
 
     @Test
     fun testBranches() {
-        val svnClient = TmateSoftSvnClient("file:////Users/Shared/SvnRepo/svn-repo-demo", "svn-project1")
+        val svnClient = TmateSoftSvnClient(root, projectUrl)
         svnClient.getBranches().forEach { println("branch: $it") }
     }
 }

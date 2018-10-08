@@ -22,17 +22,12 @@ import javax.inject.Inject
 
 private val noOpScmClient = NoneScmClient()
 
-data class ScmRepo(val id: String = "", val type: String = "", val location: String = "", val username: String = "", val passwordAlias: String = "")
-
-data class ScmConfig(val repos: List<ScmRepo> = ArrayList())
-
 class ScmReposImpl : ScmRepos {
 
     companion object {
         private val logger = LogManager.getLogger(ScmReposImpl::class.java)
     }
 
-    private val repos = HashMap<String, ScmRepo>()
     private val clients = HashMap<String, ScmClient>()
 
     private val metadataMapper = ProjectMetadataMapper()
@@ -40,22 +35,13 @@ class ScmReposImpl : ScmRepos {
     private val passwords: Passwords
 
     @Inject
-    constructor(config: ScmConfig, passwords: Passwords) {
+    constructor(passwords: Passwords) {
         this.passwords = passwords
-        for (repo in config.repos) {
-            repos.put(repo.id, repo)
-        }
-    }
-
-    override fun get(id: String): ScmRepo? = repos[id]
-
-    private fun getRepo(scm: Scm): ScmRepo? {
-        return repos[scm.repo]
     }
 
     private fun getClient(scm: Scm): ScmClient {
-        return clients.getOrPut("${scm.repo}/${scm.url}") {
-            repos[scm.repo]?.let{ buildScmClient(scm, it, passwords) } ?: noOpScmClient
+        return clients.getOrPut("${scm.id}") {
+            buildScmClient(scm, passwords) ?: noOpScmClient
         }
     }
 
@@ -73,12 +59,7 @@ class ScmReposImpl : ScmRepos {
             val lastReleasedRev = logEntries
                     .filter { StringUtils.isNotBlank(it.newVersion) }
                     .firstOrNull()?.revision
-
-            val repo = this.getRepo(scm)
-            val root = repo?.location
-            val url = if (root != null && scm.url != null) "$root${scm.url}" else null
-            // FIXME encapsulate
-
+            
             // FIXME there shouldn't be trunk in here
             val metadataFile = scmClient.getFile("/trunk/project.yaml", "-1")
             val metadata = metadataFile?.let { metadataMapper.map(metadataFile) }
@@ -88,7 +69,7 @@ class ScmReposImpl : ScmRepos {
             val scmDetails = ScmDetails(
                     owner = metadata?.owner,
                     critical = metadata?.critical,
-                    url = url,
+                    url = scm.url,
                     mavenId = MavenUtils.extractMavenId(pomFile),
                     latest = MavenUtils.extractVersion(pomFile),
                     latestRevision = logEntries.firstOrNull()?.revision,
@@ -132,11 +113,11 @@ class ScmReposImpl : ScmRepos {
         return scmClient.getFile("/trunk/$docId", "-1")
     }
 
-    private fun buildScmClient(scm: Scm, repo: ScmRepo, passwords: Passwords): ScmClient? {
-        return when (repo.type) {
-            "svn" -> TmateSoftSvnClient("${repo.location}", "${scm.url}", repo.username, passwords.getRealPassword(repo.passwordAlias))
-            "git" -> GitClient("${repo.location}/${scm.url}")
-            "dummy" -> DummyScmClient("${scm.url}")
+    private fun buildScmClient(scm: Scm, passwords: Passwords): ScmClient? {
+        return when (scm.type) {
+            "svn" -> TmateSoftSvnClient(baseUrl = scm.url, projectUrl = scm.path, username = scm.username, password = passwords.getRealPassword(scm.passwordAlias))
+            "git" -> GitClient(scm.url)
+            "dummy" -> DummyScmClient(scm.url)
             else -> null
         }
     }

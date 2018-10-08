@@ -24,7 +24,6 @@ import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
 import org.neo.gomina.integration.monitoring.Monitoring
 import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.integration.scm.ScmService
-import org.neo.gomina.integration.scm.impl.ScmConfig
 import org.neo.gomina.integration.scm.impl.ScmReposImpl
 import org.neo.gomina.integration.sonar.SonarConfig
 import org.neo.gomina.integration.sonar.SonarConnectors
@@ -50,10 +49,7 @@ import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.work.WorkList
 import org.neo.gomina.module.config.Config
 import org.neo.gomina.module.config.ConfigLoader
-import org.neo.gomina.persistence.jenkins.JenkinsConfigProvider
 import org.neo.gomina.persistence.model.*
-import org.neo.gomina.persistence.scm.ScmConfigProvider
-import org.neo.gomina.persistence.sonar.SonarConfigProvider
 import org.neo.gomina.plugins.*
 import java.io.File
 
@@ -105,17 +101,16 @@ class GominaModule : AbstractModule() {
         bind(ZmqMonitorThreadPool::class.java).`in`(Scopes.SINGLETON)
 
         // SCM
-        bind(ScmConfig::class.java).toProvider(ScmConfigProvider::class.java)
         bind(ScmRepos::class.java).to(ScmReposImpl::class.java).`in`(Scopes.SINGLETON)
         bind(ScmService::class.java).`in`(Scopes.SINGLETON)
 
         // Jenkins
-        bind(JenkinsConfig::class.java).toProvider(JenkinsConfigProvider::class.java)
+        bind(JenkinsConfig::class.java).toInstance(config.jenkins)
         bind(JenkinsConnector::class.java).to(JenkinsConnectorImpl::class.java).`in`(Scopes.SINGLETON)
         bind(JenkinsService::class.java).`in`(Scopes.SINGLETON)
 
         // Sonar
-        bind(SonarConfig::class.java).toProvider(SonarConfigProvider::class.java)
+        bind(SonarConfig::class.java).toInstance(config.sonar)
         bind(SonarConnectors::class.java).`in`(Scopes.SINGLETON)
         bind(SonarService::class.java).`in`(Scopes.SINGLETON)
 

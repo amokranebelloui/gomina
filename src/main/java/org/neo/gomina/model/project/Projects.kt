@@ -18,9 +18,15 @@ data class Project (
 
 data class Scm (
     var type: String = "",
-    var repo: String = "",
-    var url: String = ""
-)
+    var url: String = "",
+    var path: String = "",
+    val username: String = "",
+    val passwordAlias: String = ""
+) {
+    val id: String get() = "$type-$url-$path"
+    val fullUrl: String get() = "$url" + if (path.isNotBlank()) "/$path" else "$path"
+}
+
 
 interface Projects {
     fun getProjects(): List<Project>

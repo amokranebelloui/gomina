@@ -63,7 +63,7 @@ class ProjectSummary extends React.Component {
                 <div className='latest'><Version version={project.latest} /></div>
                 <div className='loc'><LinesOfCode loc={project.loc} /></div>
                 <div className='coverage'><Coverage coverage={project.coverage} /></div>
-                <div className='scm'><ScmLink projectId={project.id} type={project.scmType} url={project.scmUrl} changes={project.changes} /></div>
+                <div className='scm'><ScmLink projectId={project.id} type={project.scmType} url={project.scmLocation} changes={project.changes} /></div>
                 <div className='last-commit'>
                     <DateTime date={project.lastCommit} />&nbsp;
                     {(project.commitActivity != undefined && project.commitActivity != 0) &&
@@ -97,8 +97,8 @@ function ProjectBadge(props) {
                 <span style={{fontSize: 9}}>{project.mvn}</span>
                 <br/>
 
-                <ScmLink type={project.scmType} url={project.scmUrl}/>
-                <span style={{fontSize: 9}}>{project.scmRepo ? project.scmRepo : 'not under scm'}</span>
+                <ScmLink type={project.scmType} url={project.scmLocation}/>
+                <span style={{fontSize: 9}}>{project.scmLocation ? project.scmLocation : 'not under scm'}</span>
                 <br/>
 
                 {project.owner && [<span>Owner {project.owner}</span>, <br/>]}

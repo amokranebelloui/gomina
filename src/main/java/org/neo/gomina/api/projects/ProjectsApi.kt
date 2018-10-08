@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
 import org.neo.gomina.integration.scm.ScmDetails
-import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.sonar.SonarIndicators
 import org.neo.gomina.integration.sonar.SonarService
@@ -35,7 +34,6 @@ class ProjectsApi {
     @Inject private lateinit var systems: Systems
 
     @Inject private lateinit var scmService: ScmService
-    @Inject private lateinit var scmRepos: ScmRepos
     @Inject private lateinit var sonarService: SonarService
     @Inject private lateinit var jenkinsService: JenkinsService
 
@@ -158,7 +156,7 @@ class ProjectsApi {
     private fun build(project: Project): ProjectDetail? {
         try {
             return ProjectDetail(project.id).apply {
-                apply(project, scmRepos)
+                apply(project)
                 scmService.getScmDetails(project, fromCache = true)?.let { apply(it) }
                 sonarService.getSonar(project, fromCache = true)?.let { apply(it) }
                 jenkinsService.getStatus(project, fromCache = true)?.let { apply(it) }
@@ -214,15 +212,14 @@ class ProjectsApi {
 
 }
 
-private fun ProjectDetail.apply(project: Project, scmRepos: ScmRepos) {
+private fun ProjectDetail.apply(project: Project) {
     this.label = project.label ?: project.id
     this.type = project.type
     this.systems = project.systems
     this.languages = project.languages
     this.tags = project.tags
     this.scmType = project.scm?.type
-    this.scmRepo = project.scm?.repo
-    this.scmLocation = project.scm?.url
+    this.scmLocation = project.scm?.fullUrl
     this.mvn = project.maven
     this.jenkinsServer = project.jenkinsServer
     this.jenkinsJob = project.jenkinsJob
@@ -234,7 +231,6 @@ private fun ProjectDetail.apply(scmDetails: ScmDetails) {
     if (!scmDetails.mavenId.isNullOrBlank()) {
         this.mvn = scmDetails.mavenId
     }
-    this.scmUrl = scmDetails.url
     this.branches = scmDetails.branches.map {
         BranchDetail(name = it.name, origin = it.origin, originRevision = it.originRevision)
     }
