@@ -8,6 +8,13 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.user.Users
 import javax.inject.Inject
 
+data class UserDetail (
+        val id: String,
+        val login: String,
+        val firstName: String?,
+        val lastName: String?
+)
+
 class UsersApi {
 
     companion object {

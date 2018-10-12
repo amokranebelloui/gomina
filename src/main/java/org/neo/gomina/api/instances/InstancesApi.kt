@@ -15,15 +15,80 @@ import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.ssh.InstanceSshDetails
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.model.host.resolveHostname
-import org.neo.gomina.model.inventory.Environment
-import org.neo.gomina.model.inventory.Instance
-import org.neo.gomina.model.inventory.Inventory
-import org.neo.gomina.model.inventory.Service
+import org.neo.gomina.model.inventory.*
 import org.neo.gomina.model.monitoring.RuntimeInfo
 import org.neo.gomina.model.monitoring.ServerStatus
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
+import java.util.*
 import javax.inject.Inject
+
+data class ServiceDetail (
+        val svc: String,
+        val type: String? = null,
+        val mode: ServiceMode? = ServiceMode.ONE_ONLY,
+        val activeCount: Int = 1,
+        val project: String? = null
+)
+
+class InstanceDetail(
+
+        var env: String? = null,
+        var id: String? = null, // Unique by env
+        var name: String? = null,// X Replication
+        var service: String? = null, // Z Partitioning
+        var type: String? = null, // Y Functional
+
+        var unexpected: Boolean = false,
+        var unexpectedHost: Boolean = false,
+
+        var cluster: Boolean = false,
+        var participating: Boolean = false,
+        var leader: Boolean = false,
+
+        var pid: String? = null,
+        var host: String? = null,
+        var status: String? = null,
+        var startTime: Date? = null,
+        var startDuration: Long? = null,
+
+        var project: String? = null,
+        var deployHost: String? = null,
+        var deployFolder: String? = null,
+        var deployVersion: String? = null,
+        var deployRevision: String? = null,
+        var confCommited: Boolean? = null,
+        var confUpToDate: Boolean? = null,
+        var confRevision: String? = null,
+        var version: String? = null,
+        var revision: String? = null,
+
+        var latestVersion: String? = null,
+        var latestRevision: String? = null,
+
+        var releasedVersion: String? = null,
+        var releasedRevision: String? = null,
+
+        var jmx: Int? = null,
+        var busVersion: String? = null,
+        var coreVersion: String? = null,
+        var quickfixPersistence: String? = null,
+        var redisHost: String? = null,
+        var redisPort: Int? = null,
+        var redisMasterHost: String? = null,
+        var redisMasterPort: Int? = null,
+        var redisMasterLink: Boolean? = null,
+        var redisMasterLinkDownSince: String? = null,
+        var redisOffset: Long? = null,
+        var redisOffsetDiff: Long? = null,
+        var redisMaster: Boolean? = null,
+        var redisRole: String? = null,
+        var redisRW: String? = null,
+        var redisMode: String? = null,
+        var redisStatus: String? = null,
+        var redisSlaveCount: Int? = null,
+        var redisClientCount: Int? = null
+)
 
 class InstancesApi {
 

@@ -19,7 +19,55 @@ import org.neo.gomina.model.project.Systems
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.*
 import javax.inject.Inject
+
+data class ProjectDetail (
+        var id: String,
+        var label: String? = null,
+        var type: String? = null,
+        var owner: String? = null,
+        var critical: Int? = null,
+        var systems: List<String> = emptyList(),
+        var languages: List<String> = emptyList(),
+        var tags: List<String> = emptyList(),
+        var scmType: String? = null,
+        var scmLocation: String? = null,
+        var mvn: String? = null,
+        var sonarUrl: String? = null,
+        var jenkinsServer: String? = null,
+        var jenkinsJob: String? = null,
+        var jenkinsUrl: String? = null,
+        var buildNumber: String? = null,
+        var buildStatus: String? = null,
+        var buildTimestamp: Long? = null,
+        var branches: List<BranchDetail> = emptyList(),
+        var docFiles: List<String> = emptyList(),
+        var changes: Int? = null,
+        var latest: String? = null,
+        var released: String? = null,
+        var loc: Double? = null,
+        var coverage: Double? = null,
+        var commitLog: List<CommitLogEntry> = emptyList(),
+        var lastCommit: Date? = null,
+        var commitActivity: Int? = null
+)
+
+data class BranchDetail (
+        var name: String,
+        var origin: String? = null,
+        var originRevision: String? = null
+)
+
+data class CommitLogEntry (
+        var revision: String?,
+        var date: Date?,
+        var author: String?,
+        var message: String?,
+
+        var version: String? = null
+)
+
 
 class ProjectsApi {
 

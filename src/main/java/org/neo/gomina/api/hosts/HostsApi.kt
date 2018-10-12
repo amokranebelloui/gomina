@@ -11,6 +11,20 @@ import org.neo.gomina.model.host.Host
 import org.neo.gomina.model.host.Hosts
 import javax.inject.Inject
 
+data class HostDetail(
+        val host: String,
+        val dataCenter: String?,
+        val group: String?,
+        val type: String,
+        val tags: List<String> = emptyList(),
+
+        val username: String,
+        val passwordAlias: String? = null,
+        val sudo: String? = null,
+
+        val unexpected: List<String>
+)
+
 class HostsApi {
 
     companion object {

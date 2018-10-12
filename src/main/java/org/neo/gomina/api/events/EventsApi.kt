@@ -15,7 +15,23 @@ import org.neo.gomina.model.event.EventsProvider
 import org.neo.gomina.model.event.EventsProviderConfig
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.util.*
 import javax.inject.Inject
+
+data class EventList(
+        val events: List<EventDetail> = emptyList(),
+        val errors: List<String> = emptyList()
+)
+
+data class EventDetail(
+        val timestamp: Date,
+        val type: String?,
+        val message: String?,
+
+        val envId: String? = null,
+        val instanceId: String? = null,
+        val version: String? = null
+)
 
 class EventsApi {
 
