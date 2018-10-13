@@ -34,6 +34,8 @@ data class ServiceDetail (
 data class VersionDetail(val version: String = "", val revision: String = "")
 data class VersionsDetail(val running: VersionDetail?, val deployed: VersionDetail?, val released: VersionDetail?, val latest: VersionDetail?)
 
+data class SidecarDetail(val status: String = "", val version: String = "", val revision: String = "")
+
 class InstanceDetail(
 
         var env: String? = null,
@@ -57,10 +59,10 @@ class InstanceDetail(
 
         var project: String? = null,
         var deployHost: String? = null,
-        var deployFolder: String? = null,
-        var confCommited: Boolean? = null,
-        var confUpToDate: Boolean? = null,
-        var confRevision: String? = null,
+        @Deprecated("") var deployFolder: String? = null,
+        @Deprecated("") var confCommited: Boolean? = null,
+        @Deprecated("") var confUpToDate: Boolean? = null,
+        @Deprecated("") var confRevision: String? = null,
 
         // Versions
         /**/
@@ -75,8 +77,7 @@ class InstanceDetail(
         /**/
         var versions: VersionsDetail? = null,
 
-        var sidecarStatus: String? = null,
-        var sidecarVersion: String? = null,
+        var sidecar: SidecarDetail? = null,
 
         var properties: HashMap<String, Any?> = hashMapOf(),
 
@@ -86,8 +87,8 @@ class InstanceDetail(
         @Deprecated("") var redisMasterPort: Int? = null,
         @Deprecated("") var redisMasterLink: Boolean? = null,
         @Deprecated("") var redisMasterLinkDownSince: String? = null,
-        var redisOffset: Long? = null,
-        var redisOffsetDiff: Long? = null
+        @Deprecated("") var redisOffset: Long? = null,
+        @Deprecated("") var redisOffsetDiff: Long? = null
 )
 
 class InstancesApi {
@@ -353,8 +354,7 @@ private fun InstanceDetail.applyMonitoring(indicators: RuntimeInfo) {
     this.startTime = indicators.process.startTime?.toDateUtc
     this.startDuration = indicators.process.startDuration
 
-    this.sidecarStatus = indicators.sidecarStatus
-    this.sidecarVersion = indicators.sidecarVersion
+    this.sidecar = SidecarDetail(status = indicators.sidecarStatus ?: "", version = indicators.sidecarVersion ?: "")
 
     this.properties.put("jvm.jmx.port", indicators.jvm.jmx?.toString())
     this.properties.put("xxx.bux.version", indicators.dependencies.busVersion)
@@ -371,29 +371,37 @@ private fun InstanceDetail.applyCluster(indicators: RuntimeInfo) {
 
 private fun InstanceDetail.applyRedis(indicators: RuntimeInfo) {
 
-    this.redisHost = indicators.redis.redisHost
-    this.redisPort = indicators.redis.redisPort
+    this.redisHost = indicators.redis?.redisHost
+    this.redisPort = indicators.redis?.redisPort
 
-    this.redisOffset = indicators.redis.redisOffset
-    this.redisOffsetDiff = indicators.redis.redisOffsetDiff
+    this.redisOffset = indicators.redis?.redisOffset
+    this.redisOffsetDiff = indicators.redis?.redisOffsetDiff
 
 
-    this.redisMasterHost = indicators.redis.redisMasterHost
-    this.redisMasterPort = indicators.redis.redisMasterPort
-    this.redisMasterLink = indicators.redis.redisMasterLink
-    this.redisMasterLinkDownSince = indicators.redis.redisMasterLinkDownSince
-    
+    this.redisMasterHost = indicators.redis?.redisMasterHost
+    this.redisMasterPort = indicators.redis?.redisMasterPort
+    this.redisMasterLink = indicators.redis?.redisMasterLink
+    this.redisMasterLinkDownSince = indicators.redis?.redisMasterLinkDownSince
+
+
+    this.properties.put("redis.offset", indicators.redis?.redisOffset)
+    this.properties.put("redis.master.host", indicators.redis?.redisMasterHost)
+    this.properties.put("redis.master.port", indicators.redis?.redisMasterPort)
+    this.properties.put("redis.master.link", indicators.redis?.redisMasterLink)
+    this.properties.put("redis.master.link.down.since", indicators.redis?.redisMasterLinkDownSince)
+    this.properties.put("redis.master.offset.diff", indicators.redis?.redisOffsetDiff)
+
     // FIXME Move to dynamic fields for instance details
-    this.properties.put("redis.host", indicators.redis.redisHost)
-    this.properties.put("redis.port", indicators.redis.redisPort)
-    this.properties.put("redis.master", indicators.redis.redisMaster)
-    this.properties.put("redis.status", indicators.redis.redisStatus)
-    this.properties.put("redis.role", indicators.redis.redisRole)
-    this.properties.put("redis.rw", indicators.redis.redisRW)
-    this.properties.put("redis.persistence.mode", indicators.redis.redisMode)
-    this.properties.put("redis.slave.count", indicators.redis.redisSlaveCount?.toString())
-    this.properties.put("redis.client.count", indicators.redis.redisClientCount?.toString())
+    this.properties.put("redis.host", indicators.redis?.redisHost)
+    this.properties.put("redis.port", indicators.redis?.redisPort)
+    this.properties.put("redis.master", indicators.redis?.redisMaster)
+    this.properties.put("redis.status", indicators.redis?.redisStatus)
+    this.properties.put("redis.role", indicators.redis?.redisRole)
+    this.properties.put("redis.rw", indicators.redis?.redisRW)
+    this.properties.put("redis.persistence.mode", indicators.redis?.redisMode)
+    this.properties.put("redis.slave.count", indicators.redis?.redisSlaveCount)
+    this.properties.put("redis.client.count", indicators.redis?.redisClientCount)
     indicators.redis.let { redis -> redisMasterHost?.let {
-        this.properties.put("redis.master.link", "${redis.redisMasterHost}:${redis.redisMasterPort} connected:${redis.redisMasterLink} since:${redis.redisMasterLinkDownSince}")
+        this.properties.put("redis.master.link.detail", "${redis?.redisMasterHost}:${redis?.redisMasterPort} connected:${redis?.redisMasterLink} since:${redis?.redisMasterLinkDownSince}")
     }}
 }

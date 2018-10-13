@@ -30,6 +30,7 @@ class Blocker extends React.Component {
                 <Route path="/dependencies" component={DependenciesApp}/>
                 <Route path="/hosts" render={props => <HostsApp {...props} />}/>
                 <Route path="/host/:id" render={props => <HostsApp {...props} />}/>
+                <Route path="/envs/:id/:instanceId" render={props => <EnvApp {...props} />}/>
                 <Route path="/envs/:id" render={props => <EnvApp {...props} />}/>
                 <Route path="/envs" render={props => <EnvApp {...props} />}/>
                 <Route path="/pipeline" render={props => <PipelineApp {...props} />}/>

@@ -22,4 +22,10 @@ function RedisReadWrite(props) {
     )
 }
 
-export { RedisPersistence, RedisReadWrite }
+function RedisOffset(props) {
+    return (
+        <span style={{fontSize: 7, color: 'gray', lineHeight: '40%'}}>{props.offset}</span>
+    )
+}
+
+export { RedisPersistence, RedisReadWrite, RedisOffset }

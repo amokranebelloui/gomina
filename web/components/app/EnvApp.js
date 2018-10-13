@@ -9,6 +9,8 @@ import {Toggle} from "../common/Toggle";
 import {Container} from "../common/Container";
 import {InstanceFilter} from "../environment/InstanceFilter";
 import {Events} from "../environment/Events";
+import {InstanceProperties} from "../environment/Instance";
+import {Well} from "../common/Well";
 
 class EnvApp extends React.Component {
     constructor(props) {
@@ -188,6 +190,8 @@ class EnvApp extends React.Component {
     render() {
         const envsByType = groupBy(this.state.envs, 'type');
         const instances = flatMap(this.state.services, svc => svc.instances);
+        const selectedInstances = instances.filter (i => i.id === this.props.match.params.instanceId);
+        console.info(instances, selectedInstances);
         const events = this.state.events;
         const eventsErrors = this.state.eventsErrors;
 
@@ -231,6 +235,14 @@ class EnvApp extends React.Component {
                                 <button onClick={e => this.reloadScm()}>RELOAD SCM</button>
                                 <button onClick={e => this.reloadSsh()}>RELOAD SSH</button>
                                 <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
+                                <div>
+                                    {selectedInstances.map(i =>
+                                        <Well block>
+                                            <h3>{i.id} properties:</h3>
+                                            <InstanceProperties properties={i.properties} />
+                                        </Well>
+                                    )}
+                                </div>
                             </div>
                             <div className='side-secondary'>
                                 <Container>

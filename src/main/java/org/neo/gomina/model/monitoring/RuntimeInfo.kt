@@ -25,7 +25,7 @@ data class RuntimeInfo(
         val jvm: JvmInfo,
         val cluster: ClusterInfo,
         val fix: FixInfo,
-        val redis: RedisInfo,
+        val redis: RedisInfo?,
         val version: VersionInfo,
         val dependencies: DependenciesInfo
 ) {
