@@ -31,6 +31,9 @@ data class ServiceDetail (
         val project: String? = null
 )
 
+data class VersionDetail(val version: String = "", val revision: String = "")
+data class VersionsDetail(val running: VersionDetail?, val deployed: VersionDetail?, val released: VersionDetail?, val latest: VersionDetail?)
+
 class InstanceDetail(
 
         var env: String? = null,
@@ -55,39 +58,36 @@ class InstanceDetail(
         var project: String? = null,
         var deployHost: String? = null,
         var deployFolder: String? = null,
-        var deployVersion: String? = null,
-        var deployRevision: String? = null,
         var confCommited: Boolean? = null,
         var confUpToDate: Boolean? = null,
         var confRevision: String? = null,
-        var version: String? = null,
-        var revision: String? = null,
 
-        var latestVersion: String? = null,
-        var latestRevision: String? = null,
+        // Versions
+        /**/
+        @Deprecated("") var version: String? = null,
+        @Deprecated("") var revision: String? = null,
+        @Deprecated("") var deployVersion: String? = null,
+        @Deprecated("") var deployRevision: String? = null,
+        @Deprecated("") var releasedVersion: String? = null,
+        @Deprecated("") var releasedRevision: String? = null,
+        @Deprecated("") var latestVersion: String? = null,
+        @Deprecated("") var latestRevision: String? = null,
+        /**/
+        var versions: VersionsDetail? = null,
 
-        var releasedVersion: String? = null,
-        var releasedRevision: String? = null,
+        var sidecarStatus: String? = null,
+        var sidecarVersion: String? = null,
 
-        var jmx: Int? = null,
-        var busVersion: String? = null,
-        var coreVersion: String? = null,
-        var quickfixPersistence: String? = null,
-        var redisHost: String? = null,
-        var redisPort: Int? = null,
-        var redisMasterHost: String? = null,
-        var redisMasterPort: Int? = null,
-        var redisMasterLink: Boolean? = null,
-        var redisMasterLinkDownSince: String? = null,
+        var properties: HashMap<String, Any?> = hashMapOf(),
+
+        @Deprecated("") var redisHost: String? = null,
+        @Deprecated("") var redisPort: Int? = null,
+        @Deprecated("") var redisMasterHost: String? = null,
+        @Deprecated("") var redisMasterPort: Int? = null,
+        @Deprecated("") var redisMasterLink: Boolean? = null,
+        @Deprecated("") var redisMasterLinkDownSince: String? = null,
         var redisOffset: Long? = null,
-        var redisOffsetDiff: Long? = null,
-        var redisMaster: Boolean? = null,
-        var redisRole: String? = null,
-        var redisRW: String? = null,
-        var redisMode: String? = null,
-        var redisStatus: String? = null,
-        var redisSlaveCount: Int? = null,
-        var redisClientCount: Int? = null
+        var redisOffsetDiff: Long? = null
 )
 
 class InstancesApi {
@@ -102,7 +102,7 @@ class InstancesApi {
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var projects: Projects
 
-    @Inject lateinit private var scmService: ScmService 
+    @Inject lateinit private var scmService: ScmService
     @Inject lateinit private var sshService: SshService
 
     @Inject lateinit private var monitoring: Monitoring
@@ -192,22 +192,23 @@ class InstancesApi {
         val expected = ext.instance != null
         val id = envId + "-" + ext.id
         val instance = InstanceDetail(id = id, env = envId, type = ext.service.type, service = ext.service.svc, name = ext.id, unexpected = !expected)
+        val sshDetails = ext.instance?.let { sshService.getDetails(ext.instance) }
+        val scmDetail = ext.project?.let { scmService.getScmDetails(it, fromCache = true) }
         ext.instance?.let {
             instance.applyInventory(ext.service, ext.instance)
             if (ext.indicators == null) {
                 instance.status = ServerStatus.OFFLINE
             }
-            sshService.getDetails(ext.instance)?.let { instance.applySsh(it) }
         }
+        sshDetails?.let { instance.applySsh(it) }
         ext.indicators?.let {
             instance.applyMonitoring(ext.indicators)
             instance.applyCluster(ext.indicators)
             instance.applyRedis(ext.indicators)
             instance.unexpectedHost = StringUtils.isNotBlank(instance.deployHost) && instance.deployHost != instance.host
         }
-        ext.project?.let {
-            scmService.getScmDetails(it, fromCache = true)?.let { instance.applyScm(it) }
-        }
+        scmDetail?.let { instance.applyScm(it) }
+        instance.versions = versions(scmDetail, sshDetails, ext.indicators)
         return instance
     }
 
@@ -299,6 +300,7 @@ fun main(args: Array<String>) {
     println(merge(m1, m2))
 }
 
+//fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision.toString())
 
 fun Service.toServiceDetail(): ServiceDetail {
     return ServiceDetail(
@@ -317,6 +319,14 @@ private fun InstanceDetail.applyInventory(service: Service, envInstance: Instanc
     this.deployHost = envInstance.host
     this.deployFolder = envInstance.folder
 }
+
+private fun versions(scmDetails: ScmDetails?, instanceSshDetails: InstanceSshDetails?, indicators: RuntimeInfo?) =
+        VersionsDetail(
+                running = indicators?.version?.let { VersionDetail(it.version ?: "", it.revision ?: "") },
+                deployed = instanceSshDetails?.let { VersionDetail(it.deployedVersion ?: "", it.deployedRevision ?: "") },
+                released = scmDetails?.let { VersionDetail(it.released ?: "", it.releasedRevision ?: "") },
+                latest = scmDetails?.let { VersionDetail(it.latest ?: "", it.latestRevision ?: "") }
+        )
 
 private fun InstanceDetail.applyScm(scmDetails: ScmDetails) {
     this.latestVersion = scmDetails.latest
@@ -343,10 +353,14 @@ private fun InstanceDetail.applyMonitoring(indicators: RuntimeInfo) {
     this.startTime = indicators.process.startTime?.toDateUtc
     this.startDuration = indicators.process.startDuration
 
-    this.jmx = indicators.jvm.jmx
-    this.busVersion = indicators.dependencies.busVersion
-    this.coreVersion = indicators.dependencies.coreVersion
-    this.quickfixPersistence = indicators.fix.quickfixPersistence
+    this.sidecarStatus = indicators.sidecarStatus
+    this.sidecarVersion = indicators.sidecarVersion
+
+    this.properties.put("jvm.jmx.port", indicators.jvm.jmx?.toString())
+    this.properties.put("xxx.bux.version", indicators.dependencies.busVersion)
+    this.properties.put("xxx.core.version", indicators.dependencies.coreVersion)
+    this.properties.put("quickfix.persistence", indicators.fix.quickfixPersistence)
+
 }
 
 private fun InstanceDetail.applyCluster(indicators: RuntimeInfo) {
@@ -356,19 +370,30 @@ private fun InstanceDetail.applyCluster(indicators: RuntimeInfo) {
 }
 
 private fun InstanceDetail.applyRedis(indicators: RuntimeInfo) {
+
     this.redisHost = indicators.redis.redisHost
     this.redisPort = indicators.redis.redisPort
+
+    this.redisOffset = indicators.redis.redisOffset
+    this.redisOffsetDiff = indicators.redis.redisOffsetDiff
+
+
     this.redisMasterHost = indicators.redis.redisMasterHost
     this.redisMasterPort = indicators.redis.redisMasterPort
     this.redisMasterLink = indicators.redis.redisMasterLink
     this.redisMasterLinkDownSince = indicators.redis.redisMasterLinkDownSince
-    this.redisOffset = indicators.redis.redisOffset
-    this.redisOffsetDiff = indicators.redis.redisOffsetDiff
-    this.redisMaster = indicators.redis.redisMaster
-    this.redisRole = indicators.redis.redisRole
-    this.redisRW = indicators.redis.redisRW
-    this.redisMode = indicators.redis.redisMode
-    this.redisStatus = indicators.redis.redisStatus
-    this.redisSlaveCount = indicators.redis.redisSlaveCount
-    this.redisClientCount = indicators.redis.redisClientCount
+    
+    // FIXME Move to dynamic fields for instance details
+    this.properties.put("redis.host", indicators.redis.redisHost)
+    this.properties.put("redis.port", indicators.redis.redisPort)
+    this.properties.put("redis.master", indicators.redis.redisMaster)
+    this.properties.put("redis.status", indicators.redis.redisStatus)
+    this.properties.put("redis.role", indicators.redis.redisRole)
+    this.properties.put("redis.rw", indicators.redis.redisRW)
+    this.properties.put("redis.persistence.mode", indicators.redis.redisMode)
+    this.properties.put("redis.slave.count", indicators.redis.redisSlaveCount?.toString())
+    this.properties.put("redis.client.count", indicators.redis.redisClientCount?.toString())
+    indicators.redis.let { redis -> redisMasterHost?.let {
+        this.properties.put("redis.master.link", "${redis.redisMasterHost}:${redis.redisMasterPort} connected:${redis.redisMasterLink} since:${redis.redisMasterLinkDownSince}")
+    }}
 }

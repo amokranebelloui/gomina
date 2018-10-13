@@ -7,6 +7,7 @@ import './CommitLog.css'
 import {DateTime} from "../common/DateTime";
 import {Revision} from "./Revision";
 
+// FIXME Instance: id, env, name, version, revision, deployVersion, deployRevision
 class CommitLog extends React.Component {
 
     indexByRevision(sortedCommits, instances, logByRevision, unknown) {

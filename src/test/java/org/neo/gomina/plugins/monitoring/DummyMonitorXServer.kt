@@ -81,8 +81,8 @@ class DummyMonitorThread : Thread {
         }
         while (true) {
             println("Round ..")
-            var count = 1
             data.listEnvs().forEach { env ->
+                var count = 1
                 for ((instanceId, indicators) in data.getFor(env)) {
                     val i = random.nextInt(15)
                     val status = when {
@@ -100,8 +100,8 @@ class DummyMonitorThread : Thread {
                         count++
                     }
                 }
+                println("Sent $count messages for $env")
             }
-            println("Sent $count messages")
             try {
                 Thread.sleep(4000)
             } catch (e: InterruptedException) {

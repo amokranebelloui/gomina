@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types'
 
 class ServiceStatus extends React.Component {
     render() {
@@ -14,7 +15,7 @@ class ServiceStatus extends React.Component {
                                 'lightgray';
         const opacity = 0.9;
         return (
-            <div className='status' style={Object.assign(this.props.style, {
+            <div className='status' style={Object.assign(this.props.style||{}, {
                 backgroundColor: backgroundColor,
                 color: 'white',
                 cursor: 'pointer'
@@ -36,5 +37,12 @@ class ServiceStatus extends React.Component {
         );
     }
 }
+
+ServiceStatus.propTypes = {
+    "status": PropTypes.string,
+    "reason": PropTypes.string,
+    "text": PropTypes.string,
+    "style": PropTypes.object,
+};
 
 export { ServiceStatus }

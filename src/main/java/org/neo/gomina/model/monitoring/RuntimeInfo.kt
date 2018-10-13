@@ -18,6 +18,9 @@ data class RuntimeInfo(
         val lastTime:LocalDateTime,
         var delayed:Boolean = false,
 
+        var sidecarStatus: String? = null,
+        var sidecarVersion: String? = null,
+
         val process: ProcessInfo,
         val jvm: JvmInfo,
         val cluster: ClusterInfo,

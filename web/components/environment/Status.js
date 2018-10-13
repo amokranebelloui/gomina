@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 function isRunning(status) {
     return status == 'LIVE' || status == 'LOADING';
@@ -83,7 +84,7 @@ class Status extends React.Component {
             }
         }
         return (
-            <div className='status' style={Object.assign(this.props.style, {
+            <div className='status' style={Object.assign(this.props.style || {}, {
                 backgroundColor: backgroundColor,
                 color: 'white',
                 cursor: 'pointer'
@@ -107,5 +108,13 @@ class Status extends React.Component {
         );
     }
 }
+
+Status.propTypes = {
+    "status": PropTypes.string,
+    "leader": PropTypes.bool,
+    "participating": PropTypes.bool,
+    "cluster": PropTypes.bool,
+    "style": PropTypes.object
+};
 
 export {StatusWrapper, Status}

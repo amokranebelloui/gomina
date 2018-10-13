@@ -1,16 +1,20 @@
 import React from "react";
+import PropTypes from 'prop-types'
 import {compareVersions, compareVersionsRevisions} from "../common/version-utils";
+import {Version} from "../common/Version";
+
+//running, deployed, released, latest
 
 class Versions extends React.Component {
     render() {
-        const instance = this.props.instance;
-        const dispDeployed = (instance.deployVersion && instance.deployRevision)
-            ? compareVersionsRevisions(instance.version, instance.revision, instance.deployVersion, instance.deployRevision) != 0
-            : instance.deployVersion
-                ? compareVersions(instance.version, instance.deployVersion)
-                : false;
-        const dispReleased = compareVersionsRevisions(instance.version, instance.revision, instance.releasedVersion, instance.releasedRevision) < 0;
-        const dispLatest = compareVersionsRevisions(instance.version, instance.revision, instance.latestVersion, instance.latestRevision) < 0;
+        const v = this.props.versions || {};
+        const dispDeployed = v.running && v.deployed && ((v.deployed.version && v.deployed.revision)
+            ? compareVersionsRevisions(v.running.version, v.running.revision, v.deployed.version, v.deployed.revision) != 0
+            : v.deployed.version
+                ? compareVersions(v.running.version, v.deployed.version)
+                : false);
+        const dispReleased = v.running && v.released && compareVersionsRevisions(v.running.version, v.running.revision, v.released.version, v.released.revision) < 0;
+        const dispLatest = v.running && v.latest && compareVersionsRevisions(v.running.version, v.running.revision, v.latest.version, v.latest.revision) < 0;
 
         let versionStyle = {color: 'black', backgroundColor: 'lightgray'};
         let deployedStyle = {color: 'white', backgroundColor: '#d47951'};
@@ -19,16 +23,22 @@ class Versions extends React.Component {
 
         return (
             <span>
-                <Version version={instance.version} revision={instance.revision} {...versionStyle} />
+                {v.running
+                    ? <Version version={v.running.version} revision={v.running.revision} {...versionStyle} />
+                    : <Version {...{color:'black', backgroundColor:'lightgray'}} />}
                 {dispDeployed &&
-                <Version version={instance.deployVersion} revision={instance.deployRevision} {...deployedStyle} />}
+                <Version version={v.deployed.version} revision={v.deployed.revision} {...deployedStyle} />}
                 {dispReleased &&
-                <Version version={instance.releasedVersion} revision={instance.releasedRevision} {...releasedStyle} />}
+                <Version version={v.released.version} revision={v.released.revision} {...releasedStyle} />}
                 {dispLatest &&
-                <Version version={instance.latestVersion} revision={instance.latestRevision} {...latestStyle} />}
+                <Version version={v.latest.version} revision={v.latest.revision} {...latestStyle} />}
             </span>
         )
     }
 }
+
+Versions.propTypes = {
+    "versions": PropTypes.object
+};
 
 export {Versions}

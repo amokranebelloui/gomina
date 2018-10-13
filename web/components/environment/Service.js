@@ -2,6 +2,7 @@ import React from "react";
 import {Badge} from "../common/Badge";
 import {BuildLink} from "../build/BuildLink";
 import {ServiceStatus} from "./ServiceStatus";
+import PropTypes from 'prop-types'
 
 class Service extends React.Component {
     render() {
@@ -36,6 +37,13 @@ class Service extends React.Component {
         )
     }
 }
+
+Service.propTypes = {
+    "service": PropTypes.object,
+    "instances": PropTypes.array, /* status LIVE LOADING, leader, version, unexpected, confCommited, confRevision */
+    "highlightFunction": PropTypes.func,
+};
+
 
 function computeStatus(service, instances) {
     switch (service.mode) {
