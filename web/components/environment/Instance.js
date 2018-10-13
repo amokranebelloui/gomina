@@ -50,12 +50,12 @@ class Instance extends React.Component {
                         <li><BuildLink url={instance.project}/></li> {/* // TODO Project Build URL */}
                     </div>
 
-                    {instance.sidecar &&
+                    {/*instance.sidecar &&
                     <div className="line">
                         <li><b>@Sidecar</b></li>
                         {instance.sidecar.status} {instance.sidecar.version}
                     </div>
-                    }
+                    */}
 
                     {instance.type == 'app' &&
                     <div className="line">
@@ -73,30 +73,19 @@ class Instance extends React.Component {
                         <li><b>@Redis</b></li>
 
                         <li><InstanceProp property="redis.port" properties={instance.properties}/></li>
-                        <li><InstanceProp property="redis.rw" properties={instance.properties}/></li>
-                        <li><InstanceProp property="redis.persistence.mode" properties={instance.properties}/></li>
-                        <li><InstanceProp property="redis.client.count" properties={instance.properties}/></li>
                         <li><InstanceProp property="redis.role" properties={instance.properties}/></li>
                         <li><InstanceProp property="redis.slave.count" properties={instance.properties}/></li>
+                        <li><InstanceProp property="redis.rw" properties={instance.properties}/></li>
+                        <li><InstanceProp property="redis.persistence.mode" properties={instance.properties}/></li>
                         <li><InstanceProp property="redis.offset" properties={instance.properties}/></li>
-                        {/*
+                        <li><InstanceProp property="redis.client.count" properties={instance.properties}/></li>
+
                         <li><InstanceProp property="redis.master" properties={instance.properties}/></li>
-                        <li><InstanceProp property="redis.status" properties={instance.properties}/></li>
-                        <li><InstanceProp property="redis.host" properties={instance.properties} /></li>
-                        <li><InstanceProp property="redis.port" properties={instance.properties} /></li>
-                        */}
+                        <li><InstanceProp property="redis.master.link" properties={instance.properties}/></li>
+                        <li><InstanceProp property="redis.master.host" properties={instance.properties}/></li>
+                        <li><InstanceProp property="redis.master.port" properties={instance.properties}/></li>
+                        <li><InstanceProp property="redis.master.offset.diff" properties={instance.properties}/></li>
 
-                    </div>
-                    }
-
-                    {instance.type == 'redis' &&
-                    <div className="line">
-                        <li><b>@Redis Link</b></li> {/* Not Yet Migrated */}
-                        {instance.redisMasterHost && [
-                            <li><RedisLink status={instance.redisMasterLink} since={instance.redisMasterLinkDownSince}/></li>,
-                            <li><Host host={instance.redisMasterHost} />:<Port port={instance.redisMasterPort} /></li>,
-                            <li><RedisOffset title="Offset (Diff)" offset={instance.redisOffsetDiff} /></li>
-                        ]}
                     </div>
                     }
                 </div>
@@ -112,6 +101,9 @@ Instance.propTypes = {
 
 const map = {
     "redis.port": value => <Port port={value} />,
+    "redis.master.host": value => <Host host={value} />,
+    "redis.master.port": value => <Port port={value} />,
+    "redis.master.link": value => value && <RedisLink status={value.status} since={value.downSince} />,
     "redis.offset": value => <RedisOffset offset={value} />,
     "redis.master.offset.diff": value => <RedisOffset offset={value} />,
     "redis.master": value => <Leader cluster={true} participating={true} leader={value} />,
@@ -135,7 +127,7 @@ function InstanceProperties(props) {
 function InstanceProperty(props) {
     const property = props.property;
     const value = props.value;
-    const component = map[property] || (value => <span>{value}</span>);
+    const component = map[property] || (value => <span>{value && value.toString()}</span>);
     const p = value ? <b>{property}</b> : <span>{property}</span>;
     const c = component(value);
     return (
@@ -148,7 +140,7 @@ function InstanceProperty(props) {
 function InstanceProp(props) {
     const property = props.property;
     const value = (props.properties ||{})[property];
-    const component = map[property] || (value => <span>{value}</span>);
+    const component = map[property] || (value => <span>{value && value.toString()}</span>);
     const c = component(value);
     return (
         value ?

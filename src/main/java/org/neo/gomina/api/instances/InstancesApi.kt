@@ -79,16 +79,7 @@ class InstanceDetail(
 
         var sidecar: SidecarDetail? = null,
 
-        var properties: HashMap<String, Any?> = hashMapOf(),
-
-        @Deprecated("") var redisHost: String? = null,
-        @Deprecated("") var redisPort: Int? = null,
-        @Deprecated("") var redisMasterHost: String? = null,
-        @Deprecated("") var redisMasterPort: Int? = null,
-        @Deprecated("") var redisMasterLink: Boolean? = null,
-        @Deprecated("") var redisMasterLinkDownSince: String? = null,
-        @Deprecated("") var redisOffset: Long? = null,
-        @Deprecated("") var redisOffsetDiff: Long? = null
+        var properties: HashMap<String, Any?> = hashMapOf()
 )
 
 class InstancesApi {
@@ -370,27 +361,6 @@ private fun InstanceDetail.applyCluster(indicators: RuntimeInfo) {
 }
 
 private fun InstanceDetail.applyRedis(indicators: RuntimeInfo) {
-
-    this.redisHost = indicators.redis?.redisHost
-    this.redisPort = indicators.redis?.redisPort
-
-    this.redisOffset = indicators.redis?.redisOffset
-    this.redisOffsetDiff = indicators.redis?.redisOffsetDiff
-
-
-    this.redisMasterHost = indicators.redis?.redisMasterHost
-    this.redisMasterPort = indicators.redis?.redisMasterPort
-    this.redisMasterLink = indicators.redis?.redisMasterLink
-    this.redisMasterLinkDownSince = indicators.redis?.redisMasterLinkDownSince
-
-
-    this.properties.put("redis.offset", indicators.redis?.redisOffset)
-    this.properties.put("redis.master.host", indicators.redis?.redisMasterHost)
-    this.properties.put("redis.master.port", indicators.redis?.redisMasterPort)
-    this.properties.put("redis.master.link", indicators.redis?.redisMasterLink)
-    this.properties.put("redis.master.link.down.since", indicators.redis?.redisMasterLinkDownSince)
-    this.properties.put("redis.master.offset.diff", indicators.redis?.redisOffsetDiff)
-
     // FIXME Move to dynamic fields for instance details
     this.properties.put("redis.host", indicators.redis?.redisHost)
     this.properties.put("redis.port", indicators.redis?.redisPort)
@@ -399,9 +369,17 @@ private fun InstanceDetail.applyRedis(indicators: RuntimeInfo) {
     this.properties.put("redis.role", indicators.redis?.redisRole)
     this.properties.put("redis.rw", indicators.redis?.redisRW)
     this.properties.put("redis.persistence.mode", indicators.redis?.redisMode)
+    this.properties.put("redis.offset", indicators.redis?.redisOffset)
     this.properties.put("redis.slave.count", indicators.redis?.redisSlaveCount)
     this.properties.put("redis.client.count", indicators.redis?.redisClientCount)
-    indicators.redis.let { redis -> redisMasterHost?.let {
-        this.properties.put("redis.master.link.detail", "${redis?.redisMasterHost}:${redis?.redisMasterPort} connected:${redis?.redisMasterLink} since:${redis?.redisMasterLinkDownSince}")
-    }}
+    if (indicators.redis?.redisRole == "SLAVE") {
+        this.properties.put("redis.master.host", indicators.redis.redisMasterHost)
+        this.properties.put("redis.master.port", indicators.redis.redisMasterPort)
+        this.properties.put("redis.master.link", mapOf(
+                "status" to indicators.redis.redisMasterLink,
+                "downSince" to indicators.redis.redisMasterLinkDownSince)
+        )
+        this.properties.put("redis.master.offset.diff", indicators.redis?.redisOffsetDiff)
+    }
+
 }
