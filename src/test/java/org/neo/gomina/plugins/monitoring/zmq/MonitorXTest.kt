@@ -3,7 +3,7 @@ package org.neo.gomina.plugins.monitoring.zmq
 import org.fest.assertions.Assertions.assertThat
 import org.fest.assertions.MapAssert.entry
 import org.junit.Test
-import org.neo.gomina.integration.monitoring.Monitoring
+import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.integration.zmqmonitoring.MessageParser
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.zeromq.ZMQ

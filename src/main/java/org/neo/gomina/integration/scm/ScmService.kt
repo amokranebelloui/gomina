@@ -1,36 +1,36 @@
 package org.neo.gomina.integration.scm
 
 import com.github.rjeschke.txtmark.Processor
-import org.neo.gomina.model.project.Project
+import org.neo.gomina.integration.scm.impl.ScmReposImpl
+import org.neo.gomina.model.project.Scm
+import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.ScmDetails
+import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.utils.Cache
 import javax.inject.Inject
 
-class ScmService {
+class ScmService : ScmRepos {
 
     private val scmCache = Cache<ScmDetails>("scm") {
         it.branches = it.branches ?: emptyList()
         it.docFiles = it.docFiles ?: emptyList()
     }
 
-    @Inject lateinit var scmRepos: ScmRepos
+    @Inject lateinit var scmRepos: ScmReposImpl
 
-    fun getScmDetails(project: Project, fromCache: Boolean = false): ScmDetails? {
-        // TODO Consider scmType, noSCM
-        return project.scm?.let { scm ->
-            scmCache.get("${scm.id}", fromCache) { scmRepos.getScmDetails(scm) }
-        }
+    override fun getScmDetails(scm: Scm): ScmDetails? {
+        return scmCache.get(scm.id, true)
     }
 
-    fun getBranch(project: Project, branchId: String): List<Commit> {
-        // TODO Consider scmType, noSCM
-        return project.scm
-                ?.let { scmRepos.getBranch(it, branchId) } ?: emptyList()
+    fun reloadScmDetails(scm: Scm) {
+        scmCache.get(scm.id, false) { scmRepos.getScmDetails(scm) }
     }
 
-    fun getDocument(project: Project, docId: String): String? {
-        // TODO Consider scmType, noSCM
-        return project.scm
-                ?.let{ scmRepos.getDocument(it, docId) }
-                ?.let { Processor.process(it) }
+    override fun getBranch(scm: Scm, branchId: String): List<Commit> {
+        return scmRepos.getBranch(scm, branchId)
+    }
+
+    override fun getDocument(scm: Scm, docId: String): String? {
+        return scmRepos.getDocument(scm, docId)?.let { Processor.process(it) }
     }
 }

@@ -2,9 +2,9 @@ package org.neo.gomina.integration.scm.svn
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.scm.Branch
-import org.neo.gomina.integration.scm.Commit
-import org.neo.gomina.integration.scm.ScmClient
+import org.neo.gomina.model.scm.Branch
+import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.ScmClient
 import org.tmatesoft.svn.core.SVNDirEntry
 import org.tmatesoft.svn.core.SVNLogEntry
 import org.tmatesoft.svn.core.SVNProperties

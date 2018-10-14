@@ -1,4 +1,4 @@
-package org.neo.gomina.integration.scm
+package org.neo.gomina.model.scm
 
 import org.neo.gomina.model.project.Scm
 
@@ -15,12 +15,12 @@ data class ScmDetails (
         var releasedRevision: String? = null,
         var branches: List<Branch> = emptyList(),
         var docFiles: List<String> = emptyList(),
-        var commitLog: List<Commit> = emptyList(),
+        var commitLog: List<Commit> = emptyList(), // FIXME Doesn't need to be here
         var changes: Int? = null
 )
 
 interface ScmRepos {
     fun getDocument(scm: Scm, docId: String): String?
-    fun getScmDetails(scm: Scm): ScmDetails
+    fun getScmDetails(scm: Scm): ScmDetails?
     fun getBranch(scm: Scm, branchId: String): List<Commit>
 }

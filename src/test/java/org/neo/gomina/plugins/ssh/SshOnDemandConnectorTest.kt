@@ -4,6 +4,7 @@ import org.junit.Test
 import org.neo.gomina.integration.ssh.*
 import org.neo.gomina.model.host.Host
 import org.neo.gomina.model.host.Hosts
+import org.neo.gomina.model.host.InstanceSshDetails
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.persistence.model.InventoryFile
 import java.io.File

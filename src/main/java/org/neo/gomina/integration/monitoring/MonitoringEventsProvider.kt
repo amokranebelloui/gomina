@@ -3,6 +3,7 @@ package org.neo.gomina.integration.monitoring
 import org.neo.gomina.model.event.Event
 import org.neo.gomina.model.event.EventsProvider
 import org.neo.gomina.model.event.EventsProviderConfig
+import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.ServerStatus
 import java.time.Clock
 import java.time.LocalDate

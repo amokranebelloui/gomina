@@ -1,7 +1,7 @@
 package org.neo.gomina.integration.zmqmonitoring
 
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.monitoring.Monitoring
+import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.RuntimeInfo
 import org.zeromq.ZMQ
 import javax.inject.Inject

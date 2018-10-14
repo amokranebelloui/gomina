@@ -13,6 +13,7 @@ import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.events.EventsProviderFactory
 import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
+import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.api.projects.ProjectsApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.api.users.UsersApi
@@ -21,8 +22,6 @@ import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
-import org.neo.gomina.integration.monitoring.Monitoring
-import org.neo.gomina.integration.scm.ScmRepos
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.scm.impl.ScmReposImpl
 import org.neo.gomina.integration.sonar.SonarConfig
@@ -38,11 +37,14 @@ import org.neo.gomina.model.dependency.EnrichDependencies
 import org.neo.gomina.model.dependency.InteractionsRepository
 import org.neo.gomina.model.dependency.ProviderBasedInteractionRepository
 import org.neo.gomina.model.event.EventsProviderConfig
+import org.neo.gomina.model.host.HostRepo
 import org.neo.gomina.model.host.Hosts
 import org.neo.gomina.model.inventory.Inventory
+import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.project.ProjectSystems
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.project.Systems
+import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.model.service.Services
 import org.neo.gomina.model.user.Users
@@ -101,8 +103,9 @@ class GominaModule : AbstractModule() {
         bind(ZmqMonitorThreadPool::class.java).`in`(Scopes.SINGLETON)
 
         // SCM
-        bind(ScmRepos::class.java).to(ScmReposImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(ScmReposImpl::class.java).`in`(Scopes.SINGLETON)
         bind(ScmService::class.java).`in`(Scopes.SINGLETON)
+        bind(ScmRepos::class.java).to(ScmService::class.java).`in`(Scopes.SINGLETON)
 
         // Jenkins
         bind(JenkinsConfig::class.java).toInstance(config.jenkins)
@@ -118,6 +121,10 @@ class GominaModule : AbstractModule() {
         bind(SshClient::class.java).`in`(Scopes.SINGLETON)
         bind(SshOnDemandConnector::class.java).`in`(Scopes.SINGLETON)
         bind(SshService::class.java).`in`(Scopes.SINGLETON)
+        bind(HostRepo::class.java).to(SshService::class.java).`in`(Scopes.SINGLETON)
+
+        // Topology
+        bind(Topology::class.java).`in`(Scopes.SINGLETON)
 
         // EventRepo
         //bind(MonitoringEventsProvider::class.java).`in`(Scopes.SINGLETON)

@@ -9,7 +9,7 @@ import io.vertx.ext.web.handler.sockjs.SockJSHandler
 import io.vertx.ext.web.handler.sockjs.SockJSHandlerOptions
 import io.vertx.ext.web.handler.sockjs.SockJSSocket
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.monitoring.Monitoring
+import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.RuntimeInfo
 import java.util.*
 import javax.inject.Inject

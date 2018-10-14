@@ -1,9 +1,7 @@
-package org.neo.gomina.integration.monitoring
+package org.neo.gomina.model.monitoring
 
 import com.google.inject.name.Named
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.monitoring.RuntimeInfo
-import org.neo.gomina.model.monitoring.ServerStatus
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.ConcurrentHashMap
@@ -33,7 +31,7 @@ class Monitoring {
         this.fieldsChanged = fieldsChanged
     }
 
-    fun onMessage(listener:MonitoringEventListener) {
+    fun onMessage(listener: MonitoringEventListener) {
         this.listeners.add(listener)
     }
 

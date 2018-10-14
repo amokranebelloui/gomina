@@ -1,38 +1,27 @@
 package org.neo.gomina.integration.ssh
 
 import com.jcraft.jsch.Session
+import org.neo.gomina.model.host.HostRepo
+import org.neo.gomina.model.host.HostSshDetails
+import org.neo.gomina.model.host.InstanceSshDetails
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.utils.Cache
 import javax.inject.Inject
-
-data class InstanceSshDetails(
-        var analyzed: Boolean = false,
-        var deployedVersion: String? = null,
-        var deployedRevision: String? = null,
-        var confCommitted: Boolean? = null,
-        var confUpToDate: Boolean? = null,
-        var confRevision: String? = null
-)
-
-data class HostSshDetails(
-        var analyzed: Boolean = false,
-        var unexpectedFolders: List<String> = emptyList()
-)
 
 interface SshAnalysis {
     fun instance(instance: Instance, session: Session, sudo: String?): InstanceSshDetails = InstanceSshDetails(analyzed = true)
     fun host(session: Session, sudo: String?): HostSshDetails = HostSshDetails(analyzed = true)
 }
 
-class SshService {
+class SshService : HostRepo {
 
     @Inject private lateinit var sshAnalysis: SshAnalysis
     @Inject private lateinit var sshConnector: SshOnDemandConnector
     private val sshCache = Cache<InstanceSshDetails>("ssh")
     private val sshHostCache = Cache<HostSshDetails>("ssh-host")
 
-    fun getDetails(instance: Instance): InstanceSshDetails? {
+    override fun getDetails(instance: Instance): InstanceSshDetails? {
         if (!instance.host.isNullOrBlank() && !instance.folder.isNullOrBlank()) {
             return sshCache.get("${instance.host}-${instance.folder}")
         }

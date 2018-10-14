@@ -9,7 +9,7 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
-import org.neo.gomina.integration.scm.ScmDetails
+import org.neo.gomina.model.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.sonar.SonarIndicators
 import org.neo.gomina.integration.sonar.SonarService
@@ -146,7 +146,7 @@ class ProjectsApi {
         try {
             logger.info("Get SCM log for $projectId $branch")
             var log: List<CommitLogEntry>? = null
-            projects.getProject(projectId)?.let {
+            projects.getProject(projectId)?.scm?.let {
                 log = scmService.getBranch(it, branch).map {
                     CommitLogEntry(
                             revision = it.revision,
@@ -178,7 +178,7 @@ class ProjectsApi {
             logger.info("Get doc for $projectId $docId")
             var doc: String? = null
             projects.getProject(projectId)?.let {
-                doc = scmService.getDocument(it, docId) //.joinToString(separator = "")
+                doc = it.scm?.let { scmService.getDocument(it, docId) } //.joinToString(separator = "")
             }
             if (doc != null) {
                 ctx.response().putHeader("content-type", "text/html")
@@ -205,7 +205,9 @@ class ProjectsApi {
         try {
             return ProjectDetail(project.id).apply {
                 apply(project)
-                scmService.getScmDetails(project, fromCache = true)?.let { apply(it) }
+                project.scm
+                        ?.let { scmService.getScmDetails(it) }
+                        ?.let { apply(it) }
                 sonarService.getSonar(project, fromCache = true)?.let { apply(it) }
                 jenkinsService.getStatus(project, fromCache = true)?.let { apply(it) }
             }
@@ -221,7 +223,7 @@ class ProjectsApi {
             val projectId = ctx.request().getParam("projectId")
             projects.getProject(projectId)?.let { project ->
                 logger.info("Reload SCM data for $projectId ...")
-                scmService.getScmDetails(project, fromCache = false)
+                project.scm?.let { scmService.reloadScmDetails(it) }
                 // FIXME Jenkins in it's own, or rename API
                 logger.info("Reload Jenkins data for $projectId ...")
                 jenkinsService.getStatus(project, fromCache = false)

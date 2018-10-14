@@ -3,10 +3,10 @@ package org.neo.gomina.integration.scm.impl
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.MavenUtils
-import org.neo.gomina.integration.scm.Commit
-import org.neo.gomina.integration.scm.ScmClient
-import org.neo.gomina.integration.scm.ScmDetails
-import org.neo.gomina.integration.scm.ScmRepos
+import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.ScmClient
+import org.neo.gomina.model.scm.ScmDetails
+import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.integration.scm.dummy.DummyScmClient
 import org.neo.gomina.integration.scm.git.GitClient
 import org.neo.gomina.integration.scm.metadata.ProjectMetadataMapper

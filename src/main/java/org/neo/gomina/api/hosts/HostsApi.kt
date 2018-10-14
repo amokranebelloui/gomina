@@ -5,9 +5,9 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.ssh.HostSshDetails
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.model.host.Host
+import org.neo.gomina.model.host.HostSshDetails
 import org.neo.gomina.model.host.Hosts
 import javax.inject.Inject
 

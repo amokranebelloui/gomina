@@ -2,8 +2,8 @@ package org.neo.gomina.integration.scm.versions
 
 import org.apache.commons.lang3.StringUtils
 import org.neo.gomina.integration.maven.MavenUtils
-import org.neo.gomina.integration.scm.Commit
-import org.neo.gomina.integration.scm.ScmClient
+import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.ScmClient
 
 interface ReleaseFlagger {
     fun flag(commit: Commit): Commit

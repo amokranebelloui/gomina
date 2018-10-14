@@ -2,7 +2,8 @@ import React from "react";
 
 class Host extends React.Component {
     render() {
-        const unexpected = this.props.host && this.props.expected && this.props.expected != this.props.host;
+        const host = this.props.host ? this.props.host : this.props.expected;
+        const unexpected = this.props.host && this.props.expected && this.props.expected !== this.props.host;
         const title = "Running on " + this.props.host + (unexpected ? ", Expected " + this.props.expected : "");
         /*
         {unexpected && <span title="Expected host" style={{
@@ -15,7 +16,7 @@ class Host extends React.Component {
             <span>
                 <span title={title}
                       style={{userSelect: 'all', textDecoration: unexpected ? 'line-through' : null}}>
-                    {this.props.host}
+                    {host}
                 </span>
             </span>
         )

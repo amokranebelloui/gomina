@@ -3,7 +3,7 @@ package org.neo.gomina.model.inventory
 data class Environment(
         val id: String,
         val name: String?,
-        val type: String = "UNKNOWN",
+        val type: String = "UNKNOWN", // PROD TEST
         val monitoringUrl: String?,
         val active: Boolean = false,
         val services: List<Service> = emptyList()

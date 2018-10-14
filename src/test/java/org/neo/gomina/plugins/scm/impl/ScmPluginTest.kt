@@ -1,12 +1,10 @@
 package org.neo.gomina.plugins.scm.impl
 
 import org.junit.Test
-import org.neo.gomina.integration.scm.Commit
-import org.neo.gomina.integration.scm.ScmDetails
-import org.neo.gomina.integration.scm.ScmRepos
-import org.neo.gomina.integration.scm.ScmService
-import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Scm
+import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.ScmDetails
+import org.neo.gomina.model.scm.ScmRepos
 
 class ScmPluginTest {
 
@@ -27,14 +25,16 @@ class ScmPluginTest {
             
         }
 
+        /*
         val connector = ScmService()
         connector.scmRepos = FileScmReposOverride()
 
-        connector.getScmDetails(Project(id = "fixin", scm = Scm(url = "OMS/Server/tradex-fixin")))
-        connector.getScmDetails(Project(id = "fixin", scm = Scm(url = "OMS/Server/tradex-fixin")))
+        connector.getScmDetails(Scm(url = "OMS/Server/tradex-fixin"))
+        connector.getScmDetails(Scm(url = "OMS/Server/tradex-fixin"))
 
-        connector.getScmDetails(Project(id = "fixin", scm = Scm(url = "OMS/Server/tradex-fixin")))
-        connector.getScmDetails(Project(id = "basket", scm = Scm(url = "OMS/Server/tradex-basketmanager")))
+        connector.getScmDetails(Scm(url = "OMS/Server/tradex-fixin"))
+        connector.getScmDetails(Scm(url = "OMS/Server/tradex-basketmanager"))
+        */
     }
 
 }

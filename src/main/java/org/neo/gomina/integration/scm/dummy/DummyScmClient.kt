@@ -7,8 +7,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.scm.Commit
-import org.neo.gomina.integration.scm.ScmClient
+import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.ScmClient
 import java.io.File
 import java.util.*
 
@@ -72,10 +72,10 @@ class DummyScmClient : ScmClient {
 
     private fun buildFrom(map: Map<String, Any>): Commit {
         return Commit(
-            revision = map["revision"] as String,
-            date = map["date"] as Date?,
-            author = map["author"] as String?,
-            message = map["message"] as String?
+                revision = map["revision"] as String,
+                date = map["date"] as Date?,
+                author = map["author"] as String?,
+                message = map["message"] as String?
         )
     }
 

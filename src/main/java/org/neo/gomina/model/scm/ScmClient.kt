@@ -1,4 +1,4 @@
-package org.neo.gomina.integration.scm
+package org.neo.gomina.model.scm
 
 import java.util.*
 

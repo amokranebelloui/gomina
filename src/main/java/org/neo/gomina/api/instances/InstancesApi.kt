@@ -8,18 +8,22 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.model.runtime.ExtInstance
+import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.api.toDateUtc
-import org.neo.gomina.integration.monitoring.Monitoring
-import org.neo.gomina.integration.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmService
-import org.neo.gomina.integration.ssh.InstanceSshDetails
 import org.neo.gomina.integration.ssh.SshService
+import org.neo.gomina.model.host.InstanceSshDetails
 import org.neo.gomina.model.host.resolveHostname
-import org.neo.gomina.model.inventory.*
+import org.neo.gomina.model.inventory.Instance
+import org.neo.gomina.model.inventory.Inventory
+import org.neo.gomina.model.inventory.Service
+import org.neo.gomina.model.inventory.ServiceMode
+import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.RuntimeInfo
 import org.neo.gomina.model.monitoring.ServerStatus
-import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
+import org.neo.gomina.model.scm.ScmDetails
 import java.util.*
 import javax.inject.Inject
 
@@ -98,6 +102,7 @@ class InstancesApi {
     @Inject lateinit private var sshService: SshService
 
     @Inject lateinit private var monitoring: Monitoring
+    @Inject lateinit private var topology: Topology
 
     private val mapper = ObjectMapper()
 
@@ -126,9 +131,8 @@ class InstancesApi {
 
     private fun instances(ctx: RoutingContext) {
         try {
-            val instances = inventory.getEnvironments().flatMap { env ->
-                buildExtInstances(env).map { build(env.id, it) }
-            }
+            val instances = inventory.getEnvironments()
+                    .flatMap { env -> topology.buildExtInstances(env).map { buildInstanceDetail(env.id, it) } }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(instances))
@@ -161,12 +165,12 @@ class InstancesApi {
             val envId = ctx.request().getParam("envId")
 
             val instances = inventory.getEnvironment(envId)?.let {
-                buildExtInstances(it)
+                topology.buildExtInstances(it)
                         .groupBy { it.service }
                         .map { (service, extInstances) ->
                             mapOf(
                                     "service" to service.toServiceDetail(),
-                                    "instances" to extInstances.map { build(envId, it) }
+                                    "instances" to extInstances.map { buildInstanceDetail(envId, it) }
                             )
                         }
             }
@@ -180,55 +184,14 @@ class InstancesApi {
         }
     }
 
-    private fun build(envId: String, ext: ExtInstance): InstanceDetail {
-        val expected = ext.instance != null
-        val id = envId + "-" + ext.id
-        val instance = InstanceDetail(id = id, env = envId, type = ext.service.type, service = ext.service.svc, name = ext.id, unexpected = !expected)
-        val sshDetails = ext.instance?.let { sshService.getDetails(ext.instance) }
-        val scmDetail = ext.project?.let { scmService.getScmDetails(it, fromCache = true) }
-        ext.instance?.let {
-            instance.applyInventory(ext.service, ext.instance)
-            if (ext.indicators == null) {
-                instance.status = ServerStatus.OFFLINE
-            }
-        }
-        sshDetails?.let { instance.applySsh(it) }
-        ext.indicators?.let {
-            instance.applyMonitoring(ext.indicators)
-            instance.applyCluster(ext.indicators)
-            instance.applyRedis(ext.indicators)
-            instance.unexpectedHost = StringUtils.isNotBlank(instance.deployHost) && instance.deployHost != instance.host
-        }
-        scmDetail?.let { instance.applyScm(it) }
-        instance.versions = versions(scmDetail, sshDetails, ext.indicators)
-        return instance
-    }
-
-    private data class ExtInstance(val id:String, val service:Service, val project:Project?, val instance: Instance?, val indicators: RuntimeInfo?)
-
-    private fun buildExtInstances(env: Environment): List<ExtInstance> {
-        val services = env ?. services ?. associateBy { it.svc }
-        val inventory = env.services
-                .flatMap { svc -> svc.instances.map { instance -> svc to instance } }
-                .associateBy { (_, instance) -> instance.id }
-        val monitoring = monitoring.instancesFor(env.id)
-                .associateBy { it.instanceId }
-        return merge(inventory, monitoring)
-                .map { (id, instance, indicators) ->
-                    val svc = instance?.first?.svc ?: indicators?.service ?: "x"
-                    val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
-                    val project = service.project?.let { projects.getProject(it) }
-                    ExtInstance(id, service, project, instance?.second, indicators)
-                }
-    }
-
     private fun reloadScm(ctx: RoutingContext) {
         try {
             vertx.executeBlocking({future: Future<Void> ->
                 val envId = ctx.request().getParam("envId")
                 logger.info("Reloading SCM data $envId ...")
                 projects.getProjects()
-                        .forEach { scmService.getScmDetails(it, fromCache = false) }
+                        .mapNotNull { it.scm }
+                        .forEach { scmService.reloadScmDetails(it) }
                 future.complete()
             }, false)
             {res: AsyncResult<Void> ->
@@ -279,28 +242,26 @@ class InstancesApi {
 
 }
 
-fun <T, R> merge(map1:Map<String, T>, map2:Map<String, R>): Collection<Triple<String, T?, R?>> {
-    val result = mutableMapOf<String, Triple<String, T?, R?>>()
-    map1.forEach { (id, t) -> result.put(id, Triple(id, t, map2[id])) }
-    map2.forEach { (id, r) -> if (!map1.contains(id)) result.put(id, Triple(id, null, r)) }
-    return result.values
-}
+private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail {
 
-fun main(args: Array<String>) {
-    val m1 = mapOf("1" to 1, "2" to 2)
-    val m2 = mapOf("2" to 20.2, "3" to 30.3)
-    println(merge(m1, m2))
-}
-
-//fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision.toString())
-
-fun Service.toServiceDetail(): ServiceDetail {
-    return ServiceDetail(
-            svc = this.svc,
-            type = this.type,
-            mode = this.mode,
-            activeCount = this.activeCount,
-            project = this.project)
+    val id = envId + "-" + ext.id
+    val instance = InstanceDetail(id = id, env = envId, type = ext.service.type, service = ext.service.svc, name = ext.id, unexpected = ext.notExpected)
+    ext.instance?.let {
+        instance.applyInventory(ext.service, it)
+        if (ext.indicators == null) {
+            instance.status = ServerStatus.OFFLINE
+        }
+    }
+    ext.sshDetails?.let { instance.applySsh(it) }
+    ext.indicators?.let {
+        instance.applyMonitoring(it)
+        instance.applyCluster(it)
+        instance.applyRedis(it)
+        instance.unexpectedHost = StringUtils.isNotBlank(instance.deployHost) && instance.deployHost != instance.host
+    }
+    ext.scmDetail?.let { instance.applyScm(it) }
+    instance.versions = versions(ext.scmDetail, ext.sshDetails, ext.indicators)
+    return instance
 }
 
 private fun InstanceDetail.applyInventory(service: Service, envInstance: Instance) {
@@ -383,3 +344,14 @@ private fun InstanceDetail.applyRedis(indicators: RuntimeInfo) {
     }
 
 }
+
+fun Service.toServiceDetail(): ServiceDetail {
+    return ServiceDetail(
+            svc = this.svc,
+            type = this.type,
+            mode = this.mode,
+            activeCount = this.activeCount,
+            project = this.project)
+}
+
+//fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision.toString())

@@ -6,7 +6,9 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
-import org.neo.gomina.integration.scm.*
+import org.neo.gomina.model.scm.Branch
+import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.ScmClient
 import java.io.File
 import java.util.*
 
