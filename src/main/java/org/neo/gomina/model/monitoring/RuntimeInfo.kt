@@ -1,5 +1,6 @@
 package org.neo.gomina.model.monitoring
 
+import org.neo.gomina.model.version.Version
 import java.time.Clock
 import java.time.LocalDateTime
 
@@ -22,12 +23,10 @@ data class RuntimeInfo(
         var sidecarVersion: String? = null,
 
         val process: ProcessInfo,
-        val jvm: JvmInfo,
+        val version: Version?,
         val cluster: ClusterInfo,
-        val fix: FixInfo,
-        val redis: RedisInfo?,
-        val version: VersionInfo,
-        val dependencies: DependenciesInfo
+
+        var properties: Map<String, Any?> = mapOf()
 ) {
     fun checkDelayed(timeoutSeconds: Int = 5, notification: () -> Unit) {
         if (this.isLastTimeTooOld(timeoutSeconds) && !delayed) {
@@ -49,45 +48,9 @@ data class ProcessInfo(
         var startDuration: Long? = null
 )
 
-data class JvmInfo(
-        var jmx: Int? = null
-)
-
 data class ClusterInfo(
         var cluster: Boolean = false,
         var participating: Boolean = false,
         var leader: Boolean = false
-)
-
-data class FixInfo(
-        var quickfixPersistence: String? = null
-)
-
-data class RedisInfo(
-        var redisHost: String? = null,
-        var redisPort: Int? = null,
-        var redisMasterHost: String? = null,
-        var redisMasterPort: Int? = null,
-        var redisMasterLink: Boolean? = null,
-        var redisMasterLinkDownSince: String? = null,
-        var redisOffset: Long? = null,
-        var redisOffsetDiff: Long? = null,
-        var redisMaster: Boolean? = null,
-        var redisRole: String? = null,
-        var redisRW: String? = null,
-        var redisMode: String? = null,
-        var redisStatus: String? = null,
-        var redisSlaveCount: Int? = null,
-        var redisClientCount: Int? = null
-)
-
-data class VersionInfo(
-        var version: String? = null,
-        var revision: String? = null
-)
-
-data class DependenciesInfo(
-        var busVersion: String? = null,
-        var coreVersion: String? = null
 )
 

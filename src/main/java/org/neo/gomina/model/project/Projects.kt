@@ -1,7 +1,5 @@
 package org.neo.gomina.model.project
 
-data class ScmLocation (var svnRepo: String = "", var svnUrl: String = "")
-
 data class Project (
     var id: String,
     var label: String? = null,

@@ -8,22 +8,18 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.runtime.ExtInstance
-import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.api.toDateUtc
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.ssh.SshService
-import org.neo.gomina.model.host.InstanceSshDetails
 import org.neo.gomina.model.host.resolveHostname
-import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.inventory.ServiceMode
 import org.neo.gomina.model.monitoring.Monitoring
-import org.neo.gomina.model.monitoring.RuntimeInfo
 import org.neo.gomina.model.monitoring.ServerStatus
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.model.scm.ScmDetails
+import org.neo.gomina.model.runtime.ExtInstance
+import org.neo.gomina.model.runtime.Topology
 import java.util.*
 import javax.inject.Inject
 
@@ -35,7 +31,7 @@ data class ServiceDetail (
         val project: String? = null
 )
 
-data class VersionDetail(val version: String = "", val revision: String = "")
+data class VersionDetail(val version: String = "", val revision: String?)
 data class VersionsDetail(val running: VersionDetail?, val deployed: VersionDetail?, val released: VersionDetail?, val latest: VersionDetail?)
 
 data class SidecarDetail(val status: String = "", val version: String = "", val revision: String = "")
@@ -63,12 +59,12 @@ class InstanceDetail(
 
         var project: String? = null,
         var deployHost: String? = null,
-        @Deprecated("") var deployFolder: String? = null,
-        @Deprecated("") var confCommited: Boolean? = null,
-        @Deprecated("") var confUpToDate: Boolean? = null,
-        @Deprecated("") var confRevision: String? = null,
+        var deployFolder: String? = null,
+        var confCommited: Boolean? = null,
+        var confUpToDate: Boolean? = null,
+        var confRevision: String? = null,
 
-        // Versions
+        // FIXME Deprecated Versions
         /**/
         @Deprecated("") var version: String? = null,
         @Deprecated("") var revision: String? = null,
@@ -83,7 +79,7 @@ class InstanceDetail(
 
         var sidecar: SidecarDetail? = null,
 
-        var properties: HashMap<String, Any?> = hashMapOf()
+        var properties: Map<String, Any?> = mapOf()
 )
 
 class InstancesApi {
@@ -246,103 +242,58 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
 
     val id = envId + "-" + ext.id
     val instance = InstanceDetail(id = id, env = envId, type = ext.service.type, service = ext.service.svc, name = ext.id, unexpected = ext.notExpected)
+
+    instance.type = ext.service.type
+    instance.service = ext.service.svc
+    instance.project = ext.service.project
+
+    instance.versions = VersionsDetail(
+            running = ext.indicators?.version?.let { VersionDetail(it.version, it.revision) },
+            deployed = ext.sshDetails?.let { VersionDetail(it.deployedVersion ?: "", it.deployedRevision ?: "") },
+            released = ext.scmDetail?.let { VersionDetail(it.released ?: "", it.releasedRevision ?: "") },
+            latest = ext.scmDetail?.let { VersionDetail(it.latest ?: "", it.latestRevision ?: "") }
+    )
+
     ext.instance?.let {
-        instance.applyInventory(ext.service, it)
+        instance.unexpected = false
+        instance.deployHost = it.host
+        instance.deployFolder = it.folder
         if (ext.indicators == null) {
             instance.status = ServerStatus.OFFLINE
         }
     }
-    ext.sshDetails?.let { instance.applySsh(it) }
+    ext.sshDetails?.let {
+        instance.deployVersion = it.deployedVersion
+        instance.deployRevision = it.deployedRevision
+        instance.confCommited = it.confCommitted
+        instance.confUpToDate = it.confUpToDate
+        instance.confRevision = it.confRevision
+    }
     ext.indicators?.let {
-        instance.applyMonitoring(it)
-        instance.applyCluster(it)
-        instance.applyRedis(it)
+        instance.pid = it.process.pid
+        instance.host = resolveHostname(it.process.host)
+        instance.version = it.version?.version
+        instance.revision = it.version?.revision
+        instance.status = it.process.status
+        instance.startTime = it.process.startTime?.toDateUtc
+        instance.startDuration = it.process.startDuration
+        instance.sidecar = SidecarDetail(status = it.sidecarStatus ?: "", version = it.sidecarVersion ?: "")
+        instance.properties = it.properties
+
+        instance.cluster = it.cluster.cluster
+        instance.participating = it.cluster.participating
+        instance.leader = it.cluster.leader
+
         instance.unexpectedHost = StringUtils.isNotBlank(instance.deployHost) && instance.deployHost != instance.host
     }
-    ext.scmDetail?.let { instance.applyScm(it) }
-    instance.versions = versions(ext.scmDetail, ext.sshDetails, ext.indicators)
-    return instance
-}
-
-private fun InstanceDetail.applyInventory(service: Service, envInstance: Instance) {
-    this.unexpected = false
-    this.type = service.type
-    this.service = service.svc
-    this.project = service.project
-    this.deployHost = envInstance.host
-    this.deployFolder = envInstance.folder
-}
-
-private fun versions(scmDetails: ScmDetails?, instanceSshDetails: InstanceSshDetails?, indicators: RuntimeInfo?) =
-        VersionsDetail(
-                running = indicators?.version?.let { VersionDetail(it.version ?: "", it.revision ?: "") },
-                deployed = instanceSshDetails?.let { VersionDetail(it.deployedVersion ?: "", it.deployedRevision ?: "") },
-                released = scmDetails?.let { VersionDetail(it.released ?: "", it.releasedRevision ?: "") },
-                latest = scmDetails?.let { VersionDetail(it.latest ?: "", it.latestRevision ?: "") }
-        )
-
-private fun InstanceDetail.applyScm(scmDetails: ScmDetails) {
-    this.latestVersion = scmDetails.latest
-    this.latestRevision = scmDetails.latestRevision
-    this.releasedVersion = scmDetails.released
-    this.releasedRevision = scmDetails.releasedRevision
-}
-
-private fun InstanceDetail.applySsh(instanceSshDetails: InstanceSshDetails) {
-    this.deployVersion = instanceSshDetails.deployedVersion
-    this.deployRevision = instanceSshDetails.deployedRevision
-    this.confCommited = instanceSshDetails.confCommitted
-    this.confUpToDate = instanceSshDetails.confUpToDate
-    this.confRevision = instanceSshDetails.confRevision
-}
-
-// FIXME Redundant
-private fun InstanceDetail.applyMonitoring(indicators: RuntimeInfo) {
-    this.pid = indicators.process.pid
-    this.host = resolveHostname(indicators.process.host)
-    this.version = indicators.version.version
-    this.revision = indicators.version.revision
-    this.status = indicators.process.status
-    this.startTime = indicators.process.startTime?.toDateUtc
-    this.startDuration = indicators.process.startDuration
-
-    this.sidecar = SidecarDetail(status = indicators.sidecarStatus ?: "", version = indicators.sidecarVersion ?: "")
-
-    this.properties.put("jvm.jmx.port", indicators.jvm.jmx?.toString())
-    this.properties.put("xxx.bux.version", indicators.dependencies.busVersion)
-    this.properties.put("xxx.core.version", indicators.dependencies.coreVersion)
-    this.properties.put("quickfix.persistence", indicators.fix.quickfixPersistence)
-
-}
-
-private fun InstanceDetail.applyCluster(indicators: RuntimeInfo) {
-    this.cluster = indicators.cluster.cluster
-    this.participating = indicators.cluster.participating
-    this.leader = indicators.cluster.leader
-}
-
-private fun InstanceDetail.applyRedis(indicators: RuntimeInfo) {
-    // FIXME Move to dynamic fields for instance details
-    this.properties.put("redis.host", indicators.redis?.redisHost)
-    this.properties.put("redis.port", indicators.redis?.redisPort)
-    this.properties.put("redis.master", indicators.redis?.redisMaster)
-    this.properties.put("redis.status", indicators.redis?.redisStatus)
-    this.properties.put("redis.role", indicators.redis?.redisRole)
-    this.properties.put("redis.rw", indicators.redis?.redisRW)
-    this.properties.put("redis.persistence.mode", indicators.redis?.redisMode)
-    this.properties.put("redis.offset", indicators.redis?.redisOffset)
-    this.properties.put("redis.slave.count", indicators.redis?.redisSlaveCount)
-    this.properties.put("redis.client.count", indicators.redis?.redisClientCount)
-    if (indicators.redis?.redisRole == "SLAVE") {
-        this.properties.put("redis.master.host", indicators.redis.redisMasterHost)
-        this.properties.put("redis.master.port", indicators.redis.redisMasterPort)
-        this.properties.put("redis.master.link", mapOf(
-                "status" to indicators.redis.redisMasterLink,
-                "downSince" to indicators.redis.redisMasterLinkDownSince)
-        )
-        this.properties.put("redis.master.offset.diff", indicators.redis?.redisOffsetDiff)
+    ext.scmDetail?.let {
+        instance.latestVersion = it.latest
+        instance.latestRevision = it.latestRevision
+        instance.releasedVersion = it.released
+        instance.releasedRevision = it.releasedRevision
     }
 
+    return instance
 }
 
 fun Service.toServiceDetail(): ServiceDetail {
@@ -354,4 +305,4 @@ fun Service.toServiceDetail(): ServiceDetail {
             project = this.project)
 }
 
-//fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision.toString())
+//fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision)

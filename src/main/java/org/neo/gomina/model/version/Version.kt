@@ -2,23 +2,29 @@ package org.neo.gomina.model.version
 
 import org.apache.commons.lang3.StringUtils
 
-data class Version(val version: String = "", val revision: Long = 0) : Comparable<Version> {
+data class Version(val version: String = "", val revision: String?) : Comparable<Version> {
 
-    constructor(version: String = "") : this(version, 0)
+    constructor(version: String = "") : this(version, null)
     
-    fun isSnapshot() = version.contains("SNAPSHOT")
+    fun isSnapshot() = version.endsWith("-SNAPSHOT")
 
     override fun compareTo(other: Version): Int {
         val res = versionCompare(this.version, other.version)
+        return res
+        /*
         return if (res == 0 && this.isSnapshot()) {
-            Integer.signum((this.revision - other.revision).toInt())
+            //Integer.signum((this.revision - other.revision).toInt())
+            if (this.revision > other.revision) 1 else if (this.revision < other.revision) -1 else 0
         } else res
+        */
     }
 
     override fun toString(): String {
         return version + "@" + revision
     }
 }
+
+// FIXME Function to order snapshots
 
 private fun versionCompare(str1: String?, str2: String?): Int {
     var str1 = str1
