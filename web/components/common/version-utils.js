@@ -1,6 +1,6 @@
 // @flow
 
-function isSnapshot(version: String) {
+function isSnapshot(version: string) {
     return version ? version.includes("-SNAPSHOT") : false;
 }
 

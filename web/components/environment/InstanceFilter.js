@@ -1,9 +1,17 @@
-import React from "react";
+// @flow
+import * as React from "react";
 import {isSnapshot} from "../common/version-utils";
 import {Well} from "../common/Well";
+import type {InstanceType} from "./Instance"
 
-class InstanceFilter extends React.Component {
-    changeSelected(id, highlightFunction) {
+type InstanceFilterProps = {
+    id: ?string,
+    hosts: Array<string>,
+    onFilterChanged: (id: string, (instance: InstanceType) => boolean) => void
+}
+class InstanceFilter extends React.Component<InstanceFilterProps> {
+
+    changeSelected(id: string, highlightFunction: (instance: InstanceType) => boolean) {
         console.log('filter change:', id, highlightFunction);
         //this.setState({id: id, highlight: highlightFunction});
         this.props.onFilterChanged && this.props.onFilterChanged(id, highlightFunction);
@@ -51,7 +59,13 @@ class InstanceFilter extends React.Component {
     }
 }
 
-class Selection extends React.Component {
+type SelectionProps = {
+    id: string,
+    selected: ?string,
+    label: string,
+    onSelectionChanged: (e: SyntheticMouseEvent<>) => void
+}
+class Selection extends React.Component<SelectionProps> {
     constructor(props) {
         super(props);
     }

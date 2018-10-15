@@ -25,3 +25,6 @@ webpack --progress --colors --watch
 ### Generate stats
 webpack --profile --json > stats.json
 
+
+npm install -g flow-typed
+flow-typed install react-router-dom

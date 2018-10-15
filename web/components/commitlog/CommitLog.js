@@ -1,19 +1,48 @@
-import React from "react";
+// @flow
+import * as React from "react";
 import {Version} from "../common/Version";
 import {Badge} from "../common/Badge";
-import PropTypes from 'prop-types';
 
 import './CommitLog.css'
 import {DateTime} from "../common/DateTime";
 import {Revision} from "./Revision";
 
-// FIXME Instance: id, env, name, version, revision, deployVersion, deployRevision
-class CommitLog extends React.Component {
+type Props = {
+    commits: Array<Commit>,
+    instances: Array<Instance>,
+    type?: ?string
+}
 
-    indexByRevision(sortedCommits, instances, logByRevision, unknown) {
+type Instance = {
+    id: string,
+    env: string,
+    name: string,
+    version: string,
+    revision: number,
+    deployVersion: string,
+    deployRevision: number,
+}
+type Commit = {
+    author?: ?string,
+    date?: ?number,
+    message?: ?string,
+    version?: ?string,
+    revision?: ?number
+}
+type Line = {
+    commit?: ?Commit,
+    version2?: ?string,
+    instances?: Array<Instance>,
+    deployments?: Array<Instance>
+}
+
+// FIXME Instance: id, env, name, version, revision, deployVersion, deployRevision
+class CommitLog extends React.Component<Props> {
+
+    indexByRevision(sortedCommits: Array<Commit>, instances: Array<Instance>, logByRevision: { [number]: Object }, unknown: Array<Instance>) {
         const logByVersion = {};
         sortedCommits.map(commit => {
-            const o = Object.assign({instances: [], deployments: []}, commit);
+            const o: Line = {instances: [], deployments: [], commit: commit};
             if (commit.revision) {
                 logByRevision[commit.revision] = o;
             }
@@ -26,12 +55,12 @@ class CommitLog extends React.Component {
         (instances||[]).forEach(i => {
             let added = false;
             if (i.revision) {
-                logByRevision[i.revision] = logByRevision[i.revision] || {};
+                logByRevision[i.revision] = logByRevision[i.revision] || {commit: {}};
                 logByRevision[i.revision].version2 = i.version;
                 added = this.addToInstances(logByRevision[i.revision], i);
             }
             if (!added && i.deployRevision) {
-                logByRevision[i.deployRevision] = logByRevision[i.deployRevision] || {};
+                logByRevision[i.deployRevision] = logByRevision[i.deployRevision] || {commit: {}};
                 logByRevision[i.deployRevision].version2 = i.version;
                 added = this.addToDeployments(logByRevision[i.deployRevision], i);
             }
@@ -49,7 +78,7 @@ class CommitLog extends React.Component {
         //console.info(logByRevision);
     }
 
-    addToInstances(line, i) {
+    addToInstances(line: Object, i: Object) {
         if (line) {
             (line.instances = line.instances || []).push(i);
             return true
@@ -57,7 +86,7 @@ class CommitLog extends React.Component {
         return false
     }
 
-    addToDeployments(line, i) { // Deployed but not yet running
+    addToDeployments(line: Object, i: Object) { // Deployed but not yet running
         if (line) {
             (line.deployments = line.deployments || []).push(i);
             return true
@@ -66,13 +95,19 @@ class CommitLog extends React.Component {
     }
     
     render() {
+        function keys<T: number>(obj: any): Array<T> {
+            return Object.keys(obj)
+        }
+
         if (this.props.commits) {
             const sortedCommits = this.props.commits;
             const instances = this.props.instances;
 
-            const logByRevision = {};
+            const logByRevision: { [number]: Line } = {};
             const unknown = [];
             this.indexByRevision(sortedCommits, instances, logByRevision, unknown);
+
+            console.log("%%%", logByRevision);
 
             return (
                 <div className="commit-log">
@@ -85,21 +120,21 @@ class CommitLog extends React.Component {
                     </div>
                     <table className="commit-log-table">
                         <tbody>
-                        {Object.keys(logByRevision).sort((a, b) => b - a).map(revision =>
+                        {keys(logByRevision).sort((a, b) => b - a).map(revision =>
                             <tr block="true" key={revision}>
                                 <td style={{width: '30px'}}><Revision revision={revision} type={this.props.type}></Revision></td>
-                                <td style={{width: '20px'}}>{(logByRevision[revision].author || '') + ' ' || '-'}</td>
+                                <td style={{width: '20px'}}>{(logByRevision[revision].commit.author || '') + ' ' || '-'}</td>
                                 <td style={{width: '80px'}}>
-                                    <DateTime date={logByRevision[revision].date}/>
+                                    <DateTime date={logByRevision[revision].commit.date}/>
                                 </td>
                                 <td>
                                     <span>
-                                        {(logByRevision[revision].message || '') + ' ' || '-'}
+                                        {(logByRevision[revision].commit.message || '') + ' ' || '-'}
                                     </span>
                                     <span style={{float: 'right'}}>
 
                                         {logByRevision[revision].version2 &&
-                                            <span style={{paddingLeft: '2px', paddingRight: '2px'}}>
+                                        <span style={{paddingLeft: '2px', paddingRight: '2px'}}>
                                                 <Version version={logByRevision[revision].version2}/>
                                             </span>
                                         }
@@ -118,9 +153,9 @@ class CommitLog extends React.Component {
                                                 </span>
                                         )}
                                     </span>
-                                    {logByRevision[revision].version &&
+                                    {logByRevision[revision].commit.version &&
                                     <span style={{float: 'right', verticalAlign: 'middle'}}>
-                                        <i style={{opacity: .5}}>{logByRevision[revision].version}</i>
+                                        <i style={{opacity: .5}}>{logByRevision[revision].commit.version}</i>
                                     </span>
                                     }
                                 </td>
@@ -134,11 +169,5 @@ class CommitLog extends React.Component {
         return null
     }
 }
-
-CommitLog.propTypes = {
-    commits: PropTypes.array.isRequired,
-    instances: PropTypes.array,
-    type: PropTypes.string
-};
 
 export {CommitLog};

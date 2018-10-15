@@ -1,11 +1,24 @@
-import React from "react";
-import PropTypes from 'prop-types'
+// @flow
+
+import * as React from "react";
 import {compareVersions, compareVersionsRevisions} from "../common/version-utils";
 import {Version} from "../common/Version";
 
-//running, deployed, released, latest
+type VersionType = {
+    version?: ?string,
+    revision?: ?number
+}
 
-class Versions extends React.Component {
+type Props = {
+    versions: {
+        running: VersionType,
+        deployed: VersionType,
+        released: VersionType,
+        latest: VersionType
+    }
+}
+
+class Versions extends React.Component<Props> {
     render() {
         const v = this.props.versions || {};
         const dispDeployed = v.running && v.deployed && ((v.deployed.version && v.deployed.revision)
@@ -36,9 +49,5 @@ class Versions extends React.Component {
         )
     }
 }
-
-Versions.propTypes = {
-    "versions": PropTypes.object
-};
 
 export {Versions}

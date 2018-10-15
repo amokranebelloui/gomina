@@ -1,5 +1,5 @@
-import React from "react";
-import PropTypes from "prop-types"
+// @flow
+import * as React from "react";
 import {Status} from "./Status";
 import {Badge} from "../common/Badge";
 import {ConfCommited} from "../misc/ConfCommited";
@@ -13,9 +13,44 @@ import {Port} from "../misc/Port";
 import './Instance.css'
 import {Versions} from "./Versions";
 import {RedisOffset, RedisPersistence, RedisReadWrite} from "./RedisInstance";
-import Link from "react-router-dom/es/Link";
+import {Link} from "react-router-dom";
 
-class Instance extends React.Component {
+type InstanceType = {
+    id: string,
+    env: string,
+    name: ?string,
+    //service: ?string,
+    type: ?string,
+    unexpected: boolean,
+    unexpectedHost: boolean,
+    cluster: boolean,
+    participating: boolean,
+    leader: boolean,
+    pid: ?string,
+    host: ?string,
+    status: ?string,
+    //startTime: ?number,
+    //startDuration: ?number,
+    project: ?string,
+    deployHost: ?string,
+    deployFolder: ?string,
+    confCommited: ?boolean,
+    //confUpToDate: ?boolean,
+    confRevision: ?string,
+
+    version: string, // FIXME Deprecated version field
+
+    versions: Object,
+    //sidecar: Object,
+    properties: {[string]: any}
+}
+
+type Props = {
+    instance: InstanceType,
+    highlighted: boolean
+}
+
+class Instance extends React.Component<Props> {
     render() {
         const instance = this.props.instance;
         const opacity = this.props.highlighted ? 1 : 0.06;
@@ -30,7 +65,7 @@ class Instance extends React.Component {
                 <div className="instance">
                     <div className="line">
                         <li>
-                            <Badge><b><Link to={"/envs/" + instance.env + "/" + instance.id}>{instance.name}({instance.type})</Link></b></Badge>
+                            <Badge><b><Link to={"/envs/" + instance.env + "/" + instance.id}>{instance.name}</Link></b></Badge>
                         </li>
                         <li>
                             <Badge>
@@ -94,11 +129,6 @@ class Instance extends React.Component {
     }
 }
 
-Instance.propTypes = {
-    "instance": PropTypes.object,
-    "highlighted": PropTypes.bool
-};
-
 const map = {
     "redis.port": value => <Port port={value} />,
     "redis.master.host": value => <Host host={value} />,
@@ -111,7 +141,7 @@ const map = {
     "redis.rw": value => <RedisReadWrite redisRW={value} />
 };
 
-function InstanceProperties(props) {
+function InstanceProperties(props: {properties: Array<[string, any]>}) {
     const properties = props.properties;
     return (
         <div>
@@ -124,7 +154,7 @@ function InstanceProperties(props) {
     )
 }
 
-function InstanceProperty(props) {
+function InstanceProperty(props: {property: string, value: any}) {
     const property = props.property;
     const value = props.value;
     const component = map[property] || (value => <span>{value && value.toString()}</span>);
@@ -137,7 +167,7 @@ function InstanceProperty(props) {
     )
 }
 
-function InstanceProp(props) {
+function InstanceProp(props: {property: string, properties: {[string]: any}}) {
     const property = props.property;
     const value = (props.properties ||{})[property];
     const component = map[property] || (value => <span>{value && value.toString()}</span>);
@@ -152,3 +182,4 @@ function InstanceProp(props) {
 }
 
 export { Instance, InstanceProperty, InstanceProperties }
+export type { InstanceType }
