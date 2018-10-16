@@ -22,5 +22,6 @@ data class ScmDetails (
 interface ScmRepos {
     fun getDocument(scm: Scm, docId: String): String?
     fun getScmDetails(scm: Scm): ScmDetails?
+    fun getTrunk(scm: Scm): List<Commit>
     fun getBranch(scm: Scm, branchId: String): List<Commit>
 }

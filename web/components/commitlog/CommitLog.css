@@ -26,3 +26,11 @@
     border-right: 1px solid gray;
     */
 }
+
+.commit-log .items {
+    /*padding: 2px;*/
+}
+
+.commit-log .items > * {
+    margin: 1px;
+}

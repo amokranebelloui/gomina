@@ -26,6 +26,10 @@ class ScmService : ScmRepos {
         scmCache.get(scm.id, false) { scmRepos.getScmDetails(scm) }
     }
 
+    override fun getTrunk(scm: Scm): List<Commit> {
+        return scmRepos.getTrunk(scm)
+    }
+
     override fun getBranch(scm: Scm, branchId: String): List<Commit> {
         return scmRepos.getBranch(scm, branchId)
     }

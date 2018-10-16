@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
 import java.io.File
@@ -26,6 +27,10 @@ class DummyScmClient : ScmClient {
     
     constructor(url: String) {
         this.url = url
+    }
+
+    override fun getBranches(): List<Branch> {
+        return listOf(Branch("trunk"))
     }
 
     override fun getLog(branch: String, rev: String, count: Int): List<Commit> {
@@ -75,7 +80,8 @@ class DummyScmClient : ScmClient {
                 revision = map["revision"] as String,
                 date = map["date"] as Date?,
                 author = map["author"] as String?,
-                message = map["message"] as String?
+                message = map["message"] as String?,
+                release = map["version"] as String?
         )
     }
 

@@ -19,7 +19,7 @@ class ProjectApp extends React.Component {
             //projects: [],
             projectId: this.props.match.params.id,
             project: {},
-            instances: [],
+            //instances: [],
 
             dependencies: [],
             impacted: [],
@@ -34,7 +34,7 @@ class ProjectApp extends React.Component {
             };
         //this.retrieveProjects = this.retrieveProjects.bind(this);
         this.retrieveProject = this.retrieveProject.bind(this);
-        this.retrieveInstances= this.retrieveInstances.bind(this);
+        //this.retrieveInstances= this.retrieveInstances.bind(this);
         this.retrieveBranch = this.retrieveBranch.bind(this);
         this.retrieveDoc = this.retrieveDoc.bind(this);
         this.reloadProject = this.reloadProject.bind(this);
@@ -88,7 +88,7 @@ class ProjectApp extends React.Component {
     }
     retrieveBranch(projectId, branchId) {
         const thisComponent = this;
-        axios.get('/data/projects/' + projectId + '/scm?branchId=' + branchId)
+        axios.get('/data/projects/' + projectId + '/scm?branchId=' + (branchId ? branchId : ""))
             .then(response => {
                 console.log("branch data", response.data);
                 thisComponent.setState({branch: response.data});
@@ -172,6 +172,7 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({doc: null});
             });
     }
+    /*
     retrieveInstances(projectId) {
         console.log("projectApp Retr Instances... " + projectId);
         const thisComponent = this;
@@ -185,13 +186,13 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({instances: []});
             });
     }
-
+*/
     componentDidMount() {
         console.info("projectApp !mount ", this.props.match.params.id);
         //this.retrieveProjects();
         if (this.state.projectId) {
             this.retrieveProject(this.state.projectId);
-            this.retrieveInstances(this.state.projectId);
+            //this.retrieveInstances(this.state.projectId);
             this.retrieveDependencies(this.state.projectId);
             this.retrieveImpacted(this.state.projectId);
             this.retrieveInvocationChain(this.state.projectId);
@@ -202,6 +203,9 @@ class ProjectApp extends React.Component {
             }
             if (this.state.branchId) {
                 this.retrieveBranch(this.state.projectId, this.state.branchId);
+            }
+            else {
+                this.retrieveBranch(this.state.projectId, null);
             }
         }
     }
@@ -216,7 +220,7 @@ class ProjectApp extends React.Component {
         this.setState({projectId: newProject});
         if (this.props.match.params.id !== newProject && newProject) {
             this.retrieveProject(newProject);
-            this.retrieveInstances(newProject);
+            //this.retrieveInstances(newProject);
             this.retrieveDependencies(newProject);
             this.retrieveImpacted(newProject);
             this.retrieveInvocationChain(newProject);
@@ -227,7 +231,8 @@ class ProjectApp extends React.Component {
             (this.props.match.params.id !== newProject || this.props.match.params.docId !== newDoc)) {
             this.retrieveDoc(newProject, newDoc);
         }
-        if (newProject && newBranch &&
+        console.info("change ", queryParams.branchId, newBranch, this.props.match.params.id, newProject);
+        if (newProject &&
             (this.props.match.params.id !== newProject || queryParams.branchId !== newBranch)) {
             this.retrieveBranch(newProject, newBranch);
         }
@@ -235,9 +240,9 @@ class ProjectApp extends React.Component {
     render() {
         const queryParams = queryString.parse(this.props.location.search);
         const project = this.state.project;
-        const commits = project.commitLog || [];
-        const instances = this.state.instances.filter(instance => instance.project == project.id);
-        const title = (<span>Projects &nbsp;&nbsp;&nbsp;</span>);
+        //const commits = project.commitLog || [];
+        //const instances = this.state.instances.filter(instance => instance.project == project.id);
+        //const title = (<span>Projects &nbsp;&nbsp;&nbsp;</span>);
         const docId = this.props.match.params.docId;
         const branchId = queryParams.branchId;
         console.info("---", docId, branchId);
@@ -251,7 +256,9 @@ class ProjectApp extends React.Component {
                                       onReload={id => this.retrieveProject(id)}
                                       onReloadScm={id => this.reloadProject(id)}
                                       onReloadSonar={() => this.reloadSonar()} />
-                        {   branchId ? [<b>Branch</b>,<CommitLog type={project.scmType} commits={this.state.branch}  />] :
+                        {   branchId ? [<b>Branch</b>,<CommitLog type={project.scmType}
+                                                                 commits={(this.state.branch||{}).log}
+                                                                 unresolved={(this.state.branch||{}).unresolved} />] :
                             docId ? [<b>Doc</b>,<Documentation doc={this.state.doc} />] :
                                 this.props.location.pathname.endsWith("dependencies") ? [
                                         <b>Invocation Chain</b>,
@@ -271,7 +278,9 @@ class ProjectApp extends React.Component {
                                             <b>Impacted</b>,
                                             <Dependencies dependencies={this.state.impacted} />
                                         ] :
-                                        [<b>Commit Log</b>,<CommitLog type={project.scmType} commits={commits} instances={instances} />]
+                                        [<b>Commit Log</b>,<CommitLog type={project.scmType}
+                                                                      commits={(this.state.branch||{}).log}
+                                                                      unresolved={(this.state.branch||{}).unresolved} />]
 
                         }
                     </Container>

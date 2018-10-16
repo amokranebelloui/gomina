@@ -4,6 +4,7 @@ import org.neo.gomina.model.host.HostRepo
 import org.neo.gomina.model.host.InstanceSshDetails
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Instance
+import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.RuntimeInfo
@@ -14,7 +15,7 @@ import org.neo.gomina.model.scm.ScmRepos
 import javax.inject.Inject
 
 data class ExtInstance(
-        val id: String,
+        val id: Pair<String, String>,
         val project: Project?,
         val scmDetail: ScmDetails?,
         val service: Service,
@@ -22,12 +23,16 @@ data class ExtInstance(
         val sshDetails: InstanceSshDetails?,
         val indicators: RuntimeInfo?
 ) {
+    val completeId get() = id.first + "-" + id.second
+    val envId get() = id.first
+    val instanceId get() = id.second
     val expected get() = instance != null
     val notExpected get() = instance == null
 }
 
 class Topology {
 
+    @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var projects: Projects
     @Inject lateinit private var monitoring: Monitoring
 
@@ -38,12 +43,41 @@ class Topology {
         val services = env ?. services ?. associateBy { it.svc }
         val inventory = env.services
                 .flatMap { svc -> svc.instances.map { instance -> svc to instance } }
-                .associateBy { (_, instance) -> instance.id }
+                .associateBy { (_, instance) -> env.id to instance.id }
         val monitoring = monitoring.instancesFor(env.id)
-                .associateBy { it.instanceId }
+                .associateBy { env.id to it.instanceId }
 
 
         return merge(inventory, monitoring)
+                .map { (id, instance, indicators) ->
+                    val svc = instance?.first?.svc ?: indicators?.service ?: "x"
+                    val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
+                    val project = service.project?.let { projects.getProject(it) }
+                    val sshDetails = instance?.second?.let { hostRepo.getDetails(it) }
+                    val scmDetail = project?.scm?.let { scmRepo.getScmDetails(it) }
+
+                    ExtInstance(id, project, scmDetail, service, instance?.second, sshDetails, indicators)
+                }
+    }
+
+    fun buildExtInstances(projectId: String): List<ExtInstance> {
+        val inv = inventory.getEnvironments()
+                .flatMap { env -> env.services.map { env to it } }
+                .flatMap { (env, svc) -> svc.instances.map { instance -> Triple(env, svc, instance) } }
+                .filter { (env, svc, instance) -> svc.project == projectId }
+
+        val services = inv.map { (env, svc, instance) -> svc }.associateBy { it.svc }
+
+        val definition = inv
+                .associateBy { (env, svc, instance) -> env.id to instance.id }
+                .mapValues { (_, triple) -> triple.second to triple.third }
+        val monitoring = inventory.getEnvironments()
+                .flatMap { env -> monitoring.instancesFor(env.id).map { env to it } }
+                .filter { (env, mon) -> mon.service?.let { services[it] }?.project == projectId }
+                .associateBy { (env, mon) -> env.id to mon.instanceId }
+                .mapValues { (_, pair) -> pair.second }
+        
+        return merge(definition, monitoring)
                 .map { (id, instance, indicators) ->
                     val svc = instance?.first?.svc ?: indicators?.service ?: "x"
                     val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
@@ -59,8 +93,8 @@ class Topology {
 
 // FIXME Detect Multiple running instances with same name
 
-fun <T, R> merge(map1:Map<String, T>, map2:Map<String, R>): Collection<Triple<String, T?, R?>> {
-    val result = mutableMapOf<String, Triple<String, T?, R?>>()
+fun <ID, T, R> merge(map1:Map<ID, T>, map2:Map<ID, R>): Collection<Triple<ID, T?, R?>> {
+    val result = mutableMapOf<ID, Triple<ID, T?, R?>>()
     map1.forEach { (id, t) -> result.put(id, Triple(id, t, map2[id])) }
     map2.forEach { (id, r) -> if (!map1.contains(id)) result.put(id, Triple(id, null, r)) }
     return result.values

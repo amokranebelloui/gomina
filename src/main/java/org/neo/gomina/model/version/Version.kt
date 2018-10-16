@@ -4,9 +4,21 @@ import org.apache.commons.lang3.StringUtils
 
 data class Version(val version: String = "", val revision: String?) : Comparable<Version> {
 
+    companion object {
+        fun isSnapshot(version: String) = version.endsWith("-SNAPSHOT")
+        fun isStable(version: String) = !isSnapshot(version)
+    }
+
     constructor(version: String = "") : this(version, null)
-    
-    fun isSnapshot() = version.endsWith("-SNAPSHOT")
+
+    fun isSnapshot() = isSnapshot(version)
+    fun isStable() = isStable(version)
+
+    /*
+    override fun equals(other: Any?): Boolean {
+        return other is Version && versionCompare(this.version, other.version) == 0
+    }
+    */
 
     override fun compareTo(other: Version): Int {
         val res = versionCompare(this.version, other.version)
@@ -18,10 +30,8 @@ data class Version(val version: String = "", val revision: String?) : Comparable
         } else res
         */
     }
-
-    override fun toString(): String {
-        return version + "@" + revision
-    }
+    fun clean() = if (this.isSnapshot()) this else Version(this.version)
+    override fun toString() = version + "@" + revision
 }
 
 // FIXME Function to order snapshots

@@ -102,6 +102,11 @@ class ScmReposImpl : ScmRepos {
         return null
     }
 
+    override fun getTrunk(scm: Scm): List<Commit> {
+        val scmClient = this.getClient(scm)
+        return scmClient.getLog(scmClient.getTrunk(), "0", -1)
+    }
+
     override fun getBranch(scm: Scm, branchId: String): List<Commit> {
         val scmClient = this.getClient(scm)
         return scmClient.getLog(branchId, "0", -1)

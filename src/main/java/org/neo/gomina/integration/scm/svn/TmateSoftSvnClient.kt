@@ -70,7 +70,7 @@ class TmateSoftSvnClient : ScmClient {
             Branch(name = "branches/${it.name}", origin = copy?.copyPath, originRevision = copy?.copyRevision?.toString())
         }
         logger.info("Retrieved ${result.size} Branches")
-        return result
+        return result + Branch("trunk")
     }
 
     override fun getLog(branch: String, startRev: String, count: Int): List<Commit> {

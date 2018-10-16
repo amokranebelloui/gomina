@@ -186,7 +186,7 @@
   HOST: '10.143.3.56'
   folder: '/home/svc/prod-basket'
   VERSION: '5.1.3-SNAPSHOT'
-  REVISION: 35002
+  REVISION: 34561
   STATUS: 'DOWN'
 
   BUS: "2.0"

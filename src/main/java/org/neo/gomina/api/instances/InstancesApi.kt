@@ -239,9 +239,9 @@ class InstancesApi {
 }
 
 private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail {
-
-    val id = envId + "-" + ext.id
-    val instance = InstanceDetail(id = id, env = envId, type = ext.service.type, service = ext.service.svc, name = ext.id, unexpected = ext.notExpected)
+    val instance = InstanceDetail(id = ext.completeId,
+            env = envId, type = ext.service.type, service = ext.service.svc, name = ext.instanceId,
+            unexpected = ext.notExpected)
 
     instance.type = ext.service.type
     instance.service = ext.service.svc

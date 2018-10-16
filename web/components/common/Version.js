@@ -8,6 +8,30 @@ type Props = {
     revision?: ?string | ?number,
 }
 
+type VersionType = {
+    version: string,
+    revision?: ?string | ?number,
+}
+
+class VersionLabel extends React.PureComponent<{version: VersionType}> {
+    render() {
+        if (this.props.version) {
+            const simplifiedVersion = this.props.version
+                ? this.props.version.version.replace("-SNAPSHOT", "-S")
+                : "unknown";
+            const revision = this.props.version.revision ? this.props.version.revision : "*";
+            return (
+                <span title={revision} style={{userSelect: 'all'}}>
+                {simplifiedVersion}
+                    {isSnapshot(this.props.version.version) && <span style={{fontSize: "7px"}}>&nbsp;({revision})</span>}
+            </span>
+            )
+        }
+        return null
+    }
+}
+
+// FIXME Refactor to use VersionLabel, rename?
 class Version extends React.PureComponent<Props> {
     constructor(props: Props) {
         super(props)
@@ -37,4 +61,5 @@ class Version extends React.PureComponent<Props> {
     }
 }                     
 
-export {Version}
+export {Version, VersionLabel}
+export type {VersionType}

@@ -1,5 +1,6 @@
 package org.neo.gomina.model.scm
 
+import org.neo.gomina.model.version.Version
 import java.util.*
 
 data class Commit (
@@ -10,7 +11,13 @@ data class Commit (
 
     var release: String? = null, // new version: if the commit is a prepare release version change
     var newVersion: String? = null // version: if the commit is a release
-)
+) {
+    fun match(version: Version): Boolean {
+        return this.revision == version.revision ||
+                this.release?.let { Version.isStable(it) && this.release == version.version } == true
+    }
+}
+
 
 data class Branch(
         var name: String,

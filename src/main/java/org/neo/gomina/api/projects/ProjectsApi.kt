@@ -7,15 +7,20 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.api.instances.VersionDetail
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
-import org.neo.gomina.model.scm.ScmDetails
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.sonar.SonarIndicators
 import org.neo.gomina.integration.sonar.SonarService
 import org.neo.gomina.model.project.Project
 import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.project.Systems
+import org.neo.gomina.model.runtime.ExtInstance
+import org.neo.gomina.model.runtime.Topology
+import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.ScmDetails
+import org.neo.gomina.model.version.Version
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -48,7 +53,6 @@ data class ProjectDetail (
         var released: String? = null,
         var loc: Double? = null,
         var coverage: Double? = null,
-        var commitLog: List<CommitLogEntry> = emptyList(),
         var lastCommit: Date? = null,
         var commitActivity: Int? = null
 )
@@ -59,14 +63,27 @@ data class BranchDetail (
         var originRevision: String? = null
 )
 
-data class CommitLogEntry (
-        var revision: String?,
-        var date: Date?,
-        var author: String?,
-        var message: String?,
+data class CommitLogDetail(
+        val log: List<CommitDetail>,
+        val unresolved: List<InstanceRefDetail>)
 
-        var version: String? = null
-)
+data class InstanceRefDetail(
+        var id: String? = null,
+        var env: String? = null,
+        var name: String? = null,
+        val running: VersionDetail?,
+        val deployed: VersionDetail?)
+
+data class CommitDetail(
+        val revision: String?,
+        var date: Date? = null,
+        var author: String? = null,
+        var message: String? = null,
+
+        var version: String? = null,
+
+        val instances: List<InstanceRefDetail> = emptyList(),
+        val deployments: List<InstanceRefDetail> = emptyList())
 
 
 class ProjectsApi {
@@ -85,6 +102,7 @@ class ProjectsApi {
     @Inject private lateinit var sonarService: SonarService
     @Inject private lateinit var jenkinsService: JenkinsService
 
+    @Inject private lateinit var topology: Topology
 
     private val mapper = ObjectMapper()
 
@@ -96,7 +114,7 @@ class ProjectsApi {
         router.get("/").handler(this::projects)
         router.get("/systems").handler(this::systems)
         router.get("/:projectId").handler(this::project)
-        router.get("/:projectId/scm").handler(this::projectScm)
+        router.get("/:projectId/scm").handler(this::commitLog)
         router.get("/:projectId/doc/:docId").handler(this::projectDoc)
 
         router.post("/:projectId/reload-scm").handler(this::reloadProject)
@@ -140,35 +158,100 @@ class ProjectsApi {
         }
     }
 
-    private fun projectScm(ctx: RoutingContext) {
+    private fun commitLog(ctx: RoutingContext) {
         val projectId = ctx.request().getParam("projectId")
         val branch = ctx.request().getParam("branchId")
         try {
-            logger.info("Get SCM log for $projectId $branch")
-            var log: List<CommitLogEntry>? = null
-            projects.getProject(projectId)?.scm?.let {
-                log = scmService.getBranch(it, branch).map {
-                    CommitLogEntry(
-                            revision = it.revision,
-                            date = it.date,
-                            author = it.author,
-                            message = it.message,
-                            version = it.release ?: it.newVersion
-                    )
-                }
+            logger.info("Get SCM log for project:$projectId branch:$branch")
+
+            var log = projects.getProject(projectId)?.scm?.let {
+                val log = if (branch?.isNotBlank() == true) scmService.getBranch(it, branch) else scmService.getTrunk(it)
+                enrichLog(log, topology.buildExtInstances(projectId))
             }
             if (log != null) {
                 ctx.response().putHeader("content-type", "text/html")
                         .end(mapper.writeValueAsString(log))
             }
             else {
-                logger.info("Cannot get SCM log $projectId $branch")
+                logger.info("Cannot get SCM log project:$projectId branch:$branch")
                 ctx.fail(404)
             }
         } catch (e: Exception) {
-            logger.error("Cannot get SCM log $projectId $branch")
+            logger.error("Cannot get SCM log project:$projectId branch:$branch")
             ctx.fail(500)
         }
+    }
+
+    private fun enrichLog(log: List<Commit>, instances: List<ExtInstance>): CommitLogDetail {
+        val tmp = log.map { Triple(it, mutableListOf<ExtInstance>(), mutableListOf<ExtInstance>()) }
+        val unresolved = mutableListOf<ExtInstance>()
+        instances.forEach { instance ->
+            val runningVersion = instance.indicators?.version
+            val deployedVersion = instance.sshDetails?.version
+            val commitR = tmp.find { item -> runningVersion?.let { item.first.match(it) } == true }
+            val commitD = tmp.find { item -> deployedVersion?.let { item.first.match(it) } == true }
+
+            if (commitR == null && commitD == null) {
+                unresolved.add(instance)
+            }
+            else {
+                commitR?.let { it.second.add(instance) }
+                commitD?.let { it.third.add(instance) }
+            }
+        }
+        return CommitLogDetail(
+                log = tmp.map { (commit, running, deployed) -> CommitDetail(
+                        revision = commit.revision,
+                        date = commit.date,
+                        author = commit.author,
+                        message = commit.message,
+                        version = commit.release ?: commit.newVersion,
+                        instances = running.map { it.toRef() },
+                        deployments = deployed.map { it.toRef() }
+                ) },
+                unresolved = unresolved.map { it.toRef() }
+        )
+
+        /*
+        val result = log.map {
+            CommitLogEntry(
+                    revision = it.revision,
+                    date = it.date,
+                    author = it.author,
+                    message = it.message,
+                    version = it.release ?: it.newVersion
+            )
+        }//.toMutableList()
+
+        fun match(commit: CommitLogEntry, version: Version): Boolean {
+            return commit.revision == version.revision ||
+                    commit.version?.let { Version.isStable(it) && commit.version == version.version } == true
+        }
+
+        instances.forEach { instance ->
+            val runningVersion = instance.indicators?.version
+            val deployedVersion = instance.sshDetails?.version
+            val commitR = result.find { commit -> runningVersion?.let { match(commit, it) } == true }
+            val commitD = result.find { commit -> deployedVersion?.let { match(commit, it) } == true }
+
+            if (commitR == null && commitD == null) {
+                logger.info("@@@@ Cannot link ${instance.completeId}")
+                val indexOfFirstR = result.indexOfFirst { it.revision != null && runningVersion != null && it.revision < runningVersion?.revision ?: "" }
+                if (indexOfFirstR > 0) {
+                    result.add(indexOfFirstR, CommitLogEntry(revision = runningVersion?.revision, instances = mutableListOf(instance.toRef())))
+                }
+                val indexOfFirstD = result.indexOfFirst { it.revision != null && deployedVersion != null && it.revision < deployedVersion?.revision ?: "" }
+                if (indexOfFirstD > 0) {
+                    result.add(indexOfFirstD, CommitLogEntry(revision = deployedVersion?.revision, deployments = mutableListOf(instance.toRef())))
+                }
+            }
+            else {
+                commitR?.let { it.instances.add(instance.toRef()) }
+                commitD?.let { it.deployments.add(instance.toRef()) }
+            }
+        }
+        return result
+*/
     }
 
     private fun projectDoc(ctx: RoutingContext) {
@@ -288,15 +371,6 @@ private fun ProjectDetail.apply(scmDetails: ScmDetails) {
     this.changes = scmDetails.changes
     this.latest = scmDetails.latest
     this.released = scmDetails.released
-    this.commitLog = scmDetails.commitLog.map {
-        CommitLogEntry(
-                revision = it.revision,
-                date = it.date,
-                author = it.author,
-                message = it.message,
-                version = it.release ?: it.newVersion
-        )
-    }
     this.lastCommit = scmDetails.commitLog?.firstOrNull()?.date
     try {
         val sixMonthAgo = LocalDateTime.now(Clock.systemUTC()).minusMonths(6)
@@ -334,3 +408,11 @@ private fun ProjectDetail.apply(status: BuildStatus?) {
     this.buildStatus = if (status?.building == true) "BUILDING" else status?.result
     this.buildTimestamp = status?.timestamp
 }
+
+private fun ExtInstance.toRef() = InstanceRefDetail(
+        id = this.completeId, env = this.envId, name = this.instanceId,
+        running = this.indicators?.version?.toVersionDetail(),
+        deployed = this.sshDetails?.let { VersionDetail(it.deployedVersion ?: "", it.deployedRevision ?: "") }
+)
+
+private fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision)
