@@ -1,8 +1,9 @@
 package org.neo.gomina.integration.scm.dummy
 
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.apache.commons.lang3.StringUtils
@@ -19,9 +20,12 @@ class DummyScmClient : ScmClient {
         private val logger = LogManager.getLogger(DummyScmClient::class.java)
     }
 
-    private val mapper = ObjectMapper(YAMLFactory())
+    private val mapper = ObjectMapper(JsonFactory())
             .registerKotlinModule()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
+
 
     val url: String
     
@@ -30,7 +34,11 @@ class DummyScmClient : ScmClient {
     }
 
     override fun getBranches(): List<Branch> {
-        return listOf(Branch("trunk"))
+        val projectData = getProjectData(url)
+        val branches = projectData?.let { project ->
+            project.keys.filter { key -> key.startsWith("branch") }.map { key -> Branch(key, originRevision = (project[key] as Map<String, Any>)["origin"] as String?) }
+        } ?: emptyList()
+        return listOf(Branch("trunk")) + branches
     }
 
     override fun getLog(branch: String, rev: String, count: Int): List<Commit> {
@@ -38,7 +46,14 @@ class DummyScmClient : ScmClient {
             val projectData = getProjectData(url)
             if (projectData != null) {
                 val log = ArrayList<Map<String, Any>>()
-                for (commit in projectData["log"] as List<Map<String, Any>>) {
+                val commitLog = if (branch.startsWith("branch")) {
+                    val branchData = projectData[branch] as Map<String, Any>
+                    branchData["log"]
+                }
+                else {
+                    projectData["log"]
+                }
+                for (commit in commitLog as List<Map<String, Any>>) {
                     log.add(commit)
                     if (StringUtils.equals(commit["revision"] as String, rev)) {
                         break
@@ -86,7 +101,7 @@ class DummyScmClient : ScmClient {
     }
 
     private fun getProjectData(url: String): Map<String, Any>? {
-        return mapper.readValue<List<Map<String, Any>>>(File("datadummy/projects.svn.yaml"))
+        return mapper.readValue<List<Map<String, Any>>>(File("datadummy/dummyscm.json"))
                 .firstOrNull { StringUtils.equals(it["url"] as String, url) }
     }
 

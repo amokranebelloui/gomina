@@ -245,7 +245,7 @@ class ProjectApp extends React.Component {
         //const title = (<span>Projects &nbsp;&nbsp;&nbsp;</span>);
         const docId = this.props.match.params.docId;
         const branchId = queryParams.branchId;
-        console.info("---", docId, branchId);
+        //console.info("---", docId, branchId);
         return (
             <AppLayout title={"Component: " + project.label}>
             <LoggedUserContext.Consumer>
@@ -278,7 +278,7 @@ class ProjectApp extends React.Component {
                                             <b>Impacted</b>,
                                             <Dependencies dependencies={this.state.impacted} />
                                         ] :
-                                        [<b>Commit Log</b>,<CommitLog type={project.scmType}
+                                        [<b>Main</b>,<CommitLog type={project.scmType}
                                                                       commits={(this.state.branch||{}).log}
                                                                       unresolved={(this.state.branch||{}).unresolved} />]
 

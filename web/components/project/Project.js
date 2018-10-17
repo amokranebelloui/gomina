@@ -77,7 +77,7 @@ class ProjectSummary extends React.Component {
                     <DateTime date={project.buildTimestamp}/>
                 </div>
                 {this.props.loggedUser &&
-                    <div>(Level)</div>
+                    <div><span>(Level)</span></div>
                 }
             </div>
         )
@@ -124,7 +124,7 @@ function ProjectBadge(props) {
                 
                 <hr />
                 
-                <Link to={'/component/' + props.project.id}>SVN Log</Link>
+                <Link to={'/component/' + props.project.id}>Main</Link>
                 <span>|</span>
                 {project.branches
                     .map(branch => [

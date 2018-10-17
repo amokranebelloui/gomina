@@ -168,8 +168,8 @@
   PID: '48766'
   HOST: '10.143.3.58'
   folder: '/home/svc/prod-basket'
-  VERSION: '5.1.3-SNAPSHOT'
-  REVISION: 34433
+  VERSION: '5.1.2'
+  REVISION: 32766
   STATUS: 'LIVE'
 
   JMX: 7800
@@ -185,8 +185,8 @@
   PID: '11098'
   HOST: '10.143.3.56'
   folder: '/home/svc/prod-basket'
-  VERSION: '5.1.3-SNAPSHOT'
-  REVISION: 34561
+  VERSION: '5.1.2'
+  REVISION: 32766
   STATUS: 'DOWN'
 
   BUS: "2.0"

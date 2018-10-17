@@ -1,0 +1,66 @@
+// @formatter:off
+[
+  {
+    "url": "dummy://OMS/Server/tradex-viewkernel",
+    "log": [
+      {"revision": "35770", "author": "amokrane", "message": "[maven-release-plugin] 0.3.0-SNAPSHOT", "version": "0.3.0-SNAPSHOT"},
+      {"revision": "35766", "author": "amokrane", "message": "[maven-release-plugin] prepare release 0.2.0", "version": "0.2.0"},
+      {"revision": "35665", "author": "amokrane", "message": "view kernel commit", "version": "0.1.O-SNAPSHOT"}
+    ]
+  },
+  {
+    "url": "dummy://OMS/Server/tradex-kernel",
+    "log": [
+      {"revision": "35816", "author": "amokrane", "message": "Remove awareness of other components (fixes)"},
+      {"revision": "35815", "author": "amokrane", "message": "Remove awareness of other components"},
+      {"revision": "35770", "author": "amokrane", "message": "[maven-release-plugin] 2.3.0-SNAPSHOT", "version": "2.3.0-SNAPSHOT"},
+      {"revision": "35766", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.2.0", "version": "2.2.0"},
+      {"revision": "35665", "author": "amokrane", "message": "kernel commit", "version": "2.2.O-SNAPSHOT"},
+      {"revision": "35570", "author": "amokrane", "message": "[maven-release-plugin] 2.2.0-SNAPSHOT", "version": "2.2.0-SNAPSHOT"},
+      {"revision": "35566", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.1.0", "version": "2.1.0"}
+    ]
+  },
+  {
+    "url": "dummy://OMS/Server/tradex-basketmanager",
+    "log": [
+      {"revision": "35990", "author": "amokrane", "message": "Big refacto", "version": "5.1.3-SNAPSHOT"},
+      {"revision": "35931", "author": "amokrane", "message": "[maven-release-plugin] 5.1.4-SNAPSHOT", "version": "5.1.4-SNAPSHOT"},
+      {"revision": "35930", "author": "amokrane", "message": "[maven-release-plugin] prepare release 5.1.3", "version": "5.1.3"},
+      {"revision": "35490", "author": "amokrane", "message": "[JIRA-5409] feature 2 (bis)"},
+      {"revision": "35488", "author": "amokrane", "message": "[JIRA-5409] feature 2"},
+      {"revision": "35487", "author": "amokrane", "message": "feature1"},
+      {"revision": "35469", "author": "amokrane", "message": "feature 0"},
+      {"revision": "34561", "author": "amokrane", "message": "POC, lkhs sdpfousd sdfhpsmdnf sfspdh dk s kjf s jkhsdkjhdfos sjdfjs d sdkmfdf shjehkjdfksbdf  ukejhdkh sjd ksdhfjk qksjvkdv kbqsdbqk"},
+      {"revision": "34560", "author": "amokrane", "message": "structure"},
+      {"revision": "33982", "author": "amokrane", "message": "initial commit"},
+      {"revision": "32770", "author": "amokrane", "message": "[maven-release-plugin] 5.1.3-SNAPSHOT", "version": "5.1.3-SNAPSHOT"},
+      {"revision": "32766", "author": "amokrane", "message": "[maven-release-plugin] prepare release 5.1.2", "version": "5.1.2"}
+    ],
+    "branch_12": {
+      "name": "branch12",
+      "origin": "35930",
+      "log": [
+        {"revision": "35991", "author": "amokrane", "message": "Small bugfixes"}
+      ]
+    }
+  },
+  {
+    "url": "dummy://OMS/Server/tradex-ordermanager",
+    "log": [
+      {"revision": "35490", "author": "amokrane", "message": "[maven-release-plugin] 5.1.4-SNAPSHOT", "version": "5.1.4-SNAPSHOT"},
+      {"revision": "35489", "author": "amokrane", "message": "[maven-release-plugin] prepare release 5.1.3", "version": "5.1.3"},
+      {"revision": "35488", "author": "amokrane", "message": "[JIRA-5409] feature 2"},
+      {"revision": "35002", "author": "amokrane", "message": "Handle Order Lifecycle"}
+    ]
+  },
+  {
+    "url": "dummy://OMS/Server/tradex-fixin",
+    "log": [
+      {"revision": "35490", "author": "amokrane", "message": "refactor", "version": "0.9.1-SNAPSHOT"},
+      {"revision": "35014", "author": "amokrane", "message": "Handle Major/Minor translations", "version": "0.9.1-SNAPSHOT"},
+      {"revision": "34430", "author": "amokrane", "message": "[maven-release-plugin] 0.9.1-SNAPSHOT", "version": "0.9.2-SNAPSHOT"},
+      {"revision": "34429", "author": "amokrane", "message": "[maven-release-plugin] prepare release 0.9.0", "version": "0.9.0"}
+    ]
+  }
+]
+// @formatter:on

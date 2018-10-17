@@ -69,8 +69,8 @@ class CommitLog extends React.Component<Props> {
                                 <td style={{width: '80px'}}>
                                     <DateTime date={commit.date}/>
                                 </td>
-                                <td>
-                                    <span>
+                                <td style={{verticalAlign: 'middle'}}>
+                                    <span style={{verticalAlign: 'middle'}}>
                                         {(commit.message || '') + ' ' || '-'}
                                     </span>
                                     <span className="items" style={{float: 'right'}}>
