@@ -16,6 +16,7 @@ class UsersFile : Users, AbstractFileRepo() {
 
     @Inject @Named("users.file")
     private lateinit var file: File
+    private var users: Map<String, User> = emptyMap()
 
     fun read(file: File): List<User> {
         return when (file.extension) {
@@ -25,9 +26,18 @@ class UsersFile : Users, AbstractFileRepo() {
         }
     }
 
-    override fun getUsers(): List<User> = read(file)
+    @Inject
+    private fun load() {
+        users = read(file).associateBy { it.id }
+    }
 
-    override fun getUser(userId: String): User? = read(file).find { it.id == userId }
+    private fun loadUsers() = read(file)
 
+    override fun getUsers(): List<User> = loadUsers().toList()
+
+    override fun getUser(userId: String): User? = loadUsers().find { it.id == userId }
+
+    override fun findForAccount(account: String): User? =
+            loadUsers().find { it.accounts.contains(account) || it.login == account || it.id == account }
 
 }

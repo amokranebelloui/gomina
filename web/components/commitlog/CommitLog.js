@@ -1,5 +1,6 @@
 // @flow
 import * as React from "react";
+import {Link} from "react-router-dom";
 import type {VersionType} from "../common/Version";
 import {Version, VersionLabel} from "../common/Version";
 import {Badge} from "../common/Badge";
@@ -8,8 +9,13 @@ import './CommitLog.css'
 import {DateTime} from "../common/DateTime";
 import {Revision} from "./Revision";
 
+type UserRefType = {
+    id?: ?string,
+    shortName: ?string,
+}
+
 type CommitType = {
-    author?: ?string,
+    author?: ?UserRefType,
     date?: ?number,
     message?: ?string,
     version?: ?string,
@@ -65,7 +71,7 @@ class CommitLog extends React.Component<Props> {
                         {log.map(commit =>
                             <tr block="true" key={commit.revision}>
                                 <td style={{width: '30px'}}><Revision revision={commit.revision} type={this.props.type}></Revision></td>
-                                <td style={{width: '20px'}}>{(commit.author || '') + ' ' || '-'}</td>
+                                <td style={{width: '20px'}}>{commit.author && <UserRef user={commit.author} /> || '-'}</td>
                                 <td style={{width: '80px'}}>
                                     <DateTime date={commit.date}/>
                                 </td>
@@ -101,6 +107,15 @@ class CommitLog extends React.Component<Props> {
         }
         return null
     }
+}
+
+function UserRef(props: {user: UserRefType}) {
+    return (
+        <span>
+            {props.user.shortName}
+            {props.user.id && <Link to={"/user/" + props.user.id}>&nbsp;&rarr;</Link>}
+        </span>
+    )
 }
 
 // TODO Clean old client side matching of instances to commits

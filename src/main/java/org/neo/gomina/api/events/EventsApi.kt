@@ -5,7 +5,7 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.api.toDateUtc
+import org.neo.gomina.api.common.toDateUtc
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProvider
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProviderConfig
 import org.neo.gomina.integration.monitoring.MonitoringEventsProvider

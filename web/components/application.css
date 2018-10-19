@@ -11,6 +11,11 @@ body {
     box-sizing: border-box;
 }
 
+a {
+    /*color: blue;*/
+    text-decoration: inherit; /* no underline */
+}
+
 #root {
     height: 100%;
     width: 100%;

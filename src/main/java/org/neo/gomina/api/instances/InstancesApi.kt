@@ -8,7 +8,7 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.api.toDateUtc
+import org.neo.gomina.api.common.toDateUtc
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.model.host.resolveHostname

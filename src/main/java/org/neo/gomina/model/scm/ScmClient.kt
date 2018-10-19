@@ -4,10 +4,10 @@ import org.neo.gomina.model.version.Version
 import java.util.*
 
 data class Commit (
-    var revision: String = "",
-    var date: Date? = null,
-    var author: String? = null,
-    var message: String? = null,
+    val revision: String = "",
+    val date: Date? = null,
+    val author: String? = null,
+    val message: String? = null,
 
     var release: String? = null, // new version: if the commit is a prepare release version change
     var newVersion: String? = null // version: if the commit is a release

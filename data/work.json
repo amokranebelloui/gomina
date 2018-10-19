@@ -4,7 +4,7 @@
     "label": "Project POC",
     "type": "Dev",
     "jira": "DEMO-540",
-    "people": ["amokrane"],
+    "people": ["amokrane.belloui"],
     "projects": ["kernel", "basket", "order"],
     "status": "COMPLETED"
   },
@@ -13,7 +13,7 @@
     "label": "Facilitation",
     "type": "Dev",
     "jira": "DEMO-671",
-    "people": ["amokrane"],
+    "people": ["amokrane.belloui"],
     "projects": ["facilitation", "order"],
     "status": "DEV"
   },
@@ -21,7 +21,7 @@
     "id": "refacto",
     "label": "refacto 1",
     "type": "Dev",
-    "people": ["amokrane"],
+    "people": ["amokrane.belloui", "john.doe"],
     "projects": ["libbus"],
     "status": "DEV"
   }

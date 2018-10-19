@@ -7,6 +7,8 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.api.common.UserRef
+import org.neo.gomina.api.common.toRef
 import org.neo.gomina.api.instances.VersionDetail
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
@@ -20,6 +22,7 @@ import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmDetails
+import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.version.Version
 import java.time.Clock
 import java.time.LocalDateTime
@@ -77,7 +80,7 @@ data class InstanceRefDetail(
 data class CommitDetail(
         val revision: String?,
         var date: Date? = null,
-        var author: String? = null,
+        var author: UserRef? = null,
         var message: String? = null,
 
         var version: String? = null,
@@ -97,6 +100,7 @@ class ProjectsApi {
 
     @Inject private lateinit var projects: Projects
     @Inject private lateinit var systems: Systems
+    @Inject private lateinit var users: Users
 
     @Inject private lateinit var scmService: ScmService
     @Inject private lateinit var sonarService: SonarService
@@ -203,7 +207,7 @@ class ProjectsApi {
                 log = tmp.map { (commit, running, deployed) -> CommitDetail(
                         revision = commit.revision,
                         date = commit.date,
-                        author = commit.author,
+                        author = commit.author?.let { users.findForAccount(it) }?.toRef() ?: commit.author?.let { UserRef(shortName = commit.author) },
                         message = commit.message,
                         version = commit.release ?: commit.newVersion,
                         instances = running.map { it.toRef() },
