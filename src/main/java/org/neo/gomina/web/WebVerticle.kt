@@ -42,7 +42,7 @@ class WebVerticle : AbstractVerticle() {
 
         router
                 .mountSubRouter("/authenticate", injector.getInstance(AuthApi::class.java).router)
-                .mountSubRouter("/data/users", injector.getInstance(UsersApi::class.java).router)
+                .mountSubRouter("/data/user", injector.getInstance(UsersApi::class.java).router)
                 .mountSubRouter("/data/envs", injector.getInstance(EnvsApi::class.java).router)
                 .mountSubRouter("/data/projects", injector.getInstance(ProjectsApi::class.java).router)
                 .mountSubRouter("/data/work", injector.getInstance(WorkApi::class.java).router)
