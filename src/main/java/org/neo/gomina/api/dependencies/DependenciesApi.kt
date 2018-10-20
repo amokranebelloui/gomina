@@ -8,8 +8,8 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.project.Projects
-import org.neo.gomina.model.service.Service
-import org.neo.gomina.model.service.Services
+import org.neo.gomina.model.component.Component
+import org.neo.gomina.model.component.Components
 
 
 data class FunctionDetail(val name: String, val type: String, val usage: String? = null)
@@ -29,7 +29,7 @@ class DependenciesApi {
     val router: Router
 
     @Inject lateinit var projects: Projects
-    @Inject lateinit var services: Services
+    @Inject lateinit var components: Components
     @Inject lateinit var interactionsRepository: InteractionsRepository
 
     @Inject
@@ -60,9 +60,9 @@ class DependenciesApi {
             // FIXME Manage Project/Services dependencies
             //val allProjects = projects.getProjects().associateBy { it.id }
             val allServices = (
-                    services.getServices() +
+                    components.getComponents() +
                     projects.getProjects().map {
-                        Service(id = it.id, type = "unknown", systems = it.systems, projectId = it.id)
+                        Component(id = it.id, type = "unknown", systems = it.systems, projectId = it.id)
                     })
             val servicesInScope = allServices.filter { it.belongsToOneOf(systems) }.map { it.id }
 
@@ -86,7 +86,7 @@ class DependenciesApi {
             }
             val dependenciesDetails = dependencies.map { it.toDetail() }
             val dependenciesDetail = DependenciesDetail(
-                    services = g.sort().map { DependencyService(it, servicesInScope.contains(it)) },
+                    services = g.sort().map { DependencyService(serviceId = it, inScope = servicesInScope.contains(it)) },
                     functionTypes = Dependencies.functions(allInteractions.values).map { (f, _) -> f.type }.toSet(),
                     dependencies = dependenciesDetails)
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(dependenciesDetail))

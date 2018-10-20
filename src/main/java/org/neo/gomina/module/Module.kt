@@ -46,7 +46,7 @@ import org.neo.gomina.model.project.Projects
 import org.neo.gomina.model.project.Systems
 import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.model.security.Passwords
-import org.neo.gomina.model.service.Services
+import org.neo.gomina.model.component.Components
 import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.work.WorkList
 import org.neo.gomina.module.config.Config
@@ -77,7 +77,7 @@ class GominaModule : AbstractModule() {
         bind(Users::class.java).to(UsersFile::class.java).`in`(Scopes.SINGLETON)
 
         bind(File::class.java).annotatedWith(named("projects.file")).toInstance(File(config.inventory.projectsFile))
-        bind(File::class.java).annotatedWith(named("services.file")).toInstance(File(config.inventory.servicesFile))
+        bind(File::class.java).annotatedWith(named("components.file")).toInstance(File(config.inventory.componentsFile))
         bind(File::class.java).annotatedWith(named("interactions.file")).toInstance(File(config.inventory.interactionsFile))
         bind(File::class.java).annotatedWith(named("work.file")).toInstance(File(config.inventory.workFile))
         bind(File::class.java).annotatedWith(named("hosts.file")).toInstance(File(config.inventory.hostsFile))
@@ -86,7 +86,7 @@ class GominaModule : AbstractModule() {
 
         bind(Projects::class.java).to(ProjectsFile::class.java).`in`(Scopes.SINGLETON)
         bind(Systems::class.java).to(ProjectSystems::class.java).`in`(Scopes.SINGLETON)
-        bind(Services::class.java).to(ServicesFile::class.java).`in`(Scopes.SINGLETON)
+        bind(Components::class.java).to(ComponentsFile::class.java).`in`(Scopes.SINGLETON)
         bind(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsRepository::class.java).to(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsFileProvider::class.java).asEagerSingleton()

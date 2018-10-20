@@ -13,7 +13,7 @@ import org.neo.gomina.integration.sonar.SonarConfig
 import java.io.File
 
 data class InventoryConfig(var projectsFile: String = "",
-                           var servicesFile: String = "",
+                           var componentsFile: String = "",
                            var interactionsFile: String = "",
                            var workFile: String = "",
                            var hostsFile: String = "",

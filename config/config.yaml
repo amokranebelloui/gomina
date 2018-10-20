@@ -6,7 +6,7 @@ jiraUrl: 'http://localhost/jira'
 
 inventory:
   projectsFile: 'data/projects.json'
-  servicesFile: 'data/services.json'
+  componentsFile: 'data/components.json'
   interactionsFile: 'data/interactions.json'
   workFile: 'data/work.json'
   hostsFile: 'data/hosts.json'

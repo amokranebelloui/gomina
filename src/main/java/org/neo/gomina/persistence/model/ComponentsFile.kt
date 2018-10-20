@@ -4,20 +4,20 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.service.Service
-import org.neo.gomina.model.service.Services
+import org.neo.gomina.model.component.Component
+import org.neo.gomina.model.component.Components
 import java.io.File
 
-class ServicesFile : Services, AbstractFileRepo() {
+class ComponentsFile : Components, AbstractFileRepo() {
 
     companion object {
-        private val logger = LogManager.getLogger(ServicesFile.javaClass)
+        private val logger = LogManager.getLogger(ComponentsFile.javaClass)
     }
 
-    @Inject @Named("services.file")
+    @Inject @Named("components.file")
     private lateinit var file: File
 
-    fun read(file: File): List<Service> {
+    fun read(file: File): List<Component> {
         return when (file.extension) {
             "yaml" -> yamlMapper.readValue(file)
             "json" -> jsonMapper.readValue(file)
@@ -25,6 +25,6 @@ class ServicesFile : Services, AbstractFileRepo() {
         }
     }
 
-    override fun getServices(): List<Service> = read(file)
+    override fun getComponents(): List<Component> = read(file)
 
 }
