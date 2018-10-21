@@ -9,6 +9,9 @@ object System {
             ((previous?.let { "$it." } ?: "") + it).also { previous = it }
         }
     }
+    fun extend(systems: List<String>): List<String> {
+        return systems.flatMap { System.extend(it) }
+    }
 }
 
 interface Systems {

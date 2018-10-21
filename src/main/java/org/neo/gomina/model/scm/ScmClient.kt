@@ -1,6 +1,8 @@
 package org.neo.gomina.model.scm
 
 import org.neo.gomina.model.version.Version
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 
 data class Commit (
@@ -18,6 +20,28 @@ data class Commit (
     }
 }
 
+private fun LocalDateTime.score(reference: LocalDateTime): Int {
+    val sixMonthAgo = reference.minusMonths(6)
+    val aMonthAgo = reference.minusMonths(1)
+    val aWeekAgo = reference.minusWeeks(1)
+    val aDayAgo = reference.minusDays(1)
+
+    return when {
+        this.isAfter(aDayAgo) -> 7
+        this.isAfter(aWeekAgo) -> 5
+        this.isAfter(aMonthAgo) -> 3
+        this.isAfter(sixMonthAgo) -> 1
+        else -> 0
+    }
+}
+
+fun List<Commit>.activity(reference: LocalDateTime): Int {
+    return this.mapNotNull { it.date }
+            .mapNotNull { LocalDateTime.from(it.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDateTime()) }
+            .filter { it.isAfter(reference.minusMonths(6)) }
+            .map { it.score(reference) }
+            .sumBy { it }
+}
 
 data class Branch(
         var name: String,

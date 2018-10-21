@@ -1,0 +1,8 @@
+.items {
+    /*padding: 2px;*/
+}
+
+.items > * {
+    margin-right: 4px;
+    padding: 1px;
+}

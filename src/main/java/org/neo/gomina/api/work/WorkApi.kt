@@ -12,6 +12,7 @@ import javax.inject.Inject
 
 data class WorkDetail(val id: String, val label: String, val type: String?,
               val jira: String?, val jiraUrl: String?,
+              val status: String,
               val people: List<String>, val projects: List<String> = emptyList())
 
 
@@ -62,6 +63,7 @@ private fun Work.map(jiraUrl: String): WorkDetail {
             jiraUrl = jiraUrl
                     .takeIf { it.isNotBlank() && jira?.isNotBlank() ?: false }
                     ?.let { "$it/$jira" },
+            status = status.toString(),
             people = people,
             projects = projects
     )

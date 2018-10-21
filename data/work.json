@@ -6,7 +6,7 @@
     "jira": "DEMO-540",
     "people": ["amokrane.belloui"],
     "projects": ["kernel", "basket", "order"],
-    "status": "COMPLETED"
+    "status": "DEV"
   },
   {
     "id": "facilitation",
@@ -23,6 +23,6 @@
     "type": "Dev",
     "people": ["amokrane.belloui", "john.doe"],
     "projects": ["libbus"],
-    "status": "DEV"
+    "status": "COMPLETED"
   }
 ]

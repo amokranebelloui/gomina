@@ -1,6 +1,9 @@
 package org.neo.gomina.model.work
 
-enum class WorkStatus { OFF, SPEC, DEV, TESTING, DONE, DEPLOYMENT, COMPLETED}
+enum class WorkStatus {
+    OFF, SPEC, DEV, TESTING, DONE, DEPLOYMENT, COMPLETED;
+    fun isOpen() = this != COMPLETED
+}
 
 data class Work(val id: String, val label: String, val type: String?, val jira: String?,
                 val status: WorkStatus = WorkStatus.OFF,

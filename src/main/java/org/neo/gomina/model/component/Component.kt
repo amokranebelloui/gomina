@@ -9,7 +9,7 @@ data class Component(
         var projectId: String?) {
     fun belongsToOneOf(systems: List<String>) =
             systems.isEmpty() ||
-            systems.intersect(this.systems.flatMap { System.extend(it) }).isNotEmpty()
+            systems.intersect(System.extend(this.systems)).isNotEmpty()
 }
 
 interface Components {

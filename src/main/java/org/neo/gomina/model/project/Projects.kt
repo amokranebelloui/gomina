@@ -12,7 +12,12 @@ data class Project (
     var sonarServer: String = "",
     var jenkinsServer: String = "",
     var jenkinsJob: String? = null
-)
+) {
+    fun shareSystem(other: Project): Boolean {
+        return System.extend(this.systems).intersect(System.extend(other.systems)).isNotEmpty()
+    }
+}
+
 
 data class Scm (
     var type: String = "",

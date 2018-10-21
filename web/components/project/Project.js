@@ -1,5 +1,6 @@
-import React from "react";
-import {Link} from "react-router-dom";
+// @flow
+import * as React from "react";
+import Link from "react-router-dom/es/Link";
 import {Version} from "../common/Version";
 import {LinesOfCode} from "./LinesOfCode";
 import {Coverage} from "./Coverage";
@@ -11,9 +12,10 @@ import {Badge} from "../common/Badge";
 import {BuildStatus} from "../build/BuildStatus";
 import {BuildNumber} from "../build/BuildNumber";
 import {SonarLink} from "./SonarLink";
-import {Revision} from "../commitlog/Revision";
+import "../common/items.css"
+import type {ProjectType} from "./ProjectType";
 
-function ProjectHeader(props) {
+function ProjectHeader(props: {}) {
     return (
         <div className='project-row'>
             <div className='summary'><b>Project</b></div>
@@ -28,7 +30,11 @@ function ProjectHeader(props) {
     )
 }
 
-class ProjectSummary extends React.Component {
+type ProjectSummaryProps = {
+    project: ProjectType,
+    loggedUser?: ?string
+}
+class ProjectSummary extends React.Component<ProjectSummaryProps> {
     render() {
         const project = this.props.project;
         const systems = project.systems || [];
@@ -84,7 +90,13 @@ class ProjectSummary extends React.Component {
     }
 }
 
-function ProjectBadge(props) {
+type ProjectBadgeProps = {
+    project: ProjectType,
+    onReload: (projectId: string) => void,
+    onReloadScm: (projectId: string) => void,
+    onReloadSonar: () => void
+}
+function ProjectBadge(props: ProjectBadgeProps) {
     const project = props.project;
     if (project && project.id) {
         return (
@@ -101,8 +113,8 @@ function ProjectBadge(props) {
                 <span style={{fontSize: 9}}>{project.scmLocation ? project.scmLocation : 'not under scm'}</span>
                 <br/>
 
-                {project.owner && [<span>Owner {project.owner}</span>, <br/>]}
-                {project.critical && [<span>Criticality {project.critical}</span>, <br/>]}
+                <span key="owner">Owner {project.owner || <span style={{opacity: "0.5"}}>Unknown</span>}</span><br/>
+                <span key="criticality">Criticality {project.critical || <span style={{opacity: "0.5"}}>"?"</span>}</span><br/>
 
                 <LinesOfCode loc={project.loc}/>
                 <Coverage coverage={project.coverage}/>
@@ -121,26 +133,7 @@ function ProjectBadge(props) {
                 <button onClick={e => props.onReload(project.id)}>RELOAD</button>
                 <button onClick={e => props.onReloadScm(project.id)}>RELOAD SCM</button>
                 <button onClick={e => props.onReloadSonar()}>RELOAD SONAR</button>
-                
-                <hr />
-                
-                <Link to={'/component/' + props.project.id}>Main</Link>
-                <span>|</span>
-                {project.branches
-                    .map(branch => [
-                        <Link key={branch.name} to={'/component/' + props.project.id + '/scm?branchId=' + branch.name}>
-                            {branch.name}
-                        </Link>,
-                        <span>{branch.origin}</span>,
-                        <Revision type={project.scmType} revision={branch.originRevision}/>
-                    ])
-                }
-                <br/>
-                {project.docFiles
-                    .map(doc => <Link key={doc} to={'/component/' + props.project.id + '/doc/' + doc}>{doc}</Link>)
-                }
-                <Link to={'/component/' + props.project.id + '/dependencies'}>Dependencies</Link>
-                <Link to={'/component/' + props.project.id + '/impacted'}>Impacted</Link>
+
             </div>
         )
     }
@@ -149,8 +142,35 @@ function ProjectBadge(props) {
     }
 }
 
+type ProjectMenuProps = {
+    project: ProjectType
+}
+function ProjectMenu(props: ProjectMenuProps) {
+    const project = props.project;
+    return (
+        project &&
+        <div className="items">
+            <Link to={'/component/' + project.id}>Main</Link>
+            <span>|</span>
+            {project.branches && project.branches
+                .map(branch =>
+                    <span key={branch.name} title={"from: " + (branch.origin || "") + " rev:" + (branch.originRevision || "")}>
+                        <Link to={'/component/' + props.project.id + '/scm?branchId=' + branch.name}>
+                            {branch.name}
+                        </Link>
+                    </span>
+                )
+            }
+            <span>|</span>
+            {project.docFiles && project.docFiles
+                .map(doc => <Link key={doc} to={'/component/' + props.project.id + '/doc/' + doc}>{doc}</Link>)
+            }
+        </div>
+        || null
+    )
+}
 
-export {ProjectHeader, ProjectSummary, ProjectBadge}
+export {ProjectHeader, ProjectSummary, ProjectBadge, ProjectMenu}
 
 
 

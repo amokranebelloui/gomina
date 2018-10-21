@@ -4,6 +4,7 @@ import PropTypes from 'prop-types'
 import svnIcon from "./scm-svn.png"
 import gitIcon from "./scm-git.png"
 import mercurialIcon from "./scm-mercurial.png"
+import dummyIcon from "./scm-dummy.png"
 import defaultIcon from "./scm.png"
 
 function iconForType(type) {
@@ -11,6 +12,7 @@ function iconForType(type) {
         case "svn" : return svnIcon;
         case "git" : return gitIcon;
         case "mercurial" : return mercurialIcon;
+        case "dummy" : return dummyIcon;
         default : return defaultIcon;
     }
 }

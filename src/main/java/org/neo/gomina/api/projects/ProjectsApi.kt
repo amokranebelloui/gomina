@@ -22,13 +22,19 @@ import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmDetails
+import org.neo.gomina.model.scm.activity
 import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.version.Version
+import org.neo.gomina.model.work.WorkList
 import java.time.Clock
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.util.*
 import javax.inject.Inject
+
+data class ProjectRef (
+        var id: String,
+        var label: String? = null
+)
 
 data class ProjectDetail (
         var id: String,
@@ -101,6 +107,7 @@ class ProjectsApi {
     @Inject private lateinit var projects: Projects
     @Inject private lateinit var systems: Systems
     @Inject private lateinit var users: Users
+    @Inject private lateinit var workList: WorkList
 
     @Inject private lateinit var scmService: ScmService
     @Inject private lateinit var sonarService: SonarService
@@ -119,6 +126,7 @@ class ProjectsApi {
         router.get("/systems").handler(this::systems)
         router.get("/:projectId").handler(this::project)
         router.get("/:projectId/scm").handler(this::commitLog)
+        router.get("/:projectId/associated").handler(this::associated)
         router.get("/:projectId/doc/:docId").handler(this::projectDoc)
 
         router.post("/:projectId/reload-scm").handler(this::reloadProject)
@@ -258,6 +266,39 @@ class ProjectsApi {
 */
     }
 
+    private fun associated(ctx: RoutingContext) {
+        val projectId = ctx.request().getParam("projectId")
+        try {
+            logger.info("Get projects associated to project:$projectId")
+
+            val other = projects.getProject(projectId)?.let { project ->
+
+                val associated = workList.getAll()
+                        .filter { it.status.isOpen() && it.projects.contains(projectId) }
+                        .flatMap { it.projects }
+                        .toSet()
+                        .mapNotNull { projects.getProject(it) }
+                        .map { ProjectRef(it.id, it.label) }
+
+                val now = LocalDateTime.now(Clock.systemUTC())
+                val mostActive = projects.getProjects()
+                        .filter { it.shareSystem(project) }
+                        .mapNotNull { project -> project.scm?.let { project to (scmService.getScmDetails(it)?.commitLog?.activity(now) ?: 0) } }
+                        .filter { (project, activity) -> activity > 0 }
+                        .sortedBy { (project, activity) -> activity }
+                        .take(7 - associated.size)
+                        .map { (project, activity) -> ProjectRef(project.id, project.label) }
+                associated union mostActive
+            }
+
+            ctx.response().putHeader("content-type", "text/html")
+                        .end(mapper.writeValueAsString(other))
+        } catch (e: Exception) {
+            logger.error("Cannot projects associated to project project:$projectId")
+            ctx.fail(500)
+        }
+    }
+
     private fun projectDoc(ctx: RoutingContext) {
         val projectId = ctx.request().getParam("projectId")
         val docId = ctx.request().getParam("docId")
@@ -377,24 +418,8 @@ private fun ProjectDetail.apply(scmDetails: ScmDetails) {
     this.released = scmDetails.released
     this.lastCommit = scmDetails.commitLog?.firstOrNull()?.date
     try {
-        val sixMonthAgo = LocalDateTime.now(Clock.systemUTC()).minusMonths(6)
-        val aMonthAgo = LocalDateTime.now(Clock.systemUTC()).minusMonths(1)
-        val aWeekAgo = LocalDateTime.now(Clock.systemUTC()).minusWeeks(1)
-        val aDayAgo = LocalDateTime.now(Clock.systemUTC()).minusDays(1)
-        this.commitActivity = scmDetails.commitLog
-                .mapNotNull { it.date }
-                .mapNotNull { LocalDateTime.from(it.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDateTime()) }
-                .filter { it.isAfter(sixMonthAgo) }
-                .map {
-                    when {
-                        it.isAfter(aDayAgo) -> 7
-                        it.isAfter(aWeekAgo) -> 5
-                        it.isAfter(aMonthAgo) -> 3
-                        it.isAfter(sixMonthAgo) -> 1
-                        else -> 0
-                    }
-                }
-                .sumBy { it }
+        val reference = LocalDateTime.now(Clock.systemUTC())
+        this.commitActivity = scmDetails.commitLog.activity(reference)
     } catch (e: Exception) {
         e.printStackTrace()
     }
