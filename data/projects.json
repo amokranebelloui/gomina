@@ -83,7 +83,7 @@
   },
   {
     "id": "tradex-android", "label": "Tradex Android", "type": "app",
-    "languages": ["java", "android"], "tags": ["tradex", "lib", "mobile"],
+    "languages": ["java", "android"], "tags": ["tradex", "lib", "mobile"], "systems": ["tradex"],
     "maven": "x.oms.vac:tradex-android"
   },
   {
