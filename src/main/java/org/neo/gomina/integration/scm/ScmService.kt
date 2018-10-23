@@ -2,7 +2,7 @@ package org.neo.gomina.integration.scm
 
 import com.github.rjeschke.txtmark.Processor
 import org.neo.gomina.integration.scm.impl.ScmReposImpl
-import org.neo.gomina.model.project.Scm
+import org.neo.gomina.model.component.Scm
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmDetails
 import org.neo.gomina.model.scm.ScmRepos

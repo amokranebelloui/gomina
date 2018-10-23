@@ -12,8 +12,7 @@ import org.neo.gomina.integration.monitoring.MonitoringEventsProviderConfig
 import org.neo.gomina.integration.sonar.SonarConfig
 import java.io.File
 
-data class InventoryConfig(var projectsFile: String = "",
-                           var componentsFile: String = "",
+data class InventoryConfig(var componentsFile: String = "",
                            var interactionsFile: String = "",
                            var workFile: String = "",
                            var hostsFile: String = "",

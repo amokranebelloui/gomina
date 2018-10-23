@@ -16,7 +16,7 @@ class DependenciesTest {
     @Test
     fun testDependencies() {
         println("# Functions")
-        val functions = Dependencies.functions(projects)
+        val functions = Dependencies.functions(components)
         functions.forEach { f, stakeholders -> println("$f => $stakeholders") }
 
         println("# Links")
@@ -67,7 +67,7 @@ class DependenciesTest {
 
     @Test
     fun testInvocationCallChain() {
-        val functions = Dependencies.functions(projects)
+        val functions = Dependencies.functions(components)
         val dependencies = Dependencies.dependencies(functions)
 
         dependencies.forEach { println(it) }
@@ -86,7 +86,7 @@ class DependenciesTest {
     @Test
     fun testSpecialUsageFunctions() { // Transitive implicit dependencies
         println("# Special Dependencies")
-        val specialFunctions = projects
+        val specialFunctions = components
                 .map { p ->
                     Interactions(serviceId = p.serviceId,
                             exposed = p.exposed,
@@ -105,47 +105,47 @@ class DependenciesTest {
 
     @Test
     fun testForwardDependencies() {
-        val functions = Dependencies.functions(projects)
+        val functions = Dependencies.functions(components)
         val dependencies = Dependencies.dependencies(functions)
         val outgoing = dependencies.groupBy { it.from }
 
         println("# Forward Dependencies")
-        projects.map { it.serviceId }.forEach { project ->
-            println("$project")
-            outgoing[project]?.apply { forEach { println("   ${it.to} : #${it.functions.size} ${it.functions}") } }
+        components.map { it.serviceId }.forEach { component ->
+            println("$component")
+            outgoing[component]?.apply { forEach { println("   ${it.to} : #${it.functions.size} ${it.functions}") } }
         }
     }
 
     @Test
     fun testReverseDependencies() {
-        val functions = Dependencies.functions(projects)
+        val functions = Dependencies.functions(components)
         val dependencies = Dependencies.dependencies(functions)
         val incoming = dependencies.groupBy { it.to }
 
         println("# Reverse Dependencies")
-        projects.map { it.serviceId }.forEach { project ->
-            println("$project")
-            incoming[project]?.apply { forEach { println("   ${it.from} : #${it.functions.size} ${it.functions}") } }
+        components.map { it.serviceId }.forEach { component ->
+            println("$component")
+            incoming[component]?.apply { forEach { println("   ${it.from} : #${it.functions.size} ${it.functions}") } }
         }
     }
 
     @Test
     fun testIncomingOutgoingCounts() {
-        val functions = Dependencies.functions(projects)
+        val functions = Dependencies.functions(components)
         val dependencies = Dependencies.dependencies(functions)
 
         println("# Incoming/Outgoing")
         val counts = Dependencies.counts(dependencies)
-        counts.forEach { (project, counts) -> println("$project $counts") }
+        counts.forEach { (node, counts) -> println("$node $counts") }
     }
 
     @Test
     fun testDSM() {
-        val functions = Dependencies.functions(projects)
+        val functions = Dependencies.functions(components)
         val dependencies = Dependencies.dependencies(functions)
 
         println("# Dependency Matrix")
-        val g = TopologicalSort<Dependency>(projects.map { it.serviceId }).also {
+        val g = TopologicalSort<Dependency>(components.map { it.serviceId }).also {
                     dependencies.forEach { dependency -> it.addEdge(dependency.from, dependency.to, dependency) }
                 }
 
@@ -154,14 +154,14 @@ class DependenciesTest {
 
     @Test
     fun testDoubleResponsibilities() {
-        val functions = Dependencies.functions(projects)
+        val functions = Dependencies.functions(components)
 
         println("# Double Responsibilities")
         val doubleResponsibilities = functions.filterValues { it.exposedByMany }
         doubleResponsibilities.forEach { f, stakeholders -> println("$f ${stakeholders.exposers}") }
 
         println("# Collapsing Responsibilities")
-        val key = { projects: Collection<String> -> projects.sorted().joinToString(separator = ",") }
+        val key = { components: Collection<String> -> components.sorted().joinToString(separator = ",") }
         val collapsingResponsibilities = doubleResponsibilities
                 .map { (f, stakeholders) -> Pair(key(stakeholders.exposers.toSet()), f) }
                 .groupBy({ (exposers, f) -> exposers }) { (_, f) -> f }

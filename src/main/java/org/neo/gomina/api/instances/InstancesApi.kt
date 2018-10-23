@@ -17,7 +17,7 @@ import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.inventory.ServiceMode
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.ServerStatus
-import org.neo.gomina.model.project.Projects
+import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
 import java.util.*
@@ -92,7 +92,7 @@ class InstancesApi {
     val router: Router
 
     @Inject private lateinit var inventory: Inventory
-    @Inject private lateinit var projects: Projects
+    @Inject private lateinit var componentRepo: ComponentRepo
 
     @Inject lateinit private var scmService: ScmService
     @Inject lateinit private var sshService: SshService
@@ -185,7 +185,7 @@ class InstancesApi {
             vertx.executeBlocking({future: Future<Void> ->
                 val envId = ctx.request().getParam("envId")
                 logger.info("Reloading SCM data $envId ...")
-                projects.getProjects()
+                componentRepo.getAll()
                         .mapNotNull { it.scm }
                         .forEach { scmService.reloadScmDetails(it) }
                 future.complete()
@@ -245,7 +245,7 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
 
     instance.type = ext.service.type
     instance.service = ext.service.svc
-    instance.project = ext.service.project
+    instance.project = ext.service.componentId
 
     instance.versions = VersionsDetail(
             running = ext.indicators?.version?.let { VersionDetail(it.version, it.revision) },
@@ -302,7 +302,7 @@ fun Service.toServiceDetail(): ServiceDetail {
             type = this.type,
             mode = this.mode,
             activeCount = this.activeCount,
-            project = this.project)
+            project = this.componentId)
 }
 
 //fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision)

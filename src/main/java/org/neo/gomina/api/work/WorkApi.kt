@@ -65,6 +65,6 @@ private fun Work.map(jiraUrl: String): WorkDetail {
                     ?.let { "$it/$jira" },
             status = status.toString(),
             people = people,
-            projects = projects
+            projects = components
     )
 }

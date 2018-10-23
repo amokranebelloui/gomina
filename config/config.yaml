@@ -5,7 +5,6 @@ usersFile: 'data/users.json'
 jiraUrl: 'http://localhost/jira'
 
 inventory:
-  projectsFile: 'data/projects.json'
   componentsFile: 'data/components.json'
   interactionsFile: 'data/interactions.json'
   workFile: 'data/work.json'

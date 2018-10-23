@@ -13,8 +13,7 @@ import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.events.EventsProviderFactory
 import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
-import org.neo.gomina.model.runtime.Topology
-import org.neo.gomina.api.projects.ProjectsApi
+import org.neo.gomina.api.projects.ComponentsApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.api.users.UsersApi
 import org.neo.gomina.api.work.WorkApi
@@ -41,12 +40,12 @@ import org.neo.gomina.model.host.HostRepo
 import org.neo.gomina.model.host.Hosts
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.monitoring.Monitoring
-import org.neo.gomina.model.project.ProjectSystems
-import org.neo.gomina.model.project.Projects
-import org.neo.gomina.model.project.Systems
+import org.neo.gomina.model.system.InferredSystems
+import org.neo.gomina.model.component.ComponentRepo
+import org.neo.gomina.model.system.Systems
+import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.model.security.Passwords
-import org.neo.gomina.model.component.Components
 import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.work.WorkList
 import org.neo.gomina.module.config.Config
@@ -76,7 +75,6 @@ class GominaModule : AbstractModule() {
         bind(File::class.java).annotatedWith(named("users.file")).toInstance(File(config.usersFile))
         bind(Users::class.java).to(UsersFile::class.java).`in`(Scopes.SINGLETON)
 
-        bind(File::class.java).annotatedWith(named("projects.file")).toInstance(File(config.inventory.projectsFile))
         bind(File::class.java).annotatedWith(named("components.file")).toInstance(File(config.inventory.componentsFile))
         bind(File::class.java).annotatedWith(named("interactions.file")).toInstance(File(config.inventory.interactionsFile))
         bind(File::class.java).annotatedWith(named("work.file")).toInstance(File(config.inventory.workFile))
@@ -84,9 +82,8 @@ class GominaModule : AbstractModule() {
         bind(String::class.java).annotatedWith(named("inventory.dir")).toInstance(config.inventory.inventoryDir)
         bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
 
-        bind(Projects::class.java).to(ProjectsFile::class.java).`in`(Scopes.SINGLETON)
-        bind(Systems::class.java).to(ProjectSystems::class.java).`in`(Scopes.SINGLETON)
-        bind(Components::class.java).to(ComponentsFile::class.java).`in`(Scopes.SINGLETON)
+        bind(ComponentRepo::class.java).to(ComponentRepoFile::class.java).`in`(Scopes.SINGLETON)
+        bind(Systems::class.java).to(InferredSystems::class.java).`in`(Scopes.SINGLETON)
         bind(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsRepository::class.java).to(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsFileProvider::class.java).asEagerSingleton()
@@ -145,7 +142,7 @@ class GominaModule : AbstractModule() {
         // Vertx API
         bind(AuthApi::class.java).`in`(Scopes.SINGLETON)
         bind(UsersApi::class.java).`in`(Scopes.SINGLETON)
-        bind(ProjectsApi::class.java).`in`(Scopes.SINGLETON)
+        bind(ComponentsApi::class.java).`in`(Scopes.SINGLETON)
         bind(WorkApi::class.java).`in`(Scopes.SINGLETON)
         bind(EnvsApi::class.java).`in`(Scopes.SINGLETON)
         bind(HostsApi::class.java).`in`(Scopes.SINGLETON)

@@ -7,9 +7,7 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.dependency.*
-import org.neo.gomina.model.project.Projects
-import org.neo.gomina.model.component.Component
-import org.neo.gomina.model.component.Components
+import org.neo.gomina.model.component.ComponentRepo
 
 
 data class FunctionDetail(val name: String, val type: String, val usage: String? = null)
@@ -28,8 +26,7 @@ class DependenciesApi {
 
     val router: Router
 
-    @Inject lateinit var projects: Projects
-    @Inject lateinit var components: Components
+    @Inject lateinit var componentRepo: ComponentRepo
     @Inject lateinit var interactionsRepository: InteractionsRepository
 
     @Inject
@@ -59,11 +56,10 @@ class DependenciesApi {
 
             // FIXME Manage Project/Services dependencies
             //val allProjects = projects.getProjects().associateBy { it.id }
-            val allServices = (
-                    components.getComponents() +
-                    projects.getProjects().map {
-                        Component(id = it.id, type = "unknown", systems = it.systems, projectId = it.id)
-                    })
+            val allServices =
+                    componentRepo.getAll().map {
+                        Thing(id = it.id, type = "unknown", systems = it.systems)
+                    }
             val servicesInScope = allServices.filter { it.belongsToOneOf(systems) }.map { it.id }
 
             val allInteractions = interactionsRepository.getAll().associateBy { p -> p.serviceId }

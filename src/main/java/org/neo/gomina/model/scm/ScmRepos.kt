@@ -1,6 +1,6 @@
 package org.neo.gomina.model.scm
 
-import org.neo.gomina.model.project.Scm
+import org.neo.gomina.model.component.Scm
 
 // FIXME encapsulate document, and include type matadata
 

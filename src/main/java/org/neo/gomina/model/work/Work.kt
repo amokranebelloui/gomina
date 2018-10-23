@@ -8,7 +8,7 @@ enum class WorkStatus {
 data class Work(val id: String, val label: String, val type: String?, val jira: String?,
                 val status: WorkStatus = WorkStatus.OFF,
                 val people: List<String> = emptyList(),
-                val projects: List<String> = emptyList()
+                val components: List<String> = emptyList()
 )
 
 interface WorkList {

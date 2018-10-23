@@ -5,13 +5,13 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.component.Component
-import org.neo.gomina.model.component.Components
+import org.neo.gomina.model.component.ComponentRepo
 import java.io.File
 
-class ComponentsFile : Components, AbstractFileRepo() {
+class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
 
     companion object {
-        private val logger = LogManager.getLogger(ComponentsFile.javaClass)
+        private val logger = LogManager.getLogger(ComponentRepoFile.javaClass)
     }
 
     @Inject @Named("components.file")
@@ -25,6 +25,8 @@ class ComponentsFile : Components, AbstractFileRepo() {
         }
     }
 
-    override fun getComponents(): List<Component> = read(file)
+    override fun getAll(): List<Component> = read(file)
+
+    override fun get(componentId: String): Component? = read(file).find { it.id == componentId }
 
 }

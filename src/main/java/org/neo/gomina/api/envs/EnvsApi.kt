@@ -37,7 +37,7 @@ class EnvsApi {
 
     fun data(ctx: RoutingContext) {
         try {
-            val envs = inventory.getEnvironments().map { Env(it.id, it.type, "myproject") } // FIXME project
+            val envs = inventory.getEnvironments().map { Env(it.id, it.type, "My System") } // FIXME system
             ctx.response().putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(envs))
         }

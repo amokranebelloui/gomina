@@ -15,7 +15,7 @@ class DummySonarConnector : SonarConnector {
 
     private val mapper = ObjectMapper(YAMLFactory()).registerKotlinModule()
 
-    val file = File("datadummy/projects.sonar.yaml")
+    val file = File("datadummy/sonar.yaml")
 
     override fun getMetrics(): Map<String, SonarIndicators> {
         logger.info("Get metrics for dummy")
@@ -26,8 +26,8 @@ class DummySonarConnector : SonarConnector {
         val indicators = HashMap<String, SonarIndicators>()
         try {
             //val value: TypeReference<List<SonarIndicators>> = object : TypeReference<List<SonarIndicators>>() {}
-            for (project in mapper.readValue<List<SonarIndicators>>(file)) {
-                indicators.put(project.code, project)
+            for (comp in mapper.readValue<List<SonarIndicators>>(file)) {
+                indicators.put(comp.code, comp)
             }
         }
         catch (e: IOException) {

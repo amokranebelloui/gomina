@@ -1,11 +1,11 @@
 [
   {
     "id": "poc",
-    "label": "Project POC",
+    "label": "Platform POC",
     "type": "Dev",
     "jira": "DEMO-540",
     "people": ["amokrane.belloui"],
-    "projects": ["kernel", "basket", "order"],
+    "components": ["kernel", "basket", "order"],
     "status": "DEV"
   },
   {
@@ -14,7 +14,7 @@
     "type": "Dev",
     "jira": "DEMO-671",
     "people": ["amokrane.belloui"],
-    "projects": ["facilitation", "order"],
+    "components": ["facilitation", "order"],
     "status": "DEV"
   },
   {
@@ -22,7 +22,7 @@
     "label": "refacto 1",
     "type": "Dev",
     "people": ["amokrane.belloui", "john.doe"],
-    "projects": ["libbus"],
+    "components": ["libbus"],
     "status": "COMPLETED"
   }
 ]

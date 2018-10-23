@@ -5,17 +5,17 @@ import org.junit.Test
 import java.io.File
 import kotlin.test.assertFailsWith
 
-class ProjectsTest {
+class ComponentRepoTest {
 
     @Test fun testJson() {
-        val projects = ProjectsFile().read(File("data/projects.json"))
-        projects.forEach { println(it) }
-        assertThat(projects.size).isGreaterThan(0)
+        val components = ComponentRepoFile().read(File("data/components.json"))
+        components.forEach { println(it) }
+        assertThat(components.size).isGreaterThan(0)
     }
 
     @Test fun testException() {
         assertFailsWith(RuntimeException::class) {
-            ProjectsFile().read(File("data/projects.txt"))
+            ComponentRepoFile().read(File("data/components.txt"))
         }
     }
 }

@@ -48,4 +48,4 @@ val referential = Interactions(serviceId = "referential",
         )
 )
 
-val projects = listOf(fixin, order, orderExt, basket, referential)
+val components = listOf(fixin, order, orderExt, basket, referential)

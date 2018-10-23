@@ -1,6 +1,6 @@
 package org.neo.gomina.integration.sonar
 
-import org.neo.gomina.model.project.Project
+import org.neo.gomina.model.component.Component
 import org.neo.gomina.utils.Cache
 import javax.inject.Inject
 
@@ -11,15 +11,15 @@ class SonarService {
 
     private val sonarCache = Cache<Map<String, SonarIndicators>>("sonar")
 
-    fun getSonar(project: Project, fromCache: Boolean): SonarIndicators? {
-        val metrics = sonarCache.get(project.sonarServer, fromCache) {
-            connectors.getConnector(project.sonarServer)?.getMetrics()
+    fun getSonar(component: Component, fromCache: Boolean): SonarIndicators? {
+        val metrics = sonarCache.get(component.sonarServer, fromCache) {
+            connectors.getConnector(component.sonarServer)?.getMetrics()
         }
 
-        return metrics?.get(project.maven)?.apply {
-            val serverUrl = sonarConfig.serverMap[project.sonarServer]?.url
+        return metrics?.get(component.maven)?.apply {
+            val serverUrl = sonarConfig.serverMap[component.sonarServer]?.url
             val baseUrl = serverUrl ?: ""
-            this.sonarUrl = "$baseUrl/dashboard/index/${project.maven}"
+            this.sonarUrl = "$baseUrl/dashboard/index/${component.maven}"
         }
     }
 

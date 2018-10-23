@@ -21,7 +21,7 @@ data class Service(
         val type: String? = null,
         val mode: ServiceMode? = ServiceMode.ONE_ONLY,
         val activeCount: Int = 1,
-        val project: String? = null,
+        val componentId: String? = null,
         val instances: List<Instance> = emptyList()
 )
 

@@ -13,7 +13,7 @@ import org.neo.gomina.integration.scm.metadata.ProjectMetadataMapper
 import org.neo.gomina.integration.scm.none.NoneScmClient
 import org.neo.gomina.integration.scm.svn.TmateSoftSvnClient
 import org.neo.gomina.integration.scm.versions.MavenReleaseFlagger
-import org.neo.gomina.model.project.Scm
+import org.neo.gomina.model.component.Scm
 import org.neo.gomina.model.security.Passwords
 import java.util.*
 import javax.inject.Inject

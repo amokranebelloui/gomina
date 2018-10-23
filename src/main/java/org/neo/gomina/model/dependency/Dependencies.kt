@@ -109,26 +109,26 @@ object Dependencies {
                 .map { (link, group) -> Dependency(link.from, link.to, group.map { it.first}) }
     }
 
-    private fun buildCallChain(serviceId: String, dependencies: List<Dependency>, parentFunctions: List<FunctionUsage> = emptyList(), projectsSeen: List<String>): CallChain {
+    private fun buildCallChain(serviceId: String, dependencies: List<Dependency>, parentFunctions: List<FunctionUsage> = emptyList(), seen: List<String>): CallChain {
         val self = dependencies.find { it.self(serviceId) }?.functions?: emptyList()
         val related = dependencies
                 .filter { it.from == serviceId }
                 .map {
                     when {
                         it.self(serviceId) -> CallChain(it.to, false, self)
-                        projectsSeen.contains(it.to) -> CallChain(it.to, true, it.functions)
-                        else -> buildCallChain(it.to, dependencies, it.functions, projectsSeen + serviceId)
+                        seen.contains(it.to) -> CallChain(it.to, true, it.functions)
+                        else -> buildCallChain(it.to, dependencies, it.functions, seen + serviceId)
                     }
                 }
         return CallChain(serviceId, false, parentFunctions, related)
     }
 
     fun invocationChain(serviceId: String, dependencies: List<Dependency>): CallChain {
-        return buildCallChain(serviceId, dependencies, projectsSeen = mutableListOf())
+        return buildCallChain(serviceId, dependencies, seen = mutableListOf())
     }
 
     fun callChain(serviceId: String, dependencies: List<Dependency>): CallChain {
-        return buildCallChain(serviceId, dependencies.invert(), projectsSeen = mutableListOf())
+        return buildCallChain(serviceId, dependencies.invert(), seen = mutableListOf())
     }
 
     fun infer(users: Set<Stakeholder>, from: Any?, to: Any?, usageSelector: (Usage?) -> Any?): Stakeholders {
@@ -150,9 +150,9 @@ object Dependencies {
                     else listOf(Triple(it.from, it.to, "OUT"), Triple(it.to, it.from, "IN"))
                 }
                 .groupBy({ (from, to, type) -> from }) { (_, _, type) -> type }
-                .map { (project, types) ->
+                .map { (node, types) ->
                     val counts = types.groupBy { it }.let { Counts(it.count("IN"), it.count("SELF"), it.count("OUT")) }
-                    Pair(project, counts)
+                    Pair(node, counts)
                 }
                 .toMap()
     }
@@ -160,5 +160,5 @@ object Dependencies {
 }
 
 interface EnrichDependencies {
-    fun enrich(projects: Collection<Interactions>): Collection<Interactions>
+    fun enrich(interactions: Collection<Interactions>): Collection<Interactions>
 }

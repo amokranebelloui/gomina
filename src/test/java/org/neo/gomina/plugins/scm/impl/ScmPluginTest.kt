@@ -1,7 +1,7 @@
 package org.neo.gomina.plugins.scm.impl
 
 import org.junit.Test
-import org.neo.gomina.model.project.Scm
+import org.neo.gomina.model.component.Scm
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmDetails
 import org.neo.gomina.model.scm.ScmRepos

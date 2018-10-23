@@ -8,15 +8,15 @@ import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.RuntimeInfo
-import org.neo.gomina.model.project.Project
-import org.neo.gomina.model.project.Projects
+import org.neo.gomina.model.component.Component
+import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.scm.ScmDetails
 import org.neo.gomina.model.scm.ScmRepos
 import javax.inject.Inject
 
 data class ExtInstance(
         val id: Pair<String, String>,
-        val project: Project?,
+        val component: Component?,
         val scmDetail: ScmDetails?,
         val service: Service,
         val instance: Instance?,
@@ -33,7 +33,7 @@ data class ExtInstance(
 class Topology {
 
     @Inject private lateinit var inventory: Inventory
-    @Inject private lateinit var projects: Projects
+    @Inject private lateinit var componentRepo: ComponentRepo
     @Inject lateinit private var monitoring: Monitoring
 
     @Inject lateinit private var scmRepo: ScmRepos
@@ -52,19 +52,19 @@ class Topology {
                 .map { (id, instance, indicators) ->
                     val svc = instance?.first?.svc ?: indicators?.service ?: "x"
                     val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
-                    val project = service.project?.let { projects.getProject(it) }
+                    val component = service.componentId?.let { componentRepo.get(it) }
                     val sshDetails = instance?.second?.let { hostRepo.getDetails(it) }
-                    val scmDetail = project?.scm?.let { scmRepo.getScmDetails(it) }
+                    val scmDetail = component?.scm?.let { scmRepo.getScmDetails(it) }
 
-                    ExtInstance(id, project, scmDetail, service, instance?.second, sshDetails, indicators)
+                    ExtInstance(id, component, scmDetail, service, instance?.second, sshDetails, indicators)
                 }
     }
 
-    fun buildExtInstances(projectId: String): List<ExtInstance> {
+    fun buildExtInstances(componentId: String): List<ExtInstance> {
         val inv = inventory.getEnvironments()
                 .flatMap { env -> env.services.map { env to it } }
                 .flatMap { (env, svc) -> svc.instances.map { instance -> Triple(env, svc, instance) } }
-                .filter { (env, svc, instance) -> svc.project == projectId }
+                .filter { (env, svc, instance) -> svc.componentId == componentId }
 
         val services = inv.map { (env, svc, instance) -> svc }.associateBy { it.svc }
 
@@ -73,7 +73,7 @@ class Topology {
                 .mapValues { (_, triple) -> triple.second to triple.third }
         val monitoring = inventory.getEnvironments()
                 .flatMap { env -> monitoring.instancesFor(env.id).map { env to it } }
-                .filter { (env, mon) -> mon.service?.let { services[it] }?.project == projectId }
+                .filter { (env, mon) -> mon.service?.let { services[it] }?.componentId == componentId }
                 .associateBy { (env, mon) -> env.id to mon.instanceId }
                 .mapValues { (_, pair) -> pair.second }
         
@@ -81,11 +81,11 @@ class Topology {
                 .map { (id, instance, indicators) ->
                     val svc = instance?.first?.svc ?: indicators?.service ?: "x"
                     val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
-                    val project = service.project?.let { projects.getProject(it) }
+                    val component = service.componentId?.let { componentRepo.get(it) }
                     val sshDetails = instance?.second?.let { hostRepo.getDetails(it) }
-                    val scmDetail = project?.scm?.let { scmRepo.getScmDetails(it) }
+                    val scmDetail = component?.scm?.let { scmRepo.getScmDetails(it) }
 
-                    ExtInstance(id, project, scmDetail, service, instance?.second, sshDetails, indicators)
+                    ExtInstance(id, component, scmDetail, service, instance?.second, sshDetails, indicators)
                 }
     }
 

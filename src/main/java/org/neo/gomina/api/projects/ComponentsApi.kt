@@ -15,9 +15,9 @@ import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.sonar.SonarIndicators
 import org.neo.gomina.integration.sonar.SonarService
-import org.neo.gomina.model.project.Project
-import org.neo.gomina.model.project.Projects
-import org.neo.gomina.model.project.Systems
+import org.neo.gomina.model.component.Component
+import org.neo.gomina.model.component.ComponentRepo
+import org.neo.gomina.model.system.Systems
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.scm.Commit
@@ -95,16 +95,16 @@ data class CommitDetail(
         val deployments: List<InstanceRefDetail> = emptyList())
 
 
-class ProjectsApi {
+class ComponentsApi {
 
     companion object {
-        private val logger = LogManager.getLogger(ProjectsApi::class.java)
+        private val logger = LogManager.getLogger(ComponentsApi::class.java)
     }
 
     val vertx: Vertx
     val router: Router
 
-    @Inject private lateinit var projects: Projects
+    @Inject private lateinit var componentRepo: ComponentRepo
     @Inject private lateinit var systems: Systems
     @Inject private lateinit var users: Users
     @Inject private lateinit var workList: WorkList
@@ -176,7 +176,7 @@ class ProjectsApi {
         try {
             logger.info("Get SCM log for project:$projectId branch:$branch")
 
-            var log = projects.getProject(projectId)?.scm?.let {
+            var log = componentRepo.get(projectId)?.scm?.let {
                 val log = if (branch?.isNotBlank() == true) scmService.getBranch(it, branch) else scmService.getTrunk(it)
                 enrichLog(log, topology.buildExtInstances(projectId))
             }
@@ -271,17 +271,17 @@ class ProjectsApi {
         try {
             logger.info("Get projects associated to project:$projectId")
 
-            val other = projects.getProject(projectId)?.let { project ->
+            val other = componentRepo.get(projectId)?.let { project ->
 
                 val associated = workList.getAll()
-                        .filter { it.status.isOpen() && it.projects.contains(projectId) }
-                        .flatMap { it.projects }
+                        .filter { it.status.isOpen() && it.components.contains(projectId) }
+                        .flatMap { it.components }
                         .toSet()
-                        .mapNotNull { projects.getProject(it) }
+                        .mapNotNull { componentRepo.get(it) }
                         .map { ProjectRef(it.id, it.label) }
 
                 val now = LocalDateTime.now(Clock.systemUTC())
-                val mostActive = projects.getProjects()
+                val mostActive = componentRepo.getAll()
                         .filter { it.shareSystem(project) }
                         .mapNotNull { project -> project.scm?.let { project to (scmService.getScmDetails(it)?.commitLog?.activity(now) ?: 0) } }
                         .filter { (project, activity) -> activity > 0 }
@@ -305,7 +305,7 @@ class ProjectsApi {
         try {
             logger.info("Get doc for $projectId $docId")
             var doc: String? = null
-            projects.getProject(projectId)?.let {
+            componentRepo.get(projectId)?.let {
                 doc = it.scm?.let { scmService.getDocument(it, docId) } //.joinToString(separator = "")
             }
             if (doc != null) {
@@ -322,22 +322,22 @@ class ProjectsApi {
     }
 
     private fun getProjects(): Collection<ProjectDetail> {
-        return projects.getProjects().mapNotNull { build(it) }
+        return componentRepo.getAll().mapNotNull { build(it) }
     }
 
     private fun getProject(projectId: String): ProjectDetail? {
-        return projects.getProject(projectId)?.let { build(it) }
+        return componentRepo.get(projectId)?.let { build(it) }
     }
 
-    private fun build(project: Project): ProjectDetail? {
+    private fun build(component: Component): ProjectDetail? {
         try {
-            return ProjectDetail(project.id).apply {
-                apply(project)
-                project.scm
+            return ProjectDetail(component.id).apply {
+                apply(component)
+                component.scm
                         ?.let { scmService.getScmDetails(it) }
                         ?.let { apply(it) }
-                sonarService.getSonar(project, fromCache = true)?.let { apply(it) }
-                jenkinsService.getStatus(project, fromCache = true)?.let { apply(it) }
+                sonarService.getSonar(component, fromCache = true)?.let { apply(it) }
+                jenkinsService.getStatus(component, fromCache = true)?.let { apply(it) }
             }
         }
         catch (e: Exception) {
@@ -349,7 +349,7 @@ class ProjectsApi {
     private fun reloadProject(ctx: RoutingContext) {
         try {
             val projectId = ctx.request().getParam("projectId")
-            projects.getProject(projectId)?.let { project ->
+            componentRepo.get(projectId)?.let { project ->
                 logger.info("Reload SCM data for $projectId ...")
                 project.scm?.let { scmService.reloadScmDetails(it) }
                 // FIXME Jenkins in it's own, or rename API
@@ -369,7 +369,7 @@ class ProjectsApi {
             vertx.executeBlocking({future: Future<Void> ->
                 //val envId = ctx.request().getParam("envId")
                 logger.info("Reloading Sonar data ...")
-                projects.getProjects()
+                componentRepo.getAll()
                         .map { it.sonarServer }
                         .distinct()
                         .forEach { sonarServer ->
@@ -390,17 +390,17 @@ class ProjectsApi {
 
 }
 
-private fun ProjectDetail.apply(project: Project) {
-    this.label = project.label ?: project.id
-    this.type = project.type
-    this.systems = project.systems
-    this.languages = project.languages
-    this.tags = project.tags
-    this.scmType = project.scm?.type
-    this.scmLocation = project.scm?.fullUrl
-    this.mvn = project.maven
-    this.jenkinsServer = project.jenkinsServer
-    this.jenkinsJob = project.jenkinsJob
+private fun ProjectDetail.apply(component: Component) {
+    this.label = component.label ?: component.id
+    this.type = component.type
+    this.systems = component.systems
+    this.languages = component.languages
+    this.tags = component.tags
+    this.scmType = component.scm?.type
+    this.scmLocation = component.scm?.fullUrl
+    this.mvn = component.maven
+    this.jenkinsServer = component.jenkinsServer
+    this.jenkinsJob = component.jenkinsJob
 }
 
 private fun ProjectDetail.apply(scmDetails: ScmDetails) {
