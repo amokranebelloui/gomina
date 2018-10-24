@@ -18,7 +18,7 @@ class DependenciesApp extends React.Component {
             selectedFunctionTypes: [],
             selectedDependencies: [],
 
-            deps: {projects: [], functionTypes: [], dependencies: []}
+            deps: {services: [], functionTypes: [], dependencies: []}
         };
     }
 

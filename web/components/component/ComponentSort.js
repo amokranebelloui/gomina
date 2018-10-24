@@ -1,7 +1,7 @@
 import React from "react"
 import PropTypes from "prop-types"
 
-class ProjectSort extends React.Component {
+class ComponentSort extends React.Component {
     constructor(props) {
         super(props)
     }
@@ -23,9 +23,9 @@ class ProjectSort extends React.Component {
     }
 }
 
-ProjectSort.propTypes = {
+ComponentSort.propTypes = {
     sortBy: PropTypes.string,
     onSortChanged: PropTypes.func
 };
 
-export { ProjectSort }
+export { ComponentSort }

@@ -1,7 +1,7 @@
 import React from "react";
 import {groupBy} from "../common/utils";
 import {AppLayout} from "./common/layout";
-import {ProjectPipeline} from "../project/ProjectPipeline";
+import {DeploymentPipeline} from "../pipeline/DeploymentPipeline";
 import axios from "axios";
 
 class PipelineApp extends React.Component {
@@ -56,7 +56,7 @@ class PipelineApp extends React.Component {
         return (
             <AppLayout title="Pipeline">
                 {components.map(component =>
-                    <ProjectPipeline key={component.id} project={component} instances={instancesByComponent[component.id]}/>
+                    <DeploymentPipeline key={component.id} component={component} instances={instancesByComponent[component.id]}/>
                 )}
             </AppLayout>
         );

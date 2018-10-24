@@ -1,8 +1,8 @@
 import React from "react";
 import axios from "axios/index";
 import {AppLayout, LoggedUserContext, PrimarySecondaryLayout} from "./common/layout";
-import {ProjectBadge, ProjectMenu} from "../project/Project";
-import "../project/Project.css"
+import {ComponentBadge, ComponentMenu} from "../component/Component";
+import "../component/Component.css"
 import "../common/items.css"
 import {CommitLog} from "../commitlog/CommitLog";
 import {Container} from "../common/Container";
@@ -12,14 +12,14 @@ import {Dependencies} from "../dependency/Dependencies";
 import {CallChain} from "../dependency/CallChain";
 import Link from "react-router-dom/es/Link";
 
-class ProjectApp extends React.Component {
+class ComponentApp extends React.Component {
     
     constructor(props) {
         super(props);
         const queryParams = queryString.parse(this.props.location.search);
         this.state = {
-            projectId: this.props.match.params.id,
-            project: {},
+            componentId: this.props.match.params.id,
+            component: {},
             associated: [],
 
             dependencies: [],
@@ -46,11 +46,11 @@ class ProjectApp extends React.Component {
         axios.get('/data/components/' + componentId)
             .then(response => {
                 console.log("components", response.data);
-                thisComponent.setState({project: response.data});
+                thisComponent.setState({component: response.data});
             })
             .catch(function (error) {
                 console.log("error", error.response);
-                thisComponent.setState({project: {}});
+                thisComponent.setState({component: {}});
             });
     }
     retrieveAssociated(componentId) {
@@ -170,72 +170,62 @@ class ProjectApp extends React.Component {
     }
     componentDidMount() {
         console.info("componentApp !mount ", this.props.match.params.id);
-        if (this.state.projectId) {
-            this.retrieveComponent(this.state.projectId);
-            this.retrieveAssociated(this.state.projectId);
-            this.retrieveDependencies(this.state.projectId);
-            this.retrieveImpacted(this.state.projectId);
-            this.retrieveInvocationChain(this.state.projectId);
-            this.retrieveCallChain(this.state.projectId);
+        if (this.state.componentId) {
+            this.retrieveComponent(this.state.componentId);
+            this.retrieveAssociated(this.state.componentId);
+            this.retrieveDependencies(this.state.componentId);
+            this.retrieveImpacted(this.state.componentId);
+            this.retrieveInvocationChain(this.state.componentId);
+            this.retrieveCallChain(this.state.componentId);
             this.selectChainDependency();
             if (this.state.docId) {
-                this.retrieveDoc(this.state.projectId, this.state.docId);
+                this.retrieveDoc(this.state.componentId, this.state.docId);
             }
             if (this.state.branchId) {
-                this.retrieveBranch(this.state.projectId, this.state.branchId);
+                this.retrieveBranch(this.state.componentId, this.state.branchId);
             }
             else {
-                this.retrieveBranch(this.state.projectId, null);
+                this.retrieveBranch(this.state.componentId, null);
             }
         }
     }
     componentWillReceiveProps(nextProps) {
         const queryParams = queryString.parse(this.props.location.search);
         const nextQueryParams = queryString.parse(nextProps.location.search);
-        const newProject = nextProps.match.params.id;
+        const newComponent = nextProps.match.params.id;
         const newDoc = nextProps.match.params.docId;
         const newBranch = nextQueryParams.branchId;
-        console.info("componentApp !props-chg ", this.props.match.params.id, newProject);
+        console.info("componentApp !props-chg ", this.props.match.params.id, newComponent);
         console.info("branch", queryParams.branchId, newBranch);
-        this.setState({projectId: newProject});
-        if (this.props.match.params.id !== newProject && newProject) {
-            this.retrieveComponent(newProject);
-            this.retrieveAssociated(newProject);
-            //this.retrieveInstances(newProject);
-            this.retrieveDependencies(newProject);
-            this.retrieveImpacted(newProject);
-            this.retrieveInvocationChain(newProject);
-            this.retrieveCallChain(newProject);
+        this.setState({componentId: newComponent});
+        if (this.props.match.params.id !== newComponent && newComponent) {
+            this.retrieveComponent(newComponent);
+            this.retrieveAssociated(newComponent);
+            //this.retrieveInstances(newComponent);
+            this.retrieveDependencies(newComponent);
+            this.retrieveImpacted(newComponent);
+            this.retrieveInvocationChain(newComponent);
+            this.retrieveCallChain(newComponent);
             this.selectChainDependency()
         }
-        if (newProject && newDoc &&
-            (this.props.match.params.id !== newProject || this.props.match.params.docId !== newDoc)) {
-            this.retrieveDoc(newProject, newDoc);
+        if (newComponent && newDoc &&
+            (this.props.match.params.id !== newComponent || this.props.match.params.docId !== newDoc)) {
+            this.retrieveDoc(newComponent, newDoc);
         }
-        console.info("change ", queryParams.branchId, newBranch, this.props.match.params.id, newProject);
-        if (newProject &&
-            (this.props.match.params.id !== newProject || queryParams.branchId !== newBranch)) {
-            this.retrieveBranch(newProject, newBranch);
+        console.info("change ", queryParams.branchId, newBranch, this.props.match.params.id, newComponent);
+        if (newComponent &&
+            (this.props.match.params.id !== newComponent || queryParams.branchId !== newBranch)) {
+            this.retrieveBranch(newComponent, newBranch);
         }
     }
     render() {
         const queryParams = queryString.parse(this.props.location.search);
-        const component = this.state.project;
-        //const commits = project.commitLog || [];
-        //const instances = this.state.instances.filter(instance => instance.project == project.id);
-        //const title = (<span>Projects &nbsp;&nbsp;&nbsp;</span>);
+        const component = this.state.component;
         const docId = this.props.match.params.docId;
         const branchId = queryParams.branchId;
-        //console.info("---1", this.state.associated);
-        //console.info("---2", this.state.impacted);
         /*
-        <hr />
-                        <b>Dependencies</b>
-                        <Dependencies dependencies={this.state.dependencies} />
-                        <hr/>
-                        <b>Impacted</b>
-                        <Dependencies dependencies={this.state.impacted} />
-                        
+        <Dependencies dependencies={this.state.dependencies} />
+        <Dependencies dependencies={this.state.impacted} />
          */
         return (
             <AppLayout title={"Component: " + component.label}>
@@ -243,12 +233,12 @@ class ProjectApp extends React.Component {
             {loggedUser => (
                 <PrimarySecondaryLayout>
                     <Container>
-                        <ProjectBadge project={component}
-                                      onReload={id => this.retrieveComponent(id)}
-                                      onReloadScm={id => this.reloadComponent(id)}
-                                      onReloadSonar={() => this.reloadSonar()} />
+                        <ComponentBadge component={component}
+                                        onReload={id => this.retrieveComponent(id)}
+                                        onReloadScm={id => this.reloadComponent(id)}
+                                        onReloadSonar={() => this.reloadSonar()} />
 
-                        <ProjectMenu project={component} />
+                        <ComponentMenu component={component} />
 
                         {   branchId ? <b>Branch</b> :
                             docId ? <b>Doc</b> :
@@ -262,15 +252,15 @@ class ProjectApp extends React.Component {
 
                     </Container>
                     <div>
-                        <ProjectBadge project={component}
-                                      onReload={id => this.retrieveComponent(id)}
-                                      onReloadScm={id => this.reloadComponent(id)}
-                                      onReloadSonar={() => this.reloadSonar()} />
+                        <ComponentBadge component={component}
+                                        onReload={id => this.retrieveComponent(id)}
+                                        onReloadScm={id => this.reloadComponent(id)}
+                                        onReloadSonar={() => this.reloadSonar()} />
                         <hr/>
-                        <h3>Other Projects</h3>
+                        <h3>Other Components</h3>
                         <div className="items">
-                            {this.state.associated.map(projectRef =>
-                                <Link to={"/component/" + projectRef.id}>{projectRef.label}</Link>
+                            {this.state.associated.map(componentRef =>
+                                <Link to={"/component/" + componentRef.id}>{componentRef.label}</Link>
                             )}
                         </div>
                         <hr/>
@@ -295,4 +285,4 @@ class ProjectApp extends React.Component {
     }
 }
 
-export { ProjectApp };
+export { ComponentApp };

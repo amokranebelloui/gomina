@@ -6,17 +6,17 @@ import {compareVersions} from "../common/version-utils";
 import {Well} from "../common/Well";
 import {Version} from "../common/Version";
 
-class ProjectPipeline extends React.Component {
+class DeploymentPipeline extends React.Component {
     render() {
-        const project = this.props.project;
+        const component = this.props.component;
         const instancesByVersion = groupBy(this.props.instances || [], 'version')
-        instancesByVersion[project.latest] = instancesByVersion[project.latest] || [];
-        instancesByVersion[project.released] = instancesByVersion[project.released] || [];
+        instancesByVersion[component.latest] = instancesByVersion[component.latest] || [];
+        instancesByVersion[component.released] = instancesByVersion[component.released] || [];
         const sortedVersions = Object.keys(instancesByVersion).sort(compareVersions);
         return (
             <Well block margin="0 0 2px 0">
                 <div style={{display: 'inline-block', verticalAlign: 'top', minWidth: '50px'}}>
-                    <b>{project.id}(label?)</b>&nbsp;
+                    <b>{component.id}(label?)</b>&nbsp;
                 </div>
                 <div style={{display: 'inline-block'}}>
                     {sortedVersions.map(version =>
@@ -34,4 +34,4 @@ class ProjectPipeline extends React.Component {
     }
 }
 
-export {ProjectPipeline}
+export {DeploymentPipeline}

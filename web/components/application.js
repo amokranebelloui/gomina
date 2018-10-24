@@ -6,11 +6,11 @@ import {Index} from "./app/Index";
 import {EnvApp} from "./app/EnvApp";
 import {ArchitectureApp} from "./app/ArchitectureApp";
 import {PipelineApp} from "./app/PipelineApp";
-import {ProjectApp} from "./app/ProjectApp";
+import {ComponentApp} from "./app/ComponentApp";
 import {SandboxApp} from "./app/SandboxApp";
 import "./application.css"
 import {HostsApp} from "./app/HostsApp";
-import {ProjectsApp} from "./app/ProjectsApp";
+import {ComponentsApp} from "./app/ComponentsApp";
 import {WorkApp} from "./app/WorkApp";
 import {DependenciesApp} from "./app/DependenciesApp";
 import {UserApp} from "./app/UserApp";
@@ -35,10 +35,10 @@ class Blocker extends React.Component {
                 <Route path="/envs/:id" render={props => <EnvApp {...props} />}/>
                 <Route path="/envs" render={props => <EnvApp {...props} />}/>
                 <Route path="/pipeline" render={props => <PipelineApp {...props} />}/>
-                <Route path="/components" render={props => <ProjectsApp {...props} />}/>
-                <Route path="/component/:id/doc/:docId" render={props => <ProjectApp {...props} />}/>
-                <Route path="/component/:id/scm" render={props => <ProjectApp {...props} />}/>
-                <Route path="/component/:id" render={props => <ProjectApp {...props} />}/>
+                <Route path="/components" render={props => <ComponentsApp {...props} />}/>
+                <Route path="/component/:id/doc/:docId" render={props => <ComponentApp {...props} />}/>
+                <Route path="/component/:id/scm" render={props => <ComponentApp {...props} />}/>
+                <Route path="/component/:id" render={props => <ComponentApp {...props} />}/>
                 <Route path="/work/:id" render={props => <WorkApp {...props} />}/>
                 <Route path="/work" render={props => <WorkApp {...props} />}/>
                 <Route path="/user/:id" render={props => <UserApp {...props} />}/>

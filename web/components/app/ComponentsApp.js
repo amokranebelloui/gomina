@@ -1,25 +1,25 @@
 import React from "react";
 import {AppLayout, LoggedUserContext, PrimarySecondaryLayout} from "./common/layout";
-import {ProjectHeader, ProjectSummary} from "../project/Project";
+import {ComponentHeader, ComponentSummary} from "../component/Component";
 import axios from "axios/index";
 import {Container} from "../common/Container";
 import {TagCloud} from "../common/TagCloud";
 import {Well} from "../common/Well";
 import {flatMap} from "../common/utils";
-import {ProjectSort} from "../project/ProjectSort";
+import {ComponentSort} from "../component/ComponentSort";
 import {extendSystems} from "../system/system-utils";
 
-class ProjectsApp extends React.Component {
+class ComponentsApp extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            projects: [],
+            components: [],
             sortBy: 'alphabetical'
         };
         //this.retrieveSystems = this.retrieveSystems.bind(this);
-        this.retrieveProjects = this.retrieveProjects.bind(this);
-        console.info("projectApp !constructor ");
+        this.retrieveComponents = this.retrieveComponents.bind(this);
+        console.info("componentsApp !constructor ");
     }
     /*
     retrieveSystems() {
@@ -33,48 +33,48 @@ class ProjectsApp extends React.Component {
             });
     }
     */
-    retrieveProjects() {
-        console.log("projectApp Retr Projects ... ");
+    retrieveComponents() {
+        console.log("componentsApp Retr Components ... ");
         const thisComponent = this;
         axios.get('/data/components')
             .then(response => {
-                console.log("projectApp data components", response.data);
-                thisComponent.setState({projects: response.data});
+                console.log("componentsApp data components", response.data);
+                thisComponent.setState({components: response.data});
             })
             .catch(function (error) {
-                console.log("projectApp error components", error);
-                thisComponent.setState({projects: []});
+                console.log("componentsApp error components", error);
+                thisComponent.setState({components: []});
             });
     }
 
     componentDidMount() {
-        console.info("projectsApp !mount ", this.props.match.params.id);
+        console.info("componentsApp !mount ", this.props.match.params.id);
         //this.retrieveSystems();
-        this.retrieveProjects();
+        this.retrieveComponents();
     }
     sortChanged(sortBy) {
         this.setState({sortBy: sortBy});
     }
     render() {
-        const projects = sortProjectsBy(this.state.sortBy, this.state.projects);
-        const systems = extendSystems(flatMap(this.state.projects, p => p.systems));
+        const components = sortComponentsBy(this.state.sortBy, this.state.components);
+        const systems = extendSystems(flatMap(this.state.components, p => p.systems));
         //const systems = this.state.systems;
-        const languages = flatMap(this.state.projects, p => p.languages);
-        const tags = flatMap(this.state.projects, p => p.tags);
+        const languages = flatMap(this.state.components, p => p.languages);
+        const tags = flatMap(this.state.components, p => p.tags);
         return (
             <AppLayout title="Components">
             <LoggedUserContext.Consumer>
                 {loggedUser => (
                     <PrimarySecondaryLayout>
                         <Container>
-                            <ProjectSort sortBy={this.state.sortBy} onSortChanged={sortBy => this.sortChanged(sortBy)} />
+                            <ComponentSort sortBy={this.state.sortBy} onSortChanged={sortBy => this.sortChanged(sortBy)} />
                             <hr/>
-                            <div className='project-list'>
-                                <ProjectHeader />
-                                {projects
-                                    .filter(project => matchesSearch(project, this.state.search, this.state.selectedSystems, this.state.selectedLanguages, this.state.selectedTags))
-                                    .map(project =>
-                                        <ProjectSummary key={project.id} project={project} loggedUser={loggedUser} />
+                            <div className='component-list'>
+                                <ComponentHeader />
+                                {components
+                                    .filter(component => matchesSearch(component, this.state.search, this.state.selectedSystems, this.state.selectedLanguages, this.state.selectedTags))
+                                    .map(component =>
+                                        <ComponentSummary key={component.id} component={component} loggedUser={loggedUser} />
                                     )
                                 }
                             </div>
@@ -108,52 +108,52 @@ class ProjectsApp extends React.Component {
 }
 
 
-function matchesSearch(project, search, systems, languages, tags) {
-    let label = (project.label || "");
+function matchesSearch(component, search, systems, languages, tags) {
+    let label = (component.label || "");
     let regExp = new RegExp(search, "i");
     let matchesLabel = label.match(regExp);
-    let matchesSystems = matchesList(extendSystems(project.systems), systems);
-    let matchesLanguages = matchesList(project.languages, languages);
-    let matchesTags = matchesList(project.tags, tags);
-    //console.info("MATCH", project.id, matchesLabel, matchesSystems, matchesLanguages, matchesTags);
+    let matchesSystems = matchesList(extendSystems(component.systems), systems);
+    let matchesLanguages = matchesList(component.languages, languages);
+    let matchesTags = matchesList(component.tags, tags);
+    //console.info("MATCH", component.id, matchesLabel, matchesSystems, matchesLanguages, matchesTags);
     return matchesLabel && matchesSystems && matchesLanguages && matchesTags
     //(languages.filter(item => item.match(regExp))||[]).length > 0 ||
     //(tags.filter(item => item.match(regExp))||[]).length > 0;
-    //return project.label && project.label.indexOf(this.state.search) !== -1;
+    //return component.label && component.label.indexOf(this.state.search) !== -1;
 }
-function matchesList(projectValues, selectedValues) {
+function matchesList(componentValues, selectedValues) {
     if (selectedValues && selectedValues.length > 0) {
-        const values = (projectValues||[]);
+        const values = (componentValues||[]);
         return (selectedValues||[]).find(value => values.indexOf(value) !== -1);
     }
     return true
 }
 
-function sortProjectsBy(sortBy, projects) {
+function sortComponentsBy(sortBy, components) {
     let result;
     switch (sortBy) {
         case 'alphabetical' :
-            result = projects.sort((a, b) => a.label > b.label ? 1 : -1);
+            result = components.sort((a, b) => a.label > b.label ? 1 : -1);
             break;
         case 'loc' :
-            result = projects.sort((a, b) => (b.loc - a.loc) * 10 + (a.label > b.label ? 1 : -1));
+            result = components.sort((a, b) => (b.loc - a.loc) * 10 + (a.label > b.label ? 1 : -1));
             break;
         case 'coverage' :
-            result = projects.sort((a, b) => (b.coverage - a.coverage) * 10 + (a.label > b.label ? 1 : -1));
+            result = components.sort((a, b) => (b.coverage - a.coverage) * 10 + (a.label > b.label ? 1 : -1));
             break;
         case 'last-commit' :
-            result = projects.sort((a, b) => (b.lastCommit - a.lastCommit) * 10 + (a.label > b.label ? 1 : -1));
+            result = components.sort((a, b) => (b.lastCommit - a.lastCommit) * 10 + (a.label > b.label ? 1 : -1));
             break;
         case 'commit-activity' :
-            result = projects.sort((a, b) => (b.commitActivity - a.commitActivity) * 10 + (a.label > b.label ? 1 : -1));
+            result = components.sort((a, b) => (b.commitActivity - a.commitActivity) * 10 + (a.label > b.label ? 1 : -1));
             break;
         case 'unreleased-changes' :
-            result = projects.sort((a, b) => (b.changes - a.changes) * 10 + (a.label > b.label ? 1 : -1));
+            result = components.sort((a, b) => (b.changes - a.changes) * 10 + (a.label > b.label ? 1 : -1));
             break;
         default :
-            result = projects
+            result = components
     }
     return result;
 }
 
-export {ProjectsApp};
+export {ComponentsApp};

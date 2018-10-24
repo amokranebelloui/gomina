@@ -1,28 +1,28 @@
 
-.project-list {
+.component-list {
     display: table;
     width: 100%;
 }
 
-.project-row {
+.component-row {
     display: table-row;
 }
 
-.project-row > * {
+.component-row > * {
     display: table-cell;
     vertical-align: middle;
     /*height: 100%;*/
     padding: 3px;
 }
 
-.project-row > .loc, .coverage, .last-commit {
+.component-row > .loc, .coverage, .last-commit {
     /*min-width: 50px;*/
 }
 
-.project-row > .released, .latest, .scm, .build {
+.component-row > .released, .latest, .scm, .build {
     text-align: center;
 }
 
-.project-badge > * {
+.component-badge > * {
     margin-right: 3px
 }

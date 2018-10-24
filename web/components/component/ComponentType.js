@@ -7,7 +7,7 @@ type BranchDetailType = {
     originRevision?: ?string
 }
 
-type ProjectType = {
+type ComponentType = {
     id: string,
     label?: ?string,
     type?: ?string,
@@ -37,9 +37,9 @@ type ProjectType = {
     commitActivity?: ?number
 }
 
-type ProjectRefType = {
+type ComponentRefType = {
     id: string,
     label?: ?string,
 }
 
-export type {ProjectType, ProjectRefType, BranchDetailType}
+export type {ComponentType, ComponentRefType, BranchDetailType}
