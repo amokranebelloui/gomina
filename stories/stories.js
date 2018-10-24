@@ -135,7 +135,7 @@ storiesOf('Build', module)
 storiesOf('Documentation', module)
     .add('Documentation', () => {
         const doc = `<h1>Sample documentation</h1>
-description of the project
+description of the component
 <h2>Features</h2>
 <li>Handling the cart</li>
 <li>analysis of why users remove articles from cart</li>

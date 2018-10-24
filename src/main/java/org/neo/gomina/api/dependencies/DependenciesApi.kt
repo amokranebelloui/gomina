@@ -54,8 +54,6 @@ class DependenciesApi {
                     ?: emptyList()
             logger.info("Get Dependencies $systems $functionTypes")
 
-            // FIXME Manage Project/Services dependencies
-            //val allProjects = projects.getProjects().associateBy { it.id }
             val allServices =
                     componentRepo.getAll().map {
                         Thing(id = it.id, type = "unknown", systems = it.systems)
@@ -98,7 +96,6 @@ class DependenciesApi {
         try {
             val allInteractions = interactionsRepository.getAll().associateBy { p -> p.serviceId }
             val functions = Dependencies.functions(allInteractions.values)
-                    //.filter { (f,stakeholders) -> stakeholders.users.find { it.projectId == projectId } != null }
             val dependencies = Dependencies.dependencies(functions).filter { it.from == componentId }.map { it.toDetail() }
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(dependencies))
         }
@@ -114,7 +111,6 @@ class DependenciesApi {
         try {
             val allInteractions = interactionsRepository.getAll().associateBy { p -> p.serviceId }
             val functions = Dependencies.functions(allInteractions.values)
-                    //.filter { (f,stakeholders) -> stakeholders.exposers.contains(projectId) }
             val dependencies = Dependencies.dependencies(functions).filter { it.to == componentId }.map { it.toDetail() }
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(dependencies))
         }

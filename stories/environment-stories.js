@@ -10,7 +10,7 @@ var service = {
     type: "app",
     mode: "ONE_ONLY", // ONE_ONLY, LEADERSHIP, LOAD_BALANCING, OFFLINE,
     activeCount: 1,
-    project: "basket"
+    componentId: "basket"
 };
 
 //status LIVE LOADING, leader, version, unexpected, confCommited, confRevision
@@ -64,7 +64,7 @@ storiesOf('Instances', module)
     })
     .add('Instance', () => {
         const app = {
-            id: "UAT-co1", type: 'app', name: "checkout1", project: 'basket',
+            id: "UAT-co1", type: 'app', name: "checkout1", componentId: 'basket',
             status: 'LIVE', leader: true, participating: true, cluster: true,
             pid: '45356', host:"jupiter1", deployHost: "saturn1",
             /*version: '2.3.4', revision: 12304, deployVersion: '2.3.5', deployRevision: 12456,*/
