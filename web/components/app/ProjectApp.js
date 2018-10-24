@@ -18,7 +18,6 @@ class ProjectApp extends React.Component {
         super(props);
         const queryParams = queryString.parse(this.props.location.search);
         this.state = {
-            //projects: [],
             projectId: this.props.match.params.id,
             project: {},
             associated: [],
@@ -35,35 +34,18 @@ class ProjectApp extends React.Component {
             docId: this.props.match.params.docId,
             doc: null
             };
-        //this.retrieveProjects = this.retrieveProjects.bind(this);
-        this.retrieveProject = this.retrieveProject.bind(this);
+        this.retrieveComponent = this.retrieveComponent.bind(this);
         this.retrieveAssociated= this.retrieveAssociated.bind(this);
-        //this.retrieveInstances= this.retrieveInstances.bind(this);
         this.retrieveBranch = this.retrieveBranch.bind(this);
         this.retrieveDoc = this.retrieveDoc.bind(this);
-        this.reloadProject = this.reloadProject.bind(this);
-        console.info("projectApp !constructor ", this.props.match.params);
+        this.reloadComponent = this.reloadComponent.bind(this);
+        console.info("componentApp !constructor ", this.props.match.params);
     }
-    /*
-    retrieveProjects() {
-        console.log("projectApp Retr Projects ... ");
+    retrieveComponent(componentId) {
         const thisComponent = this;
-        axios.get('/data/projects')
+        axios.get('/data/components/' + componentId)
             .then(response => {
-                console.log("projectApp data projects", response.data);
-                thisComponent.setState({projects: response.data});
-            })
-            .catch(function (error) {
-                console.log("projectApp error", error);
-                thisComponent.setState({projects: []});
-            });
-    }
-    */
-    retrieveProject(projectId) {
-        const thisComponent = this;
-        axios.get('/data/projects/' + projectId)
-            .then(response => {
-                console.log("project", response.data);
+                console.log("components", response.data);
                 thisComponent.setState({project: response.data});
             })
             .catch(function (error) {
@@ -71,11 +53,11 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({project: {}});
             });
     }
-    retrieveAssociated(projectId) {
+    retrieveAssociated(componentId) {
         const thisComponent = this;
-        axios.get('/data/projects/' + projectId + '/associated')
+        axios.get('/data/components/' + componentId + '/associated')
             .then(response => {
-                console.log("project", response.data);
+                console.log("components", response.data);
                 thisComponent.setState({associated: response.data});
             })
             .catch(function (error) {
@@ -83,18 +65,18 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({associated: []});
             });
     }
-    reloadProject(projectId) {
-        console.info("reloading", projectId);
-        axios.post('/data/projects/' + projectId + '/reload-scm')
+    reloadComponent(componentId) {
+        console.info("reloading", componentId);
+        axios.post('/data/components/' + componentId + '/reload-scm')
             .then(response => {
-                console.log("project reloaded", response.data);
+                console.log("component reloaded", response.data);
             })
             .catch(function (error) {
-                console.log("project reload error", error.response);
+                console.log("component reload error", error.response);
             });
     }
-    reloadSonar(projectId) {
-        axios.post('/data/projects/reload-sonar')
+    reloadSonar(componentId) {
+        axios.post('/data/components/reload-sonar')
             .then(response => {
                 console.log("sonar reloaded", response.data);
             })
@@ -102,9 +84,9 @@ class ProjectApp extends React.Component {
                 console.log("sonar reload error", error.response);
             });
     }
-    retrieveBranch(projectId, branchId) {
+    retrieveBranch(componentId, branchId) {
         const thisComponent = this;
-        axios.get('/data/projects/' + projectId + '/scm?branchId=' + (branchId ? branchId : ""))
+        axios.get('/data/components/' + componentId + '/scm?branchId=' + (branchId ? branchId : ""))
             .then(response => {
                 console.log("branch data", response.data);
                 thisComponent.setState({branch: response.data});
@@ -114,9 +96,9 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({branch: null});
             });
     }
-    retrieveDependencies(projectId) {
+    retrieveDependencies(componentId) {
         const thisComponent = this;
-        axios.get('/data/dependencies/outgoing/' + projectId)
+        axios.get('/data/dependencies/outgoing/' + componentId)
             .then(response => {
                 console.log("deps data");
                 thisComponent.setState({dependencies: response.data});
@@ -126,9 +108,9 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({dependencies: null});
             });
     }
-    retrieveImpacted(projectId) {
+    retrieveImpacted(componentId) {
         const thisComponent = this;
-        axios.get('/data/dependencies/incoming/' + projectId)
+        axios.get('/data/dependencies/incoming/' + componentId)
             .then(response => {
                 console.log("impacted data");
                 thisComponent.setState({impacted: response.data});
@@ -138,9 +120,9 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({impacted: null});
             });
     }
-    retrieveInvocationChain(projectId) {
+    retrieveInvocationChain(componentId) {
         const thisComponent = this;
-        axios.get('/data/dependencies/invocation/chain/' + projectId)
+        axios.get('/data/dependencies/invocation/chain/' + componentId)
             .then(response => {
                 console.log("invocation chain data", response.data);
                 thisComponent.setState({invocationChain: response.data});
@@ -150,9 +132,9 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({invocationChain: null});
             });
     }
-    retrieveCallChain(projectId) {
+    retrieveCallChain(componentId) {
         const thisComponent = this;
-        axios.get('/data/dependencies/call/chain/' + projectId)
+        axios.get('/data/dependencies/call/chain/' + componentId)
             .then(response => {
                 console.log("call chain data", response.data);
                 thisComponent.setState({callChain: response.data});
@@ -174,9 +156,9 @@ class ProjectApp extends React.Component {
         const dep = {from: child.serviceId, to: parent.serviceId, functions: child.functions};
         this.setState({chainSelectedCall: [dep]});
     }
-    retrieveDoc(projectId, docId) {
+    retrieveDoc(componentId, docId) {
         const thisComponent = this;
-        axios.get('/data/projects/' + projectId + '/doc/' + docId)
+        axios.get('/data/components/' + componentId + '/doc/' + docId)
             .then(response => {
                 console.log("doc data");
                 thisComponent.setState({doc: response.data});
@@ -186,28 +168,11 @@ class ProjectApp extends React.Component {
                 thisComponent.setState({doc: null});
             });
     }
-    /*
-    retrieveInstances(projectId) {
-        console.log("projectApp Retr Instances... " + projectId);
-        const thisComponent = this;
-        axios.get('/data/instances') // FIXME Retrieve only instances corresponding to project
-            .then(response => {
-                console.log("projectApp data instances", response.data);
-                thisComponent.setState({instances: response.data});
-            })
-            .catch(function (error) {
-                console.log("projectApp error", error);
-                thisComponent.setState({instances: []});
-            });
-    }
-*/
     componentDidMount() {
-        console.info("projectApp !mount ", this.props.match.params.id);
-        //this.retrieveProjects();
+        console.info("componentApp !mount ", this.props.match.params.id);
         if (this.state.projectId) {
-            this.retrieveProject(this.state.projectId);
+            this.retrieveComponent(this.state.projectId);
             this.retrieveAssociated(this.state.projectId);
-            //this.retrieveInstances(this.state.projectId);
             this.retrieveDependencies(this.state.projectId);
             this.retrieveImpacted(this.state.projectId);
             this.retrieveInvocationChain(this.state.projectId);
@@ -230,11 +195,11 @@ class ProjectApp extends React.Component {
         const newProject = nextProps.match.params.id;
         const newDoc = nextProps.match.params.docId;
         const newBranch = nextQueryParams.branchId;
-        console.info("projectApp !props-chg ", this.props.match.params.id, newProject);
-        console.info("project branch", queryParams.branchId, newBranch);
+        console.info("componentApp !props-chg ", this.props.match.params.id, newProject);
+        console.info("branch", queryParams.branchId, newBranch);
         this.setState({projectId: newProject});
         if (this.props.match.params.id !== newProject && newProject) {
-            this.retrieveProject(newProject);
+            this.retrieveComponent(newProject);
             this.retrieveAssociated(newProject);
             //this.retrieveInstances(newProject);
             this.retrieveDependencies(newProject);
@@ -255,7 +220,7 @@ class ProjectApp extends React.Component {
     }
     render() {
         const queryParams = queryString.parse(this.props.location.search);
-        const project = this.state.project;
+        const component = this.state.project;
         //const commits = project.commitLog || [];
         //const instances = this.state.instances.filter(instance => instance.project == project.id);
         //const title = (<span>Projects &nbsp;&nbsp;&nbsp;</span>);
@@ -273,17 +238,17 @@ class ProjectApp extends React.Component {
                         
          */
         return (
-            <AppLayout title={"Component: " + project.label}>
+            <AppLayout title={"Component: " + component.label}>
             <LoggedUserContext.Consumer>
             {loggedUser => (
                 <PrimarySecondaryLayout>
                     <Container>
-                        <ProjectBadge project={project}
-                                      onReload={id => this.retrieveProject(id)}
-                                      onReloadScm={id => this.reloadProject(id)}
+                        <ProjectBadge project={component}
+                                      onReload={id => this.retrieveComponent(id)}
+                                      onReloadScm={id => this.reloadComponent(id)}
                                       onReloadSonar={() => this.reloadSonar()} />
 
-                        <ProjectMenu project={project} />
+                        <ProjectMenu project={component} />
 
                         {   branchId ? <b>Branch</b> :
                             docId ? <b>Doc</b> :
@@ -292,14 +257,14 @@ class ProjectApp extends React.Component {
 
                         {   docId
                             ? <Documentation doc={this.state.doc} />
-                            : <CommitLog type={project.scmType} commits={(this.state.branch||{}).log} unresolved={(this.state.branch||{}).unresolved} />
+                            : <CommitLog type={component.scmType} commits={(this.state.branch||{}).log} unresolved={(this.state.branch||{}).unresolved} />
                         }
 
                     </Container>
                     <div>
-                        <ProjectBadge project={project}
-                                      onReload={id => this.retrieveProject(id)}
-                                      onReloadScm={id => this.reloadProject(id)}
+                        <ProjectBadge project={component}
+                                      onReload={id => this.retrieveComponent(id)}
+                                      onReloadScm={id => this.reloadComponent(id)}
                                       onReloadSonar={() => this.reloadSonar()} />
                         <hr/>
                         <h3>Other Projects</h3>

@@ -7,23 +7,23 @@ import axios from "axios";
 class PipelineApp extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {projects: [], instances: []};
-        this.retrieveProjects = this.retrieveProjects.bind(this);
+        this.state = {components: [], instances: []};
+        this.retrieveComponents = this.retrieveComponents.bind(this);
         this.retrieveInstances = this.retrieveInstances.bind(this);
 
         console.info("pipeApp !constructor");
     }
-    retrieveProjects() {
-        console.log("pipeApp Retr Projects ... ");
+    retrieveComponents() {
+        console.log("pipeApp Retr components ... ");
         const thisComponent = this;
-        axios.get('/data/projects')
+        axios.get('/data/components')
             .then(response => {
-                console.log("pipeApp data projects", response.data);
-                thisComponent.setState({projects: response.data});
+                console.log("pipeApp data components", response.data);
+                thisComponent.setState({components: response.data});
             })
             .catch(function (error) {
-                console.log("pipeApp error", error);
-                thisComponent.setState({projects: []});
+                console.log("pipeApp error components", error);
+                thisComponent.setState({components: []});
             });
     }
     retrieveInstances() {
@@ -45,18 +45,18 @@ class PipelineApp extends React.Component {
     }
     componentDidMount() {
         console.info("pipeApp !mount ");
-        this.retrieveProjects();
+        this.retrieveComponents();
         this.retrieveInstances();
     }
 
     render() {
-        const instancesByProject = groupBy(this.state.instances, 'project');
-        console.info('pipeApp render! ', instancesByProject);
-        const projects = this.state.projects;
+        const instancesByComponent = groupBy(this.state.instances, 'componentId');
+        console.info('pipeApp render! ', instancesByComponent);
+        const components = this.state.components;
         return (
             <AppLayout title="Pipeline">
-                {projects.map(project =>
-                    <ProjectPipeline key={project.id} project={project} instances={instancesByProject[project.id]}/>
+                {components.map(component =>
+                    <ProjectPipeline key={component.id} project={component} instances={instancesByComponent[component.id]}/>
                 )}
             </AppLayout>
         );

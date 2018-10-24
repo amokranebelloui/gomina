@@ -60,7 +60,7 @@ class WorkApp extends React.Component {
                                 <td><b>type</b></td>
                                 <td><b>jira</b></td>
                                 <td><b>status</b></td>
-                                <td><b>projects</b></td>
+                                <td><b>components</b></td>
                                 <td><b>people</b></td>
                             </tr>
                             {workList.map(work =>
@@ -78,7 +78,7 @@ class WorkApp extends React.Component {
                                     </td>
                                     <td>{work.status}</td>
                                     <td>
-                                        {work.projects.map(p =>
+                                        {work.components.map(p =>
                                             <span><Link to={"/component/" + p}>{p}</Link> </span>
                                         )}
                                     </td>
@@ -127,7 +127,7 @@ function Work(props) {
             </div>
             <hr/>
             <div>
-                {work.projects.map(p =>
+                {work.components.map(p =>
                     <span style={{color: 'blue'}}>{p} </span>
                 )}
             </div>

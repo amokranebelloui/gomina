@@ -27,7 +27,7 @@ class DependenciesApp extends React.Component {
         this.retrieveDependencies();
     }
     retrieveSystems() {
-        axios.get('/data/projects/systems')
+        axios.get('/data/components/systems')
             .then(response => {
                 console.log("systems data", response.data);
                 this.setState({systems: response.data});

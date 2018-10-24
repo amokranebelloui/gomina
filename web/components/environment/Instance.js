@@ -31,7 +31,7 @@ type InstanceType = {
     status: ?string,
     //startTime: ?number,
     //startDuration: ?number,
-    project: ?string,
+    componentId: ?string,
     deployHost: ?string,
     deployFolder: ?string,
     confCommited: ?boolean,
@@ -82,7 +82,7 @@ class Instance extends React.Component<Props> {
 
                         <li><Badge title={'Conf SVN revision'} backgroundColor='red' color='white'>{instance.confRevision}</Badge></li>
                         <li><ConfCommited commited={instance.confCommited}/></li>
-                        <li><BuildLink url={instance.project}/></li> {/* // TODO Project Build URL */}
+                        <li><BuildLink url={instance.componentId}/></li> {/* // TODO Build URL */}
                     </div>
 
                     {/*instance.sidecar &&

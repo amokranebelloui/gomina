@@ -23,7 +23,7 @@ class ProjectsApp extends React.Component {
     }
     /*
     retrieveSystems() {
-        axios.get('/data/projects/systems')
+        axios.get('/data/components/systems')
             .then(response => {
                 console.log("systems data", response.data);
                 this.setState({systems: response.data});
@@ -36,20 +36,19 @@ class ProjectsApp extends React.Component {
     retrieveProjects() {
         console.log("projectApp Retr Projects ... ");
         const thisComponent = this;
-        axios.get('/data/projects')
+        axios.get('/data/components')
             .then(response => {
-                console.log("projectApp data projects", response.data);
+                console.log("projectApp data components", response.data);
                 thisComponent.setState({projects: response.data});
             })
             .catch(function (error) {
-                console.log("projectApp error", error);
+                console.log("projectApp error components", error);
                 thisComponent.setState({projects: []});
             });
     }
 
     componentDidMount() {
         console.info("projectsApp !mount ", this.props.match.params.id);
-        //this.retrieveProject(this.props.match.params.id);
         //this.retrieveSystems();
         this.retrieveProjects();
     }

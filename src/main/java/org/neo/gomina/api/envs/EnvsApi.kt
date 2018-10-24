@@ -42,7 +42,7 @@ class EnvsApi {
                     .end(mapper.writeValueAsString(envs))
         }
         catch (e: Exception) {
-            logger.error("Cannot get projects", e)
+            logger.error("Cannot get envs", e)
             ctx.fail(500)
         }
     }

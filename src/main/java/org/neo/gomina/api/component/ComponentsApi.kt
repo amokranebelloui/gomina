@@ -1,4 +1,4 @@
-package org.neo.gomina.api.projects
+package org.neo.gomina.api.component
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.vertx.core.AsyncResult
@@ -31,12 +31,12 @@ import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
 
-data class ProjectRef (
+data class ComponentRef(
         var id: String,
         var label: String? = null
 )
 
-data class ProjectDetail (
+data class ComponentDetail(
         var id: String,
         var label: String? = null,
         var type: String? = null,
@@ -76,13 +76,6 @@ data class CommitLogDetail(
         val log: List<CommitDetail>,
         val unresolved: List<InstanceRefDetail>)
 
-data class InstanceRefDetail(
-        var id: String? = null,
-        var env: String? = null,
-        var name: String? = null,
-        val running: VersionDetail?,
-        val deployed: VersionDetail?)
-
 data class CommitDetail(
         val revision: String?,
         var date: Date? = null,
@@ -94,6 +87,12 @@ data class CommitDetail(
         val instances: List<InstanceRefDetail> = emptyList(),
         val deployments: List<InstanceRefDetail> = emptyList())
 
+data class InstanceRefDetail(
+        var id: String? = null,
+        var env: String? = null,
+        var name: String? = null,
+        val running: VersionDetail?,
+        val deployed: VersionDetail?)
 
 class ComponentsApi {
 
@@ -122,23 +121,24 @@ class ComponentsApi {
         this.vertx = vertx
         this.router = Router.router(vertx)
 
-        router.get("/").handler(this::projects)
+        router.get("/").handler(this::components)
         router.get("/systems").handler(this::systems)
-        router.get("/:projectId").handler(this::project)
-        router.get("/:projectId/scm").handler(this::commitLog)
-        router.get("/:projectId/associated").handler(this::associated)
-        router.get("/:projectId/doc/:docId").handler(this::projectDoc)
+        router.get("/:componentId").handler(this::component)
+        router.get("/:componentId/scm").handler(this::commitLog)
+        router.get("/:componentId/associated").handler(this::associated)
+        router.get("/:componentId/doc/:docId").handler(this::componentDoc)
 
-        router.post("/:projectId/reload-scm").handler(this::reloadProject)
+        router.post("/:componentId/reload-scm").handler(this::reloadComponent)
         router.post("/reload-sonar").handler(this::reloadSonar)
     }
 
-    fun projects(ctx: RoutingContext) {
+    fun components(ctx: RoutingContext) {
         try {
+            val components = this.componentRepo.getAll().mapNotNull { this.build(it) }
             ctx.response().putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(this.getProjects()))
+                    .end(mapper.writeValueAsString(components))
         } catch (e: Exception) {
-            logger.error("Cannot get projects", e)
+            logger.error("Cannot get components", e)
             ctx.fail(500)
         }
     }
@@ -148,48 +148,48 @@ class ComponentsApi {
             ctx.response().putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(systems.getSystems()))
         } catch (e: Exception) {
-            logger.error("Cannot get projects", e)
+            logger.error("Cannot get components", e)
             ctx.fail(500)
         }
     }
 
-    fun project(ctx: RoutingContext) {
+    fun component(ctx: RoutingContext) {
         try {
-            val projectId = ctx.request().getParam("projectId")
-            val project = this.getProject(projectId)
-            if (project != null) {
+            val componentId = ctx.request().getParam("componentId")
+            val component = this.componentRepo.get(componentId)?.let { this.build(it) }
+            if (component != null) {
                 ctx.response().putHeader("content-type", "text/javascript")
-                        .end(mapper.writeValueAsString(project))
+                        .end(mapper.writeValueAsString(component))
             } else {
-                logger.info("Cannot get project " + projectId)
+                logger.info("Cannot get component " + componentId)
                 ctx.fail(404)
             }
         } catch (e: Exception) {
-            logger.error("Cannot get project", e)
+            logger.error("Cannot get component", e)
             ctx.fail(500)
         }
     }
 
     private fun commitLog(ctx: RoutingContext) {
-        val projectId = ctx.request().getParam("projectId")
+        val componentId = ctx.request().getParam("componentId")
         val branch = ctx.request().getParam("branchId")
         try {
-            logger.info("Get SCM log for project:$projectId branch:$branch")
+            logger.info("Get SCM log for component:$componentId branch:$branch")
 
-            var log = componentRepo.get(projectId)?.scm?.let {
+            var log = componentRepo.get(componentId)?.scm?.let {
                 val log = if (branch?.isNotBlank() == true) scmService.getBranch(it, branch) else scmService.getTrunk(it)
-                enrichLog(log, topology.buildExtInstances(projectId))
+                enrichLog(log, topology.buildExtInstances(componentId))
             }
             if (log != null) {
                 ctx.response().putHeader("content-type", "text/html")
                         .end(mapper.writeValueAsString(log))
             }
             else {
-                logger.info("Cannot get SCM log project:$projectId branch:$branch")
+                logger.info("Cannot get SCM log component:$componentId branch:$branch")
                 ctx.fail(404)
             }
         } catch (e: Exception) {
-            logger.error("Cannot get SCM log project:$projectId branch:$branch")
+            logger.error("Cannot get SCM log component:$componentId branch:$branch")
             ctx.fail(500)
         }
     }
@@ -212,15 +212,17 @@ class ComponentsApi {
             }
         }
         return CommitLogDetail(
-                log = tmp.map { (commit, running, deployed) -> CommitDetail(
-                        revision = commit.revision,
-                        date = commit.date,
-                        author = commit.author?.let { users.findForAccount(it) }?.toRef() ?: commit.author?.let { UserRef(shortName = commit.author) },
-                        message = commit.message,
-                        version = commit.release ?: commit.newVersion,
-                        instances = running.map { it.toRef() },
-                        deployments = deployed.map { it.toRef() }
-                ) },
+                log = tmp.map { (commit, running, deployed) ->
+                    CommitDetail(
+                            revision = commit.revision,
+                            date = commit.date,
+                            author = commit.author?.let { users.findForAccount(it) }?.toRef() ?: commit.author?.let { UserRef(shortName = commit.author) },
+                            message = commit.message,
+                            version = commit.release ?: commit.newVersion,
+                            instances = running.map { it.toRef() },
+                            deployments = deployed.map { it.toRef() }
+                    )
+                },
                 unresolved = unresolved.map { it.toRef() }
         )
 
@@ -267,71 +269,63 @@ class ComponentsApi {
     }
 
     private fun associated(ctx: RoutingContext) {
-        val projectId = ctx.request().getParam("projectId")
+        val componentId = ctx.request().getParam("componentId")
         try {
-            logger.info("Get projects associated to project:$projectId")
+            logger.info("Get components associated to component:$componentId")
 
-            val other = componentRepo.get(projectId)?.let { project ->
+            val other = componentRepo.get(componentId)?.let { component ->
 
                 val associated = workList.getAll()
-                        .filter { it.status.isOpen() && it.components.contains(projectId) }
+                        .filter { it.status.isOpen() && it.components.contains(componentId) }
                         .flatMap { it.components }
                         .toSet()
                         .mapNotNull { componentRepo.get(it) }
-                        .map { ProjectRef(it.id, it.label) }
+                        .map { ComponentRef(it.id, it.label) }
 
                 val now = LocalDateTime.now(Clock.systemUTC())
                 val mostActive = componentRepo.getAll()
-                        .filter { it.shareSystem(project) }
-                        .mapNotNull { project -> project.scm?.let { project to (scmService.getScmDetails(it)?.commitLog?.activity(now) ?: 0) } }
-                        .filter { (project, activity) -> activity > 0 }
-                        .sortedBy { (project, activity) -> activity }
+                        .filter { it.shareSystem(component) }
+                        .mapNotNull { component -> component.scm?.let { component to (scmService.getScmDetails(it)?.commitLog?.activity(now) ?: 0) } }
+                        .filter { (component, activity) -> activity > 0 }
+                        .sortedBy { (component, activity) -> activity }
                         .take(7 - associated.size)
-                        .map { (project, activity) -> ProjectRef(project.id, project.label) }
+                        .map { (component, activity) -> ComponentRef(component.id, component.label) }
                 associated union mostActive
             }
 
             ctx.response().putHeader("content-type", "text/html")
                         .end(mapper.writeValueAsString(other))
         } catch (e: Exception) {
-            logger.error("Cannot projects associated to project project:$projectId")
+            logger.error("Cannot component associated to component:$componentId")
             ctx.fail(500)
         }
     }
 
-    private fun projectDoc(ctx: RoutingContext) {
-        val projectId = ctx.request().getParam("projectId")
+    private fun componentDoc(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
         val docId = ctx.request().getParam("docId")
         try {
-            logger.info("Get doc for $projectId $docId")
+            logger.info("Get doc for $componentId $docId")
             var doc: String? = null
-            componentRepo.get(projectId)?.let {
+            componentRepo.get(componentId)?.let {
                 doc = it.scm?.let { scmService.getDocument(it, docId) } //.joinToString(separator = "")
             }
             if (doc != null) {
                 ctx.response().putHeader("content-type", "text/html")
                         .end(doc)
             } else {
-                logger.info("Cannot get doc $projectId $docId")
+                logger.info("Cannot get doc $componentId $docId")
                 ctx.fail(404)
             }
         } catch (e: Exception) {
-            logger.error("Cannot get doc $projectId $docId")
+            logger.error("Cannot get doc $componentId $docId")
             ctx.fail(500)
         }
     }
 
-    private fun getProjects(): Collection<ProjectDetail> {
-        return componentRepo.getAll().mapNotNull { build(it) }
-    }
-
-    private fun getProject(projectId: String): ProjectDetail? {
-        return componentRepo.get(projectId)?.let { build(it) }
-    }
-
-    private fun build(component: Component): ProjectDetail? {
+    private fun build(component: Component): ComponentDetail? {
         try {
-            return ProjectDetail(component.id).apply {
+            return ComponentDetail(component.id).apply {
                 apply(component)
                 component.scm
                         ?.let { scmService.getScmDetails(it) }
@@ -346,20 +340,20 @@ class ComponentsApi {
         return null
     }
 
-    private fun reloadProject(ctx: RoutingContext) {
+    private fun reloadComponent(ctx: RoutingContext) {
         try {
-            val projectId = ctx.request().getParam("projectId")
-            componentRepo.get(projectId)?.let { project ->
-                logger.info("Reload SCM data for $projectId ...")
-                project.scm?.let { scmService.reloadScmDetails(it) }
+            val componentId = ctx.request().getParam("componentId")
+            componentRepo.get(componentId)?.let { component ->
+                logger.info("Reload SCM data for $componentId ...")
+                component.scm?.let { scmService.reloadScmDetails(it) }
                 // FIXME Jenkins in it's own, or rename API
-                logger.info("Reload Jenkins data for $projectId ...")
-                jenkinsService.getStatus(project, fromCache = false)
+                logger.info("Reload Jenkins data for $componentId ...")
+                jenkinsService.getStatus(component, fromCache = false)
             }
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
-            logger.error("Cannot get project", e)
+            logger.error("Cannot get component", e)
             ctx.fail(500)
         }
     }
@@ -390,7 +384,7 @@ class ComponentsApi {
 
 }
 
-private fun ProjectDetail.apply(component: Component) {
+private fun ComponentDetail.apply(component: Component) {
     this.label = component.label ?: component.id
     this.type = component.type
     this.systems = component.systems
@@ -403,7 +397,7 @@ private fun ProjectDetail.apply(component: Component) {
     this.jenkinsJob = component.jenkinsJob
 }
 
-private fun ProjectDetail.apply(scmDetails: ScmDetails) {
+private fun ComponentDetail.apply(scmDetails: ScmDetails) {
     this.owner = scmDetails.owner
     this.critical = scmDetails.critical
     if (!scmDetails.mavenId.isNullOrBlank()) {
@@ -425,13 +419,13 @@ private fun ProjectDetail.apply(scmDetails: ScmDetails) {
     }
 }
 
-private fun ProjectDetail.apply(sonarIndicators: SonarIndicators?) {
+private fun ComponentDetail.apply(sonarIndicators: SonarIndicators?) {
     this.sonarUrl = sonarIndicators?.sonarUrl
     this.loc = sonarIndicators?.loc
     this.coverage = sonarIndicators?.coverage
 }
 
-private fun ProjectDetail.apply(status: BuildStatus?) {
+private fun ComponentDetail.apply(status: BuildStatus?) {
     this.jenkinsUrl = status?.url
     this.buildNumber = status?.id
     this.buildStatus = if (status?.building == true) "BUILDING" else status?.result

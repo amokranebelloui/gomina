@@ -8,8 +8,8 @@ class Service extends React.Component {
     render() {
         const service = this.props.service;
         const instances = this.props.instances ? this.props.instances : [];
-        const projectSet = new Set(instances.map(instance => instance.project).filter(p => p != null));
-        const projects = [...projectSet];
+        const componentSet = new Set(instances.map(instance => instance.componentId).filter(p => p != null));
+        const components = [...componentSet];
         const status = computeStatus(service, instances);
         const d = computeServiceDetails(service, instances);
         const highlightFunction = this.props.highlightFunction || (instance => true);
@@ -26,8 +26,8 @@ class Service extends React.Component {
                     <span><b>{service.svc}</b>&nbsp;<i>{service.type}</i></span>&nbsp;
                     <Badge backgroundColor="">{instances.length}</Badge><br/>
                     {service.mode}
-                    {projects.map(project =>
-                        <BuildLink url={'navigate/' + project}/>
+                    {components.map(component =>
+                        <BuildLink url={'navigate/' + component}/>
                     )}
                     {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge>}
                     {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}

@@ -13,7 +13,7 @@ import javax.inject.Inject
 data class WorkDetail(val id: String, val label: String, val type: String?,
               val jira: String?, val jiraUrl: String?,
               val status: String,
-              val people: List<String>, val projects: List<String> = emptyList())
+              val people: List<String>, val components: List<String> = emptyList())
 
 
 class WorkApi {
@@ -65,6 +65,6 @@ private fun Work.map(jiraUrl: String): WorkDetail {
                     ?.let { "$it/$jira" },
             status = status.toString(),
             people = people,
-            projects = components
+            components = components
     )
 }

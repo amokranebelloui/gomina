@@ -34,10 +34,10 @@ class DependenciesApi {
         this.router = Router.router(vertx)
 
         router.get("/").handler(this::get)
-        router.get("/outgoing/:projectId").handler(this::getOutgoing)
-        router.get("/incoming/:projectId").handler(this::getIncoming)
-        router.get("/invocation/chain/:projectId").handler(this::getInvocationChain)
-        router.get("/call/chain/:projectId").handler(this::getCallChain)
+        router.get("/outgoing/:componentId").handler(this::getOutgoing)
+        router.get("/incoming/:componentId").handler(this::getIncoming)
+        router.get("/invocation/chain/:componentId").handler(this::getInvocationChain)
+        router.get("/call/chain/:componentId").handler(this::getCallChain)
     }
 
     fun get(ctx: RoutingContext) {
@@ -93,63 +93,63 @@ class DependenciesApi {
     }
 
     private fun getOutgoing(ctx: RoutingContext) {
-        val projectId = ctx.request().getParam("projectId")
-        logger.info("Get Project Dependencies $projectId")
+        val componentId = ctx.request().getParam("componentId")
+        logger.info("Get Dependencies $componentId")
         try {
             val allInteractions = interactionsRepository.getAll().associateBy { p -> p.serviceId }
             val functions = Dependencies.functions(allInteractions.values)
                     //.filter { (f,stakeholders) -> stakeholders.users.find { it.projectId == projectId } != null }
-            val dependencies = Dependencies.dependencies(functions).filter { it.from == projectId }.map { it.toDetail() }
+            val dependencies = Dependencies.dependencies(functions).filter { it.from == componentId }.map { it.toDetail() }
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(dependencies))
         }
         catch (e: Exception) {
-            logger.error("Cannot get Project Dependencies $projectId", e)
+            logger.error("Cannot get Dependencies $componentId", e)
             ctx.fail(500)
         }
     }
 
     private fun getIncoming(ctx: RoutingContext) {
-        val projectId = ctx.request().getParam("projectId")
-        logger.info("Get Project Dependencies $projectId")
+        val componentId = ctx.request().getParam("componentId")
+        logger.info("Get Dependencies $componentId")
         try {
             val allInteractions = interactionsRepository.getAll().associateBy { p -> p.serviceId }
             val functions = Dependencies.functions(allInteractions.values)
                     //.filter { (f,stakeholders) -> stakeholders.exposers.contains(projectId) }
-            val dependencies = Dependencies.dependencies(functions).filter { it.to == projectId }.map { it.toDetail() }
+            val dependencies = Dependencies.dependencies(functions).filter { it.to == componentId }.map { it.toDetail() }
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(dependencies))
         }
         catch (e: Exception) {
-            logger.error("Cannot get Project Dependencies $projectId", e)
+            logger.error("Cannot get Dependencies $componentId", e)
             ctx.fail(500)
         }
     }
 
     private fun getInvocationChain(ctx: RoutingContext) {
-        val projectId = ctx.request().getParam("projectId")
-        logger.info("Get Invocation Chain $projectId")
+        val componentId = ctx.request().getParam("componentId")
+        logger.info("Get Invocation Chain $componentId")
         try {
             val functions = Dependencies.functions(interactionsRepository.getAll())
             val dependencies = Dependencies.dependencies(functions)
-            val invocationChain = Dependencies.invocationChain(projectId, dependencies).toDetail()
+            val invocationChain = Dependencies.invocationChain(componentId, dependencies).toDetail()
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(invocationChain))
         }
         catch (e: Exception) {
-            logger.error("Cannot get Invocation Chain $projectId", e)
+            logger.error("Cannot get Invocation Chain $componentId", e)
             ctx.fail(500)
         }
     }
 
     private fun getCallChain(ctx: RoutingContext) {
-        val projectId = ctx.request().getParam("projectId")
-        logger.info("Get Call Chain $projectId")
+        val componentId = ctx.request().getParam("componentId")
+        logger.info("Get Call Chain $componentId")
         try {
             val functions = Dependencies.functions(interactionsRepository.getAll())
             val dependencies = Dependencies.dependencies(functions)
-            val callChain = Dependencies.callChain(projectId, dependencies).toDetail()
+            val callChain = Dependencies.callChain(componentId, dependencies).toDetail()
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(callChain))
         }
         catch (e: Exception) {
-            logger.error("Cannot get Call Chain $projectId", e)
+            logger.error("Cannot get Call Chain $componentId", e)
             ctx.fail(500)
         }
     }

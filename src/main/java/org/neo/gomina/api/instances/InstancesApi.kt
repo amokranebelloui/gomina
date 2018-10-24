@@ -28,7 +28,7 @@ data class ServiceDetail (
         val type: String? = null,
         val mode: ServiceMode? = ServiceMode.ONE_ONLY,
         val activeCount: Int = 1,
-        val project: String? = null
+        val componentId: String? = null
 )
 
 data class VersionDetail(val version: String = "", val revision: String?)
@@ -57,7 +57,7 @@ class InstanceDetail(
         var startTime: Date? = null,
         var startDuration: Long? = null,
 
-        var project: String? = null,
+        var componentId: String? = null,
         var deployHost: String? = null,
         var deployFolder: String? = null,
         var confCommited: Boolean? = null,
@@ -245,7 +245,7 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
 
     instance.type = ext.service.type
     instance.service = ext.service.svc
-    instance.project = ext.service.componentId
+    instance.componentId = ext.service.componentId
 
     instance.versions = VersionsDetail(
             running = ext.indicators?.version?.let { VersionDetail(it.version, it.revision) },
@@ -302,7 +302,7 @@ fun Service.toServiceDetail(): ServiceDetail {
             type = this.type,
             mode = this.mode,
             activeCount = this.activeCount,
-            project = this.componentId)
+            componentId = this.componentId)
 }
 
 //fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision)
