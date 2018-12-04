@@ -1,5 +1,6 @@
 package org.neo.gomina.integration.jenkins
 
+import org.apache.commons.codec.net.URLCodec
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.utils.Cache
@@ -14,7 +15,7 @@ class JenkinsService {
 
     fun getStatus(component: Component, fromCache: Boolean = false): BuildStatus? {
         val root = jenkinsConfig.serverMap[component.jenkinsServer]?.location
-        val url = "$root${component.jenkinsJob}"
+        val url = "$root${URLCodec().encode(component.jenkinsJob).replace("+", "%20")}"
         // FIXME Return something when failing to retrieve status
         return jenkinsCache.get(url, fromCache) { jenkinsConnector.getStatus(url) }
     }

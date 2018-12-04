@@ -68,7 +68,10 @@ class Cache<T>(val prefix:String, val fixFunction:(T) -> Unit = {}) {
     }
 
     private fun fileNameFor(id: String): File {
-        val filename = id.replace("/".toRegex(), "-").replace("\\\\".toRegex(), "-")
+        val filename = id
+                .replace("/".toRegex(), "-")
+                .replace("\\\\".toRegex(), "-")
+                .replace(":".toRegex(), "-")
         return File(".cache/$prefix/$filename.$prefix")
     }
 
