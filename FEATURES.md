@@ -1,8 +1,48 @@
+Model: Component, System, Env, Instance, Dependency, Event
 
+## Components
+- List of registered components  
+- Local configuration
+  - ~~components.json file~~
+  - Per component .yaml file, (folder, database?)
+- Plugin System for extensions
+  - Basic information
+    - Description
+    - Ownership: **Commit activity a good indicator** 
+    - Importance/Risk 
+  - Documentation
+    - Formats: Markdown
+    - Locations: In the component's SCM 
+  - SCM: 
+    - Commit log 
+    - Versions
+    - **Branches management**
+  - Sonar: LineOfCode, Coverage
+  - Jenkins: 
+    - Build status
+    - **Which version/revision has been built** 
+    - **Branches management**
+  - **Dependencies**
+    - Service registry entry names
+    - to other components
+    - Along with code    
+- Ability view information stored along with code 
+  at any time in the past
+
+## Environments
+- Reference component (duplicate data, just link)
+- Inventory: (env > services > instances)
+- Monitoring and real time status
+- SSH: where/what installed, unwanted stuff
+  - Simple folder structure
+  - **Other models, like schedulers: Docker/Kubernetes**
+- Cluster status, **Zookeeper Integration**
+
+- Do the right subscriptions when a new env/instance is added
 
 ## Inventory
-List and manage all your projects, environments, instances
-- Projects: owners, SCM url, description, code metrics (coverage, loc, etc)
+List and manage all your components, environments, instances
+- Components: owners, SCM url, description, code metrics (coverage, loc, etc)
 - Envs and instances: what should run and where
 - Alert on unexpected instances, and instances not running where they should
 - 

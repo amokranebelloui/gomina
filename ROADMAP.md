@@ -1,6 +1,6 @@
 
 ## Inventory 
-- elastic deployments (variable number of instances)
+- Elastic deployments (variable number of instances)
 - Leadership status: part of a cluster? who is leaser?
 - Diverging versions? A/B testing?
 
