@@ -33,7 +33,7 @@ class NexusConnector(val host: String, val port:Int, private val releaseRepo: St
             //val fileName = "$artifact-$fullVersion-$classifier.$type"
             val repoName = if (Version.isSnapshot(v)) snapshotRepo else releaseRepo
             val url = "http://$host:$port/$repoPrefix/$repoName/${group.replace(".", "/")}/$artifact/$v/$fileName"
-            System.out.println("URL: " + url)
+            System.out.println("$group $artifact $version --> $url")
 
             httpGet(url)
         }
@@ -62,8 +62,11 @@ class NexusConnector(val host: String, val port:Int, private val releaseRepo: St
     @Throws(IOException::class)
     private fun httpGet(url: String): String? {
         return httpclient.execute(HttpGet(url)).use { response ->
-            val entity = response.entity
-            IOUtils.toString(entity.content).also { EntityUtils.consume(entity) }
+            return if (response.statusLine.statusCode in 200..299) {
+                val entity = response.entity
+                IOUtils.toString(entity.content).also { EntityUtils.consume(entity) }
+            }
+            else null
         }
     }
 }
