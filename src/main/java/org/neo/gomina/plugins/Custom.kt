@@ -3,20 +3,17 @@ package org.neo.gomina.plugins
 import com.google.inject.Inject
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
-import org.neo.gomina.integration.monitoring.asBoolean
-import org.neo.gomina.integration.monitoring.asInt
-import org.neo.gomina.integration.monitoring.asLong
-import org.neo.gomina.integration.monitoring.asTime
-import org.neo.gomina.integration.ssh.HostSshDetails
-import org.neo.gomina.integration.ssh.InstanceSshDetails
 import org.neo.gomina.integration.ssh.SshAnalysis
 import org.neo.gomina.integration.ssh.sudo
 import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
+import org.neo.gomina.model.host.HostSshDetails
+import org.neo.gomina.model.host.InstanceSshDetails
 import org.neo.gomina.model.host.resolveHostname
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.monitoring.*
+import org.neo.gomina.model.version.Version
 import java.time.Clock
 import java.time.LocalDateTime
 
@@ -67,14 +64,27 @@ class CustomSshAnalysis : SshAnalysis {
     }
 
     fun deployedVersion(session: Session, user: String?, applicationFolder: String?): String {
-        var result = session.sudo(user, "cat $applicationFolder/current/version.txt 2>/dev/null")
-        result = StringUtils.trim(result)
-        if (StringUtils.isBlank(result)) {
-            result = session.sudo(user, "ls -ll $applicationFolder/current")
-            val pattern = ".*versions/.*-([0-9\\.]+(-SNAPSHOT)?)/"
-            result = result.replace(pattern.toRegex(), "$1").trim { it <= ' ' }
+        try {
+            var result = session.sudo(user, "cat $applicationFolder/current/version.txt 2>/dev/null")
+            result = when {
+                result.contains("No such file or directory") -> "?"
+                else -> result
+            }
+            result = StringUtils.trim(result)
+            if (StringUtils.isBlank(result)) {
+                result = session.sudo(user, "ls -ll $applicationFolder/current")
+                result = when {
+                    result.contains("No such file or directory") -> "?"
+                    else -> result
+                }
+                val pattern = ".*versions/.*-([0-9\\.]+(-SNAPSHOT)?)/"
+                result = result.replace(pattern.toRegex(), "$1").trim { it <= ' ' }
+            }
+            return result
         }
-        return result
+        catch (e: Exception) {
+            return "?"
+        }
     }
 
 }
@@ -82,60 +92,88 @@ class CustomSshAnalysis : SshAnalysis {
 class CustomMonitoringMapper : MonitoringMapper {
     override fun map(instanceId: String, indicators: Map<String, String>): RuntimeInfo? {
         return if (indicators["STATUS"] != null && indicators["VERSION"] != null) {
+            val type = indicators["type"]
             var status = mapStatus(indicators["STATUS"])
+
+            var cluster = indicators["ELECTION"].asBoolean ?: false
+            var participating = indicators["PARTICIPATING"].asBoolean ?: false
+            var leader = indicators["LEADER"].asBoolean ?: true
+
+            var host = indicators["IP"]
+
+            var version = indicators["VERSION"]
+            var revision = indicators["REVISION"]
+
             // Sidecar managed processes
-            if (indicators["TYPE"] == "redis") {
-                if (status == ServerStatus.LIVE) indicators["REDIS_STATE"] else ServerStatus.DARK
+            var sidecarStatus = mapStatus(indicators["STATUS"])
+            if (type == "redis") {
+                status = if (status == ServerStatus.LIVE) mapStatus(indicators["REDIS_STATE"]) else ServerStatus.DARK
+                cluster = true
+                participating = true
+                leader = indicators["REDIS_MASTER"].asBoolean ?: false
+                host = indicators["REDIS_HOST"]
+                version = "2.8.9" // FIXME Retrieve correct value
+                revision= ""
             }
+
+            val properties = mapOf(
+                    "jvm.jmx.port" to indicators["JMX"].asInt,
+                    "xxx.bux.version" to indicators["BUS"],
+                    "xxx.core.version" to indicators["CORE"],
+                    "quickfix.persistence" to indicators["QUICKFIX_MODE"]
+            )
+
+            // FIXME Avoid this technology specific switches 
+            val redis = if (type == "redis") {
+                listOf(
+                        "redis.host" to indicators["REDIS_HOST"],
+                        "redis.port" to indicators["REDIS_PORT"].asInt,
+                        "redis.master" to indicators["REDIS_MASTER"].asBoolean,
+                        "redis.status" to indicators["REDIS_STATE"],
+                        "redis.role" to indicators["REDIS_ROLE"],
+                        "redis.rw" to if ("yes".equals(indicators["REDIS_READONLY"], ignoreCase = true)) "ro" else "rw",
+                        "redis.persistence.mode" to if ("1" == indicators["REDIS_AOF"]) "AOF" else "RDB",
+                        "redis.offset" to indicators["REDIS_OFFSET"].asLong,
+                        "redis.slave.count" to indicators["REDIS_SLAVES"].asInt,
+                        "redis.client.count" to indicators["REDIS_CLIENTS"].asInt
+                )
+
+            } else emptyList()
+
+            val redisSlave = if (type == "redis" && indicators["REDIS_ROLE"] == "SLAVE") {
+                listOf(
+                        "redis.master.host" to indicators["REDIS_MASTER_HOST"],
+                        "redis.master.port" to indicators["REDIS_MASTER_PORT"].asInt,
+                        "redis.master.link" to mapOf(
+                                "status" to ("up" == indicators["REDIS_MASTER_LINK"]),
+                                "downSince" to indicators["REDIS_MASTER_LINK_DOWN_SINCE"]),
+                        "redis.master.offset.diff" to indicators["REDIS_OFFSET_DIFF"].asLong
+                )
+            } else emptyList()
+
             RuntimeInfo(
                     instanceId = instanceId,
-                    type = indicators["TYPE"],
-                    service = indicators["SERVICE"],
+                    type = type,
+                    service = indicators["service"],
                     lastTime = LocalDateTime.now(Clock.systemUTC()),
                     delayed = false,
                     process = ProcessInfo(
                             pid = indicators["PID"],
-                            host = resolveHostname(indicators["IP"]),
+                            host = resolveHostname(host),
                             status = status,
                             startTime = indicators["START_TIME"].asTime,
                             startDuration = indicators["START_DURATION"].asLong
                     ),
-                    jvm = JvmInfo(
-                            jmx = indicators["JMX"].asInt
-                    ),
+                    sidecarStatus = sidecarStatus,
+                    sidecarVersion = indicators["VERSION"],
+
                     cluster = ClusterInfo(
-                            cluster = indicators["ELECTION"].asBoolean ?: false,
-                            participating = indicators["PARTICIPATING"].asBoolean ?: false,
-                            leader = indicators["LEADER"].asBoolean ?: true // Historically we didn't have this field
+                            cluster = cluster,
+                            participating = participating,
+                            leader = leader // Historically we didn't have this field
                     ),
-                    fix = FixInfo(
-                            quickfixPersistence = indicators["QUICKFIX_MODE"]
-                    ),
-                    redis = RedisInfo(
-                            redisHost = indicators["REDIS_HOST"],
-                            redisPort = indicators["REDIS_PORT"].asInt,
-                            redisMasterHost = indicators["REDIS_MASTER_HOST"],
-                            redisMasterPort = indicators["REDIS_MASTER_PORT"].asInt,
-                            redisMasterLink = "up" == indicators["REDIS_MASTER_LINK"],
-                            redisMasterLinkDownSince = indicators["REDIS_MASTER_LINK_DOWN_SINCE"],
-                            redisOffset = indicators["REDIS_OFFSET"].asLong,
-                            redisOffsetDiff = indicators["REDIS_OFFSET_DIFF"].asLong,
-                            redisMaster = indicators["REDIS_MASTER"].asBoolean,
-                            redisRole = indicators["REDIS_ROLE"],
-                            redisRW = if ("yes".equals(indicators["REDIS_READONLY"], ignoreCase = true)) "ro" else "rw",
-                            redisMode = if ("1" == indicators["REDIS_AOF"]) "AOF" else "RDB",
-                            redisStatus = indicators["REDIS_STATE"],
-                            redisSlaveCount = indicators["REDIS_SLAVES"].asInt,
-                            redisClientCount = indicators["REDIS_CLIENTS"].asInt
-                    ),
-                    version = VersionInfo(
-                            version = indicators["VERSION"],
-                            revision = indicators["REVISION"]
-                    ),
-                    dependencies = DependenciesInfo(
-                            busVersion = indicators["BUS"],
-                            coreVersion = indicators["CORE"]
-                    )
+                    version = version?.let { Version(version = version, revision = revision) },
+                    properties = properties + redis + redisSlave
             )
         }
         else {
@@ -149,13 +187,13 @@ fun mapStatus(status: String?) =
 
 
 
-val fixin = Interactions(projectId = "fixin",
+val fixin = Interactions(serviceId = "fixin",
         used = listOf(
                 FunctionUsage("createOrder", "command"),
                 FunctionUsage("basketDb", "database", Usage("READ"))
         )
 )
-val order = Interactions(projectId = "order",
+val order = Interactions(serviceId = "order",
         exposed = listOf(
                 Function("createOrder", "command")
         ),
@@ -164,7 +202,7 @@ val order = Interactions(projectId = "order",
                 FunctionUsage("createCustomer", "request")
         )
 )
-val orderExt = Interactions(projectId = "orderExt",
+val orderExt = Interactions(serviceId = "orderExt",
         exposed = listOf(
                 Function("createOrder", "command")
         ),
@@ -173,7 +211,7 @@ val orderExt = Interactions(projectId = "orderExt",
                 FunctionUsage("createCustomer", "request")
         )
 )
-val basket = Interactions(projectId = "basket",
+val basket = Interactions(serviceId = "basket",
         exposed = listOf(
                 Function("checkBasket", "command")
         ),
@@ -183,7 +221,7 @@ val basket = Interactions(projectId = "basket",
                 FunctionUsage("basketDb", "database", Usage("WRITE"))
         )
 )
-val referential = Interactions(projectId = "tradex-referential",
+val referential = Interactions(serviceId = "tradex-referential",
         exposed = listOf(
                 Function("getCustomer", "request"),
                 Function("createCustomer", "request")
@@ -196,22 +234,70 @@ class CustomInteractionProvider : InteractionsProvider {
         repository.providers.add(this)
     }
     override fun getAll(): List<Interactions> {
+        // FIXME Read using XXRawDeps
         return listOf(fixin, order, orderExt, basket, referential)
     }
 }
 
+object XXRawDeps {
+    fun list(): List<XRawDeps> {
+        // Overrides
+        val misReadOnly = listOf("BASKET", "ORDER", "EXEC", "ORDER_MARKET", "EXEC_MARKET", "BOOKING")
+
+        println("-- Dependencies -----------------")
+        val result = listOf(
+                XDepSource.get("x.oms.referential", "tradex-referential"),
+                XDepSource.get("x.oms.position", "tradex-position"),
+                XDepSource.get("x.oms.marketdata", "tradex-marketdata"),
+                XDepSource.get("x.oms.vac", "voms-basketmanager"),
+                XDepSource.get("x.oms.vac", "voms-ordermanager"),
+                XDepSource.get("x.oms.vac", "voms-marketmanager"),
+                XDepSource.get("x.oms.vac", "voms-crossbroker"),
+                XDepSource.get("x.oms.execution", "tradex-execution"),
+                XDepSource.get("x.oms.clientrfq", "tradex-clientrfq"),
+                XDepSource.get("x.oms.fixout", "tradex-fixout"),
+                XDepSource.get("x.oms.emmabroker", "tradex-emmabroker"),
+                XDepSource.get("x.oms.fidessa", "tradex-fidessa", "3.0.1-SNAPSHOT"),
+                XDepSource.get("x.oms.posttrade", "tradex-posttrade-app"),
+                XDepSource.get("x.oms.pretrade", "tradex-pretrade-app"),
+                XDepSource.get("x.oms.fixinest", "tradex-fixinest"),
+                XDepSource.get("x.oms.fixin", "tradex-fixin", "1.4.1-SNAPSHOT"),
+                XDepSource.get("x.oms.booking", "tradex-booking"),
+                XDepSource.get("x.oms.ioi", "tradex-ioi"),
+                XDepSource.get("x.oms.interest", "tradex-interest"),
+                XDepSource.get("x.oms.advert", "tradex-advert"),
+                XDepSource.get("x.oms.position", "tradex-position"),
+                XDepSource.get("x.oms.brokerrfq", "tradex-brokerrfq"),
+                XDepSource.get("x.oms.bookbroker", "tradex-bookbroker"),
+                XDepSource.get("x.oms.facilitation", "tradex-facilitation"),
+                XDepSource.get("x.oms.fakebroker", "tradex-fakebroker"),
+                XDepSource.get("x.oms.pnl", "tradex-pnl"),
+                XDepSource.get("x.oms.mis", "tradex-mis", "1.3.2-SNAPSHOT")?.apply {
+                    this.api?.raised = emptyMap()
+                    this.dependencies?.redis?.forEach {
+                        if (misReadOnly.contains(it.topic)) it.type = "R"
+                    }
+                }
+                //DataAccess.get("x.oms.routingsync", "tradex-routingsync"),
+                //DataAccess.get("x.oms.cli", "tradex-cli")
+        )
+        println("---------------------------------")
+        return result.filterNotNull()
+    }
+}
+
 class CustomEnrichDependencies : EnrichDependencies {
-    override fun enrich(projects: Collection<Interactions>): Collection<Interactions> {
-        val specialFunctions = projects
+    override fun enrich(components: Collection<Interactions>): Collection<Interactions> {
+        val specialFunctions = components
                 .map { p ->
-                    Interactions(projectId = p.projectId,
+                    Interactions(serviceId = p.serviceId,
                             exposed = p.exposed,
                             used = p.used.filter { it.function.type == "database" })
                 }
                 .let { Dependencies.functions(it) }
                 .filter { (f, stakeholders) -> stakeholders.usageExists }
                 .map { (f, stakeholders) ->
-                    Pair(Function(f.name, "database-write"), Dependencies.infer(stakeholders.users, "READ", "WRITE") { it?.usage })
+                    Pair(Function(f.name, "db-interaction"), Dependencies.infer(stakeholders.users, "READ", "WRITE") { it?.usage })
                 }
                 .toMap()
         return Dependencies.interactions(specialFunctions)
