@@ -3,9 +3,11 @@ package org.neo.gomina.plugins
 import com.google.inject.Inject
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
+import org.neo.gomina.integration.maven.MavenId
 import org.neo.gomina.integration.ssh.SshAnalysis
 import org.neo.gomina.integration.ssh.sudo
 import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
+import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
 import org.neo.gomina.model.host.HostSshDetails
@@ -230,49 +232,62 @@ val referential = Interactions(serviceId = "tradex-referential",
 
 class CustomInteractionProvider : InteractionsProvider {
     @Inject lateinit var repository: ProviderBasedInteractionRepository
+    @Inject lateinit var componentsRepo: ComponentRepo
+    @Inject lateinit var enrichDependencies: EnrichDependencies
     @Inject fun init() {
         repository.providers.add(this)
     }
     override fun getAll(): List<Interactions> {
-        // FIXME Read using XXRawDeps
-        return listOf(fixin, order, orderExt, basket, referential)
-    }
-}
-
-object XXRawDeps {
-    fun list(): List<XRawDeps> {
-        // Overrides
+        // Get the dependencies
         val misReadOnly = listOf("BASKET", "ORDER", "EXEC", "ORDER_MARKET", "EXEC_MARKET", "BOOKING")
-
         println("-- Dependencies -----------------")
-        val result = listOf(
-                XDepSource.get("x.oms.referential", "tradex-referential"),
-                XDepSource.get("x.oms.position", "tradex-position"),
-                XDepSource.get("x.oms.marketdata", "tradex-marketdata"),
-                XDepSource.get("x.oms.vac", "voms-basketmanager"),
-                XDepSource.get("x.oms.vac", "voms-ordermanager"),
-                XDepSource.get("x.oms.vac", "voms-marketmanager"),
-                XDepSource.get("x.oms.vac", "voms-crossbroker"),
-                XDepSource.get("x.oms.execution", "tradex-execution"),
-                XDepSource.get("x.oms.clientrfq", "tradex-clientrfq"),
-                XDepSource.get("x.oms.fixout", "tradex-fixout"),
-                XDepSource.get("x.oms.emmabroker", "tradex-emmabroker"),
-                XDepSource.get("x.oms.fidessa", "tradex-fidessa", "3.0.1-SNAPSHOT"),
-                XDepSource.get("x.oms.posttrade", "tradex-posttrade-app"),
-                XDepSource.get("x.oms.pretrade", "tradex-pretrade-app"),
-                XDepSource.get("x.oms.fixinest", "tradex-fixinest"),
-                XDepSource.get("x.oms.fixin", "tradex-fixin", "1.4.1-SNAPSHOT"),
-                XDepSource.get("x.oms.booking", "tradex-booking"),
-                XDepSource.get("x.oms.ioi", "tradex-ioi"),
-                XDepSource.get("x.oms.interest", "tradex-interest"),
-                XDepSource.get("x.oms.advert", "tradex-advert"),
-                XDepSource.get("x.oms.position", "tradex-position"),
-                XDepSource.get("x.oms.brokerrfq", "tradex-brokerrfq"),
-                XDepSource.get("x.oms.bookbroker", "tradex-bookbroker"),
-                XDepSource.get("x.oms.facilitation", "tradex-facilitation"),
-                XDepSource.get("x.oms.fakebroker", "tradex-fakebroker"),
-                XDepSource.get("x.oms.pnl", "tradex-pnl"),
-                XDepSource.get("x.oms.mis", "tradex-mis", "1.3.2-SNAPSHOT")?.apply {
+
+        val interactions = componentsRepo.getAll()
+                .mapNotNull { c -> c.maven?.let { c.id to MavenId.from(it) } }
+                .flatMap { (cid, mvnId) -> mvnId?.let { listOf(cid to mvnId) } ?: emptyList() }
+                .mapNotNull { (cId, mvnId) ->
+                    when (cId) {
+                        "tradex-mis" -> XDepSource.get(cId, mvnId.groupId ?: "", mvnId.artifactId, "1.3.2-SNAPSHOT")
+                                ?.apply {
+                                    this.api?.raised = emptyMap()
+                                    this.dependencies?.redis?.forEach {
+                                        if (misReadOnly.contains(it.topic)) it.type = "R"
+                                    }
+                                }
+                        else -> XDepSource.get(cId, mvnId.groupId ?: "", mvnId.artifactId)
+                    }
+        }
+        /*
+        println("---------------------------------")
+        val result1 = listOf(
+                XDepSource.get("tradex-referential", "x.oms.referential", "tradex-referential"),
+                XDepSource.get("tradex-position", "x.oms.position", "tradex-position"),
+                XDepSource.get("tradex-marketdata", "x.oms.marketdata", "tradex-marketdata"),
+                XDepSource.get("tradex-basketmanager", "x.oms.vac", "voms-basketmanager"),
+                XDepSource.get("tradex-ordermanager", "x.oms.vac", "voms-ordermanager"),
+                XDepSource.get("tradex-marketmanager", "x.oms.vac", "voms-marketmanager"),
+                XDepSource.get("tradex-crossbroker", "x.oms.vac", "voms-crossbroker"),
+                XDepSource.get("tradex-execution", "x.oms.execution", "tradex-execution"),
+                XDepSource.get("tradex-clientrfq", "x.oms.clientrfq", "tradex-clientrfq"),
+                XDepSource.get("tradex-fixout", "x.oms.fixout", "tradex-fixout"),
+                XDepSource.get("tradex-emmabroker", "x.oms.emmabroker", "tradex-emmabroker"),
+                XDepSource.get("tradex-liquidityprovider", "x.oms.liquidityprovider", "tradex-liquidityprovider"),
+                XDepSource.get("tradex-fidessa", "x.oms.fidessa", "tradex-fidessa", "3.0.1-SNAPSHOT"),
+                XDepSource.get("tradex-posttrade-app", "x.oms.posttrade", "tradex-posttrade-app"),
+                XDepSource.get("tradex-pretrade-app", "x.oms.pretrade", "tradex-pretrade-app"),
+                XDepSource.get("tradex-fixinest", "x.oms.fixinest", "tradex-fixinest"),
+                XDepSource.get("tradex-fixin", "x.oms.fixin", "tradex-fixin", "1.4.1-SNAPSHOT"),
+                XDepSource.get("tradex-booking", "x.oms.booking", "tradex-booking"),
+                XDepSource.get("tradex-ioi", "x.oms.ioi", "tradex-ioi"),
+                XDepSource.get("tradex-interest", "x.oms.interest", "tradex-interest"),
+                XDepSource.get("tradex-advert", "x.oms.advert", "tradex-advert"),
+                //XDepSource.get("tradex-position", "x.oms.position", "tradex-position"),
+                XDepSource.get("tradex-brokerrfq", "x.oms.brokerrfq", "tradex-brokerrfq"),
+                XDepSource.get("tradex-bookbroker", "x.oms.bookbroker", "tradex-bookbroker"),
+                XDepSource.get("tradex-facilitation", "x.oms.facilitation", "tradex-facilitation"),
+                XDepSource.get("tradex-fakebroker", "x.oms.fakebroker", "tradex-fakebroker"),
+                XDepSource.get("tradex-pnl", "x.oms.pnl", "tradex-pnl"),
+                XDepSource.get("tradex-mis", "x.oms.mis", "tradex-mis", "1.3.2-SNAPSHOT")?.apply {
                     this.api?.raised = emptyMap()
                     this.dependencies?.redis?.forEach {
                         if (misReadOnly.contains(it.topic)) it.type = "R"
@@ -281,8 +296,38 @@ object XXRawDeps {
                 //DataAccess.get("x.oms.routingsync", "tradex-routingsync"),
                 //DataAccess.get("x.oms.cli", "tradex-cli")
         )
+        .filterNotNull()
         println("---------------------------------")
-        return result.filterNotNull()
+        */
+        // Map to the right format
+        val result = interactions.map {d ->
+            val apiCmd = d.api?.commands?.flatMap { it.value }?.map { Function(it, "cmd") } ?: emptyList()
+            val apiCmI = d.api?.commands?.flatMap { it.value }?.map { Function(it, "cmd-internal") } ?: emptyList()
+            val apiEvt = d.api?.raised?.flatMap { it.value }?.map { Function(it, "evt") } ?: emptyList()
+            val depCmd = d.dependencies?.commands?.flatMap { it.value }?.map { FunctionUsage(it, "cmd", Usage("CMD-INVOCATION")) } ?: emptyList()
+            val depCmI = d.dependencies?.commandsInternal?.flatMap { it.value }?.map { FunctionUsage(it, "cmd-internal", Usage("CMD-INVOCATION")) } ?: emptyList()
+            val depEvt = d.dependencies?.events?.flatMap { it.value }?.map { FunctionUsage(it, "evt", Usage("EVT-INVOCATION")) } ?: emptyList()
+            val depRed = d.dependencies?.redis?.map { FunctionUsage(it.redisName ?: "", "database", Usage(it.type ?: "")) } ?: emptyList()
+            Interactions(d.component, apiCmd + apiCmI + apiEvt, depCmd + depCmI + depEvt + depRed)
+        }
+
+        val specialInteractions = interactions
+            .map { d ->
+                val entDep = d.dependencies?.redis?.map { FunctionUsage("${it.redisName}.${it.topic}", "topic", Usage(it.type ?: "")) } ?: emptyList()
+                Interactions(d.component, emptyList(), entDep)
+            }
+            .let { Dependencies.functions(it) }
+            .flatMap { (f, stakeholders) ->
+                listOf(
+                    Pair(Function(f.name, "db-read"), Dependencies.infer(stakeholders.users, "R", "RW") { it?.usage }),
+                    Pair(Function(f.name, "db-multi"), Dependencies.infer(stakeholders.users, "RW", "RW") { it?.usage })
+                )
+            }
+            .toMap()
+            .let { Dependencies.interactions(it) }
+
+        return (result + specialInteractions).merge().toList()
+        //return listOf(fixin, order, orderExt, basket, referential)
     }
 }
 
@@ -297,7 +342,7 @@ class CustomEnrichDependencies : EnrichDependencies {
                 .let { Dependencies.functions(it) }
                 .filter { (f, stakeholders) -> stakeholders.usageExists }
                 .map { (f, stakeholders) ->
-                    Pair(Function(f.name, "db-interaction"), Dependencies.infer(stakeholders.users, "READ", "WRITE") { it?.usage })
+                    Pair(Function(f.name, "db-interaction"), Dependencies.infer(stakeholders.users, "R", "RW") { it?.usage })
                 }
                 .toMap()
         return Dependencies.interactions(specialFunctions)

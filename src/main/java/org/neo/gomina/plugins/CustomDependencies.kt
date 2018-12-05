@@ -27,7 +27,7 @@ data class XDependencies (
         var redis: List<XRedisDep>? = null
 )
 
-data class XRawDeps(var component: String? = null,
+data class XRawDeps(var component: String = "",
                     var api: Api? = null,
                     var dependencies: XDependencies? = null,
                     var events: List<String>? = null
@@ -69,7 +69,8 @@ fun flat(rawDeps: XRawDeps): XComponentDeps {
 
 object XDepSource {
 
-    val nexusAccess = NexusConnector("viw-facto-101", 8081, "releases", "snapshots")
+    // FIXME Move to config
+    val nexusAccess = NexusConnector("viw-facto-101", 8081, "releases", "snapshots", isNexus3 = true)
 
     private val objectMapper = ObjectMapper()
     init {
@@ -79,13 +80,14 @@ object XDepSource {
         objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
     }
 
-
     @Throws(Exception::class)
-    @JvmOverloads operator fun get(group: String, artifact: String, version: String? = null): XRawDeps? {
+    @JvmOverloads operator fun get(componentId: String, group: String, artifact: String, version: String? = null): XRawDeps? {
         try {
-            val result = objectMapper.readValue(nexusAccess.getContent(group, artifact, version), XRawDeps::class.java)
-            result.component = artifact
-            return result
+            return nexusAccess.getContent(group, artifact, version, "dependencies", "json")?.let {
+                val result = objectMapper.readValue(it, XRawDeps::class.java)
+                result.component = componentId
+                result
+            }
         } catch (e: Exception) {
             println("Error $group $artifact $version")
             e.printStackTrace()

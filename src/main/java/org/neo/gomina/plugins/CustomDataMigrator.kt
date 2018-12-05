@@ -17,9 +17,10 @@ fun main(args: Array<String>) {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
             .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
-    val old:DEnvironment = jsonMapper.readValue(File("data/tdx/env.tradex-uat.json"))
+    val file = "env.tradex-uatb.json"
+    val old:DEnvironment = jsonMapper.readValue(File("data/oldx/$file"))
     val new = map(old)
-    jsonMapper.writeValue(File("data/tdx/env.tradex-uat.new.json"), new)
+    jsonMapper.writeValue(File("data/$file"), new)
 }
 
 private fun map(old: DEnvironment): Environment {
