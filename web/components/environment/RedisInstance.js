@@ -1,18 +1,26 @@
-import React from "react";
-import {CopyButton} from "../common/utils";
+// @flow
+import * as React from "react";
 import './Instance.css'
 import {Badge} from "../common/Badge";
 
-function RedisPersistence(props) {
+type RedisPersistenceType = {
+    redisMode?: string
+}
+
+function RedisPersistence(props: RedisPersistenceType) {
     const persistenceModeColor = props.redisMode === 'AOF' ? 'green' : props.redisMode === 'RDB' ? 'lightgreen' : 'gray';
     return (
-        <Badge title={'Persistence Mode ' + props.redisMode} backgroundColor={persistenceModeColor} color='white'>
+        <Badge title={'Persistence Mode ' + (props.redisMode||'')} backgroundColor={persistenceModeColor} color='white'>
             {props.redisMode}
         </Badge>
     )
 }
 
-function RedisReadWrite(props) {
+type RedisReadWriteType = {
+    redisRW?: string
+}
+
+function RedisReadWrite(props:RedisReadWriteType) {
     return (
         props.redisRW == 'rw'
             ? <Badge backgroundColor='#969696' color='white' title="Read/Write">RW</Badge>
@@ -22,7 +30,11 @@ function RedisReadWrite(props) {
     )
 }
 
-function RedisOffset(props) {
+type RedisOffsetType = {
+    offset?: string
+}
+
+function RedisOffset(props: RedisOffsetType) {
     return (
         <span style={{fontSize: 7, color: 'gray', lineHeight: '40%'}}>{props.offset}</span>
     )

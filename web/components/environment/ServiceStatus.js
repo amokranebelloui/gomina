@@ -1,7 +1,14 @@
-import React from "react";
-import PropTypes from 'prop-types'
+// @flow
+import * as React from "react";
 
-class ServiceStatus extends React.Component {
+type Props = {
+    status?: ?string,
+    reason?: ?string,
+    text?: ?string,
+    style?: ?any,
+}
+
+class ServiceStatus extends React.Component<Props> {
     render() {
         const status = this.props.status;
         const reason = this.props.reason;
@@ -37,12 +44,5 @@ class ServiceStatus extends React.Component {
         );
     }
 }
-
-ServiceStatus.propTypes = {
-    "status": PropTypes.string,
-    "reason": PropTypes.string,
-    "text": PropTypes.string,
-    "style": PropTypes.object,
-};
 
 export { ServiceStatus }

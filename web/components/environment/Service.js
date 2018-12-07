@@ -1,11 +1,25 @@
-import React from "react";
+// @flow
+import * as React from "react";
 import {Badge} from "../common/Badge";
 import {BuildLink} from "../build/BuildLink";
 import {ServiceStatus} from "./ServiceStatus";
-import PropTypes from 'prop-types'
-import {Tags} from "../common/Tags";
+import type {InstanceType} from "./Instance";
 
-class Service extends React.Component {
+type ServiceType = {
+    svc: string,
+    type?: ?string,
+    mode?: ?string,
+    activeCount?: ?number,
+    systems?: ?Array<string>,
+}
+
+type Props = {
+    service: ServiceType,
+    instances?: ?Array<InstanceType>,
+    highlightFunction?: ?(InstanceType => boolean),
+}
+
+class Service extends React.Component<Props> {
     render() {
         const service = this.props.service;
         const instances = this.props.instances ? this.props.instances : [];
@@ -16,7 +30,7 @@ class Service extends React.Component {
         const highlightFunction = this.props.highlightFunction || (instance => true);
         var serviceHighlighted = false;
         {instances.map(instance =>
-            serviceHighlighted |= highlightFunction(instance)
+            serviceHighlighted = serviceHighlighted || highlightFunction(instance)
         )}
         const opacity = serviceHighlighted ? 1 : 0.1;
         return ([
@@ -29,7 +43,7 @@ class Service extends React.Component {
                     {service.mode}
                     |{service.systems}|
                     {components.map(component =>
-                        <BuildLink url={'navigate/' + component}/>
+                        <BuildLink url={'navigate/' + (component||'')}/>
                     )}
                     {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge>}
                     {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
@@ -40,14 +54,7 @@ class Service extends React.Component {
     }
 }
 
-Service.propTypes = {
-    "service": PropTypes.object,
-    "instances": PropTypes.array, /* status LIVE LOADING, leader, version, unexpected, confCommited, confRevision */
-    "highlightFunction": PropTypes.func,
-};
-
-
-function computeStatus(service, instances) {
+function computeStatus(service: ServiceType, instances: Array<InstanceType>) {
     switch (service.mode) {
         case "ONE_ONLY": return computeStatusOnlyOne(service, instances);
         case "LEADERSHIP": return computeStatusLeadership(service, instances);
@@ -57,11 +64,11 @@ function computeStatus(service, instances) {
     return {
         status: 'UNKNOWN',
         reason: 'UNKNOWN',
-        text: 'Unknown mode ' + service.mode,
+        text: 'Unknown mode ' + (service.mode || ''),
     }
 }
 
-function computeStatusOnlyOne(service, instances) {
+function computeStatusOnlyOne(service: ServiceType, instances: Array<InstanceType>) {
     const loading = instances.filter(instance => instance.status === 'LOADING');
     const live = instances.filter(instance => instance.status === 'LIVE');
     const liveLeaders = instances.filter(instance => instance.status === 'LIVE' && instance.leader);
@@ -84,7 +91,7 @@ function computeStatusOnlyOne(service, instances) {
     }
 }
 
-function computeStatusLeadership(service, instances) {
+function computeStatusLeadership(service: ServiceType, instances: Array<InstanceType>) {
     const loading = instances.filter(instance => instance.status === 'LOADING');
     const live = instances.filter(instance => instance.status === 'LIVE');
     const liveLeaders = instances.filter(instance => instance.status === 'LIVE' && instance.leader);
@@ -110,11 +117,11 @@ function computeStatusLeadership(service, instances) {
     }
 }
 
-function computeStatusLoadBalancing(service, instances) {
+function computeStatusLoadBalancing(service: ServiceType, instances: Array<InstanceType>) {
     const loading = instances.filter(instance => instance.status === 'LOADING');
     const liveLeaders = instances.filter(instance => instance.status === 'LIVE' && instance.leader);
 
-    const count = service.activeCount;
+    const count = service.activeCount || 0;
     if (liveLeaders.length >= count) {
         return {status: 'LIVE', reason: '-', text: '-'};
     }
@@ -129,7 +136,7 @@ function computeStatusLoadBalancing(service, instances) {
     }
 }
 
-function computeStatusOffline(service, instances) {
+function computeStatusOffline(service: ServiceType, instances: Array<InstanceType>) {
     const live = instances.filter(instance => instance.status === 'LIVE');
 
     if (live.length > 0) {
@@ -140,7 +147,7 @@ function computeStatusOffline(service, instances) {
     }
 }
 
-function computeServiceDetails(service, instances) {
+function computeServiceDetails(service: ServiceType, instances: Array<InstanceType>) {
     const unexpected = instances.filter(instance => instance.unexpected === true);
     const versions = new Set(instances.map(instance => instance.version));
     const confrevs = new Set(instances.map(instance => instance.confRevision));
@@ -154,3 +161,4 @@ function computeServiceDetails(service, instances) {
 }
 
 export { Service }
+export type { ServiceType }

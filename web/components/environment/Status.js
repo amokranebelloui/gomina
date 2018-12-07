@@ -1,12 +1,20 @@
-import React from "react";
-import PropTypes from "prop-types";
+// @flow
+import * as React from "react";
 
-function isRunning(status) {
-    return status == 'LIVE' || status == 'LOADING';
+function isRunning(status: ?string) {
+    return status === 'LIVE' || status === 'LOADING';
 }
 
+type StatusWrapperType = {
+    status: string,
+    leader: boolean,
+    participating: boolean,
+    cluster: boolean,
+    style?: ?any,
+    children?: ?any
+};
 
-class StatusWrapper extends React.Component {
+class StatusWrapper extends React.Component<StatusWrapperType> {
     render() {
         const status = this.props.status;
         const color =
@@ -22,7 +30,7 @@ class StatusWrapper extends React.Component {
         //#F8F8F8
         return (
             <div style={{
-                padding: '2px', margin: this.props.margin, display: this.props.block ? null : 'inline-block',
+                padding: '2px', margin: '2px', display: 'inline-block',
                 backgroundColor: background, border: '3px solid ' + color, borderRadius: '5px'
             }}>
                 {this.props.children}
@@ -31,7 +39,15 @@ class StatusWrapper extends React.Component {
     }
 }
 
-class Status extends React.Component {
+type StatusType = {
+    status?: ?string,
+    leader: boolean,
+    participating: boolean,
+    cluster: boolean,
+    style?: ?any
+};
+
+class Status extends React.Component<StatusType> {
     render() {
         const status = this.props.status;
         const leader = this.props.leader;
@@ -61,17 +77,17 @@ class Status extends React.Component {
                 </span>
          */
 
-        let role = {text: '-', title: 'No information', opacity: 0.3};
+        let role = {text: '-', title: 'No information', opacity: 0.3, fontStyle: null};
         if (isRunning(status)) {
             if (cluster) {
                 if (leader) {
-                    role = {text: 'LEADER', title: 'Elected Leader', opacity: 0.9}
+                    role = {text: 'LEADER', title: 'Elected Leader', opacity: 0.9, fontStyle: null}
                 }
                 else if (participating) {
-                    role = {text: 'PARTICIP', title: 'Contending for Leadership', opacity: 0.7}
+                    role = {text: 'PARTICIP', title: 'Contending for Leadership', opacity: 0.7, fontStyle: null}
                 }
                 else {
-                    role = {text: 'STANDBY', title: 'Standby instance', opacity: 0.3}
+                    role = {text: 'STANDBY', title: 'Standby instance', opacity: 0.3, fontStyle: null}
                 }
             }
             else {
@@ -79,7 +95,7 @@ class Status extends React.Component {
                     role = {text: 'LEADER', title: 'Leader', opacity: 0.9, fontStyle: 'italic'}
                 }
                 else {
-                    role = {text: 'NONE', title: 'Not leader', opacity: 0.3}
+                    role = {text: 'NONE', title: 'Not leader', opacity: 0.3, fontStyle: null}
                 }
             }
         }
@@ -108,13 +124,5 @@ class Status extends React.Component {
         );
     }
 }
-
-Status.propTypes = {
-    "status": PropTypes.string,
-    "leader": PropTypes.bool,
-    "participating": PropTypes.bool,
-    "cluster": PropTypes.bool,
-    "style": PropTypes.object
-};
 
 export {StatusWrapper, Status}
