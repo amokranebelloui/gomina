@@ -121,23 +121,23 @@
   },
   {
     "id": "tradingDb", "label": "Trading DB", "type": "redis",
-    "systems": ["tradex"]
+    "systems": ["tradex.oms"]
   },
   {
     "id": "basketDb", "label": "Basket DB", "type": "redis",
-    "systems": ["tradex"]
+    "systems": ["tradex.oms"]
   },
   {
     "id": "orderDb", "label": "Order DB", "type": "redis",
-    "systems": ["tradex"]
+    "systems": ["tradex.oms"]
   },
   {
     "id": "referentialDb", "label": "Referential DB", "type": "redis",
-    "systems": ["tradex"]
+    "systems": ["tradex.ref"]
   },
   {
     "id": "auditDb", "label": "Audit DB", "type": "mongodb",
-    "systems": ["tradex"]
+    "systems": ["tradex.audit"]
   },
   {
     "id": "metrics", "label": "Metrics Database", "type": "elastic-search",

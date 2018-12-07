@@ -3,6 +3,7 @@ import {Badge} from "../common/Badge";
 import {BuildLink} from "../build/BuildLink";
 import {ServiceStatus} from "./ServiceStatus";
 import PropTypes from 'prop-types'
+import {Tags} from "../common/Tags";
 
 class Service extends React.Component {
     render() {
@@ -26,6 +27,7 @@ class Service extends React.Component {
                     <span><b>{service.svc}</b>&nbsp;<i>{service.type}</i></span>&nbsp;
                     <Badge backgroundColor="">{instances.length}</Badge><br/>
                     {service.mode}
+                    |{service.systems}|
                     {components.map(component =>
                         <BuildLink url={'navigate/' + component}/>
                     )}

@@ -4,13 +4,16 @@ import axios from "axios/index";
 import {flatMap, groupBy} from "../common/utils";
 import {EnvironmentLogical} from "../environment/Environment";
 import {AppLayout} from "./common/layout";
-import {Link} from "react-router-dom";
+//import {Link} from "react-router-dom";
 import {Toggle} from "../common/Toggle";
 import {Container} from "../common/Container";
 import {InstanceFilter} from "../environment/InstanceFilter";
 import {Events} from "../environment/Events";
 import {InstanceProperties} from "../environment/Instance";
 import {Well} from "../common/Well";
+import {extendSystems} from "../system/system-utils";
+import {TagCloud} from "../common/TagCloud";
+import Link from "react-router-dom/es/Link";
 
 class EnvApp extends React.Component {
     constructor(props) {
@@ -189,8 +192,14 @@ class EnvApp extends React.Component {
     }
     render() {
         const envsByType = groupBy(this.state.envs, 'type');
-        const instances = flatMap(this.state.services, svc => svc.instances);
+        const services = this.state.services;
+        const instances = flatMap(services, svc => svc.instances);
         const selectedInstances = instances.filter (i => i.id === this.props.match.params.instanceId);
+
+        const systems = extendSystems(flatMap(services, p => p.service.systems));
+
+        const selectedServices = services.filter(s => matchesList(extendSystems(s.service.systems), this.state.selectedSystems));
+
         console.info(instances, selectedInstances);
         const events = this.state.events;
         const eventsErrors = this.state.eventsErrors;
@@ -224,12 +233,15 @@ class EnvApp extends React.Component {
                 <div className='main-content'>
                     <div className='principal-content'>
                         <Container>
-                            <EnvironmentLogical services={this.state.services} highlight={this.state.highlight} />
+                            <EnvironmentLogical services={selectedServices} highlight={this.state.highlight} />
                         </Container>
                     </div>
                     <div className='side-content'>
                         <div className='side-content-wrapper'>
                             <div className='side-primary'>
+                                Systems:
+                                <TagCloud tags={systems} displayCount={true}
+                                          selectionChanged={values => this.setState({selectedSystems: values})} />
                                 <InstanceFilter id={this.state.filterId} hosts={hosts} onFilterChanged={(e, hf) => this.changeSelected(e, hf)} />
                                 <button onClick={e => this.reloadInventory()}>RELOAD INV</button>
                                 <button onClick={e => this.reloadScm()}>RELOAD SCM</button>
@@ -256,6 +268,15 @@ class EnvApp extends React.Component {
             </AppLayout>
         );
     }
+}
+
+// FIXME Duplicated
+function matchesList(componentValues, selectedValues) {
+    if (selectedValues && selectedValues.length > 0) {
+        const values = (componentValues||[]);
+        return (selectedValues||[]).find(value => values.indexOf(value) !== -1);
+    }
+    return true
 }
 
 export { EnvApp }

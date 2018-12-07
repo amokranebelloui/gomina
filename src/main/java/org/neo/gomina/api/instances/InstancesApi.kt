@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.common.toDateUtc
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.ssh.SshService
+import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.host.resolveHostname
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
@@ -28,7 +29,8 @@ data class ServiceDetail (
         val type: String? = null,
         val mode: ServiceMode? = ServiceMode.ONE_ONLY,
         val activeCount: Int = 1,
-        val componentId: String? = null
+        val componentId: String? = null,
+        val systems: List<String>
 )
 
 data class VersionDetail(val version: String = "", val revision: String?)
@@ -160,12 +162,14 @@ class InstancesApi {
         try {
             val envId = ctx.request().getParam("envId")
 
+            val components = componentRepo.getAll().associateBy { it.id }
+
             val instances = inventory.getEnvironment(envId)?.let {
                 topology.buildExtInstances(it)
                         .groupBy { it.service }
                         .map { (service, extInstances) ->
                             mapOf(
-                                    "service" to service.toServiceDetail(),
+                                    "service" to service.toServiceDetail(components[service.componentId]),
                                     "instances" to extInstances.map { buildInstanceDetail(envId, it) }
                             )
                         }
@@ -296,13 +300,14 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
     return instance
 }
 
-fun Service.toServiceDetail(): ServiceDetail {
+fun Service.toServiceDetail(component: Component?): ServiceDetail {
     return ServiceDetail(
             svc = this.svc,
             type = this.type,
             mode = this.mode,
             activeCount = this.activeCount,
-            componentId = this.componentId)
+            componentId = this.componentId,
+            systems = component?.systems ?: emptyList())
 }
 
 //fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision)
