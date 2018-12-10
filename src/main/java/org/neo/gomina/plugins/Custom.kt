@@ -11,8 +11,8 @@ import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
 import org.neo.gomina.model.host.HostSshDetails
+import org.neo.gomina.model.host.HostUtils
 import org.neo.gomina.model.host.InstanceSshDetails
-import org.neo.gomina.model.host.resolveHostname
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.monitoring.*
 import org.neo.gomina.model.version.Version
@@ -92,9 +92,10 @@ class CustomSshAnalysis : SshAnalysis {
 }
 
 class CustomMonitoringMapper : MonitoringMapper {
+    @Inject lateinit var hostUtils: HostUtils
     override fun map(instanceId: String, indicators: Map<String, String>): RuntimeInfo? {
         return if (indicators["STATUS"] != null && indicators["VERSION"] != null) {
-            val type = indicators["type"]
+            val type = indicators["TYPE"]
             var status = mapStatus(indicators["STATUS"])
 
             var cluster = indicators["ELECTION"].asBoolean ?: false
@@ -127,14 +128,29 @@ class CustomMonitoringMapper : MonitoringMapper {
 
             // FIXME Avoid this technology specific switches 
             val redis = if (type == "redis") {
+                val redisRole = indicators["REDIS_ROLE"]
+                val readOnly: String?
+                val aof: String?
+                if (status == ServerStatus.LIVE) {
+                    readOnly = when {
+                        redisRole == "master" -> "rw"
+                        "yes".equals(indicators["REDIS_READONLY"].asString, ignoreCase = true) -> "ro"
+                        else -> "rw"
+                    }
+                    aof = if ("1" == indicators["REDIS_AOF"].asString) "AOF" else "RDB"
+                }
+                else {
+                    readOnly = ""
+                    aof = ""
+                }
                 listOf(
                         "redis.host" to indicators["REDIS_HOST"],
                         "redis.port" to indicators["REDIS_PORT"].asInt,
                         "redis.master" to indicators["REDIS_MASTER"].asBoolean,
                         "redis.status" to indicators["REDIS_STATE"],
-                        "redis.role" to indicators["REDIS_ROLE"],
-                        "redis.rw" to if ("yes".equals(indicators["REDIS_READONLY"], ignoreCase = true)) "ro" else "rw",
-                        "redis.persistence.mode" to if ("1" == indicators["REDIS_AOF"]) "AOF" else "RDB",
+                        "redis.role" to redisRole,
+                        "redis.rw" to readOnly,
+                        "redis.persistence.mode" to aof,
                         "redis.offset" to indicators["REDIS_OFFSET"].asLong,
                         "redis.slave.count" to indicators["REDIS_SLAVES"].asInt,
                         "redis.client.count" to indicators["REDIS_CLIENTS"].asInt
@@ -161,7 +177,7 @@ class CustomMonitoringMapper : MonitoringMapper {
                     delayed = false,
                     process = ProcessInfo(
                             pid = indicators["PID"],
-                            host = resolveHostname(host),
+                            host = hostUtils.resolve(host),
                             status = status,
                             startTime = indicators["START_TIME"].asTime,
                             startDuration = indicators["START_DURATION"].asLong

@@ -12,13 +12,12 @@ import org.neo.gomina.api.common.toDateUtc
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.model.component.Component
-import org.neo.gomina.model.host.resolveHostname
+import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.inventory.ServiceMode
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.ServerStatus
-import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
 import java.util.*
@@ -275,7 +274,7 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
     }
     ext.indicators?.let {
         instance.pid = it.process.pid
-        instance.host = resolveHostname(it.process.host)
+        instance.host = it.process.host
         instance.version = it.version?.version
         instance.revision = it.version?.revision
         instance.status = it.process.status

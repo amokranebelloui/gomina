@@ -31,6 +31,7 @@ data class Config (
         var name: String? = null,
         var passwordsFile: String? = null,
         val usersFile: String?,
+        var domains: List<String> = emptyList(),
         val jiraUrl: String = "",
         var inventory: InventoryConfig = InventoryConfig(),
         var monitoring: MonitoringConfig = MonitoringConfig(),

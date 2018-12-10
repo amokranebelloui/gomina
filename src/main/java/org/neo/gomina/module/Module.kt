@@ -4,8 +4,10 @@ import com.google.inject.AbstractModule
 import com.google.inject.Scopes
 import com.google.inject.TypeLiteral
 import com.google.inject.assistedinject.FactoryModuleBuilder
+import com.google.inject.name.Names
 import com.google.inject.name.Names.named
 import org.neo.gomina.api.auth.AuthApi
+import org.neo.gomina.api.component.ComponentsApi
 import org.neo.gomina.api.dependencies.DependenciesApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvsApi
@@ -13,7 +15,6 @@ import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.events.EventsProviderFactory
 import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
-import org.neo.gomina.api.component.ComponentsApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.api.users.UsersApi
 import org.neo.gomina.api.work.WorkApi
@@ -32,20 +33,21 @@ import org.neo.gomina.integration.ssh.SshOnDemandConnector
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
+import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.EnrichDependencies
 import org.neo.gomina.model.dependency.InteractionsRepository
 import org.neo.gomina.model.dependency.ProviderBasedInteractionRepository
 import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.HostRepo
+import org.neo.gomina.model.host.HostUtils
 import org.neo.gomina.model.host.Hosts
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.monitoring.Monitoring
-import org.neo.gomina.model.system.InferredSystems
-import org.neo.gomina.model.component.ComponentRepo
-import org.neo.gomina.model.system.Systems
 import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.model.security.Passwords
+import org.neo.gomina.model.system.InferredSystems
+import org.neo.gomina.model.system.Systems
 import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.work.WorkList
 import org.neo.gomina.module.config.Config
@@ -131,6 +133,10 @@ class GominaModule : AbstractModule() {
         install(FactoryModuleBuilder()
                 //.implement(EventsProvider::class.java, ElasticEvents::class.java)
                 .build(EventsProviderFactory::class.java))
+
+        // Hosts
+        bind(HostUtils::class.java).`in`(Scopes.SINGLETON)
+        bind(typeLiteral<List<@JvmSuppressWildcards String>>()).annotatedWith(Names.named("domains")).toInstance(config.domains)
 
         // Custom
         bind(PluginAssembler::class.java).`in`(Scopes.SINGLETON)

@@ -10,6 +10,7 @@ import javax.inject.Inject
 import kotlin.concurrent.thread
 
 private fun String?.clean() = if (this == "null") null else this
+val String?.asString: String? get() = this.clean()
 val String?.asInt: Int? get() = this.clean()?.toInt()
 val String?.asLong: Long? get() = this.clean()?.toLong()
 val String?.asBoolean: Boolean? get() = this.clean()?.toBoolean()
