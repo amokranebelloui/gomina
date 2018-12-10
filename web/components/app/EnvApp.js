@@ -14,6 +14,8 @@ import {Well} from "../common/Well";
 import {extendSystems} from "../system/system-utils";
 import {TagCloud} from "../common/TagCloud";
 import Link from "react-router-dom/es/Link";
+import {EnvInstances} from "../environment/EnvInstances";
+import {EnvServices} from "../environment/EnvServices";
 
 class EnvApp extends React.Component {
     constructor(props) {
@@ -22,6 +24,7 @@ class EnvApp extends React.Component {
             env: props.match.params.id,
             envs: [],
             realtime: false,
+            group: "SERVICES",
             services: [],
             filterId: 'all',
             highlight: instance => true,
@@ -233,16 +236,24 @@ class EnvApp extends React.Component {
                 <div className='main-content'>
                     <div className='principal-content'>
                         <Container>
-                            <EnvironmentLogical services={selectedServices} highlight={this.state.highlight} />
+                            {this.state.group}
+                            {
+                                this.state.group == "SERVICES" ? <EnvServices services={selectedServices} highlight={this.state.highlight} /> :
+                                    this.state.group == "INSTANCES" ? <EnvInstances services={selectedServices} highlight={this.state.highlight} /> :
+                                        <EnvironmentLogical services={selectedServices} highlight={this.state.highlight} />
+                            }
                         </Container>
                     </div>
                     <div className='side-content'>
                         <div className='side-content-wrapper'>
                             <div className='side-primary'>
+                                <button onClick={e => this.setState({group: "SERVICES"})}>SERVICES</button>
+                                <button onClick={e => this.setState({group: "INSTANCES"})}>INSTANCES</button>
+                                <button onClick={e => this.setState({group: "DETAIL"})}>DETAIL</button>
+                                <InstanceFilter id={this.state.filterId} hosts={hosts} onFilterChanged={(e, hf) => this.changeSelected(e, hf)} />
                                 Systems:
                                 <TagCloud tags={systems} displayCount={true}
                                           selectionChanged={values => this.setState({selectedSystems: values})} />
-                                <InstanceFilter id={this.state.filterId} hosts={hosts} onFilterChanged={(e, hf) => this.changeSelected(e, hf)} />
                                 <button onClick={e => this.reloadInventory()}>RELOAD INV</button>
                                 <button onClick={e => this.reloadScm()}>RELOAD SCM</button>
                                 <button onClick={e => this.reloadSsh()}>RELOAD SSH</button>

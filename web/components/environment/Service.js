@@ -13,6 +13,11 @@ type ServiceType = {
     systems?: ?Array<string>,
 }
 
+type ServiceDetailType = {
+    service: ServiceType,
+    instances: Array<InstanceType>
+}
+
 type Props = {
     service: ServiceType,
     instances?: ?Array<InstanceType>,
@@ -38,7 +43,7 @@ class Service extends React.Component<Props> {
                                status={status.status} reason={status.reason} text={status.text}
                                style={{opacity: opacity}} />
                 ,
-                <td key={'detail' + service.svc} className="service" style={{opacity: opacity}}>
+                <td key={'detail' + service.svc} colSpan="6" className="service" style={{opacity: opacity}}>
                     <span><b style={{fontSize: '16px'}}>{service.svc}</b>&nbsp;<i>{service.type}</i></span>&nbsp;
                     <Badge backgroundColor="">{instances.length}</Badge>
                     {service.mode}
@@ -162,4 +167,4 @@ function computeServiceDetails(service: ServiceType, instances: Array<InstanceTy
 }
 
 export { Service }
-export type { ServiceType }
+export type { ServiceType, ServiceDetailType }
