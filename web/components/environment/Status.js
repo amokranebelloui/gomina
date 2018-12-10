@@ -100,17 +100,16 @@ class Status extends React.Component<StatusType> {
             }
         }
         return (
-            <div className='status' style={Object.assign(this.props.style || {}, {
+            <td className='status' style={Object.assign(this.props.style || {}, {
                 backgroundColor: backgroundColor,
                 color: 'white',
                 cursor: 'pointer'
             })}>
-                <div style={{display: 'table', width: '100%', boxSizing: 'border-box', padding: '3px'}}>
+                <div style={{display: 'table', width: '100%', boxSizing: 'border-box', padding: '1px'}}>
 
                     <div style={{display: 'table-row'}}>
-                        <div style={{display: 'table-cell', textAlign: 'left', fontSize: '15px'}}>{status}</div>
-                    </div>
-                    <div style={{display: 'table-row'}}>
+                        <div style={{display: 'table-cell', textAlign: 'left', fontSize: '15px'}}><b>{status}</b></div>
+                    
                         <div style={{display: 'table-cell', textAlign: 'right'}}>
                             <span title={role.title}
                                   style={{fontSize: '7px', fontStyle: role.fontStyle, opacity: role.opacity}}>
@@ -119,7 +118,7 @@ class Status extends React.Component<StatusType> {
                         </div>
                     </div>
                 </div>
-            </div>
+            </td>
 
         );
     }

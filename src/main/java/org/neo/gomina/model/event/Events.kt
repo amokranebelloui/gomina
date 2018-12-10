@@ -3,6 +3,7 @@ package org.neo.gomina.model.event
 import java.time.LocalDateTime
 
 data class Event (
+        val id: String,
         val timestamp: LocalDateTime,
         val type: String?,
         val message: String?,

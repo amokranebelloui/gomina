@@ -22,17 +22,15 @@ class ServiceStatus extends React.Component<Props> {
                                 'lightgray';
         const opacity = 0.9;
         return (
-            <div className='status' style={Object.assign(this.props.style||{}, {
+            <td colSpan="2" className='status' style={Object.assign(this.props.style||{}, {
                 backgroundColor: backgroundColor,
                 color: 'white',
                 cursor: 'pointer'
             })}>
-                <div style={{display: 'table', width: '100%', boxSizing: 'border-box', padding: '3px'}}>
+                <div style={{display: 'table', width: '100%', boxSizing: 'border-box', padding: '1px'}}>
 
                     <div style={{display: 'table-row'}}>
-                        <div style={{display: 'table-cell', textAlign: 'left', fontSize: '15px'}}>{status}</div>
-                    </div>
-                    <div style={{display: 'table-row'}}>
+                        <div style={{display: 'table-cell', textAlign: 'left', fontSize: '15px'}}><b>{status}</b></div>
                         <div style={{display: 'table-cell', textAlign: 'right'}}>
                             <span title={text} style={{fontSize: '7px', opacity: opacity}}>
                                 {reason}
@@ -40,7 +38,7 @@ class ServiceStatus extends React.Component<Props> {
                         </div>
                     </div>
                 </div>
-            </div>
+            </td>
         );
     }
 }

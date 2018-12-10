@@ -24,6 +24,7 @@ data class EventList(
 )
 
 data class EventDetail(
+        val id: String,
         val timestamp: Date,
         val type: String?,
         val message: String?,
@@ -110,6 +111,7 @@ interface EventsProviderFactory {
 
 
 fun Event.toEventDetail() = EventDetail(
+        id = this.id,
         timestamp = this.timestamp.toDateUtc,
         type = this.type,
         message = this.message,

@@ -4,11 +4,13 @@
 }
 
 .instance > .line {
+    /*
     margin-top: 0px;
     margin-bottom: 1px;
-    display: table;
-    border-collapse: collapse;
     padding: 0px;
+    */
+    display: inline-block;
+    border-collapse: collapse;
     /*
     border: blue 1px solid;
     height: 80px;

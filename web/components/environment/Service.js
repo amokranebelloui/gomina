@@ -36,19 +36,20 @@ class Service extends React.Component<Props> {
         return ([
                 <ServiceStatus key={'status' + service.svc}
                                status={status.status} reason={status.reason} text={status.text}
-                               style={{opacity: opacity}} />,
-                <div className="service" style={{opacity: opacity}}>
-                    <span><b>{service.svc}</b>&nbsp;<i>{service.type}</i></span>&nbsp;
-                    <Badge backgroundColor="">{instances.length}</Badge><br/>
+                               style={{opacity: opacity}} />
+                ,
+                <td key={'detail' + service.svc} className="service" style={{opacity: opacity}}>
+                    <span><b style={{fontSize: '16px'}}>{service.svc}</b>&nbsp;<i>{service.type}</i></span>&nbsp;
+                    <Badge backgroundColor="">{instances.length}</Badge>
                     {service.mode}
                     |{service.systems}|
                     {components.map(component =>
-                        <BuildLink url={'navigate/' + (component||'')}/>
+                        <BuildLink key={component} url={'navigate/' + (component||'')}/>
                     )}
                     {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge>}
                     {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
                     {d.configs && <Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge>}
-                </div>
+                </td>
             ]
         )
     }

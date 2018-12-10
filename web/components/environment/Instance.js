@@ -1,6 +1,5 @@
 // @flow
 import * as React from "react";
-import {Status} from "./Status";
 import {Badge} from "../common/Badge";
 import {ConfCommited} from "../misc/ConfCommited";
 import {Expected} from "../misc/Expected";
@@ -13,7 +12,7 @@ import {Port} from "../misc/Port";
 import './Instance.css'
 import {Versions} from "./Versions";
 import {RedisOffset, RedisPersistence, RedisReadWrite} from "./RedisInstance";
-import {Link} from "react-router-dom";
+import Link from "react-router-dom/es/Link";
 
 type InstanceType = {
     id: string,
@@ -55,17 +54,14 @@ class Instance extends React.Component<Props> {
         const instance = this.props.instance;
         const opacity = this.props.highlighted ? 1 : 0.06;
         
-        return ([
-            <Status key={'status' + instance.id} status={instance.status} leader={instance.leader}
-                    participating={instance.participating} cluster={instance.cluster} style={{opacity: opacity}}/>
-            ,
-            <div key={instance.id} className='instance-badge'
+        return (
+            <td key={instance.id} className='instance'
                  style={{display: 'table-cell', opacity: opacity}}>
 
                 <div className="instance">
                     <div className="line">
                         <li>
-                            <Badge><b><Link to={"/envs/" + instance.env + "/" + instance.id}>{instance.name}</Link></b></Badge>
+                            <b style={{fontSize: '13px'}}><Link to={"/envs/" + instance.env + "/" + instance.id}>{instance.name}</Link></b>
                         </li>
                         <li>
                             <Badge>
@@ -124,8 +120,8 @@ class Instance extends React.Component<Props> {
                     </div>
                     }
                 </div>
-            </div>,
-        ])
+            </td>
+        )
     }
 }
 

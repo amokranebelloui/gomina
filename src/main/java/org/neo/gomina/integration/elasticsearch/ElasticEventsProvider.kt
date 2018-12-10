@@ -51,6 +51,7 @@ class ElasticEventsProvider : EventsProvider {
                 val map = it.sourceAsMap
                 try {
                     Event(
+                            "es-${it.id}",
                             timestamp = LocalDateTime.parse(map[config.timestamp] as String, pattern),
                             type = map[config.type] as String?,
                             message = map[config.message] as String?,

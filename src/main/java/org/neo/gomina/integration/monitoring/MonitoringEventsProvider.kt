@@ -18,6 +18,7 @@ class MonitoringEventsProvider : EventsProvider {
 
     @Inject private lateinit var monitoring: Monitoring
 
+    private var seq = 1
     private val events = mutableListOf<Event>()
 
     @Inject
@@ -27,13 +28,13 @@ class MonitoringEventsProvider : EventsProvider {
                 val newStatus = newValues.process.status
                 val oldStatus = oldValues.process.status
                 if (newStatus == ServerStatus.LIVE && oldStatus != ServerStatus.LIVE) {
-                    events.add(Event(LocalDateTime.now(Clock.systemUTC()), type = "runtime", message = "$instanceId started"))
+                    events.add(Event("${seq++}", LocalDateTime.now(Clock.systemUTC()), type = "runtime", message = "$instanceId started"))
                 }
                 if (newStatus == ServerStatus.DOWN && oldStatus == ServerStatus.LIVE) {
-                    events.add(Event(LocalDateTime.now(Clock.systemUTC()), type = "runtime", message = "$instanceId stopped"))
+                    events.add(Event("${seq++}", LocalDateTime.now(Clock.systemUTC()), type = "runtime", message = "$instanceId stopped"))
                 }
                 if (newStatus != ServerStatus.LIVE && oldStatus == ServerStatus.LIVE) {
-                    events.add(Event(LocalDateTime.now(Clock.systemUTC()), type = "runtime", message = "$instanceId status changed to $newStatus"))
+                    events.add(Event("${seq++}", LocalDateTime.now(Clock.systemUTC()), type = "runtime", message = "$instanceId status changed to $newStatus"))
                 }
             }
         }
@@ -44,7 +45,7 @@ class MonitoringEventsProvider : EventsProvider {
     override fun events(since: LocalDateTime): List<Event> {
         // FIXME Dummy Data
 
-        return (events + Event(LocalDate.now().atStartOfDay(), "info", "Greeting for today"))
+        return (events + Event("${seq++}", LocalDate.now().atStartOfDay(), "info", "Greeting for today"))
             .filter { it.timestamp > since }
     }
 

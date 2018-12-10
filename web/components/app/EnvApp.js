@@ -204,7 +204,7 @@ class EnvApp extends React.Component {
         const events = this.state.events;
         const eventsErrors = this.state.eventsErrors;
 
-        const iterable = instances.map(instance => instance.host);
+        const iterable = instances.map(instance => instance.host); // TODO Add deployHost too
         const hosts = [...new Set(iterable)].sort();
 
         console.info("envApp !render");

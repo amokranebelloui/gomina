@@ -16,10 +16,11 @@ class Events extends React.Component {
                 )}
                 <ul>
                     {this.props.events.map(event =>
-                        <li key={event.timestamp + event.message}>
+                        <li key={event.id}>
                             {new Date(event.timestamp).toLocaleString()}&nbsp;
                             {event.type}&nbsp;
-                            {event.message}
+                            {event.message}&nbsp;
+                            <span style={{ color: 'lightgray', ontStyle: 'italic'}}>{event.id}</span>
                         </li>
                     )}
                 </ul>
