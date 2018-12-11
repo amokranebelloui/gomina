@@ -2,14 +2,16 @@
 import * as React from "react";
 import {Badge} from "../common/Badge";
 import {BuildLink} from "../build/BuildLink";
-import {ServiceStatus} from "./ServiceStatus";
 import type {InstanceType} from "./Instance";
+import Link from "react-router-dom/es/Link";
+import {InstanceBadge} from "./InstanceBadge";
 
 type ServiceType = {
     svc: string,
     type?: ?string,
     mode?: ?string,
     activeCount?: ?number,
+    componentId?: ?string,
     systems?: ?Array<string>,
 }
 
@@ -31,20 +33,35 @@ class Service extends React.Component<Props> {
         const components = [...componentSet];
         //const status = computeStatus(service, instances);
         const d = computeServiceDetails(service, instances);
-        return (
-            <td key={'detail' + service.svc} colSpan="6" className="service">
-                <span><b style={{fontSize: '16px'}}>{service.svc}</b>&nbsp;<i>{service.type}</i></span>&nbsp;
+        return ([
+            <td key={'detail' + service.svc} className="service" valign="middle">
+                <span>
+                    <b style={{fontSize: '16px'}}>{service.svc}</b>&nbsp;
+                    {service.componentId &&
+                        <Link to={'/component/' + service.componentId}>
+                            <span>&rarr;</span>
+                        </Link>
+                    }
+                    &nbsp;
+                    <i>{service.type}</i>
+                </span>&nbsp;
                 <Badge backgroundColor="">{instances.length}</Badge>
-                {service.mode}
-                |{service.systems}|
+                <span>{service.mode}</span>
+                <span>|{service.systems}|</span>
                 {components.map(component =>
                     <BuildLink key={component} url={'navigate/' + (component||'')}/>
                 )}
                 {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge>}
                 {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
                 {d.configs && <Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge>}
+
+                <div className="items" style={{display: 'table-cell', float: "right", height: 'auto'}}>
+                    {instances.map( i =>
+                        <InstanceBadge instance={i} />
+                    )}
+                </div>
             </td>
-        )
+        ])
     }
 }
 

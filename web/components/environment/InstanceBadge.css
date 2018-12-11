@@ -1,0 +1,23 @@
+
+.instance-badge {
+    padding: 2px 3px;
+    background-color: #ededed;
+    border-radius: 5px;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.instance-badge > span {
+    box-sizing: padding-box;
+    padding: 0px 2px;
+    border-left: 0px;
+    border-right: 1px solid gray;
+}
+
+.instance-badge > span:first-child {
+    border-right: 0px;
+}
+
+.instance-badge > span:last-child {
+    border-right: 0px;
+}

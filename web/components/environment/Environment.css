@@ -67,6 +67,7 @@
     display: table-cell;
     padding: 1px 3px;
     vertical-align: middle;
+    border-bottom: 1px solid gray;
 }
 
 .env-row .instance {
