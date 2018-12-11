@@ -260,7 +260,7 @@ class ComponentApp extends React.Component {
                         <h3>Other Components</h3>
                         <div className="items">
                             {this.state.associated.map(componentRef =>
-                                <Link to={"/component/" + componentRef.id}>{componentRef.label}</Link>
+                                <Link to={"/component/" + componentRef.id}>{componentRef.label || componentRef.id}</Link>
                             )}
                         </div>
                         <hr/>
