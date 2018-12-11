@@ -44,7 +44,8 @@ type StatusType = {
     leader: boolean,
     participating: boolean,
     cluster: boolean,
-    style?: ?any
+    style?: ?any,
+    onClick?: (e: SyntheticEvent<>) => void
 };
 
 class Status extends React.Component<StatusType> {
@@ -99,16 +100,17 @@ class Status extends React.Component<StatusType> {
                 }
             }
         }
+        const style = Object.assign(this.props.style || {}, {
+            backgroundColor: backgroundColor,
+            color: 'white',
+            cursor: 'pointer'
+        });
         return (
-            <td className='status' style={Object.assign(this.props.style || {}, {
-                backgroundColor: backgroundColor,
-                color: 'white',
-                cursor: 'pointer'
-            })}>
-                <div style={{display: 'table', width: '100%', boxSizing: 'border-box', padding: '1px'}}>
+            <td className='status' style={style} onClick={e => this.props.onClick && this.props.onClick(e)}>
+                <div style={{display: 'table', width: '100%', boxSizing: 'border-box', padding: '0px 2px'}}>
 
                     <div style={{display: 'table-row'}}>
-                        <div style={{display: 'table-cell', textAlign: 'left', fontSize: '15px'}}><b>{status}</b></div>
+                        <div style={{display: 'table-cell', textAlign: 'left', fontSize: '12px'}}><b>{status}</b></div>
                     
                         <div style={{display: 'table-cell', textAlign: 'right'}}>
                             <span title={role.title}

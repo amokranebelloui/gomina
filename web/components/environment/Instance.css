@@ -3,29 +3,29 @@
 
 }
 
-.instance > .line {
+.instance > .section {
     /*
     margin-top: 0px;
     margin-bottom: 1px;
     padding: 0px;
     */
-    /*display: inline-block;*/
-    border-collapse: collapse;
+    display: inline-block;
+    /*border-collapse: collapse;
     /*
     border: blue 1px solid;
     height: 80px;
     */
 }
 
-.instance > .line:first-child {
+.instance > .section:first-child {
     /*margin-top: 0px;*/
 }
 
-.instance > .line:last-child {
+.instance > .section:last-child {
     margin-bottom: 0px;
 }
 
-.instance > .line > li {
+.instance > .section > li {
     padding-left: 1px;
     padding-right: 1px;
     display: table-cell;
@@ -35,10 +35,10 @@
     */
 }
 
-.instance > .line > li:first-child {
+.instance > .section > li:first-child {
     padding-left: 0px;
 }
 
-.instance > .line > li:last-child {
+.instance > .section > li:last-child {
     padding-right: 0px;
 }

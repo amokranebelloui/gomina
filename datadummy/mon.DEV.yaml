@@ -2,7 +2,7 @@
 - id: 12
   env: 'DEV'
   name: 'fixinfid1'
-  type: 'app'
+  TYPE: 'app'
   service: 'fixinfid'
   folder: '/home/svc/uat-fixinfid'
   PID: '45643'

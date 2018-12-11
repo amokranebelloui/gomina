@@ -21,7 +21,6 @@ type ServiceDetailType = {
 type Props = {
     service: ServiceType,
     instances?: ?Array<InstanceType>,
-    highlightFunction?: ?(InstanceType => boolean),
 }
 
 class Service extends React.Component<Props> {
@@ -30,32 +29,21 @@ class Service extends React.Component<Props> {
         const instances = this.props.instances ? this.props.instances : [];
         const componentSet = new Set(instances.map(instance => instance.componentId).filter(p => p != null));
         const components = [...componentSet];
-        const status = computeStatus(service, instances);
+        //const status = computeStatus(service, instances);
         const d = computeServiceDetails(service, instances);
-        const highlightFunction = this.props.highlightFunction || (instance => true);
-        var serviceHighlighted = false;
-        {instances.map(instance =>
-            serviceHighlighted = serviceHighlighted || highlightFunction(instance)
-        )}
-        const opacity = serviceHighlighted ? 1 : 0.1;
-        return ([
-                <ServiceStatus key={'status' + service.svc}
-                               status={status.status} reason={status.reason} text={status.text}
-                               style={{opacity: opacity}} />
-                ,
-                <td key={'detail' + service.svc} colSpan="6" className="service" style={{opacity: opacity}}>
-                    <span><b style={{fontSize: '16px'}}>{service.svc}</b>&nbsp;<i>{service.type}</i></span>&nbsp;
-                    <Badge backgroundColor="">{instances.length}</Badge>
-                    {service.mode}
-                    |{service.systems}|
-                    {components.map(component =>
-                        <BuildLink key={component} url={'navigate/' + (component||'')}/>
-                    )}
-                    {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge>}
-                    {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
-                    {d.configs && <Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge>}
-                </td>
-            ]
+        return (
+            <td key={'detail' + service.svc} colSpan="6" className="service">
+                <span><b style={{fontSize: '16px'}}>{service.svc}</b>&nbsp;<i>{service.type}</i></span>&nbsp;
+                <Badge backgroundColor="">{instances.length}</Badge>
+                {service.mode}
+                |{service.systems}|
+                {components.map(component =>
+                    <BuildLink key={component} url={'navigate/' + (component||'')}/>
+                )}
+                {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge>}
+                {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
+                {d.configs && <Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge>}
+            </td>
         )
     }
 }
@@ -166,5 +154,5 @@ function computeServiceDetails(service: ServiceType, instances: Array<InstanceTy
     }
 }
 
-export { Service }
+export { Service, computeStatus }
 export type { ServiceType, ServiceDetailType }

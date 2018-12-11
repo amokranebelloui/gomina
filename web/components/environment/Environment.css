@@ -1,21 +1,21 @@
 
 .env-table {
     display: table;
-    border: 1px solid red;
+    /*border: 1px solid red;*/
     border-collapse:separate;
     border-spacing: 1px;
     box-sizing: border-box;
     width: 100%;
 }
 
-.env-table > .env-row {
+.env-table .env-row {
     display: table-row;
-    border: 1px solid red;
+    /*border-bottom: 1px solid blue;
     /*height: 35px;*/
 }
 
-.env-table > .env-row > td {
-    border: 1px solid green;
+.env-table .env-row td {
+
 }
 
 /*
@@ -44,7 +44,8 @@
 
 .status {
     display: table-cell;
-    width: 75px;
+    width: 95px;
+    min-width: 95px;
     /*
     position: absolute;
     top: 0;
@@ -73,6 +74,7 @@
     padding: 1px 2px;
     vertical-align: middle;
     background: #f0f0f0;
+    border-bottom: 1px solid gray;
 }
 
 /*

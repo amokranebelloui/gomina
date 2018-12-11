@@ -2,7 +2,7 @@
 - id: -1
   env: 'PROD'
   name: 'redis1'
-  type: 'redis'
+  TYPE: 'redis'
   service: 'redis'
   folder: '/home/svc/prod-redis'
   PID: '54637'
@@ -36,7 +36,7 @@
 - id: -2
   env: 'PROD'
   name: 'redis2'
-  type: 'redis'
+  TYPE: 'redis'
   service: 'redis'
   PID: '13467'
   HOST: '10.143.29.43'
@@ -70,7 +70,7 @@
 - id: -3
   env: 'PROD'
   name: 'redis3'
-  type: 'redis'
+  TYPE: 'redis'
   service: 'redis'
   HOST: '10.143.29.42'
   folder: '/home/svc/prod-redis'
@@ -103,7 +103,7 @@
 - id: 1
   env: 'PROD'
   name: 'kernel'
-  type: 'app'
+  TYPE: 'app'
   service: 'kernel'
   PID: '65487'
   HOST: '10.143.29.42'
@@ -123,7 +123,7 @@
 - id: 2
   env: 'PROD'
   name: 'kernel2'
-  type: 'app'
+  TYPE: 'app'
   service: 'kernel'
   PID: '88373'
   HOST: '10.143.29.41'
@@ -143,7 +143,7 @@
 - id: 22
   env: 'PROD'
   name: 'kernel3'
-  type: 'app'
+  TYPE: 'app'
   service: 'kernel'
   PID: '98477'
   HOST: '10.143.29.41'
@@ -163,7 +163,7 @@
 - id: 3
   env: 'PROD'
   name: 'basket'
-  type: 'app'
+  TYPE: 'app'
   service: 'basket'
   PID: '48766'
   HOST: '10.143.3.58'
@@ -180,7 +180,7 @@
 - id: 4
   env: 'PROD'
   name: 'basket2'
-  type: 'app'
+  TYPE: 'app'
   service: 'basket'
   PID: '11098'
   HOST: '10.143.3.56'
@@ -196,7 +196,7 @@
 - id: 5
   env: 'PROD'
   name: 'order1'
-  type: 'app'
+  TYPE: 'app'
   service: 'order'
   HOST: '10.143.3.58'
   folder: '/home/svc/prod-order'
@@ -211,7 +211,7 @@
 - id: 6
   env: 'PROD'
   name: 'order2'
-  type: 'app'
+  TYPE: 'app'
   service: 'order'
   PID: '18000'
   HOST: '10.143.3.56'
@@ -229,7 +229,7 @@
 - id: 7
   env: 'PROD'
   name: 'unexpected2'
-  type: 'app'
+  TYPE: 'app'
   service: 'order'
   PID: '33070'
   HOST: '10.0.0.99'

@@ -4,7 +4,6 @@ import {Badge} from "../common/Badge";
 import {ConfCommited} from "../misc/ConfCommited";
 import {Expected} from "../misc/Expected";
 import {BuildLink} from "../build/BuildLink";
-import {CopyButton} from "../common/CopyButton";
 import {Host} from "../misc/Host";
 import {Leader} from "../misc/Leader";
 import {RedisLink} from "../misc/RedisLink";
@@ -45,68 +44,60 @@ type InstanceType = {
 }
 
 type Props = {
-    instance: InstanceType,
-    highlighted: boolean
+    instance: InstanceType
 }
 
 class Instance extends React.Component<Props> {
     render() {
         const instance = this.props.instance;
-        const opacity = this.props.highlighted ? 1 : 0.06;
-        
-        return ([
-            <td className="line">
-                <li>
-                    <b style={{fontSize: '13px'}}><Link to={"/envs/" + instance.env + "/" + instance.id}>{instance.name}</Link></b>
-                </li>
-                <li>
-                    <Badge>
-                        {instance.pid && <span>{instance.pid}@</span>}
-                        <Host host={instance.host} expected={instance.deployHost}/>
-                    </Badge>
-                </li>
-                <li><Versions versions={instance.versions} /></li>
-                <li><Expected expected={!instance.unexpected} /></li>
-            </td>,
-            <td className="line">
-                {instance.deployFolder && <li><Badge><span style={{userSelect: 'all', fontSize: 10}}>{instance.deployFolder}</span></Badge></li>}
-                {instance.deployFolder && <li><CopyButton value={instance.deployFolder}/></li>}
+        return (
+            <td className="instance">
+                <div className="section">
+                    <li>
+                        <b style={{fontSize: '12px'}}>{instance.name}</b>
+                    </li>
+                    <li>
+                        <Badge>
+                            {instance.pid && <span>{instance.pid}@</span>}
+                            <Host host={instance.host} expected={instance.deployHost}/>
+                        </Badge>
+                    </li>
+                    <li><Versions versions={instance.versions} /></li>
+                    <li><Expected expected={!instance.unexpected} /></li>
+                </div>
+                <div className="section">
+                    {instance.deployFolder && <li><Badge><span style={{display: 'block', userSelect: 'all', fontSize: 10}}>{instance.deployFolder}</span></Badge></li>}
 
-                <li><Badge title={'Conf SVN revision'} backgroundColor='red' color='white'>{instance.confRevision}</Badge></li>
-                <li><ConfCommited commited={instance.confCommited}/></li>
-                <li><BuildLink url={instance.componentId}/></li> {/* // TODO Build URL */}
-            </td>,
+                    <li><Badge title={'Conf SVN revision'} backgroundColor='red' color='white'>{instance.confRevision}</Badge></li>
+                    <li><ConfCommited commited={instance.confCommited}/></li>
+                    <li><BuildLink url={instance.componentId}/></li> {/* // TODO Build URL */}
+                </div>
 
-            <td className="line">
-                {instance.type == 'app' &&
-                    <b>@App</b>
-                }
-                <li><InstanceProp property="jvm.jmx.port" properties={instance.properties}/></li>
-                <li><InstanceProp property="xxx.bux.version" properties={instance.properties}/></li>
-                <li><InstanceProp property="xxx.core.version" properties={instance.properties}/></li>
-                <li><InstanceProp property="quickfix.persistence" properties={instance.properties}/></li>
-            </td>,
+                <div className="section">
+                    {instance.type == 'app' && [
+                        <li><InstanceProp property="jvm.jmx.port" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="xxx.bux.version" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="xxx.core.version" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="quickfix.persistence" properties={instance.properties}/></li>
+                    ]}
+                    {instance.type == 'redis' && [
+                        <li><InstanceProp property="redis.port" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="redis.role" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="redis.slave.count" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="redis.rw" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="redis.persistence.mode" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="redis.offset" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="redis.client.count" properties={instance.properties}/></li>,
 
-            <td className="line">
-                {instance.type == 'redis' &&
-                    <span>@Redis</span>
-                }
-                <li><InstanceProp property="redis.port" properties={instance.properties}/></li>
-                <li><InstanceProp property="redis.role" properties={instance.properties}/></li>
-                <li><InstanceProp property="redis.slave.count" properties={instance.properties}/></li>
-                <li><InstanceProp property="redis.rw" properties={instance.properties}/></li>
-                <li><InstanceProp property="redis.persistence.mode" properties={instance.properties}/></li>
-                <li><InstanceProp property="redis.offset" properties={instance.properties}/></li>
-                <li><InstanceProp property="redis.client.count" properties={instance.properties}/></li>
-
-                <li><InstanceProp property="redis.master" properties={instance.properties}/></li>
-                <li><InstanceProp property="redis.master.link" properties={instance.properties}/></li>
-                <li><InstanceProp property="redis.master.host" properties={instance.properties}/></li>
-                <li><InstanceProp property="redis.master.port" properties={instance.properties}/></li>
-                <li><InstanceProp property="redis.master.offset.diff" properties={instance.properties}/></li>
-
+                        <li><InstanceProp property="redis.master" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="redis.master.link" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="redis.master.host" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="redis.master.port" properties={instance.properties}/></li>,
+                        <li><InstanceProp property="redis.master.offset.diff" properties={instance.properties}/></li>,
+                    ]}
+                </div>
             </td>
-        ])
+        )
     }
 }
 

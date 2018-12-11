@@ -3,7 +3,7 @@
 - id: uat1
   env: 'UAT'
   name: 'viewkernel1'
-  type: 'app'
+  TYPE: 'app'
   service: 'viewkernel'
   HOST: '10.2.29.42'
   folder: '/home/svc/uat-viewkernel'
@@ -15,7 +15,7 @@
 - id: uat2
   env: 'UAT'
   name: 'viewkernel2'
-  type: 'app'
+  TYPE: 'app'
   service: 'viewkernel'
   HOST: '10.2.29.43'
   folder: '/home/svc/uat-viewkernel'
@@ -27,7 +27,7 @@
 - id: 7
   env: 'UAT'
   name: 'kernel'
-  type: 'app'
+  TYPE: 'app'
   service: 'kernel'
   HOST: '10.2.29.42'
   folder: '/home/svc/uat-kernel'
@@ -42,7 +42,7 @@
 - id: 8
   env: 'UAT'
   name: 'kernel2'
-  type: 'app'
+  TYPE: 'app'
   service: 'kernel'
   HOST: '10.2.29.41'
   folder: '/home/svc/uat-kernel'
@@ -57,7 +57,7 @@
 - id: 9
   env: 'UAT'
   name: 'basket'
-  type: 'app'
+  TYPE: 'app'
   service: 'basket'
   HOST: '10.2.3.58'
   folder: '/home/svc/uat-basket'
@@ -72,7 +72,7 @@
 - id: 10
   env: 'UAT'
   name: 'basket2'
-  type: 'app'
+  TYPE: 'app'
   service: 'basket'
   HOST: '10.2.3.56'
   folder: '/home/svc/uat-basket'
@@ -87,7 +87,7 @@
 - id: 11
   env: 'UAT'
   name: 'fixintbx1'
-  type: 'app'
+  TYPE: 'app'
   service: 'fixintbx'
   HOST: '10.2.3.58'
   folder: '/home/svc/uat-fixintbx'
