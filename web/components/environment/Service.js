@@ -5,6 +5,7 @@ import {BuildLink} from "../build/BuildLink";
 import type {InstanceType} from "./Instance";
 import Link from "react-router-dom/es/Link";
 import {InstanceBadge} from "./InstanceBadge";
+import {sortInstances} from "./instances-utils";
 
 type ServiceType = {
     svc: string,
@@ -28,7 +29,7 @@ type Props = {
 class Service extends React.Component<Props> {
     render() {
         const service = this.props.service;
-        const instances = this.props.instances ? this.props.instances : [];
+        const instances = this.props.instances ? sortInstances(this.props.instances) : [];
         const componentSet = new Set(instances.map(instance => instance.componentId).filter(p => p != null));
         const components = [...componentSet];
         //const status = computeStatus(service, instances);

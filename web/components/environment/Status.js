@@ -117,4 +117,4 @@ function statusRole(status, leader, participating, cluster) {
     return role;
 }
 
-export { StatusWrapper, Status, statusColor }
+export { StatusWrapper, Status, isRunning, statusColor }
