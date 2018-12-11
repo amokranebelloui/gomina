@@ -1,6 +1,8 @@
 package org.neo.gomina.api.events
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.vertx.core.AsyncResult
+import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
@@ -71,26 +73,30 @@ class EventsApi {
     
     private fun eventsForEnv(ctx: RoutingContext) {
         try {
-            val envId = ctx.request().getParam("envId")
-            logger.info("Events for $envId")
-            val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
+            vertx.executeBlocking({future: Future<Pair<List<EventDetail>, List<String>>> ->
+                val envId = ctx.request().getParam("envId")
+                logger.info("Events for $envId")
+                val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
 
-            val errors = mutableListOf<String>()
-            val events = eventProviders()
-                    .flatMap {
-                        try {
-                            it.events(since)
-                        } catch (e: Exception) {
-                            errors.add(e.message ?: "Unknown error")
-                            emptyList<Event>()
+                val errors = mutableListOf<String>()
+                val events = eventProviders()
+                        .flatMap {
+                            try {
+                                it.events(since)
+                            } catch (e: Exception) {
+                                errors.add(e.message ?: "Unknown error")
+                                emptyList<Event>()
+                            }
                         }
-                    }
-                    .sortedByDescending { it.timestamp }
-                    .map { it.toEventDetail() }
-
-            ctx.response()
-                    .putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(EventList(events, errors)))
+                        .sortedByDescending { it.timestamp }
+                        .map { it.toEventDetail() }
+                future.complete(events to errors)
+            }, false)
+            {res: AsyncResult<Pair<List<EventDetail>, List<String>>> ->
+                ctx.response()
+                        .putHeader("content-type", "text/javascript")
+                        .end(mapper.writeValueAsString(EventList(res.result().first, res.result().second)))
+            }
         }
         catch (e: Exception) {
             logger.error("Cannot get instances", e)
