@@ -28,4 +28,6 @@ class WorkListFile : WorkList, AbstractFileRepo() {
 
     override fun getAll(): List<Work> = read(file)
 
+    override fun get(workId: String): Work? = read(file).find { it -> it.id == workId }
+
 }

@@ -4,6 +4,7 @@ import React from "react";
 import {Well} from "../common/Well";
 import Link from "react-router-dom/es/Link";
 import {Badge} from "../common/Badge";
+import {CommitLog} from "../commitlog/CommitLog";
 
 class WorkApp extends React.Component {
 
@@ -11,16 +12,18 @@ class WorkApp extends React.Component {
         super(props);
         this.state = {
             workList: [],
+            workDetail: [],
             workId: this.props.match.params.id,
         };
         this.retrieveWorkList = this.retrieveWorkList.bind(this);
+        this.retrieveWorkDetail = this.retrieveWorkDetail.bind(this);
         console.info("workApp !constructor ");
     }
 
     retrieveWorkList() {
         console.log("workApp Retr Hosts ... ");
         const thisComponent = this;
-        axios.get('/data/work')
+        axios.get('/data/work/list')
             .then(response => {
                 console.log("workApp data workList", response.data);
                 thisComponent.setState({workList: response.data});
@@ -30,10 +33,24 @@ class WorkApp extends React.Component {
                 thisComponent.setState({workList: []});
             });
     }
+    retrieveWorkDetail(workId) {
+        console.log("workApp Retr Hosts ... ");
+        const thisComponent = this;
+        axios.get('/data/work/detail' + (workId ? '/' + workId : ''))
+            .then(response => {
+                console.log("workApp data workDetail", response.data);
+                thisComponent.setState({workDetail: response.data});
+            })
+            .catch(function (error) {
+                console.log("workApp error workDetail", error);
+                thisComponent.setState({workDetail: null});
+            });
+    }
 
     componentDidMount() {
         console.info("workApp !did mount ");
-        this.retrieveWorkList()
+        this.retrieveWorkList();
+        this.retrieveWorkDetail(this.props.workId);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -41,18 +58,44 @@ class WorkApp extends React.Component {
         console.info("workApp !did willRecProps ", newWorkId, nextProps);
         this.setState({workId: newWorkId});
         if (this.props.match.params.id != newWorkId && newWorkId) {
-            // do something with newWorkId
+            this.retrieveWorkDetail(newWorkId)
         }
     }
     
     render()  {
         const workList = this.state.workList || [];
-        const workId = this.state.workId;
-        const work = workList.find(w => w.id == workId);
+        const workDetail = this.state.workDetail;
+        console.info("workDetail", workDetail);
         return (
             <AppLayout title="Work List">
                 <PrimarySecondaryLayout>
                     <div>
+                        {workDetail && workDetail.work ?
+                            <div>
+                                {workDetail.work &&
+                                    <Work key={workDetail.work.id} work={workDetail.work}></Work>
+                                }
+                                {workDetail.details && workDetail.details.map(d =>
+                                    <div>
+                                        <h3>{d.componentId}</h3>
+                                        <CommitLog commits={d.commits} />
+                                    </div>
+                                )}
+                            </div>
+                            :
+                            <div>
+                                Select a Work to see details<br/>
+                                <li>Components involved</li>
+                                <li>Commit logs</li>
+                                <li>etc...</li>
+                            </div>
+                        }
+                    </div>
+                    <div>
+                        <Well block>
+                            Filtering
+                        </Well>
+
                         <table width="100%">
                             <tr>
                                 <td><b>id</b></td>
@@ -71,10 +114,10 @@ class WorkApp extends React.Component {
                                     <td>{work.label}</td>
                                     <td>{work.type}</td>
                                     <td>
-                                    {work.jiraUrl
-                                        ? (<a href={work.jiraUrl} target="_blank">{work.jira}</a>)
-                                        : (work.jira)
-                                    }
+                                        {work.jiraUrl
+                                            ? (<a href={work.jiraUrl} target="_blank">{work.jira}</a>)
+                                            : (work.jira)
+                                        }
                                     </td>
                                     <td>{work.status}</td>
                                     <td>
@@ -90,14 +133,6 @@ class WorkApp extends React.Component {
                                 </tr>
                             )}
                         </table>
-                    </div>
-                    <div>
-                        <Well block>
-                            <h3>Detail</h3>
-                            {work &&
-                                <Work key={work.id} work={work}></Work>
-                            }
-                        </Well>
                     </div>
                 </PrimarySecondaryLayout>
             </AppLayout>

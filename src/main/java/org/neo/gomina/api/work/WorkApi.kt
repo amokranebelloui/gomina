@@ -6,15 +6,35 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.api.common.UserRef
+import org.neo.gomina.api.common.toRef
+import org.neo.gomina.integration.scm.ScmService
+import org.neo.gomina.model.component.ComponentRepo
+import org.neo.gomina.model.runtime.Topology
+import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.work.Work
 import org.neo.gomina.model.work.WorkList
+import java.util.*
 import javax.inject.Inject
 
 data class WorkDetail(val id: String, val label: String, val type: String?,
               val jira: String?, val jiraUrl: String?,
               val status: String,
-              val people: List<String>, val components: List<String> = emptyList())
+              val people: List<String>, // TODO User Ref
+              val components: List<String> = emptyList())
 
+data class WorkManifestDetail(val work: WorkDetail?,
+                              val details: List<ComponentWorkDetail> = emptyList())
+
+data class ComponentWorkDetail(val componentId: String, val commits: List<CommitDetail>)
+
+data class CommitDetail(
+        val revision: String?,
+        var date: Date? = null,
+        var author: UserRef? = null,
+        var message: String? = null,
+
+        var version: String? = null)
 
 class WorkApi {
 
@@ -28,6 +48,11 @@ class WorkApi {
     @Inject lateinit var workList: WorkList
     @Inject @Named("jira.url") lateinit var jiraUrl: String
 
+    @Inject private lateinit var componentRepo: ComponentRepo
+    @Inject private lateinit var scmService: ScmService
+    @Inject private lateinit var topology: Topology
+    @Inject private lateinit var users: Users
+
     private val mapper = ObjectMapper()
 
     @Inject
@@ -35,19 +60,58 @@ class WorkApi {
         this.vertx = vertx
         this.router = Router.router(vertx)
 
-        router.get("/").handler(this::workList)
+        router.get("/list").handler(this::workList)
+        router.get("/detail/:workId").handler(this::workDetail)
+        router.get("/detail").handler(this::workDetail)
     }
 
     private fun workList(ctx: RoutingContext) {
         try {
             logger.info("Get Work List")
-            val hosts = workList.getAll().map { it.map(jiraUrl) }
+            val workList = workList.getAll().map { it.map(jiraUrl) }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(hosts))
+                    .end(mapper.writeValueAsString(workList))
         }
         catch (e: Exception) {
-            logger.error("Cannot get hosts", e)
+            logger.error("Cannot get Work List", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun workDetail(ctx: RoutingContext) {
+        val workId = ctx.request().getParam("workId")
+        try {
+            logger.info("Get Work Detail")
+
+            val work = workId?.let { workList.get(it) }
+            val detail = work?.components
+                    ?.mapNotNull { componentRepo.get(it) }
+                    ?.map { component ->
+                        val commits = component.scm?.let {
+                            scmService.getTrunk(it).map { commit ->
+                                CommitDetail(
+                                        revision = commit.revision,
+                                        date = commit.date,
+                                        author = commit.author?.let { users.findForAccount(it) }?.toRef()
+                                                ?: commit.author?.let { UserRef(shortName = commit.author) },
+                                        message = commit.message,
+                                        version = commit.release ?: commit.newVersion
+                                )
+                            }
+                        }
+                        ?: emptyList()
+                        ComponentWorkDetail(component.id, commits)
+                    }
+                    ?: emptyList()
+            val workDetail = work?.map(jiraUrl)
+            val manifest = WorkManifestDetail(workDetail, detail)
+            ctx.response()
+                    .putHeader("content-type", "text/javascript")
+                    .end(mapper.writeValueAsString(manifest))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get Work Detail", e)
             ctx.fail(500)
         }
     }

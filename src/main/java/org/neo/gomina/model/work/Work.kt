@@ -13,4 +13,5 @@ data class Work(val id: String, val label: String, val type: String?, val jira: 
 
 interface WorkList {
     fun getAll(): List<Work>
+    fun get(workId: String): Work?
 }
