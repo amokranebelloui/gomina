@@ -50,6 +50,7 @@ class SshOnDemandConnector {
                 hostMap.put(host, instanceMap)
             }
         }
+        logger.info("SSH Analysis for ${env.id} done")
         return hostMap
     }
 

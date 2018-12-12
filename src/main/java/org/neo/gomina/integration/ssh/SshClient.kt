@@ -10,7 +10,7 @@ import java.io.ByteArrayOutputStream
 private val logger = LogManager.getLogger(Session::class.java)
 
 fun Session.sudo(user: String?, cmd: String): String {
-    val sudoPrefix = if (user?.isNotBlank() == true) "sudo -u " + user else ""
+    val sudoPrefix = if (user?.isNotBlank() == true) "sudo -u $user " else ""
     return execute(sudoPrefix + cmd)
 }
 
