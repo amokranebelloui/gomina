@@ -172,7 +172,7 @@ class CustomMonitoringMapper : MonitoringMapper {
             RuntimeInfo(
                     instanceId = instanceId,
                     type = type,
-                    service = indicators["service"],
+                    service = indicators["SERVICE"],
                     lastTime = LocalDateTime.now(Clock.systemUTC()),
                     delayed = false,
                     process = ProcessInfo(
