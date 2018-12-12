@@ -71,12 +71,13 @@ class Topology {
         val definition = inv
                 .associateBy { (env, svc, instance) -> env.id to instance.id }
                 .mapValues { (_, triple) -> triple.second to triple.third }
-        val monitoring = inventory.getEnvironments()
+        val monitoredInstances = inventory.getEnvironments()
                 .flatMap { env -> monitoring.instancesFor(env.id).map { env to it } }
+        val monitoring = monitoredInstances
                 .filter { (env, mon) -> mon.service?.let { services[it] }?.componentId == componentId }
                 .associateBy { (env, mon) -> env.id to mon.instanceId }
                 .mapValues { (_, pair) -> pair.second }
-        
+
         return merge(definition, monitoring)
                 .map { (id, instance, indicators) ->
                     val svc = instance?.first?.svc ?: indicators?.service ?: "x"

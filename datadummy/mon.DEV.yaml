@@ -3,7 +3,7 @@
   env: 'DEV'
   name: 'fixinfid1'
   TYPE: 'app'
-  service: 'fixinfid'
+  SERVICE: 'fixinfid'
   folder: '/home/svc/uat-fixinfid'
   PID: '45643'
   HOST: '10.2.3.56'
