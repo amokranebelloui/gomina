@@ -15,7 +15,7 @@ data class Commit (
     var newVersion: String? = null // version: if the commit is a release
 ) {
     fun match(version: Version): Boolean {
-        return this.revision == version.revision ||
+        return this.release == version.version && this.revision == version.revision ||
                 this.release?.let { Version.isStable(it) && this.release == version.version } == true
     }
 }

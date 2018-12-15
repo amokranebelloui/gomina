@@ -212,7 +212,11 @@ class InstancesApi {
                 future.complete()
             }, false)
             {res: AsyncResult<Void> ->
-                ctx.response().putHeader("content-type", "text/javascript").end("reload SSH done!")
+                when {
+                    res.succeeded() -> ctx.response().putHeader("content-type", "text/javascript").end("reload SSH done!")
+                    res.failed() -> ctx.fail(500)
+                }
+
             }
         }
         catch (e: Exception) {

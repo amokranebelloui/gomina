@@ -207,8 +207,8 @@ class ComponentsApi {
                 unresolved.add(instance)
             }
             else {
-                commitR?.let { it.second.add(instance) }
-                commitD?.let { it.third.add(instance) }
+                if (commitR != null) commitR.second.add(instance)
+                else commitD?.third?.add(instance)
             }
         }
         return CommitLogDetail(

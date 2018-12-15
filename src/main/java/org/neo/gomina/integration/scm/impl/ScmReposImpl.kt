@@ -3,10 +3,6 @@ package org.neo.gomina.integration.scm.impl
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.MavenUtils
-import org.neo.gomina.model.scm.Commit
-import org.neo.gomina.model.scm.ScmClient
-import org.neo.gomina.model.scm.ScmDetails
-import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.integration.scm.dummy.DummyScmClient
 import org.neo.gomina.integration.scm.git.GitClient
 import org.neo.gomina.integration.scm.metadata.ProjectMetadataMapper
@@ -14,6 +10,10 @@ import org.neo.gomina.integration.scm.none.NoneScmClient
 import org.neo.gomina.integration.scm.svn.TmateSoftSvnClient
 import org.neo.gomina.integration.scm.versions.MavenReleaseFlagger
 import org.neo.gomina.model.component.Scm
+import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.ScmClient
+import org.neo.gomina.model.scm.ScmDetails
+import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.model.security.Passwords
 import java.util.*
 import javax.inject.Inject
@@ -104,12 +104,16 @@ class ScmReposImpl : ScmRepos {
 
     override fun getTrunk(scm: Scm): List<Commit> {
         val scmClient = this.getClient(scm)
+        val mavenReleaseFlagger = MavenReleaseFlagger(scmClient) // FIXME Detect build system
         return scmClient.getLog(scmClient.getTrunk(), "0", -1)
+                .map { mavenReleaseFlagger.flag(it) }
     }
 
     override fun getBranch(scm: Scm, branchId: String): List<Commit> {
         val scmClient = this.getClient(scm)
+        val mavenReleaseFlagger = MavenReleaseFlagger(scmClient) // FIXME Detect build system
         return scmClient.getLog(branchId, "0", -1)
+                .map { mavenReleaseFlagger.flag(it) }
     }
 
     override fun getDocument(scm: Scm, docId: String): String? {

@@ -67,10 +67,10 @@ class SshOnDemandConnector {
     private fun processHost(host: String, function: (session: Session, sudo: String?) -> Unit) {
         val config = hosts.getHost(host)
         if (config != null) {
-            val username = config.username
-            val password = passwords.getRealPassword(config.passwordAlias!!)
-            val sudo = config.sudo
             try {
+                val username = config.username
+                val password = passwords.getRealPassword(config.passwordAlias!!)
+                val sudo = config.sudo
                 logger.info("Analyze '$host' using $username/***${StringUtils.length(password)} $sudo")
                 val auth = SshAuth(username, password, sudo)
                 val session = sshClient.getSession(host, auth)
