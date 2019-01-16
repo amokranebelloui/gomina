@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 typealias HostAnalysisFunction<T> = (session: Session, sudo: String?) -> T
 
-typealias InstanceAnalysisFunction<T> = (instance: Instance, session: Session, sudo: String?) -> T
+typealias InstanceAnalysisFunction<T> = (session: Session, sudo: String?, instances: List<Instance>) -> Map<String, T>
 
 fun <T> Map<String, Map<String, T>>.getFor(host: String?, folder: String?): T? {
     var result: T? = null
@@ -41,13 +41,9 @@ class SshOnDemandConnector {
         for ((host, instances) in instancesByHost) {
             processHost(host) { session, sudo ->
                 logger.info("${instances.size} instances to analyze")
-                val instanceMap = mutableMapOf<String, T>()
-                for (instance in instances) {
-                    val t = analysisFunction(instance, session, sudo)
-                    instanceMap.put(instance.folder!!, t)
-                    logger.info("Analyzed $host ${instance.folder} $t")
-                }
-                hostMap.put(host, instanceMap)
+                val instanceMap = analysisFunction(session, sudo, instances)
+                logger.info("Analyzed ${instances.size} apps on $host")
+                hostMap[host] = instanceMap
             }
         }
         logger.info("SSH Analysis for ${env.id} done")
@@ -68,12 +64,18 @@ class SshOnDemandConnector {
         val config = hosts.getHost(host)
         if (config != null) {
             try {
-                val username = config.username
-                val password = passwords.getRealPassword(config.passwordAlias!!)
                 val sudo = config.sudo
-                logger.info("Analyze '$host' using $username/***${StringUtils.length(password)} $sudo")
-                val auth = SshAuth(username, password, sudo)
-                val session = sshClient.getSession(host, auth)
+                val password = passwords.getRealPassword(config.passwordAlias!!)
+                val session = if (config.proxyHost != null) {
+                    val username = config.username + (config.proxyUser?.let { "@$it" } ?: "") + "@$host"
+                    logger.info("Analyze '$host' using $username/***${StringUtils.length(password)} $sudo")
+                    sshClient.getSession(config.proxyHost, SshAuth(username, password, sudo))
+                }
+                else {
+                    val username = config.username
+                    logger.info("Analyze '$host' using $username/***${StringUtils.length(password)} $sudo")
+                    sshClient.getSession(host, SshAuth(username, password, sudo))
+                }
                 session.connect(1000)
 
                 function.invoke(session, sudo)

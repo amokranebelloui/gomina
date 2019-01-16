@@ -9,12 +9,17 @@ import java.io.ByteArrayOutputStream
 
 private val logger = LogManager.getLogger(Session::class.java)
 
-fun Session.sudo(user: String?, cmd: String): String {
+fun Session.sudo(user: String?, cmd: String) = sudo(user, listOf(cmd))
+
+fun Session.sudo(user: String?, cmds: List<String>): String {
     val sudoPrefix = if (user?.isNotBlank() == true) "sudo -u $user " else ""
-    return execute(sudoPrefix + cmd)
+    return execute(cmds.map { sudoPrefix + it })
 }
 
-fun Session.execute(cmd: String): String {
+fun Session.execute(cmd: String) = execute(listOf(cmd))
+
+fun Session.execute(cmds: List<String>): String {
+    val cmd = cmds.joinToString(separator = " ; \n")
     logger.debug("#CMD[${this.host}]: $cmd")
     val start = System.nanoTime()
     val channel = this.openChannel("exec") as ChannelExec

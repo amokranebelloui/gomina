@@ -21,15 +21,55 @@ import java.time.LocalDateTime
 
 class CustomSshAnalysis : SshAnalysis {
 
-    override fun instance(instance: Instance, session: Session, sudo: String?): InstanceSshDetails {
-        return InstanceSshDetails(
-                analyzed = true,
-                deployedVersion = deployedVersion(session, sudo, instance.folder),
-                deployedRevision = null,
-                confRevision = confRevision(session, sudo, instance.folder),
-                confCommitted = checkConfCommited(session, sudo, instance.folder),
-                confUpToDate = null
-        )
+    override fun instances(session: Session, sudo: String?, instances: List<Instance>): Map<String, InstanceSshDetails> {
+        val cmds = instances.flatMap {
+            listOf(
+                    """
+                        echo "${it.id}.version=`cat ${it.folder}/current/version.txt 2>/dev/null`"
+                    """.trimIndent(),
+                    //"echo \"${it.id}.version=`cat ${it.folder}/current/version.properties 2>/dev/null | grep version`\"",
+                    "echo \"${it.id}.revision=`cat ${it.folder}/current/version.properties 2>/dev/null | grep revision | cut -c14-`\"",
+                    //"echo \"${it.id}.version2=`ls -ll $it.folder/current/libs`\"",
+                    "echo \"${it.id}.conf.revision=`svn info ${it.folder}/config 2>/dev/null | grep Revision: |cut -c11-`\"",
+                    """
+                        echo "${it.id}.conf.status=$(echo "$(
+                            result=$(svn status ${it.folder}/config 2>&1);
+                            notvers=$(echo ${"$"}result | grep 'is not a working copy');
+                            if [ ! -z "${"$"}notvers" ]; then
+                                echo 'not versioned';
+                            elif [ ! -z "${"$"}result" ]; then
+                                echo 'modified'; else echo 'ok';
+                            fi
+                        )")"
+                    """.trimIndent()
+                    //"echo \"${it.id}.conf.status=$(svn status ${it.folder}/config)\""
+            )
+        }
+        val result = session.sudo(sudo, cmds)
+                .lines()
+                .filter { it.contains('=') }
+                .map { it.split('=', limit = 2) }
+                .map { it[0] to it[1] }
+                .toMap()
+
+        result.forEach { k, v -> println("  $k = $v") }
+
+        return instances.map { instance ->
+            instance.folder!! to InstanceSshDetails(
+                    analyzed = true,
+                    deployedVersion = result["${instance.id}.version"], // deployedVersion(session, sudo, instance.folder),
+                    deployedRevision = result["${instance.id}.revision"],
+                    confRevision = result["${instance.id}.conf.revision"], //confRevision(session, sudo, instance.folder),
+                    confCommitted = when (result["${instance.id}.conf.status"]) {
+                        "ok" -> true
+                        "modified" -> false
+                        "not versioned" -> null
+                        else -> null
+                    }, //checkConfCommited(session, sudo, instance.folder),
+                    confUpToDate = null
+            )
+        }
+        .toMap()
     }
 
     override fun host(session: Session, sudo: String?): HostSshDetails {

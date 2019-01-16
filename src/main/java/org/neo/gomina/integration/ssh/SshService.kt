@@ -10,7 +10,7 @@ import org.neo.gomina.utils.Cache
 import javax.inject.Inject
 
 interface SshAnalysis {
-    fun instance(instance: Instance, session: Session, sudo: String?): InstanceSshDetails = InstanceSshDetails(analyzed = true)
+    fun instances(session: Session, sudo: String?, instances: List<Instance>): Map<String, InstanceSshDetails> = emptyMap()
     fun host(session: Session, sudo: String?): HostSshDetails = HostSshDetails(analyzed = true)
 }
 
@@ -33,8 +33,8 @@ class SshService : HostRepo {
     }
 
     fun processEnv(env: Environment) {
-        val analysis = sshConnector.analyze(env) { instance, session, sudo ->
-            sshAnalysis.instance(instance, session, sudo)
+        val analysis = sshConnector.analyze(env) { session, sudo, instances ->
+            sshAnalysis.instances(session, sudo, instances)
         }
         env.services
                 .flatMap { it.instances }

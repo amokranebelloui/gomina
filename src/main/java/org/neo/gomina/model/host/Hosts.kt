@@ -8,6 +8,8 @@ data class Host(
     val tags: List<String> = emptyList(),
     val username: String,
     val passwordAlias: String? = null,
+    val proxyUser: String? = null,
+    val proxyHost: String? = null,
     val sudo: String? = null
 )
 
