@@ -163,7 +163,7 @@ function computeServiceDetails(service: ServiceType, instances: Array<InstanceTy
     const unexpected = instances.filter(instance => instance.unexpected === true);
     const versions = new Set(instances.map(instance => {
         const compVersion = instance.versions.running || instance.versions.deployed;
-        return compVersion.version + "|" + compVersion.revision
+        return compVersion && (compVersion.version + "|" + compVersion.revision)
     }));
     const confrevs = new Set(instances.map(instance => instance.confRevision));
     const confpend = instances.filter(instance => instance.confCommited === false);
