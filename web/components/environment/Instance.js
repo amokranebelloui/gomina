@@ -38,7 +38,7 @@ type InstanceType = {
 
     version: string, // FIXME Deprecated version field
 
-    versions: Object,
+    versions: Object, // FIXME Type
     //sidecar: Object,
     properties: {[string]: any}
 }
@@ -63,12 +63,13 @@ class Instance extends React.Component<Props> {
                         </Badge>
                     </li>
                     <li><Versions versions={instance.versions} /></li>
+                    <li><Link to={"/component/" + (instance.componentId||'')}>&rarr;</Link></li>
                     <li><Expected expected={!instance.unexpected} /></li>
                 </div>
                 <div className="section">
                     {instance.deployFolder && <li><Badge><span style={{display: 'block', userSelect: 'all', fontSize: 10}}>{instance.deployFolder}</span></Badge></li>}
 
-                    <li><Badge title={'Conf SVN revision'} backgroundColor='red' color='white'>{instance.confRevision}</Badge></li>
+                    <li><Badge title={'Conf SVN revision'} backgroundColor='darkred' color='white'>{instance.confRevision}</Badge></li>
                     <li><ConfCommited commited={instance.confCommited}/></li>
                     <li><BuildLink url={instance.componentId}/></li> {/* // TODO Build URL */}
                 </div>

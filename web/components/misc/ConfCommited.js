@@ -7,7 +7,7 @@ class ConfCommited extends React.Component {
         return (
             display &&
             <Badge title={'Config in not Committed'}
-                   backgroundColor='darkred' color='white'>{this.props.commited == false ? 'chg' : '?'}</Badge>
+                   backgroundColor='red' color='white'>{this.props.commited == false ? 'chg' : '?'}</Badge>
         );
     }
 }
