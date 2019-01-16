@@ -109,17 +109,27 @@ object Dependencies {
                 .map { (link, group) -> Dependency(link.from, link.to, group.map { it.first}) }
     }
 
-    private fun buildCallChain(serviceId: String, dependencies: List<Dependency>, parentFunctions: List<FunctionUsage> = emptyList(), seen: List<String>): CallChain {
-        val self = dependencies.find { it.self(serviceId) }?.functions?: emptyList()
-        val related = dependencies
-                .filter { it.from == serviceId }
+    private fun buildCallChain(serviceId: String, dependencies: List<Dependency>, parentFunctions: List<FunctionUsage> = emptyList(), seen: List<String> = arrayListOf("?")/*, max: Int = 0*/): CallChain {
+        val cleanDeps = dependencies
+                .map {
+                    Dependency(
+                        it.from, it.to,
+                        it.functions.filter { f -> f.function.type != "db-interaction" && f.function.type != "db-multi" && f.function.type != "db-read"  } // FIXME Configurable
+                    )
+                }
+                .filter { it.functions.isNotEmpty() }
+        val self = cleanDeps.find { it.self(serviceId) }?.functions?: emptyList()
+        val related = if (!seen.contains(serviceId)/* && max >= 0*/) {
+            cleanDeps
+                .filter { it.from == serviceId && !seen.contains(it.to) }
                 .map {
                     when {
                         it.self(serviceId) -> CallChain(it.to, false, self)
-                        seen.contains(it.to) -> CallChain(it.to, true, it.functions)
-                        else -> buildCallChain(it.to, dependencies, it.functions, seen + serviceId)
+                        else -> buildCallChain(it.to, cleanDeps, it.functions, seen + serviceId/*, max + 1*/)
                     }
                 }
+        }
+        else emptyList()
         return CallChain(serviceId, false, parentFunctions, related)
     }
 

@@ -6,8 +6,8 @@ import io.vertx.core.json.Json
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.component.ComponentRepo
+import org.neo.gomina.model.dependency.*
 
 
 data class FunctionDetail(val name: String, val type: String, val usage: String? = null)
