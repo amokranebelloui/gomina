@@ -6,15 +6,14 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.api.common.UserRef
-import org.neo.gomina.api.common.toRef
+import org.neo.gomina.api.component.CommitDetail
+import org.neo.gomina.api.component.CommitLogEnricher
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.work.Work
 import org.neo.gomina.model.work.WorkList
-import java.util.*
 import javax.inject.Inject
 
 data class WorkDetail(val id: String, val label: String, val type: String?,
@@ -28,6 +27,7 @@ data class WorkManifestDetail(val work: WorkDetail?,
 
 data class ComponentWorkDetail(val componentId: String, val commits: List<CommitDetail>)
 
+/*
 data class CommitDetail(
         val revision: String?,
         var date: Date? = null,
@@ -35,6 +35,7 @@ data class CommitDetail(
         var message: String? = null,
 
         var version: String? = null)
+*/
 
 class WorkApi {
 
@@ -47,9 +48,11 @@ class WorkApi {
 
     @Inject lateinit var workList: WorkList
     @Inject @Named("jira.url") lateinit var jiraUrl: String
+    @Inject @Named("work.reference.env") lateinit var workReferenceEnv: String
 
     @Inject private lateinit var componentRepo: ComponentRepo
     @Inject private lateinit var scmService: ScmService
+    @Inject private lateinit var commitLogEnricher: CommitLogEnricher
     @Inject private lateinit var topology: Topology
     @Inject private lateinit var users: Users
 
@@ -88,9 +91,16 @@ class WorkApi {
             val detail = work?.components
                     ?.mapNotNull { componentRepo.get(it) }
                     ?.map { component ->
-                        val commits = component.scm?.let {
-                            scmService.getTrunk(it).map { commit ->
-                                CommitDetail(
+                        val commits = component.scm?.let {scm ->
+                            scmService.getTrunk(scm)
+                                    .let { log -> commitLogEnricher.enrichLog(log, topology.buildExtInstances(component.id)).log }
+                                    .takeWhile { commit ->
+                                        !commit.instances.map { it.env }.contains(workReferenceEnv) &&
+                                        !commit.deployments.map { it.env }.contains(workReferenceEnv)
+                                    }
+                                    /*
+                                    .map { commit ->
+                                        CommitDetail(
                                         revision = commit.revision,
                                         date = commit.date,
                                         author = commit.author?.let { users.findForAccount(it) }?.toRef()
@@ -98,7 +108,8 @@ class WorkApi {
                                         message = commit.message,
                                         version = commit.release ?: commit.newVersion
                                 )
-                            }
+
+                            }*/
                         }
                         ?: emptyList()
                         ComponentWorkDetail(component.id, commits)

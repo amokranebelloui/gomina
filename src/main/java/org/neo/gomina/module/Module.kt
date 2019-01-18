@@ -7,6 +7,7 @@ import com.google.inject.assistedinject.FactoryModuleBuilder
 import com.google.inject.name.Names
 import com.google.inject.name.Names.named
 import org.neo.gomina.api.auth.AuthApi
+import org.neo.gomina.api.component.CommitLogEnricher
 import org.neo.gomina.api.component.ComponentsApi
 import org.neo.gomina.api.dependencies.DependenciesApi
 import org.neo.gomina.api.diagram.DiagramApi
@@ -80,6 +81,7 @@ class GominaModule : AbstractModule() {
         bind(File::class.java).annotatedWith(named("components.file")).toInstance(File(config.inventory.componentsFile))
         bind(File::class.java).annotatedWith(named("interactions.file")).toInstance(File(config.inventory.interactionsFile))
         bind(File::class.java).annotatedWith(named("work.file")).toInstance(File(config.inventory.workFile))
+        bind(String::class.java).annotatedWith(named("work.reference.env")).toInstance(config.work.referenceEnv)
         bind(File::class.java).annotatedWith(named("hosts.file")).toInstance(File(config.inventory.hostsFile))
         bind(String::class.java).annotatedWith(named("inventory.dir")).toInstance(config.inventory.inventoryDir)
         bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
@@ -146,6 +148,8 @@ class GominaModule : AbstractModule() {
         bind(EnrichDependencies::class.java).to(CustomEnrichDependencies::class.java).`in`(Scopes.SINGLETON)
 
         // Vertx API
+        bind(CommitLogEnricher::class.java).`in`(Scopes.SINGLETON)
+
         bind(AuthApi::class.java).`in`(Scopes.SINGLETON)
         bind(UsersApi::class.java).`in`(Scopes.SINGLETON)
         bind(ComponentsApi::class.java).`in`(Scopes.SINGLETON)

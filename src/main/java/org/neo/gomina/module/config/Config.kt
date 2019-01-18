@@ -18,6 +18,7 @@ data class InventoryConfig(var componentsFile: String = "",
                            var hostsFile: String = "",
                            var inventoryDir: String = "",
                            var inventoryFilter: String = "")
+data class WorkConfig(var referenceEnv: String = "")
 data class MonitoringConfig(var timeout: Int = 5)
 data class EventsConfig(
         var elasticSearch: List<ElasticEventsProviderConfig> = emptyList(),
@@ -34,6 +35,7 @@ data class Config (
         var domains: List<String> = emptyList(),
         val jiraUrl: String = "",
         var inventory: InventoryConfig = InventoryConfig(),
+        var work: WorkConfig = WorkConfig(),
         var monitoring: MonitoringConfig = MonitoringConfig(),
         var events: EventsConfig = EventsConfig(),
         var jenkins: JenkinsConfig = JenkinsConfig(),
