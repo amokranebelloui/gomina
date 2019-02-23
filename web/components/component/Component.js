@@ -94,7 +94,11 @@ type ComponentBadgeProps = {
     component: ComponentType,
     onReload: (componentId: string) => void,
     onReloadScm: (componentId: string) => void,
-    onReloadSonar: () => void
+    onReloadBuild: (componentId: string) => void,
+    onReloadSonar: () => void,
+    onEnable: (componentId: string) => void,
+    onDisable: (componentId: string) => void,
+    onDelete: (componentId: string) => void
 }
 function ComponentBadge(props: ComponentBadgeProps) {
     const component = props.component;
@@ -132,7 +136,11 @@ function ComponentBadge(props: ComponentBadgeProps) {
 
                 <button onClick={e => props.onReload(component.id)}>RELOAD</button>
                 <button onClick={e => props.onReloadScm(component.id)}>RELOAD SCM</button>
+                <button onClick={e => props.onReloadBuild(component.id)}>RELOAD Build</button>
                 <button onClick={e => props.onReloadSonar()}>RELOAD SONAR</button>
+                <button onClick={e => props.onEnable(component.id)}>Enable</button>
+                <button onClick={e => props.onDisable(component.id)}>Disable</button>
+                <button onClick={e => props.onDelete(component.id)}>Delete</button>
 
             </div>
         )

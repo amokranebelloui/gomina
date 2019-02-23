@@ -75,6 +75,16 @@ class ComponentApp extends React.Component {
                 console.log("component reload error", error.response);
             });
     }
+    reloadBuild(componentId) {
+        console.info("reloading build ", componentId);
+        axios.post('/data/components/' + componentId + '/reload-build')
+            .then(response => {
+                console.log("component build reloaded", response.data);
+            })
+            .catch(function (error) {
+                console.log("component build reload error", error.response);
+            });
+    }
     reloadSonar(componentId) {
         axios.post('/data/components/reload-sonar')
             .then(response => {
@@ -82,6 +92,36 @@ class ComponentApp extends React.Component {
             })
             .catch(function (error) {
                 console.log("sonar reload error", error.response);
+            });
+    }
+    enable(componentId) {
+        console.info("enable ", componentId);
+        axios.put('/data/components/' + componentId + '/enable')
+            .then(response => {
+                console.log("component enabled", response.data);
+            })
+            .catch(function (error) {
+                console.log("component enable error", error.response);
+            });
+    }
+    disable(componentId) {
+        console.info("disable ", componentId);
+        axios.put('/data/components/' + componentId + '/disable')
+            .then(response => {
+                console.log("component disabled", response.data);
+            })
+            .catch(function (error) {
+                console.log("component disable error", error.response);
+            });
+    }
+    delete(componentId) {
+        console.info("delete ", componentId);
+        axios.delete('/data/components/' + componentId + '/delete')
+            .then(response => {
+                console.log("component delete", response.data);
+            })
+            .catch(function (error) {
+                console.log("component delete error", error.response);
             });
     }
     retrieveBranch(componentId, branchId) {
@@ -236,7 +276,12 @@ class ComponentApp extends React.Component {
                         <ComponentBadge component={component}
                                         onReload={id => this.retrieveComponent(id)}
                                         onReloadScm={id => this.reloadComponent(id)}
-                                        onReloadSonar={() => this.reloadSonar()} />
+                                        onReloadBuild={id => this.reloadBuild(id)}
+                                        onReloadSonar={() => this.reloadSonar()}
+                                        onEnable={id => this.enable(id)}
+                                        onDisable={id => this.disable(id)}
+                                        onDelete={id => this.delete(id)}
+                        />
 
                         <ComponentMenu component={component} />
 
@@ -255,7 +300,12 @@ class ComponentApp extends React.Component {
                         <ComponentBadge component={component}
                                         onReload={id => this.retrieveComponent(id)}
                                         onReloadScm={id => this.reloadComponent(id)}
-                                        onReloadSonar={() => this.reloadSonar()} />
+                                        onReloadBuild={id => this.reloadBuild(id)}
+                                        onReloadSonar={() => this.reloadSonar()}
+                                        onEnable={id => this.enable(id)}
+                                        onDisable={id => this.disable(id)}
+                                        onDelete={id => this.delete(id)}
+                        />
                         <hr/>
                         <h3>Other Components</h3>
                         <div className="items">
