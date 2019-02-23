@@ -86,7 +86,8 @@ class GominaModule : AbstractModule() {
         bind(String::class.java).annotatedWith(named("inventory.dir")).toInstance(config.inventory.inventoryDir)
         bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
 
-        bind(ComponentRepo::class.java).to(ComponentRepoFile::class.java).`in`(Scopes.SINGLETON)
+        //bind(ComponentRepo::class.java).to(ComponentRepoFile::class.java).`in`(Scopes.SINGLETON)
+        bind(ComponentRepo::class.java).to(ComponentRepoRedis::class.java).`in`(Scopes.SINGLETON)
         bind(Systems::class.java).to(InferredSystems::class.java).`in`(Scopes.SINGLETON)
         bind(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsRepository::class.java).to(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
