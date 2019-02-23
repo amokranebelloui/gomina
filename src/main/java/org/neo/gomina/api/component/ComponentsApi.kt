@@ -8,7 +8,6 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.common.UserRef
-import org.neo.gomina.api.common.toRef
 import org.neo.gomina.api.instances.VersionDetail
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
@@ -20,7 +19,6 @@ import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.system.Systems
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
-import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmDetails
 import org.neo.gomina.model.scm.activity
 import org.neo.gomina.model.user.Users
@@ -129,7 +127,12 @@ class ComponentsApi {
         router.get("/:componentId/associated").handler(this::associated)
         router.get("/:componentId/doc/:docId").handler(this::componentDoc)
 
-        router.post("/:componentId/reload-scm").handler(this::reloadComponent)
+        router.post("/add").handler(this::addComponent)
+        router.post("/:componentId/reload-scm").handler(this::reloadScm)
+        router.post("/:componentId/reload-build").handler(this::reloadBuild)
+        router.put("/:componentId/enable").handler(this::enable)
+        router.put("/:componentId/disable").handler(this::disable)
+        router.delete("/:componentId/delete").handler(this::delete)
         router.post("/reload-sonar").handler(this::reloadSonar)
     }
 
@@ -267,20 +270,59 @@ class ComponentsApi {
         return null
     }
 
-    private fun reloadComponent(ctx: RoutingContext) {
+    @Deprecated("Dummy") private val components = mutableSetOf<String>()
+
+    private fun addComponent(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+
+            if (!components.contains(componentId)) {
+                logger.info("Adding component " + componentId)
+                Thread.sleep(2000)
+                components.add(componentId)
+                //val component = this.componentRepo.get(componentId)?.let { this.build(it) }
+                val component = ComponentDetail(id = componentId, label = "Component $componentId") // FIXME Real impl
+                logger.info("Added component " + componentId)
+                ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(component))
+            }
+            else {
+                ctx.response().putHeader("content-type", "text/javascript").setStatusCode(403).end("$componentId already exists")
+            }
+
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get component", e)
+            ctx.fail(500)
+        }
+    }
+
+
+    private fun reloadScm(ctx: RoutingContext) {
         try {
             val componentId = ctx.request().getParam("componentId")
             componentRepo.get(componentId)?.let { component ->
                 logger.info("Reload SCM data for $componentId ...")
                 component.scm?.let { scmService.reloadScmDetails(it) }
-                // FIXME Jenkins in it's own, or rename API
+            }
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get component", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun reloadBuild(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            componentRepo.get(componentId)?.let { component ->
                 logger.info("Reload Jenkins data for $componentId ...")
                 jenkinsService.getStatus(component, fromCache = false)
             }
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
-            logger.error("Cannot get component", e)
+            logger.error("Cannot reload Jenkins", e)
             ctx.fail(500)
         }
     }
@@ -305,6 +347,51 @@ class ComponentsApi {
         }
         catch (e: Exception) {
             logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun enable(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            componentRepo.get(componentId)?.let { component ->
+                logger.info("Enable $componentId [TODO] ...")
+                // FIXME Implement
+            }
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot enable component", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun disable(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            componentRepo.get(componentId)?.let { component ->
+                logger.info("Disable $componentId [TODO] ...")
+                // FIXME Implement
+            }
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot disable component", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun delete(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            componentRepo.get(componentId)?.let { component ->
+                logger.info("Delete $componentId [TODO] ...")
+                // FIXME Implement
+            }
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot delete component", e)
             ctx.fail(500)
         }
     }
