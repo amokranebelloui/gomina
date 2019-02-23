@@ -8,6 +8,7 @@ import {Well} from "../common/Well";
 import {flatMap} from "../common/utils";
 import {ComponentSort} from "../component/ComponentSort";
 import {extendSystems} from "../system/system-utils";
+import {AddComponent} from "../component/AddComponent";
 
 class ComponentsApp extends React.Component {
 
@@ -97,6 +98,9 @@ class ComponentsApp extends React.Component {
                                 <TagCloud tags={tags} displayCount={true}
                                           selectionChanged={values => this.setState({selectedTags: values})} />
                                 <br/>
+                            </Well>
+                            <Well block>
+                                <AddComponent />
                             </Well>
                         </div>
                     </PrimarySecondaryLayout>
