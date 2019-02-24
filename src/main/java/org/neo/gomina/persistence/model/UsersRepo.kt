@@ -3,10 +3,12 @@ package org.neo.gomina.persistence.model
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.user.User
 import org.neo.gomina.model.user.Users
 import redis.clients.jedis.Jedis
+import redis.clients.jedis.JedisPool
 import java.io.File
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
@@ -56,26 +58,32 @@ class RedisUserRepo : Users {
         private val logger = LogManager.getLogger(RedisComponentRepo.javaClass)
     }
 
-    private lateinit var jedis: Jedis
+    private lateinit var pool: JedisPool
 
     var md = MessageDigest.getInstance("SHA-512")
 
     @Inject
     private fun initialize(@Named("database.host") host: String, @Named("database.port") port: Int) {
-        jedis = Jedis(host, port).also { it.select(0) }
+        pool = JedisPool(
+                GenericObjectPoolConfig().apply { testOnBorrow = true },
+                host, port, 10000, null, 0)
         logger.info("Users Database connected $host $port")
     }
 
     override fun getUsers(): List<User> {
-        val pipe = jedis.pipelined()
-        val data = jedis.keys("user:*").map { it.substring(5) to pipe.hgetAll(it) }
-        pipe.sync()
-        return data.map { (id, data) -> toUser(id, data.get()) }
+        pool.resource.use { jedis ->
+            val pipe = jedis.pipelined()
+            val data = jedis.keys("user:*").map { it.substring(5) to pipe.hgetAll(it) }
+            pipe.sync()
+            return data.map { (id, data) -> toUser(id, data.get()) }
+        }
     }
 
     override fun getUser(userId: String): User? {
-        return jedis.hgetAll("user:$userId")
-                ?.let { toUser(userId, it) }
+        pool.resource.use { jedis ->
+            return jedis.hgetAll("user:$userId")
+                    ?.let { toUser(userId, it) }
+        }
     }
 
     override fun findForAccount(account: String): User? {
@@ -95,18 +103,19 @@ class RedisUserRepo : Users {
 
     override fun authenticate(userLogin: String, userPassword: String): User? {
         val userPasswordHash = md.digest(userPassword.toByteArray(StandardCharsets.UTF_8)).toString(StandardCharsets.UTF_8)
-
-        // FIXME Optimize database access
-        val pipe = jedis.pipelined()
-        val data = jedis.keys("user:*").map { it.substring(5) to pipe.hmget(it, "login", "password_hash") }
-        pipe.sync()
-        val userId = data.map { (id, data) -> data.get().let { Triple(id, it[0], it[1]) } }
-                .filter { (id, login, passwordHash) ->
-                    login == userLogin && (passwordHash == null || userPasswordHash == passwordHash)
-                }
-                .map { (id, _, _) -> id }
-                .firstOrNull()
-        return userId?.let { getUser(it) }
+        pool.resource.use { jedis ->
+            // FIXME Optimize database access
+            val pipe = jedis.pipelined()
+            val data = jedis.keys("user:*").map { it.substring(5) to pipe.hmget(it, "login", "password_hash") }
+            pipe.sync()
+            val userId = data.map { (id, data) -> data.get().let { Triple(id, it[0], it[1]) } }
+                    .filter { (id, login, passwordHash) ->
+                        login == userLogin && (passwordHash == null || userPasswordHash == passwordHash)
+                    }
+                    .map { (id, _, _) -> id }
+                    .firstOrNull()
+            return userId?.let { getUser(it) }
+        }
     }
 
 }

@@ -3,11 +3,12 @@ package org.neo.gomina.persistence.model
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.inject.Inject
 import com.google.inject.name.Named
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.component.Scm
-import redis.clients.jedis.Jedis
+import redis.clients.jedis.JedisPool
 import java.io.File
 
 class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
@@ -46,24 +47,30 @@ class RedisComponentRepo : ComponentRepo {
         private val logger = LogManager.getLogger(RedisComponentRepo.javaClass)
     }
 
-    private lateinit var jedis: Jedis
+    private lateinit var pool: JedisPool
 
     @Inject
     private fun initialize(@Named("database.host") host: String, @Named("database.port") port: Int) {
-        jedis = Jedis(host, port).also { it.select(1) }
+        pool = JedisPool(
+                GenericObjectPoolConfig().apply { testOnBorrow = true },
+                host, port, 10000, null, 1)
         logger.info("Components Database connected $host $port")
     }
 
     override fun getAll(): List<Component> {
-        val pipe = jedis.pipelined()
-        val data = jedis.keys("component:*").map { it.substring(10) to pipe.hgetAll(it) }
-        pipe.sync()
-        return data.map { (id, data) -> toComponent(id, data.get()) }
+        pool.resource.use { jedis ->
+            val pipe = jedis.pipelined()
+            val data = jedis.keys("component:*").map { it.substring(10) to pipe.hgetAll(it) }
+            pipe.sync()
+            return data.map { (id, data) -> toComponent(id, data.get()) }
+        }
     }
 
     override fun get(componentId: String): Component? {
-        return jedis.hgetAll("component:$componentId")
-                ?.let { toComponent(componentId, it) }
+        pool.resource.use { jedis ->
+            return jedis.hgetAll("component:$componentId")
+                    ?.let { toComponent(componentId, it) }
+        }
     }
 
     private fun toComponent(id: String, map: Map<String, String>) = Component(
@@ -88,14 +95,18 @@ class RedisComponentRepo : ComponentRepo {
     )
 
     override fun disable(componentId: String) {
-        "component:$componentId".let { key ->
-            if (jedis.exists(key)) jedis.hset(key, "disabled", "true")
+        pool.resource.use { jedis ->
+            "component:$componentId".let { key ->
+                if (jedis.exists(key)) jedis.hset(key, "disabled", "true")
+            }
         }
     }
 
     override fun enable(componentId: String) {
-        "component:$componentId".let { key ->
-            if (jedis.exists(key)) jedis.hset(key, "disabled", "false")
+        pool.resource.use { jedis ->
+            "component:$componentId".let { key ->
+                if (jedis.exists(key)) jedis.hset(key, "disabled", "false")
+            }
         }
     }
 
