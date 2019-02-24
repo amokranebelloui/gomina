@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios/index";
-import {AppLayout, LoggedUserContext, PrimarySecondaryLayout} from "./common/layout";
+import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import {ComponentBadge, ComponentMenu} from "../component/Component";
 import "../component/Component.css"
 import "../common/items.css"
@@ -38,7 +38,7 @@ class ComponentApp extends React.Component {
         this.retrieveAssociated= this.retrieveAssociated.bind(this);
         this.retrieveBranch = this.retrieveBranch.bind(this);
         this.retrieveDoc = this.retrieveDoc.bind(this);
-        this.reloadComponent = this.reloadComponent.bind(this);
+        this.reloadScm = this.reloadScm.bind(this);
         console.info("componentApp !constructor ", this.props.match.params);
     }
     retrieveComponent(componentId) {
@@ -65,11 +65,12 @@ class ComponentApp extends React.Component {
                 thisComponent.setState({associated: []});
             });
     }
-    reloadComponent(componentId) {
+    reloadScm(componentId) {
         console.info("reloading", componentId);
         axios.post('/data/components/' + componentId + '/reload-scm')
             .then(response => {
                 console.log("component reloaded", response.data);
+                this.retrieveComponent(componentId)
             })
             .catch(function (error) {
                 console.log("component reload error", error.response);
@@ -80,6 +81,7 @@ class ComponentApp extends React.Component {
         axios.post('/data/components/' + componentId + '/reload-build')
             .then(response => {
                 console.log("component build reloaded", response.data);
+                this.retrieveComponent(componentId)
             })
             .catch(function (error) {
                 console.log("component build reload error", error.response);
@@ -89,6 +91,8 @@ class ComponentApp extends React.Component {
         axios.post('/data/components/reload-sonar')
             .then(response => {
                 console.log("sonar reloaded", response.data);
+                //this.retrieveComponent(componentId)
+                // FIXME Make Sonar reload per component, not global
             })
             .catch(function (error) {
                 console.log("sonar reload error", error.response);
@@ -99,6 +103,7 @@ class ComponentApp extends React.Component {
         axios.put('/data/components/' + componentId + '/enable')
             .then(response => {
                 console.log("component enabled", response.data);
+                this.retrieveComponent(componentId)
             })
             .catch(function (error) {
                 console.log("component enable error", error.response);
@@ -109,6 +114,7 @@ class ComponentApp extends React.Component {
         axios.put('/data/components/' + componentId + '/disable')
             .then(response => {
                 console.log("component disabled", response.data);
+                this.retrieveComponent(componentId)
             })
             .catch(function (error) {
                 console.log("component disable error", error.response);
@@ -119,6 +125,7 @@ class ComponentApp extends React.Component {
         axios.delete('/data/components/' + componentId + '/delete')
             .then(response => {
                 console.log("component delete", response.data);
+                this.retrieveComponent(componentId)
             })
             .catch(function (error) {
                 console.log("component delete error", error.response);
@@ -269,13 +276,11 @@ class ComponentApp extends React.Component {
          */
         return (
             <AppLayout title={"Component: " + component.label}>
-            <LoggedUserContext.Consumer>
-            {loggedUser => (
                 <PrimarySecondaryLayout>
                     <Container>
                         <ComponentBadge component={component}
                                         onReload={id => this.retrieveComponent(id)}
-                                        onReloadScm={id => this.reloadComponent(id)}
+                                        onReloadScm={id => this.reloadScm(id)}
                                         onReloadBuild={id => this.reloadBuild(id)}
                                         onReloadSonar={() => this.reloadSonar()}
                                         onEnable={id => this.enable(id)}
@@ -299,7 +304,7 @@ class ComponentApp extends React.Component {
                     <div>
                         <ComponentBadge component={component}
                                         onReload={id => this.retrieveComponent(id)}
-                                        onReloadScm={id => this.reloadComponent(id)}
+                                        onReloadScm={id => this.reloadScm(id)}
                                         onReloadBuild={id => this.reloadBuild(id)}
                                         onReloadSonar={() => this.reloadSonar()}
                                         onEnable={id => this.enable(id)}
@@ -329,7 +334,6 @@ class ComponentApp extends React.Component {
                     </Container>
                 </PrimarySecondaryLayout>
             )}
-            </LoggedUserContext.Consumer>
             </AppLayout>
         );
     }
