@@ -13,7 +13,9 @@ data class Component(
         var maven: String? = null,
         var sonarServer: String = "",
         var jenkinsServer: String = "",
-        var jenkinsJob: String? = null) {
+        var jenkinsJob: String? = null,
+        var disabled: Boolean
+) {
     fun shareSystem(other: Component): Boolean {
         return System.extend(this.systems).intersect(System.extend(other.systems)).isNotEmpty()
     }
@@ -32,6 +34,8 @@ data class Scm (
 interface ComponentRepo {
     fun getAll(): List<Component>
     fun get(componentId: String): Component?
+    fun disable(componentId: String)
+    fun enable(componentId: String)
 }
 
 

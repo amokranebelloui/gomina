@@ -61,7 +61,8 @@ data class ComponentDetail(
         var loc: Double? = null,
         var coverage: Double? = null,
         var lastCommit: Date? = null,
-        var commitActivity: Int? = null
+        var commitActivity: Int? = null,
+        var disabled: Boolean = false
 )
 
 data class BranchDetail (
@@ -354,10 +355,8 @@ class ComponentsApi {
     private fun enable(ctx: RoutingContext) {
         try {
             val componentId = ctx.request().getParam("componentId")
-            componentRepo.get(componentId)?.let { component ->
-                logger.info("Enable $componentId [TODO] ...")
-                // FIXME Implement
-            }
+            logger.info("Enable $componentId [TODO] ...")
+            componentRepo.enable(componentId)
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
@@ -369,10 +368,8 @@ class ComponentsApi {
     private fun disable(ctx: RoutingContext) {
         try {
             val componentId = ctx.request().getParam("componentId")
-            componentRepo.get(componentId)?.let { component ->
-                logger.info("Disable $componentId [TODO] ...")
-                // FIXME Implement
-            }
+            logger.info("Disable $componentId [TODO] ...")
+            componentRepo.disable(componentId)
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
@@ -409,6 +406,7 @@ private fun ComponentDetail.apply(component: Component) {
     this.mvn = component.maven
     this.jenkinsServer = component.jenkinsServer
     this.jenkinsJob = component.jenkinsJob
+    this.disabled = component.disabled
 }
 
 private fun ComponentDetail.apply(scmDetails: ScmDetails) {

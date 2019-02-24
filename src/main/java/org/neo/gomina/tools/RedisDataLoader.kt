@@ -21,9 +21,9 @@ fun main(args: Array<String>) {
     val jedis = Jedis("localhost", 6379)
     jedis.select(1)
     data.forEach {
-        val mapOf: Map<String, String> = mapOf(
-                "label" to (it.label ?: ""),
-                "type" to (it.type ?: ""),
+        val mapOf: Map<String, String>? = listOfNotNull(
+                it.label?.let { "label" to it },
+                it.type?.let { "type" to it },
                 "systems" to (it.systems.joinToString(", ")),
                 "languages" to (it.languages.joinToString(", ")),
                 "tags" to (it.tags.joinToString(", ")),
@@ -36,7 +36,9 @@ fun main(args: Array<String>) {
                 "sonarServer" to (it.sonarServer),
                 "jenkinsServer" to (it.jenkinsServer),
                 "jenkinsJob" to (it.jenkinsJob ?: "")
+                //"disabled" to (it.jenkinsJob ?: "")
         )
+        .toMap()
         jedis.hmset("component:${it.id}", mapOf)
     }
 }

@@ -11,7 +11,6 @@ import redis.clients.jedis.Jedis
 import java.io.File
 
 class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
-
     companion object {
         private val logger = LogManager.getLogger(ComponentRepoFile.javaClass)
     }
@@ -30,6 +29,14 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
     override fun getAll(): List<Component> = read(file)
 
     override fun get(componentId: String): Component? = read(file).find { it.id == componentId }
+
+    override fun disable(componentId: String) {
+        TODO("not implemented")
+    }
+
+    override fun enable(componentId: String) {
+        TODO("not implemented")
+    }
 
 }
 
@@ -70,6 +77,20 @@ class ComponentRepoRedis : ComponentRepo {
             maven = map["maven"],
             sonarServer = map["sonarServer"] ?: "",
             jenkinsServer = map["jenkinsServer"] ?: "",
-            jenkinsJob = map["jenkinsJob"]
+            jenkinsJob = map["jenkinsJob"],
+            disabled = map["disabled"]?.toBoolean() == true
     )
+
+    override fun disable(componentId: String) {
+        "component:$componentId".let { key ->
+            if (jedis.exists(key)) jedis.hset(key, "disabled", "true")
+        }
+    }
+
+    override fun enable(componentId: String) {
+        "component:$componentId".let { key ->
+            if (jedis.exists(key)) jedis.hset(key, "disabled", "false")
+        }
+    }
+
 }
