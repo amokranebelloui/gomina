@@ -42,6 +42,7 @@ class Blocker extends React.Component {
                 <Route path="/work/:id" render={props => <WorkApp {...props} />}/>
                 <Route path="/work" render={props => <WorkApp {...props} />}/>
                 <Route path="/user/:id" render={props => <UserApp {...props} />}/>
+                <Route path="/user" render={props => <UserApp {...props} />}/>
                 <Route path="/sandbox" component={() => <SandboxApp />}/>
                 <Route path="*" component={() => <div>I don't know you man!!!</div>} />
             </Switch>

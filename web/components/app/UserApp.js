@@ -10,15 +10,30 @@ type Props = {
     match: Object // FIXME Type react match object
 };
 type State = {
-    user: ?Object
+    user: ?Object,
+    users: Array<Object>
 };
 
 class UserApp extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
         this.state = {
-            user: null
+            user: null,
+            users: []
         }
+    }
+    retrieveUsers() {
+        console.log("userApp Retr Users ... ");
+        const thisComponent = this;
+        axios.get('/data/user')
+            .then(response => {
+                console.log("userApp users", response.data);
+                thisComponent.setState({users: response.data});
+            })
+            .catch(function (error) {
+                console.log("userApp users error", error);
+                thisComponent.setState({users: []});
+            });
     }
     retrieveUser(userId: string) {
         console.log("userApp Retr User ... ");
@@ -36,13 +51,15 @@ class UserApp extends React.Component<Props, State> {
 
     componentDidMount() {
         console.info("userApp !did mount ");
-        this.retrieveUser(this.props.match.params.id)
+        this.retrieveUsers();
+        this.props.match.params.id && this.retrieveUser(this.props.match.params.id)
     }
     componentWillReceiveProps(nextProps: Props) {
         const newUserId = nextProps.match.params.id;
         console.info("userApp !did willRecProps ", newUserId, nextProps);
-        if (this.props.match.params.id != newUserId && newUserId) {
-            this.retrieveUser(newUserId)
+        this.retrieveUsers();
+        if (this.props.match.params.id != newUserId) {
+            newUserId ? this.retrieveUser(newUserId) : this.setState({user: null});
         }
     }
 
@@ -66,22 +83,31 @@ class UserApp extends React.Component<Props, State> {
             <AppLayout title="Components">
                 <PrimarySecondaryLayout>
                     <Container>
-                        User: {this.props.match.params.id}<br/>
-
-                        {this.state.user &&
-                        <div>
-                            <br/>
-                            {this.state.user.firstName} {this.state.user.lastName}
-                        </div>
+                        {this.props.match.params.id && this.state.user &&
+                            <div>
+                                User: {this.props.match.params.id}<br/>
+                                <br/>
+                                {this.state.user.firstName} {this.state.user.lastName}
+                                <br/>
+                                <Secure condition={(user) => user === this.props.match.params.id}>
+                                    <input type="button" value="Manage my profile [TODO]" />
+                                </Secure>
+                            </div>
                         }
-                        <Secure condition={(user) => user === this.props.match.params.id}>
-                            <input type="button" value="Manage my profile [TODO]" />
-                        </Secure>
+                        {!this.props.match.params.id &&
+                            <p>
+                                See the contributors for your project,
+                                their knowledge of the different areas
+                                and the components they're currently working on
+                            </p>
+                        }
                     </Container>
                     <div>
-                        <Link to="/user/jd4436">John Doe</Link>
-                        <br/>
-                        <Link to="/user/amokrane.belloui">Amokrane Belloui</Link>
+                        <div className="items">
+                        {(this.state.users||[]).map(user =>
+                            [<Link key={user.id} to={"/user/" + user.id}>{user.firstName} {user.lastName}</Link>,<br key={"b" + user.id}/>]
+                        )}
+                        </div>
                     </div>
                 </PrimarySecondaryLayout>
             </AppLayout>
