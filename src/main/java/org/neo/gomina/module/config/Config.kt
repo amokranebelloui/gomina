@@ -12,6 +12,7 @@ import org.neo.gomina.integration.monitoring.MonitoringEventsProviderConfig
 import org.neo.gomina.integration.sonar.SonarConfig
 import java.io.File
 
+data class DatabaseConfig(var host: String = "localhost", var port: Int = 0)
 data class InventoryConfig(var componentsFile: String = "",
                            var interactionsFile: String = "",
                            var workFile: String = "",
@@ -34,6 +35,7 @@ data class Config (
         val usersFile: String?,
         var domains: List<String> = emptyList(),
         val jiraUrl: String = "",
+        var database: DatabaseConfig = DatabaseConfig(),
         var inventory: InventoryConfig = InventoryConfig(),
         var work: WorkConfig = WorkConfig(),
         var monitoring: MonitoringConfig = MonitoringConfig(),

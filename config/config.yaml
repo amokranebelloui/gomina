@@ -4,6 +4,10 @@ passwordsFile: 'config/pass.properties'
 usersFile: 'data/users.json'
 jiraUrl: 'http://localhost/jira'
 
+database:
+  host: 'localhost'
+  port: '7070'
+
 inventory:
   componentsFile: 'data/components.json'
   interactionsFile: 'data/interactions.json'

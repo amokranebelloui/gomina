@@ -46,7 +46,13 @@ class ComponentRepoRedis : ComponentRepo {
         private val logger = LogManager.getLogger(ComponentRepoRedis.javaClass)
     }
 
-    private val jedis = Jedis("localhost", 6379).also { it.select(1) }
+    private lateinit var jedis: Jedis
+
+    @Inject
+    private fun initialize(@Named("database.host") host: String, @Named("database.port") port: Int) {
+        jedis = Jedis(host, port).also { it.select(1) }
+        logger.info("Components Database connected $host $port")
+    }
 
     override fun getAll(): List<Component> {
         val pipe = jedis.pipelined()

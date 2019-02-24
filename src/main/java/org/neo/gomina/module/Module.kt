@@ -83,6 +83,8 @@ class GominaModule : AbstractModule() {
         bind(File::class.java).annotatedWith(named("work.file")).toInstance(File(config.inventory.workFile))
         bind(String::class.java).annotatedWith(named("work.reference.env")).toInstance(config.work.referenceEnv)
         bind(File::class.java).annotatedWith(named("hosts.file")).toInstance(File(config.inventory.hostsFile))
+        bind(String::class.java).annotatedWith(named("database.host")).toInstance(config.database.host)
+        bind(Int::class.java).annotatedWith(named("database.port")).toInstance(config.database.port)
         bind(String::class.java).annotatedWith(named("inventory.dir")).toInstance(config.inventory.inventoryDir)
         bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
 
