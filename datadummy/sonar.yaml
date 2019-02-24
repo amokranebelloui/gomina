@@ -4,7 +4,7 @@
 
 - code: 'x.oms.vac:voms-basketmanager'
   loc: 6013
-  coverage: 22.0
+  coverage: 24.0
 
 - code: 'x.oms.vac:voms-ordermanager'
   loc: 11764

@@ -129,12 +129,12 @@ class ComponentsApi {
         router.get("/:componentId/doc/:docId").handler(this::componentDoc)
 
         router.post("/add").handler(this::addComponent)
-        router.post("/:componentId/reload-scm").handler(this::reloadScm)
-        router.post("/:componentId/reload-build").handler(this::reloadBuild)
+        router.put("/:componentId/reload-scm").handler(this::reloadScm)
+        router.put("/:componentId/reload-build").handler(this::reloadBuild)
+        router.put("/:componentId/reload-sonar").handler(this::reloadSonar)
         router.put("/:componentId/enable").handler(this::enable)
         router.put("/:componentId/disable").handler(this::disable)
         router.delete("/:componentId/delete").handler(this::delete)
-        router.post("/reload-sonar").handler(this::reloadSonar)
     }
 
     fun components(ctx: RoutingContext) {
@@ -331,15 +331,15 @@ class ComponentsApi {
     private fun reloadSonar(ctx: RoutingContext) {
         try {
             vertx.executeBlocking({future: Future<Void> ->
-                //val envId = ctx.request().getParam("envId")
-                logger.info("Reloading Sonar data ...")
+                val componentId = ctx.request().getParam("componentId")
+                logger.info("Reloading Sonar data for $componentId ... [actually doing it for all components]")
+                // TODO Limit Sonar reload scope  to a component
                 componentRepo.getAll()
                         .map { it.sonarServer }
                         .distinct()
                         .forEach { sonarServer ->
                             sonarService.reload(sonarServer)
                         }
-
                 future.complete()
             }, false)
             {res: AsyncResult<Void> ->

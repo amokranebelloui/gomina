@@ -98,7 +98,7 @@ type ComponentBadgeProps = {
     onReload: (componentId: string) => void,
     onReloadScm: (componentId: string) => void,
     onReloadBuild: (componentId: string) => void,
-    onReloadSonar: () => void,
+    onReloadSonar: (componentId: string) => void,
     onEnable: (componentId: string) => void,
     onDisable: (componentId: string) => void,
     onDelete: (componentId: string) => void
@@ -142,8 +142,8 @@ function ComponentBadge(props: ComponentBadgeProps) {
 
                 <button onClick={e => props.onReload(component.id)}>RELOAD</button>
                 <button onClick={e => props.onReloadScm(component.id)}>SCM</button>
-                <button onClick={e => props.onReloadBuild(component.id)}>Build</button>
-                <button onClick={e => props.onReloadSonar()}>SONAR</button>
+                <button onClick={e => props.onReloadBuild(component.id)}>BUILD</button>
+                <button onClick={e => props.onReloadSonar(component.id)}>SONAR</button>
                 <Secure permission="component.disable">
                     {component.disabled
                         ? <button onClick={e => props.onEnable(component.id)}>Enable</button>

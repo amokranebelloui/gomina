@@ -67,7 +67,7 @@ class ComponentApp extends React.Component {
     }
     reloadScm(componentId) {
         console.info("reloading", componentId);
-        axios.post('/data/components/' + componentId + '/reload-scm')
+        axios.put('/data/components/' + componentId + '/reload-scm')
             .then(response => {
                 console.log("component reloaded", response.data);
                 this.retrieveComponent(componentId)
@@ -78,7 +78,7 @@ class ComponentApp extends React.Component {
     }
     reloadBuild(componentId) {
         console.info("reloading build ", componentId);
-        axios.post('/data/components/' + componentId + '/reload-build')
+        axios.put('/data/components/' + componentId + '/reload-build')
             .then(response => {
                 console.log("component build reloaded", response.data);
                 this.retrieveComponent(componentId)
@@ -88,11 +88,10 @@ class ComponentApp extends React.Component {
             });
     }
     reloadSonar(componentId) {
-        axios.post('/data/components/reload-sonar')
+        axios.put('/data/components/' + componentId + '/reload-sonar')
             .then(response => {
                 console.log("sonar reloaded", response.data);
-                //this.retrieveComponent(componentId)
-                // FIXME Make Sonar reload per component, not global
+                this.retrieveComponent(componentId)
             })
             .catch(function (error) {
                 console.log("sonar reload error", error.response);
@@ -282,7 +281,7 @@ class ComponentApp extends React.Component {
                                         onReload={id => this.retrieveComponent(id)}
                                         onReloadScm={id => this.reloadScm(id)}
                                         onReloadBuild={id => this.reloadBuild(id)}
-                                        onReloadSonar={() => this.reloadSonar()}
+                                        onReloadSonar={(id) => this.reloadSonar(id)}
                                         onEnable={id => this.enable(id)}
                                         onDisable={id => this.disable(id)}
                                         onDelete={id => this.delete(id)}
@@ -306,7 +305,7 @@ class ComponentApp extends React.Component {
                                         onReload={id => this.retrieveComponent(id)}
                                         onReloadScm={id => this.reloadScm(id)}
                                         onReloadBuild={id => this.reloadBuild(id)}
-                                        onReloadSonar={() => this.reloadSonar()}
+                                        onReloadSonar={id => this.reloadSonar(id)}
                                         onEnable={id => this.enable(id)}
                                         onDisable={id => this.disable(id)}
                                         onDelete={id => this.delete(id)}
