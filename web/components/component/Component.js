@@ -32,8 +32,7 @@ function ComponentHeader(props: {}) {
 }
 
 type ComponentSummaryProps = {
-    component: ComponentType,
-    loggedUser?: ?string
+    component: ComponentType
 }
 class ComponentSummary extends React.Component<ComponentSummaryProps> {
     render() {
@@ -86,9 +85,9 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
                     <br/>
                     <DateTime date={component.buildTimestamp}/>
                 </div>
-                {this.props.loggedUser &&
+                <Secure permission="component.knowledge">
                     <div><span>(Level)</span></div>
-                }
+                </Secure>
             </div>
         )
     }
@@ -145,11 +144,13 @@ function ComponentBadge(props: ComponentBadgeProps) {
                 <button onClick={e => props.onReloadScm(component.id)}>SCM</button>
                 <button onClick={e => props.onReloadBuild(component.id)}>Build</button>
                 <button onClick={e => props.onReloadSonar()}>SONAR</button>
-                <Secure>
+                <Secure permission="component.disable">
                     {component.disabled
                         ? <button onClick={e => props.onEnable(component.id)}>Enable</button>
                         : <button onClick={e => props.onDisable(component.id)}>Disable</button>
                     }
+                </Secure>
+                <Secure permission="component.delete">
                     <button onClick={e => props.onDelete(component.id)}>Delete</button>
                 </Secure>
             </div>

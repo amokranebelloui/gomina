@@ -37,14 +37,22 @@ class Clock extends React.Component {
 class AppLayout extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {user: Cookies.get('gomina-user')}
+        this.state = {
+            user: Cookies.get('gomina-user'),
+            permissions: Cookies.get('gomina-permissions')
+        }
     }
     login(username, password) {
         axios.post('/authenticate', {username: username, password: password})
             .then(response => {
                 console.info("Logged in", response.data);
+                // FIXME Cookies are not secure, implement a correct 'keep me logged in'
                 Cookies.set('gomina-user', username);
-                this.setState({'user': username})
+                Cookies.set('gomina-permissions', response.data.permissions);
+                this.setState({
+                    'user': username,
+                    'permissions': response.data.permissions
+                })
             })
             .catch(function (error) {
                 console.log("Login error", error.response);
@@ -56,7 +64,7 @@ class AppLayout extends React.Component {
     }
     render() {
         return (
-            <LoggedUserContext.Provider value={this.state.user}>
+            <LoggedUserContext.Provider value={{"user": this.state.user, "permissions": this.state.permissions}}>
                 <div className="container">
                     <div className="header">
                         <div className="menu">

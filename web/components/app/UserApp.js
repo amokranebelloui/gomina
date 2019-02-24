@@ -1,7 +1,7 @@
 // @flow
 import * as React from "react"
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout"
-import {LoggedUserContext} from "../permission/Secure"
+import {LoggedUserContext, Secure} from "../permission/Secure"
 import {Container} from "../common/Container";
 import axios from "axios/index";
 import Link from "react-router-dom/es/Link";
@@ -68,7 +68,7 @@ class UserApp extends React.Component<Props, State> {
                     {loggedUser => (
                         <PrimarySecondaryLayout>
                             <Container>
-                                User {this.props.match.params.id} ({loggedUser})
+                                User: {this.props.match.params.id}<br/>
 
                                 {this.state.user &&
                                 <div>
@@ -76,6 +76,9 @@ class UserApp extends React.Component<Props, State> {
                                     {this.state.user.firstName} {this.state.user.lastName}
                                 </div>
                                 }
+                                <Secure condition={(user) => user === this.props.match.params.id}>
+                                    <input type="button" value="Manage my profile [TODO]" />
+                                </Secure>
                             </Container>
                             <div>
                                 <Link to="/user/john.doe">John Doe</Link>

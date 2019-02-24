@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 class LoginForm extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {username: 'amokrane', password: ''}
+        this.state = {username: '', password: ''}
     }
 
     authenticate(e) {

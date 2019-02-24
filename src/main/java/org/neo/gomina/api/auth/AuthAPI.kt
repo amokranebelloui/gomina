@@ -34,7 +34,16 @@ class AuthApi {
             val username = ctx.bodyAsJson.getString("username")
             val password = ctx.bodyAsJson.getString("password")
             logger.info("Authenticate '$username' ")
-            var token = "T0K3N-$username"
+
+            // FIXME Authentication and permissions
+            val userid = username
+            val permissions = listOf(
+                    "component.knowledge",
+                    "component.disable",
+                    "component.delete"
+            )
+
+            var token = mapOf("userid" to userid, "token" to "T0K3N-$username", "permissions" to permissions)
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(token))

@@ -65,50 +65,46 @@ class ComponentsApp extends React.Component {
         const tags = flatMap(this.state.components, p => p.tags);
         return (
             <AppLayout title="Components">
-            <LoggedUserContext.Consumer>
-                {loggedUser => (
-                    <PrimarySecondaryLayout>
-                        <Container>
-                            <ComponentSort sortBy={this.state.sortBy} onSortChanged={sortBy => this.sortChanged(sortBy)} />
-                            <hr/>
-                            <div className='component-list'>
-                                <ComponentHeader />
-                                {components
-                                    .filter(component => matchesSearch(component, this.state.search, this.state.selectedSystems, this.state.selectedLanguages, this.state.selectedTags))
-                                    .map(component =>
-                                        <ComponentSummary key={component.id} component={component} loggedUser={loggedUser} />
-                                    )
-                                }
-                            </div>
-                        </Container>
-                        <div>
-                            <Well block>
-                                Search:
-                                <input type="text" name="search" onChange={e => this.setState({search: e.target.value})}/>
-                                &nbsp;
-                                <br/>
-                                Systems:
-                                <TagCloud tags={systems} displayCount={true}
-                                          selectionChanged={values => this.setState({selectedSystems: values})} />
-                                <br/>
-                                Languages:
-                                <TagCloud tags={languages} displayCount={true}
-                                          selectionChanged={values => this.setState({selectedLanguages: values})} />
-                                <br/>
-                                Tags:
-                                <TagCloud tags={tags} displayCount={true}
-                                          selectionChanged={values => this.setState({selectedTags: values})} />
-                                <br/>
-                            </Well>
-                            <Secure>
-                                <Well block>
-                                    <AddComponent />
-                                </Well>
-                            </Secure>
+                <PrimarySecondaryLayout>
+                    <Container>
+                        <ComponentSort sortBy={this.state.sortBy} onSortChanged={sortBy => this.sortChanged(sortBy)} />
+                        <hr/>
+                        <div className='component-list'>
+                            <ComponentHeader />
+                            {components
+                                .filter(component => matchesSearch(component, this.state.search, this.state.selectedSystems, this.state.selectedLanguages, this.state.selectedTags))
+                                .map(component =>
+                                    <ComponentSummary key={component.id} component={component} />
+                                )
+                            }
                         </div>
-                    </PrimarySecondaryLayout>
-                )}
-            </LoggedUserContext.Consumer>
+                    </Container>
+                    <div>
+                        <Well block>
+                            Search:
+                            <input type="text" name="search" onChange={e => this.setState({search: e.target.value})}/>
+                            &nbsp;
+                            <br/>
+                            Systems:
+                            <TagCloud tags={systems} displayCount={true}
+                                      selectionChanged={values => this.setState({selectedSystems: values})} />
+                            <br/>
+                            Languages:
+                            <TagCloud tags={languages} displayCount={true}
+                                      selectionChanged={values => this.setState({selectedLanguages: values})} />
+                            <br/>
+                            Tags:
+                            <TagCloud tags={tags} displayCount={true}
+                                      selectionChanged={values => this.setState({selectedTags: values})} />
+                            <br/>
+                        </Well>
+                        <Secure>
+                            <Well block>
+                                <AddComponent />
+                            </Well>
+                        </Secure>
+                    </div>
+                </PrimarySecondaryLayout>
             </AppLayout>
         );
     }
