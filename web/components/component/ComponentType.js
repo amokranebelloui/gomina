@@ -34,7 +34,8 @@ type ComponentType = {
     loc?: ?number,
     coverage?: ?number,
     lastCommit?: ?number, // date
-    commitActivity?: ?number
+    commitActivity?: ?number,
+    disabled: boolean
 }
 
 type ComponentRefType = {

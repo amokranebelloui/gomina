@@ -1,5 +1,6 @@
 import React from "react";
-import {AppLayout, LoggedUserContext, PrimarySecondaryLayout} from "./common/layout";
+import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
+import {LoggedUserContext, Secure} from "../permission/Secure"
 import {ComponentHeader, ComponentSummary} from "../component/Component";
 import axios from "axios/index";
 import {Container} from "../common/Container";
@@ -99,9 +100,11 @@ class ComponentsApp extends React.Component {
                                           selectionChanged={values => this.setState({selectedTags: values})} />
                                 <br/>
                             </Well>
-                            <Well block>
-                                <AddComponent />
-                            </Well>
+                            <Secure>
+                                <Well block>
+                                    <AddComponent />
+                                </Well>
+                            </Secure>
                         </div>
                     </PrimarySecondaryLayout>
                 )}

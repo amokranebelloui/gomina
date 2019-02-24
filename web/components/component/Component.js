@@ -14,6 +14,7 @@ import {BuildNumber} from "../build/BuildNumber";
 import {SonarLink} from "./SonarLink";
 import "../common/items.css"
 import type {ComponentType} from "./ComponentType";
+import {Secure} from "../permission/Secure";
 
 function ComponentHeader(props: {}) {
     return (
@@ -46,6 +47,9 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
                     <span title={component.id}>
                         <Link to={"/component/" + component.id}>
                             <span style={{fontSize: 14}}>{component.label}</span>
+                            {component.disabled &&
+                                <span>&nbsp;<s>DISABLED</s></span>
+                            }
                         </Link>
                         &nbsp;
                         <UnreleasedChangeCount changes={component.changes} />
@@ -107,6 +111,9 @@ function ComponentBadge(props: ComponentBadgeProps) {
             <div className='component-badge'>
                 <span title={component.id}>
                     <span style={{fontSize: 14}}><b>{component.label}</b></span>
+                    {component.disabled &&
+                        <span>&nbsp;<s>DISABLED</s></span>
+                    }
                     <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
                 </span>
                 <br/>
@@ -135,13 +142,16 @@ function ComponentBadge(props: ComponentBadgeProps) {
                 <br/>
 
                 <button onClick={e => props.onReload(component.id)}>RELOAD</button>
-                <button onClick={e => props.onReloadScm(component.id)}>RELOAD SCM</button>
-                <button onClick={e => props.onReloadBuild(component.id)}>RELOAD Build</button>
-                <button onClick={e => props.onReloadSonar()}>RELOAD SONAR</button>
-                <button onClick={e => props.onEnable(component.id)}>Enable</button>
-                <button onClick={e => props.onDisable(component.id)}>Disable</button>
-                <button onClick={e => props.onDelete(component.id)}>Delete</button>
-
+                <button onClick={e => props.onReloadScm(component.id)}>SCM</button>
+                <button onClick={e => props.onReloadBuild(component.id)}>Build</button>
+                <button onClick={e => props.onReloadSonar()}>SONAR</button>
+                <Secure>
+                    {component.disabled
+                        ? <button onClick={e => props.onEnable(component.id)}>Enable</button>
+                        : <button onClick={e => props.onDisable(component.id)}>Disable</button>
+                    }
+                    <button onClick={e => props.onDelete(component.id)}>Delete</button>
+                </Secure>
             </div>
         )
     }

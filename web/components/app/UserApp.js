@@ -1,6 +1,7 @@
 // @flow
 import * as React from "react"
-import {AppLayout, LoggedUserContext, PrimarySecondaryLayout} from "./common/layout"
+import {AppLayout, PrimarySecondaryLayout} from "./common/layout"
+import {LoggedUserContext} from "../permission/Secure"
 import {Container} from "../common/Container";
 import axios from "axios/index";
 import Link from "react-router-dom/es/Link";

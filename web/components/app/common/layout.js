@@ -4,8 +4,7 @@ import "./layout.css"
 import Cookies from "js-cookie";
 import {LoginForm} from "../../common/LoginForm";
 import axios from "axios/index";
-
-const LoggedUserContext = React.createContext("");
+import {LoggedUserContext} from "../../permission/Secure"
 
 class Clock extends React.Component {
     constructor(props) {
@@ -123,5 +122,5 @@ class PrimarySecondaryLayout extends React.Component {
 }
 
 
-export { AppLayout, PrimarySecondaryLayout, Clock, LoggedUserContext};
+export { AppLayout, PrimarySecondaryLayout, Clock };
 
