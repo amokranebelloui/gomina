@@ -12,7 +12,8 @@ data class UserDetail (
         val id: String,
         val login: String,
         val firstName: String?,
-        val lastName: String?
+        val lastName: String?,
+        var disabled: Boolean
 )
 
 class UsersApi {
@@ -45,7 +46,8 @@ class UsersApi {
                         id = it.id,
                         login = it.login,
                         firstName = it.firstName,
-                        lastName = it.lastName
+                        lastName = it.lastName,
+                        disabled = it.disabled
                 )
             }
             ctx.response()
@@ -67,7 +69,8 @@ class UsersApi {
                         id = it.id,
                         login = it.login,
                         firstName = it.firstName,
-                        lastName = it.lastName
+                        lastName = it.lastName,
+                        disabled = it.disabled
                 )
             }
             ctx.response()

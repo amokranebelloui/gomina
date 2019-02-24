@@ -38,19 +38,23 @@ class AppLayout extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            user: Cookies.get('gomina-user'),
+            userId: Cookies.get('gomina-userId'),
+            login: Cookies.get('gomina-login'),
             permissions: Cookies.get('gomina-permissions')
         }
     }
-    login(username, password) {
-        axios.post('/authenticate', {username: username, password: password})
+    login(login, password) {
+        console.info("Authenticating", login);
+        axios.post('/authenticate', {login: login, password: password})
             .then(response => {
                 console.info("Logged in", response.data);
                 // FIXME Cookies are not secure, implement a correct 'keep me logged in'
-                Cookies.set('gomina-user', username);
+                Cookies.set('gomina-userId', response.data.userId);
+                Cookies.set('gomina-login', login);
                 Cookies.set('gomina-permissions', response.data.permissions);
                 this.setState({
-                    'user': username,
+                    'userId': response.data.userId,
+                    'login': login,
                     'permissions': response.data.permissions
                 })
             })
@@ -59,12 +63,14 @@ class AppLayout extends React.Component {
             });
     }
     logout() {
-        Cookies.remove('gomina-user');
-        this.setState({'user': null})
+        Cookies.remove('gomina-userId');
+        Cookies.remove('gomina-login');
+        Cookies.remove('gomina-permissions');
+        this.setState({'userId': null, 'login': null, 'permissions': null})
     }
     render() {
         return (
-            <LoggedUserContext.Provider value={{"user": this.state.user, "permissions": this.state.permissions}}>
+            <LoggedUserContext.Provider value={{"userId": this.state.userId, "login": this.state.login, "permissions": this.state.permissions}}>
                 <div className="container">
                     <div className="header">
                         <div className="menu">
@@ -84,9 +90,9 @@ class AppLayout extends React.Component {
                                 <br/>
                             </span>
                             <span className="context">
-                                {this.state.user}
-                                {this.state.user && <input type="button" onClick={e => this.logout()} value="Logout" />}
-                                {!this.state.user && <LoginForm onAuthenticate={e => this.login(e.username, e.password)} />}
+                                {this.state.userId} {this.state.login && '-'} {this.state.login}
+                                {this.state.userId && <input type="button" onClick={e => this.logout()} value="Logout" />}
+                                {!this.state.userId && <LoginForm onAuthenticate={e => this.login(e.login, e.password)} />}
 
                                 <Clock />
                             </span>

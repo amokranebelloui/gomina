@@ -1,10 +1,10 @@
 // @formatter:off
 [
     {
-        id: "amokrane.belloui", login: "amokrane_b", shortName: "Amokrane", firstName: "Amokrane", lastName: "Belloui",
+        id: "ab6743", login: "amokrane_b", shortName: "Amokrane", firstName: "Amokrane", lastName: "Belloui",
         accounts: ["Amokrane Belloui", "amokrane"]
     },
     {
-        id: "john.doe", login: "john_d", shortName: "John D", firstName: "John", lastName: "Doe", accounts: ["johnd"]
+        id: "jd4436", login: "john_d", shortName: "John D", firstName: "John", lastName: "Doe", accounts: ["johnd"]
     }
 ]

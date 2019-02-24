@@ -31,22 +31,35 @@ class AuthApi {
 
     private fun authenticate(ctx: RoutingContext) {
         try {
-            val username = ctx.bodyAsJson.getString("username")
+            val login = ctx.bodyAsJson.getString("login")
             val password = ctx.bodyAsJson.getString("password")
-            logger.info("Authenticate '$username' ")
+            logger.info("Authenticate '$login'")
 
-            // FIXME Authentication and permissions
-            val userid = username
-            val permissions = listOf(
-                    "component.knowledge",
-                    "component.disable",
-                    "component.delete"
-            )
+            val authenticated = users.authenticate(login, password)
+            if (authenticated != null) {
+                logger.info("Authenticated '$login'")
+                // FIXME permissions
+                val permissions = listOf(
+                        "component.knowledge",
+                        "component.disable",
+                        "component.delete"
+                )
 
-            var token = mapOf("userid" to userid, "token" to "T0K3N-$username", "permissions" to permissions)
-            ctx.response()
-                    .putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(token))
+                var result = mapOf(
+                        "userId" to authenticated.id,
+                        "token" to "T0K3N-${authenticated.login}",
+                        "permissions" to permissions
+                )
+                ctx.response()
+                        .putHeader("content-type", "text/javascript")
+                        .end(mapper.writeValueAsString(result))
+
+            }
+            else {
+                logger.info("Authentication failed '$login'")
+                ctx.response().setStatusCode(401).end()
+            }
+
         }
         catch (e: Exception) {
             logger.error("Cannot Authenticate", e)

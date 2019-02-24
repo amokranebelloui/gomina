@@ -4,13 +4,13 @@ import PropTypes from "prop-types";
 class LoginForm extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {username: '', password: ''}
+        this.state = {login: '', password: ''}
     }
 
     authenticate(e) {
         e.preventDefault();
         this.props.onAuthenticate && this.props.onAuthenticate({
-            username: this.state.username,
+            login: this.state.login,
             password: this.state.password
         });
     }
@@ -19,8 +19,8 @@ class LoginForm extends React.Component {
         return (
             <form style={{display: 'inline-block'}} onSubmit={e => this.authenticate(e)}>
                 <label>user</label>&nbsp;
-                <input style={{width: '60px'}} name="username" type="text" defaultValue={this.state.username}
-                       onChange={e => this.setState({username: e.target.value})} />
+                <input style={{width: '60px'}} name="login" type="text" defaultValue={this.state.login}
+                       onChange={e => this.setState({login: e.target.value})} />
                 &nbsp;
                 <label>pass</label>&nbsp;
                 <input style={{width: '60px'}} name="password" type="password"

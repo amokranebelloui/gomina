@@ -16,9 +16,9 @@ class Secure extends React.PureComponent<Props> {
             <LoggedUserContext.Consumer>
                 {loggedUser => (
                     loggedUser &&
-                    loggedUser.user &&
+                    loggedUser.userId &&
                     (!this.props.permission || (loggedUser.permissions||[]).includes(this.props.permission)) &&
-                    (!this.props.condition || this.props.condition(loggedUser.user)) &&
+                    (!this.props.condition || this.props.condition(loggedUser.userId)) &&
                     this.props.children
             )}
             </LoggedUserContext.Consumer>

@@ -40,10 +40,10 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
 
 }
 
-class ComponentRepoRedis : ComponentRepo {
+class RedisComponentRepo : ComponentRepo {
 
     companion object {
-        private val logger = LogManager.getLogger(ComponentRepoRedis.javaClass)
+        private val logger = LogManager.getLogger(RedisComponentRepo.javaClass)
     }
 
     private lateinit var jedis: Jedis

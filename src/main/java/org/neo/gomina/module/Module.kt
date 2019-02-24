@@ -76,7 +76,7 @@ class GominaModule : AbstractModule() {
 
         // Model
         bind(File::class.java).annotatedWith(named("users.file")).toInstance(File(config.usersFile))
-        bind(Users::class.java).to(UsersFile::class.java).`in`(Scopes.SINGLETON)
+        bind(Users::class.java).to(RedisUserRepo::class.java).`in`(Scopes.SINGLETON)
 
         bind(File::class.java).annotatedWith(named("components.file")).toInstance(File(config.inventory.componentsFile))
         bind(File::class.java).annotatedWith(named("interactions.file")).toInstance(File(config.inventory.interactionsFile))
@@ -88,8 +88,7 @@ class GominaModule : AbstractModule() {
         bind(String::class.java).annotatedWith(named("inventory.dir")).toInstance(config.inventory.inventoryDir)
         bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
 
-        //bind(ComponentRepo::class.java).to(ComponentRepoFile::class.java).`in`(Scopes.SINGLETON)
-        bind(ComponentRepo::class.java).to(ComponentRepoRedis::class.java).`in`(Scopes.SINGLETON)
+        bind(ComponentRepo::class.java).to(RedisComponentRepo::class.java).`in`(Scopes.SINGLETON)
         bind(Systems::class.java).to(InferredSystems::class.java).`in`(Scopes.SINGLETON)
         bind(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsRepository::class.java).to(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)

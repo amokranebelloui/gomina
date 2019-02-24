@@ -64,30 +64,26 @@ class UserApp extends React.Component<Props, State> {
          */
         return (
             <AppLayout title="Components">
-                <LoggedUserContext.Consumer>
-                    {loggedUser => (
-                        <PrimarySecondaryLayout>
-                            <Container>
-                                User: {this.props.match.params.id}<br/>
+                <PrimarySecondaryLayout>
+                    <Container>
+                        User: {this.props.match.params.id}<br/>
 
-                                {this.state.user &&
-                                <div>
-                                    <br/>
-                                    {this.state.user.firstName} {this.state.user.lastName}
-                                </div>
-                                }
-                                <Secure condition={(user) => user === this.props.match.params.id}>
-                                    <input type="button" value="Manage my profile [TODO]" />
-                                </Secure>
-                            </Container>
-                            <div>
-                                <Link to="/user/john.doe">John Doe</Link>
-                                <br/>
-                                <Link to="/user/amokrane.belloui">Amokrane Belloui</Link>
-                            </div>
-                        </PrimarySecondaryLayout>
-                    )}
-                </LoggedUserContext.Consumer>
+                        {this.state.user &&
+                        <div>
+                            <br/>
+                            {this.state.user.firstName} {this.state.user.lastName}
+                        </div>
+                        }
+                        <Secure condition={(user) => user === this.props.match.params.id}>
+                            <input type="button" value="Manage my profile [TODO]" />
+                        </Secure>
+                    </Container>
+                    <div>
+                        <Link to="/user/jd4436">John Doe</Link>
+                        <br/>
+                        <Link to="/user/amokrane.belloui">Amokrane Belloui</Link>
+                    </div>
+                </PrimarySecondaryLayout>
             </AppLayout>
         )
     }

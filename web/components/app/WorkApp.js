@@ -127,7 +127,7 @@ class WorkApp extends React.Component {
                                     </td>
                                     <td>
                                         {work.people.map(p =>
-                                            <span>{p} </span>
+                                            <span><Link to={"/user/" + p}>{p}</Link> </span>
                                         )}
                                     </td>
                                 </tr>
@@ -157,7 +157,9 @@ function Work(props) {
             <hr/>
             <div>
                 {work.people.map(p =>
-                    <span style={{color: 'blue'}}>{p} </span>
+                    <span style={{color: 'blue'}}>
+                        <Link to={"/user/" + p}>{p} </Link>
+                    </span>
                 )}
             </div>
             <hr/>
