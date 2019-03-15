@@ -48,6 +48,41 @@ class ComponentsApp extends React.Component {
                 thisComponent.setState({components: []});
             });
     }
+    reloadScm() {
+        const componentIds = this.selectedComponents(this.state.components).map(c => c.id).join(',');
+        console.info("Reloading", componentIds);
+        axios.put('/data/components/reload-scm?componentIds=' + componentIds)
+            .then(response => {
+                console.log("component reloaded", response.data);
+                this.retrieveComponents()
+            })
+            .catch(function (error) {
+                console.log("component reload error", error.response);
+            });
+    }
+    reloadBuild() {
+        const componentIds = this.selectedComponents(this.state.components).map(c => c.id).join(',');
+        console.info("Reloading build ", componentIds);
+        axios.put('/data/components/reload-build?componentIds=' + componentIds)
+            .then(response => {
+                console.log("component build reloaded", response.data);
+                this.retrieveComponents()
+            })
+            .catch(function (error) {
+                console.log("component build reload error", error.response);
+            });
+    }
+    reloadSonar() {
+        const componentIds = this.selectedComponents(this.state.components).map(c => c.id).join(',');
+        axios.put('/data/components/reload-sonar?componentIds=' + componentIds)
+            .then(response => {
+                console.log("sonar reloaded", response.data);
+                this.retrieveComponents()
+            })
+            .catch(function (error) {
+                console.log("sonar reload error", error.response);
+            });
+    }
 
     componentDidMount() {
         console.info("componentsApp !mount ", this.props.match.params.id);
@@ -56,6 +91,11 @@ class ComponentsApp extends React.Component {
     }
     sortChanged(sortBy) {
         this.setState({sortBy: sortBy});
+    }
+    selectedComponents(components) {
+        const selectedComponents = components
+            .filter(component => matchesSearch(component, this.state.search, this.state.selectedSystems, this.state.selectedLanguages, this.state.selectedTags));
+        return selectedComponents;
     }
     render() {
         const components = sortComponentsBy(this.state.sortBy, this.state.components);
@@ -71,12 +111,9 @@ class ComponentsApp extends React.Component {
                         <hr/>
                         <div className='component-list'>
                             <ComponentHeader />
-                            {components
-                                .filter(component => matchesSearch(component, this.state.search, this.state.selectedSystems, this.state.selectedLanguages, this.state.selectedTags))
-                                .map(component =>
-                                    <ComponentSummary key={component.id} component={component} />
-                                )
-                            }
+                            {this.selectedComponents(components).map(component =>
+                                <ComponentSummary key={component.id} component={component}/>
+                            )}
                         </div>
                     </Container>
                     <div>
@@ -97,6 +134,12 @@ class ComponentsApp extends React.Component {
                             <TagCloud tags={tags} displayCount={true}
                                       selectionChanged={values => this.setState({selectedTags: values})} />
                             <br/>
+                        </Well>
+                        <Well block>
+                            <button onClick={e => this.retrieveComponents()}>RELOAD</button>
+                            <button onClick={e => this.reloadScm()}>SCM</button>
+                            <button onClick={e => this.reloadBuild()}>BUILD</button>
+                            <button onClick={e => this.reloadSonar()}>SONAR</button>
                         </Well>
                         <Secure>
                             <Well block>

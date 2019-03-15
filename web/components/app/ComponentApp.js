@@ -67,7 +67,7 @@ class ComponentApp extends React.Component {
     }
     reloadScm(componentId) {
         console.info("reloading", componentId);
-        axios.put('/data/components/' + componentId + '/reload-scm')
+        axios.put('/data/components/reload-scm?componentIds=' + componentId)
             .then(response => {
                 console.log("component reloaded", response.data);
                 this.retrieveComponent(componentId)
@@ -78,7 +78,7 @@ class ComponentApp extends React.Component {
     }
     reloadBuild(componentId) {
         console.info("reloading build ", componentId);
-        axios.put('/data/components/' + componentId + '/reload-build')
+        axios.put('/data/components/reload-build?componentIds=' + componentId)
             .then(response => {
                 console.log("component build reloaded", response.data);
                 this.retrieveComponent(componentId)
@@ -88,7 +88,7 @@ class ComponentApp extends React.Component {
             });
     }
     reloadSonar(componentId) {
-        axios.put('/data/components/' + componentId + '/reload-sonar')
+        axios.put('/data/components/reload-sonar?componentIds=' + componentId)
             .then(response => {
                 console.log("sonar reloaded", response.data);
                 this.retrieveComponent(componentId)

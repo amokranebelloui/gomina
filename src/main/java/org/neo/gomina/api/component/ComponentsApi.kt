@@ -16,11 +16,11 @@ import org.neo.gomina.integration.sonar.SonarIndicators
 import org.neo.gomina.integration.sonar.SonarService
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
-import org.neo.gomina.model.system.Systems
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.scm.ScmDetails
 import org.neo.gomina.model.scm.activity
+import org.neo.gomina.model.system.Systems
 import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.version.Version
 import org.neo.gomina.model.work.WorkList
@@ -129,9 +129,9 @@ class ComponentsApi {
         router.get("/:componentId/doc/:docId").handler(this::componentDoc)
 
         router.post("/add").handler(this::addComponent)
-        router.put("/:componentId/reload-scm").handler(this::reloadScm)
-        router.put("/:componentId/reload-build").handler(this::reloadBuild)
-        router.put("/:componentId/reload-sonar").handler(this::reloadSonar)
+        router.put("/reload-scm").handler(this::reloadScm)
+        router.put("/reload-build").handler(this::reloadBuild)
+        router.put("/reload-sonar").handler(this::reloadSonar)
         router.put("/:componentId/enable").handler(this::enable)
         router.put("/:componentId/disable").handler(this::disable)
         router.delete("/:componentId/delete").handler(this::delete)
@@ -300,10 +300,11 @@ class ComponentsApi {
 
     private fun reloadScm(ctx: RoutingContext) {
         try {
-            val componentId = ctx.request().getParam("componentId")
-            componentRepo.get(componentId)?.let { component ->
-                logger.info("Reload SCM data for $componentId ...")
-                component.scm?.let { scmService.reloadScmDetails(it) }
+            ctx.request().getParam("componentIds")?.split(",")?.map { it.trim() }?.forEach {
+                componentRepo.get(it)?.let { component ->
+                    logger.info("Reload SCM data for $it ...")
+                    component.scm?.let { scmService.reloadScmDetails(it) }
+                }
             }
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
@@ -315,10 +316,11 @@ class ComponentsApi {
 
     private fun reloadBuild(ctx: RoutingContext) {
         try {
-            val componentId = ctx.request().getParam("componentId")
-            componentRepo.get(componentId)?.let { component ->
-                logger.info("Reload Jenkins data for $componentId ...")
-                jenkinsService.getStatus(component, fromCache = false)
+            ctx.request().getParam("componentIds")?.split(",")?.map { it.trim() }?.forEach {
+                componentRepo.get(it)?.let { component ->
+                    logger.info("Reload Jenkins data for $it ...")
+                    jenkinsService.getStatus(component, fromCache = false)
+                }
             }
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
@@ -331,8 +333,9 @@ class ComponentsApi {
     private fun reloadSonar(ctx: RoutingContext) {
         try {
             vertx.executeBlocking({future: Future<Void> ->
-                val componentId = ctx.request().getParam("componentId")
-                logger.info("Reloading Sonar data for $componentId ... [actually doing it for all components]")
+                ctx.request().getParam("componentIds")?.split(",")?.map { it.trim() }?.forEach {
+                    logger.info("Reloading Sonar data for $it ... [actually doing it for all components]")
+                }
                 // TODO Limit Sonar reload scope  to a component
                 componentRepo.getAll()
                         .map { it.sonarServer }
