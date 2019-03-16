@@ -63,7 +63,7 @@ class AddComponent extends React.Component<Props, State> {
                                 adding: false
                             })
                         }
-                    }, 3000
+                    }, 8000
                 );
             })
             .catch(function (error) {
