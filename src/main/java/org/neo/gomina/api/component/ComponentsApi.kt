@@ -159,6 +159,12 @@ class ComponentsApi {
         router.put("/reload-scm").handler(this::reloadScm)
         router.put("/reload-build").handler(this::reloadBuild)
         router.put("/reload-sonar").handler(this::reloadSonar)
+        router.put("/:componentId/add-system/:system").handler(this::addSystem)
+        router.put("/:componentId/delete-system/:system").handler(this::deleteSystem)
+        router.put("/:componentId/add-language/:language").handler(this::addLanguage)
+        router.put("/:componentId/delete-language/:language").handler(this::deleteLanguage)
+        router.put("/:componentId/add-tag/:tag").handler(this::addTag)
+        router.put("/:componentId/delete-tag/:tag").handler(this::deleteTag)
         router.put("/:componentId/enable").handler(this::enable)
         router.put("/:componentId/disable").handler(this::disable)
         router.delete("/:componentId/delete").handler(this::delete)
@@ -375,6 +381,90 @@ class ComponentsApi {
         }
         catch (e: Exception) {
             logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun addSystem(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val system = ctx.request().getParam("system")
+            logger.info("Add system $componentId $system ...")
+            componentRepo.addSystem(componentId, system)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot add system", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun deleteSystem(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val system = ctx.request().getParam("system")
+            logger.info("Delete system $componentId $system ...")
+            componentRepo.deleteSystem(componentId, system)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot delete system", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun addLanguage(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val language = ctx.request().getParam("language")
+            logger.info("Add language $componentId $language ...")
+            componentRepo.addLanguage(componentId, language)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot add language", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun deleteLanguage(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val language = ctx.request().getParam("language")
+            logger.info("Delete language $componentId $language ...")
+            componentRepo.deleteLanguage(componentId, language)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot delete language", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun addTag(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val tag = ctx.request().getParam("tag")
+            logger.info("Add tag $componentId $tag ...")
+            componentRepo.addTag(componentId, tag)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot add tag", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun deleteTag(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val tag = ctx.request().getParam("tag")
+            logger.info("Delete tag $componentId $tag ...")
+            componentRepo.deleteTag(componentId, tag)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot delete tag", e)
             ctx.fail(500)
         }
     }

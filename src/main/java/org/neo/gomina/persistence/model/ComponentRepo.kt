@@ -36,6 +36,15 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
         TODO("not implemented")
     }
 
+    override fun addSystem(componentId: String, system: String) { TODO("not implemented") }
+    override fun deleteSystem(componentId: String, system: String) { TODO("not implemented") }
+
+    override fun addLanguage(componentId: String, language: String) { TODO("not implemented")}
+    override fun deleteLanguage(componentId: String, language: String) { TODO("not implemented")}
+    override fun addTag(componentId: String, tag: String) { TODO("not implemented")}
+    override fun deleteTag(componentId: String, tag: String) { TODO("not implemented")}
+
+
     override fun disable(componentId: String) {
         TODO("not implemented")
     }
@@ -77,26 +86,28 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
-    private fun toComponent(id: String, map: Map<String, String>) = Component(
-            id = id,
-            label = map["label"],
-            type = map["type"],
-            systems = map["systems"]?.split(",")?.map { it.trim() } ?: emptyList(),
-            languages = map["languages"]?.split(",")?.map { it.trim() } ?: emptyList(),
-            tags = map["tags"]?.split(",")?.map { it.trim() } ?: emptyList(),
-            scm = Scm(
-                    type = map["scm_type"] ?: "",
-                    url = map["scm_url"] ?: "",
-                    path = map["scm_path"] ?: "",
-                    username = map["scm_username"] ?: "",
-                    passwordAlias = map["scm_password_alias"] ?: ""
-            ) ,
-            maven = map["maven"],
-            sonarServer = map["sonarServer"] ?: "",
-            jenkinsServer = map["jenkinsServer"] ?: "",
-            jenkinsJob = map["jenkinsJob"],
-            disabled = map["disabled"]?.toBoolean() == true
-    )
+    private fun toComponent(id: String, map: Map<String, String>): Component {
+        return Component(
+                id = id,
+                label = map["label"],
+                type = map["type"],
+                systems = map["systems"].toList(),
+                languages = map["languages"].toList(),
+                tags = map["tags"].toList(),
+                scm = Scm(
+                        type = map["scm_type"] ?: "",
+                        url = map["scm_url"] ?: "",
+                        path = map["scm_path"] ?: "",
+                        username = map["scm_username"] ?: "",
+                        passwordAlias = map["scm_password_alias"] ?: ""
+                ) ,
+                maven = map["maven"],
+                sonarServer = map["sonarServer"] ?: "",
+                jenkinsServer = map["jenkinsServer"] ?: "",
+                jenkinsJob = map["jenkinsJob"],
+                disabled = map["disabled"]?.toBoolean() == true
+        )
+    }
 
     override fun add(component: NewComponent) {
         pool.resource.use { jedis ->
@@ -106,9 +117,9 @@ class RedisComponentRepo : ComponentRepo {
             jedis.hmset("component:${component.id}", listOfNotNull(
                     "label" to component.label,
                     "type" to component.type,
-                    "systems" to component.systems.joinToString(separator = ","),
-                    "languages" to component.languages.joinToString(separator = ","),
-                    "tags" to component.tags.joinToString(separator = ","),
+                    "systems" to component.systems.toStr(),
+                    "languages" to component.languages.toStr(),
+                    "tags" to component.tags.toStr(),
                     "scm_type" to (component.scm?.type ?: ""),
                     "scm_url" to (component.scm?.url ?: ""),
                     "scm_path" to (component.scm?.path ?: ""),
@@ -116,6 +127,54 @@ class RedisComponentRepo : ComponentRepo {
                     component.jenkinsServer?.let { "jenkinsServer" to it },
                     component.jenkinsJob?. let { "jenkinsJob" to it }
             ).toMap())
+        }
+    }
+
+    override fun addSystem(componentId: String, system: String) {
+        pool.resource.use { jedis ->
+            jedis.hget("component:$componentId", "systems").toList().toSet()
+                    .plus(system)
+                    .toStr().let { jedis.hset("component:$componentId", "systems", it) }
+        }
+    }
+
+    override fun deleteSystem(componentId: String, system: String) {
+        pool.resource.use { jedis ->
+            jedis.hget("component:$componentId", "systems").toList().toSet()
+                    .minus(system)
+                    .toStr().let { jedis.hset("component:$componentId", "systems", it) }
+        }
+    }
+
+    override fun addLanguage(componentId: String, language: String) {
+        pool.resource.use { jedis ->
+            jedis.hget("component:$componentId", "languages").toList().toSet()
+                    .plus(language)
+                    .toStr().let { jedis.hset("component:$componentId", "languages", it) }
+        }
+    }
+
+    override fun deleteLanguage(componentId: String, language: String) {
+        pool.resource.use { jedis ->
+            jedis.hget("component:$componentId", "languages").toList().toSet()
+                    .minus(language)
+                    .toStr().let { jedis.hset("component:$componentId", "languages", it) }
+        }
+    }
+
+    override fun addTag(componentId: String, tag: String) {
+        pool.resource.use { jedis ->
+            jedis.hget("component:$componentId", "tags").toList().toSet()
+                    .plus(tag)
+                    .toStr().let { jedis.hset("component:$componentId", "tags", it) }
+        }
+    }
+
+    override fun deleteTag(componentId: String, tag: String) {
+        pool.resource.use { jedis ->
+            jedis.hget("component:$componentId", "tags").toList().toSet()
+                    .minus(tag)
+                    .toStr().let { jedis.hset("component:$componentId", "tags", it) }
         }
     }
 
@@ -134,5 +193,9 @@ class RedisComponentRepo : ComponentRepo {
             }
         }
     }
+
+    private fun String?.toList() = this?.split(",")?.map { it.trim() } ?: emptyList()
+
+    private fun Collection<String>.toStr() = this.joinToString(separator = ",")
 
 }

@@ -17,6 +17,7 @@ import {Tags} from "../web/components/common/Tags";
 import {LoginForm} from "../web/components/common/LoginForm";
 import {BuildStatus} from "../web/components/build/BuildStatus";
 import {BuildLink} from "../web/components/build/BuildLink";
+import {TagEditor} from "../web/components/common/TagEditor";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -65,6 +66,10 @@ storiesOf('Components', module)
     .add('TagCloud', () => {
         const tags = ["java", ".net", "java", "java", "kotlin", "javascript", "java"];
         return <TagCloud tags={tags} displayCount={true} selectionChanged={action("selectionChanged")} />
+    })
+    .add('TagEditor', () => {
+        const tags = ["java", ".net", "kotlin", "javascript"];
+        return <TagEditor tags={tags} displayCount={true} selectionChanged={action("selectionChanged")} />
     })
 ;
 

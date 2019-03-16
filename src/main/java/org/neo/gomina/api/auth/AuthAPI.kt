@@ -40,6 +40,8 @@ class AuthApi {
                 logger.info("Authenticated '$login'")
                 // FIXME permissions
                 val permissions = listOf(
+                        "component.add",
+                        "component.edit",
                         "component.knowledge",
                         "component.disable",
                         "component.delete"

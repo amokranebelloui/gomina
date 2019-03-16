@@ -1,19 +1,30 @@
-import React from "react"
-import PropTypes from "prop-types"
+// @flow
+import * as React from "react"
 import {Badge} from "./Badge";
 import {uniqCount} from "./utils";
+
+type Props = {
+    tags?: ?Array<string>,
+    sortByCount?: ?boolean, // true
+    displayCount?: ?boolean,
+    sortAlphabetically?: ?boolean, // true
+    selectionChanged?: ?Array<string> => void
+}
+type State = {
+    selected: Array<string>
+}
 
 /**
  * Tag cloud, with the size or color representing the importance of a tag.
  * The items can be selectable
  */
-class TagCloud extends React.Component {
-    constructor(props) {
+class TagCloud extends React.Component<Props, State> {
+    constructor(props: Props) {
         super(props);
         this.state = {selected: []}
     }
-    onSelected(value, multi) {
-        let nextVal;
+    onSelected(value: string, multi: boolean) {
+        let nextVal: Array<string>;
         if (multi) {
             if (this.state.selected.indexOf(value) !== -1) {
                 nextVal = this.state.selected.filter(i => i !== value)
@@ -34,15 +45,15 @@ class TagCloud extends React.Component {
         this.setState({selected: nextVal});
         this.props.selectionChanged && this.props.selectionChanged(nextVal)
     }
-    isSelected(value) {
+    isSelected(value: string) {
         return this.state.selected.indexOf(value) > -1
     }
     render() {
         let tags = uniqCount(this.props.tags);
-        if (this.props.sortByCount === true) {
+        if (this.props.sortByCount || true) {
             tags = tags.sort((i1, i2) => {
                 const diff = i2.count - i1.count;
-                if (this.props.sortAlphabetically) {
+                if (this.props.sortAlphabetically || true) {
                     return diff !== 0 ? diff : i2.value > i1.value ? -1 : 1
                 }
                 else {
@@ -50,7 +61,7 @@ class TagCloud extends React.Component {
                 }
             });
         }
-        else if (this.props.sortAlphabetically === true) {
+        else if (this.props.sortAlphabetically || true) {
             tags = tags.sort((i1, i2) => i2.value > i1.value ? -1 : 1);
         }
 
@@ -59,23 +70,11 @@ class TagCloud extends React.Component {
                 <Badge key={t.value} value={t.value}
                        backgroundColor={this.isSelected(t.value) ? 'yellow' : null}
                        onSelected={(v, multi) => this.onSelected(v, multi)}>
-                    {t.value}{this.props.displayCount && "(" + t.count + ")"}
+                    {t.value}{(this.props.displayCount || false) && "(" + t.count + ")"}
                 </Badge>
             )
         )
     }
 }
-
-TagCloud.propTypes = {
-    tags: PropTypes.array.isRequired,
-    sortByCount: PropTypes.bool,
-    displayCount: PropTypes.bool,
-    sortAlphabetically: PropTypes.bool,
-    selectionChanged: PropTypes.func
-};
-TagCloud.defaultProps = {
-    sortByCount: true,
-    sortAlphabetically: true
-};
 
 export { TagCloud }

@@ -16,7 +16,7 @@ import "../common/items.css"
 import type {ComponentType} from "./ComponentType";
 import {Secure} from "../permission/Secure";
 import {TagCloud} from "../common/TagCloud";
-import {Tags} from "../common/Tags";
+import {TagEditor} from "../common/TagEditor";
 
 function ComponentHeader(props: {}) {
     return (
@@ -101,6 +101,12 @@ type ComponentBadgeProps = {
     onReloadScm: (componentId: string) => void,
     onReloadBuild: (componentId: string) => void,
     onReloadSonar: (componentId: string) => void,
+    onSystemAdd: (componentId: string, system: string) => void,
+    onSystemDelete: (componentId: string, system: string) => void,
+    onLanguageAdd: (componentId: string, language: string) => void,
+    onLanguageDelete: (componentId: string, language: string) => void,
+    onTagAdd: (componentId: string, tags: string) => void,
+    onTagDelete: (componentId: string, tags: string) => void,
     onEnable: (componentId: string) => void,
     onDisable: (componentId: string) => void,
     onDelete: (componentId: string) => void
@@ -132,9 +138,36 @@ function ComponentBadge(props: ComponentBadgeProps) {
 
                 <hr/>
 
-                Systems: <TagCloud tags={component.systems} /><br/>
-                Languages: <TagCloud tags={component.languages} /><br/>
-                Tags: <TagCloud tags={component.tags} /><br/>
+                Systems:
+                <Secure permission="component.edit" fallback={
+                    <TagCloud tags={component.systems} />
+                }>
+                    <TagEditor tags={component.systems}
+                               onTagAdd={t => props.onSystemAdd(component.id, t)}
+                               onTagDelete={t => props.onSystemDelete(component.id, t)}
+                    />
+                </Secure>
+                <br/>
+                Languages:
+                <Secure permission="component.edit" fallback={
+                    <TagCloud tags={component.languages} />
+                }>
+                    <TagEditor tags={component.languages}
+                               onTagAdd={t => props.onLanguageAdd(component.id, t)}
+                               onTagDelete={t => props.onLanguageDelete(component.id, t)}
+                    />
+                </Secure>
+                <br/>
+                Tags:
+                <Secure permission="component.edit" fallback={
+                    <TagCloud tags={component.tags} />
+                }>
+                    <TagEditor tags={component.tags}
+                               onTagAdd={t => props.onTagAdd(component.id, t)}
+                               onTagDelete={t => props.onTagDelete(component.id, t)}
+                    />
+                </Secure>
+                <br/>
 
                 <hr/>
 

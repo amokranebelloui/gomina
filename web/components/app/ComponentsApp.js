@@ -141,7 +141,7 @@ class ComponentsApp extends React.Component {
                             <button onClick={e => this.reloadBuild()}>BUILD</button>
                             <button onClick={e => this.reloadSonar()}>SONAR</button>
                         </Well>
-                        <Secure>
+                        <Secure permission="component.add">
                             <Well block>
                                 <AddComponent />
                             </Well>

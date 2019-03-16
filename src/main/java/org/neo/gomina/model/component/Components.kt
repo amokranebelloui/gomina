@@ -51,6 +51,12 @@ interface ComponentRepo {
     fun getAll(): List<Component>
     fun get(componentId: String): Component?
     fun add(component: NewComponent)
+    fun addSystem(componentId: String, system: String)
+    fun deleteSystem(componentId: String, system: String)
+    fun addLanguage(componentId: String, language: String)
+    fun deleteLanguage(componentId: String, language: String)
+    fun addTag(componentId: String, tag: String)
+    fun deleteTag(componentId: String, tag: String)
     fun disable(componentId: String)
     fun enable(componentId: String)
 }

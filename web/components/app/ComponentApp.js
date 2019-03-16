@@ -99,6 +99,37 @@ class ComponentApp extends React.Component {
                 console.log("sonar reload error", error.response);
             });
     }
+    addSystem(componentId, system) {
+        axios.put('/data/components/' + componentId + '/add-system/' + system)
+            .then(() => this.retrieveComponent(componentId))
+            .catch((error) => console.error("cannot add system", error.response));
+    }
+    deleteSystem(componentId, system) {
+        axios.put('/data/components/' + componentId + '/delete-system/' + system)
+            .then(() => this.retrieveComponent(componentId))
+            .catch(error => console.error("cannot delete system", error.response));
+    }
+    addLanguage(componentId, language) {
+        console.info("add language", componentId, language);
+        axios.put('/data/components/' + componentId + '/add-language/' + language)
+            .then(() => this.retrieveComponent(componentId))
+            .catch((error) => console.error("cannot add language", error.response));
+    }
+    deleteLanguage(componentId, language) {
+        axios.put('/data/components/' + componentId + '/delete-language/' + language)
+            .then(() => this.retrieveComponent(componentId))
+            .catch(error => console.error("cannot delete language", error.response));
+    }
+    addTag(componentId, tag) {
+        axios.put('/data/components/' + componentId + '/add-tag/' + tag)
+            .then(() => this.retrieveComponent(componentId))
+            .catch((error) => console.error("cannot add tag", error.response));
+    }
+    deleteTag(componentId, tag) {
+        axios.put('/data/components/' + componentId + '/delete-tag/' + tag)
+            .then(() => this.retrieveComponent(componentId))
+            .catch(error => console.error("cannot delete tag", error.response));
+    }
     enable(componentId) {
         console.info("enable ", componentId);
         axios.put('/data/components/' + componentId + '/enable')
@@ -314,6 +345,12 @@ class ComponentApp extends React.Component {
                                         onReloadScm={id => this.reloadScm(id)}
                                         onReloadBuild={id => this.reloadBuild(id)}
                                         onReloadSonar={id => this.reloadSonar(id)}
+                                        onSystemAdd={(id, s) => this.addSystem(id,s)}
+                                        onSystemDelete={(id, s) => this.deleteSystem(id,s)}
+                                        onLanguageAdd={(id, l) => this.addLanguage(id,l)}
+                                        onLanguageDelete={(id, l) => this.deleteLanguage(id,l)}
+                                        onTagAdd={(id, t) => this.addTag(id,t)}
+                                        onTagDelete={(id, t) => this.deleteTag(id,t)}
                                         onEnable={id => this.enable(id)}
                                         onDisable={id => this.disable(id)}
                                         onDelete={id => this.delete(id)}
