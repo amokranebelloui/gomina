@@ -24,7 +24,8 @@ class ScmLink extends React.Component {
         const hasChanges = changesCount > 0;
         //const backgroundColor = hasChanges ? '#EAA910' : '#F2E18F';
         // TODO Display component has unreleased changes
-        const opacity = this.props.url ? null : .05;
+        //const opacity = this.props.url ? null : .05;
+        const opacity = 1;
         return (
             <a href={this.props.url} target="_blank" title={this.props.url}
                style={{

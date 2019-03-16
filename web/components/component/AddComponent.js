@@ -1,7 +1,7 @@
 // @flow
 
 import * as React from "react"
-import type {NewComponentData} from "./NewComponent";
+import type {NewComponentType} from "./NewComponent";
 import {NewComponent} from "./NewComponent";
 import * as axios from "axios";
 import {ComponentAdded} from "./ComponentAdded";
@@ -40,7 +40,7 @@ class AddComponent extends React.Component<Props, State> {
             error: null
         })
     }
-    addComponent(newComponentData: NewComponentData) {
+    addComponent(newComponentData: NewComponentType) {
         console.info("Adding Component", newComponentData);
         this.setState({
             processing: true,
@@ -48,7 +48,7 @@ class AddComponent extends React.Component<Props, State> {
             error: null
         });
         const thisComponent = this;
-        axios.post('/data/components/add?componentId=' + newComponentData.id)
+        axios.post('/data/components/add?componentId=' + newComponentData.id, newComponentData)
             .then(response => {
                 console.log("component added", response.data);
                 thisComponent.setState({

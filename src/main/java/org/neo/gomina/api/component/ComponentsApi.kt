@@ -1,6 +1,10 @@
 package org.neo.gomina.api.component
 
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -16,6 +20,8 @@ import org.neo.gomina.integration.sonar.SonarIndicators
 import org.neo.gomina.integration.sonar.SonarService
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
+import org.neo.gomina.model.component.NewComponent
+import org.neo.gomina.model.component.Scm
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.scm.ScmDetails
@@ -93,6 +99,24 @@ data class InstanceRefDetail(
         val running: VersionDetail?,
         val deployed: VersionDetail?)
 
+data class NewComponentDetail(
+        var id: String,
+        var label: String? = null,
+        var type: String? = null,
+        //var owner: String? = null,
+        //var critical: Int? = null,
+        var systems: List<String> = emptyList(),
+        var languages: List<String> = emptyList(),
+        var tags: List<String> = emptyList(),
+        var scmType: String? = null,
+        var scmUrl: String? = null,
+        var scmPath: String? = null,
+        var sonarServer: String? = null,
+        var jenkinsServer: String? = null,
+        var jenkinsJob: String? = null
+)
+
+
 class ComponentsApi {
 
     companion object {
@@ -114,7 +138,10 @@ class ComponentsApi {
 
     @Inject private lateinit var topology: Topology
 
-    private val mapper = ObjectMapper()
+    private val mapper = ObjectMapper().registerKotlinModule()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
 
     @Inject
     constructor(vertx: Vertx) {
@@ -271,32 +298,29 @@ class ComponentsApi {
         return null
     }
 
-    @Deprecated("Dummy") private val components = mutableSetOf<String>()
-
     private fun addComponent(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
         try {
-            val componentId = ctx.request().getParam("componentId")
-
-            if (!components.contains(componentId)) {
-                logger.info("Adding component " + componentId)
-                Thread.sleep(2000)
-                components.add(componentId)
-                //val component = this.componentRepo.get(componentId)?.let { this.build(it) }
-                val component = ComponentDetail(id = componentId, label = "Component $componentId") // FIXME Real impl
-                logger.info("Added component " + componentId)
-                ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(component))
-            }
-            else {
-                ctx.response().putHeader("content-type", "text/javascript").setStatusCode(403).end("$componentId already exists")
-            }
-
+            val newComp = mapper.readValue<NewComponentDetail>(ctx.body.toString())
+            logger.info("Adding component $componentId => $newComp")
+            componentRepo.add(NewComponent(
+                    id = newComp.id,
+                    label = newComp.label,
+                    type = newComp.type,
+                    systems = newComp.systems,
+                    tags = newComp.tags,
+                    languages = newComp.languages,
+                    scm = Scm(newComp.scmType ?: "", newComp.scmUrl ?: "", newComp.scmPath ?: "") // FIXME ????
+            ))
+            logger.info("Added component " + componentId)
+            val component = this.componentRepo.get(componentId)?.let { this.build(it) }
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(component))
         }
         catch (e: Exception) {
-            logger.error("Cannot get component", e)
-            ctx.fail(500)
+            logger.error("Cannot add component", e)
+            ctx.response().putHeader("content-type", "text/javascript").setStatusCode(403).end(e.message)
         }
     }
-
 
     private fun reloadScm(ctx: RoutingContext) {
         try {

@@ -7,6 +7,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
+import org.neo.gomina.model.component.NewComponent
 import org.neo.gomina.model.component.Scm
 import redis.clients.jedis.JedisPool
 import java.io.File
@@ -31,6 +32,10 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
 
     override fun get(componentId: String): Component? = read(file).find { it.id == componentId }
 
+    override fun add(component: NewComponent) {
+        TODO("not implemented")
+    }
+
     override fun disable(componentId: String) {
         TODO("not implemented")
     }
@@ -42,7 +47,6 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
 }
 
 class RedisComponentRepo : ComponentRepo {
-
     companion object {
         private val logger = LogManager.getLogger(RedisComponentRepo.javaClass)
     }
@@ -93,6 +97,27 @@ class RedisComponentRepo : ComponentRepo {
             jenkinsJob = map["jenkinsJob"],
             disabled = map["disabled"]?.toBoolean() == true
     )
+
+    override fun add(component: NewComponent) {
+        pool.resource.use { jedis ->
+            if (jedis.exists("component:${component.id}")) {
+                throw Exception("${component.id} already exists")
+            }
+            jedis.hmset("component:${component.id}", listOfNotNull(
+                    "label" to component.label,
+                    "type" to component.type,
+                    "systems" to component.systems.joinToString(separator = ","),
+                    "languages" to component.languages.joinToString(separator = ","),
+                    "tags" to component.tags.joinToString(separator = ","),
+                    "scm_type" to (component.scm?.type ?: ""),
+                    "scm_url" to (component.scm?.url ?: ""),
+                    "scm_path" to (component.scm?.path ?: ""),
+                    component.sonarServer?.let { "sonarServer" to it },
+                    component.jenkinsServer?.let { "jenkinsServer" to it },
+                    component.jenkinsJob?. let { "jenkinsJob" to it }
+            ).toMap())
+        }
+    }
 
     override fun disable(componentId: String) {
         pool.resource.use { jedis ->

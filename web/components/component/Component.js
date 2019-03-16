@@ -15,6 +15,8 @@ import {SonarLink} from "./SonarLink";
 import "../common/items.css"
 import type {ComponentType} from "./ComponentType";
 import {Secure} from "../permission/Secure";
+import {TagCloud} from "../common/TagCloud";
+import {Tags} from "../common/Tags";
 
 function ComponentHeader(props: {}) {
     return (
@@ -115,20 +117,31 @@ function ComponentBadge(props: ComponentBadgeProps) {
                     }
                     <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
                 </span>
+                <button onClick={e => props.onReload(component.id)}>RELOAD</button>
                 <br/>
                 <span style={{fontSize: 9}}>{component.mvn}</span>
                 <br/>
 
                 <ScmLink type={component.scmType} url={component.scmLocation}/>
                 <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
+                <button onClick={e => props.onReloadScm(component.id)}>SCM</button>
                 <br/>
 
                 <span key="owner">Owner {component.owner || <span style={{opacity: "0.5"}}>Unknown</span>}</span><br/>
                 <span key="criticality">Criticality {component.critical || <span style={{opacity: "0.5"}}>"?"</span>}</span><br/>
 
+                <hr/>
+
+                Systems: <TagCloud tags={component.systems} /><br/>
+                Languages: <TagCloud tags={component.languages} /><br/>
+                Tags: <TagCloud tags={component.tags} /><br/>
+
+                <hr/>
+
                 <LinesOfCode loc={component.loc}/>
                 <Coverage coverage={component.coverage}/>
                 <SonarLink url={component.sonarUrl} />
+                <button onClick={e => props.onReloadSonar(component.id)}>SONAR</button>
                 <br/>
 
                 <BuildLink
@@ -138,12 +151,9 @@ function ComponentBadge(props: ComponentBadgeProps) {
                 <BuildNumber number={component.buildNumber}/>
                 <BuildStatus status={component.buildStatus}/>
                 <DateTime date={component.buildTimestamp}/>
+                <button onClick={e => props.onReloadBuild(component.id)}>BUILD</button>
                 <br/>
 
-                <button onClick={e => props.onReload(component.id)}>RELOAD</button>
-                <button onClick={e => props.onReloadScm(component.id)}>SCM</button>
-                <button onClick={e => props.onReloadBuild(component.id)}>BUILD</button>
-                <button onClick={e => props.onReloadSonar(component.id)}>SONAR</button>
                 <Secure permission="component.disable">
                     {component.disabled
                         ? <button onClick={e => props.onEnable(component.id)}>Enable</button>

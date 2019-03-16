@@ -14,10 +14,13 @@ class JenkinsService {
     private val jenkinsCache = Cache<BuildStatus>("jenkins")
 
     fun getStatus(component: Component, fromCache: Boolean = false): BuildStatus? {
-        val root = jenkinsConfig.serverMap[component.jenkinsServer]?.location
-        val url = "$root${URLCodec().encode(component.jenkinsJob).replace("+", "%20")}"
-        // FIXME Return something when failing to retrieve status
-        return jenkinsCache.get(url, fromCache) { jenkinsConnector.getStatus(url) }
+        return if (component.jenkinsJob?.isNotBlank() == true) {
+            val root = jenkinsConfig.serverMap[component.jenkinsServer]?.location
+            val url = "$root${URLCodec().encode(component.jenkinsJob).replace("+", "%20")}"
+            // FIXME Return something when failing to retrieve status
+            return jenkinsCache.get(url, fromCache) { jenkinsConnector.getStatus(url) }
+        }
+        else null
     }
 
 }

@@ -21,6 +21,22 @@ data class Component(
     }
 }
 
+data class NewComponent(
+        var id: String,
+        var label: String? = null,
+        var type: String? = null,
+        //var owner: String? = null,
+        //var critical: Int? = null,
+        var systems: List<String> = emptyList(),
+        var languages: List<String> = emptyList(),
+        var tags: List<String> = emptyList(),
+        var scm: Scm? = null,
+        var sonarServer: String? = null,
+        var jenkinsServer: String? = null,
+        var jenkinsJob: String? = null
+)
+
+
 data class Scm (
         var type: String = "",
         var url: String = "", var path: String = "",
@@ -34,6 +50,7 @@ data class Scm (
 interface ComponentRepo {
     fun getAll(): List<Component>
     fun get(componentId: String): Component?
+    fun add(component: NewComponent)
     fun disable(componentId: String)
     fun enable(componentId: String)
 }

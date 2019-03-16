@@ -11,6 +11,8 @@ import queryString from 'query-string'
 import {Dependencies} from "../dependency/Dependencies";
 import {CallChain} from "../dependency/CallChain";
 import Link from "react-router-dom/es/Link";
+import {ScmLink} from "../component/ScmLink";
+import {UnreleasedChangeCount} from "../component/UnreleasedChangeCount";
 
 class ComponentApp extends React.Component {
     
@@ -277,15 +279,21 @@ class ComponentApp extends React.Component {
             <AppLayout title={"Component: " + component.label}>
                 <PrimarySecondaryLayout>
                     <Container>
-                        <ComponentBadge component={component}
-                                        onReload={id => this.retrieveComponent(id)}
-                                        onReloadScm={id => this.reloadScm(id)}
-                                        onReloadBuild={id => this.reloadBuild(id)}
-                                        onReloadSonar={(id) => this.reloadSonar(id)}
-                                        onEnable={id => this.enable(id)}
-                                        onDisable={id => this.disable(id)}
-                                        onDelete={id => this.delete(id)}
-                        />
+                        <span title={component.id}>
+                            <span style={{fontSize: 14}}><b>{component.label}</b></span>
+                            {component.disabled &&
+                                <span>&nbsp;<s>DISABLED</s></span>
+                            }
+                            <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
+                        </span>
+                        <br/>
+                        <span style={{fontSize: 9}}>{component.mvn}</span>
+                        <br/>
+
+                        <ScmLink type={component.scmType} />&nbsp;
+                        <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
+                        <br/>
+                        <UnreleasedChangeCount changes={component.changes} />
 
                         <ComponentMenu component={component} />
 
