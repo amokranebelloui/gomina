@@ -144,8 +144,12 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
             return (
                 <div className='component-badge'>
                     <span title={component.id}>
-                        <EditableLabel label={component.label} style={{fontSize: 16, fontWeight: 'bold'}}
-                                       onLabelEdited={l => this.props.onLabelEdited(component.id, l)} />
+                        <Secure permission="component.edit" fallback={
+                            <span style={{fontSize: 16, fontWeight: 'bold'}}>{component.label}</span>
+                        }>
+                            <EditableLabel label={component.label} style={{fontSize: 16, fontWeight: 'bold'}}
+                                           onLabelEdited={l => this.props.onLabelEdited(component.id, l)} />
+                        </Secure>
                         &nbsp;
                         <button onClick={e => this.props.onReload(component.id)}>RELOAD</button>
                         {component.disabled && <span>&nbsp;<s>DISABLED</s></span>}
@@ -167,7 +171,9 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                         <ScmLink type={component.scmType} />&nbsp;
                         <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
                         &nbsp;
-                        <button onClick={() => this.startEditScm()}>Edit</button>
+                        <Secure permission="component.edit">
+                            <button onClick={() => this.startEditScm()}>Edit</button>
+                        </Secure>
                         <button onClick={() => this.props.onReloadScm(component.id)}>ReloadSCM</button>
                     </div>
                     }
@@ -179,8 +185,12 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                     <br/>
 
                     <span key="type">Type &nbsp;
-                    <EditableLabel label={component.type}
-                                   onLabelEdited={t => this.props.onTypeEdited(component.id, t)}/>
+                    <Secure permission="component.edit" fallback={
+                        <span>{component.type}</span>
+                    }>
+                        <EditableLabel label={component.type}
+                                       onLabelEdited={t => this.props.onTypeEdited(component.id, t)}/>
+                    </Secure>
                     <br/></span>
 
                     <span key="owner">Owner {component.owner || <span style={{opacity: "0.5"}}>Unknown</span>}</span><br/>
