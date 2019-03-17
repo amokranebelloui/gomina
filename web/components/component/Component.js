@@ -17,6 +17,7 @@ import type {ComponentType} from "./ComponentType";
 import {Secure} from "../permission/Secure";
 import {TagCloud} from "../common/TagCloud";
 import {TagEditor} from "../common/TagEditor";
+import {EditableLabel} from "../common/EditableLabel";
 
 function ComponentHeader(props: {}) {
     return (
@@ -101,6 +102,8 @@ type ComponentBadgeProps = {
     onReloadScm: (componentId: string) => void,
     onReloadBuild: (componentId: string) => void,
     onReloadSonar: (componentId: string) => void,
+    onLabelEdited: (componentId: string, label: string) => void,
+    onTypeEdited: (componentId: string, type: string) => void,
     onSystemAdd: (componentId: string, system: string) => void,
     onSystemDelete: (componentId: string, system: string) => void,
     onLanguageAdd: (componentId: string, language: string) => void,
@@ -117,14 +120,21 @@ function ComponentBadge(props: ComponentBadgeProps) {
         return (
             <div className='component-badge'>
                 <span title={component.id}>
-                    <span style={{fontSize: 14}}><b>{component.label}</b></span>
-                    {component.disabled &&
-                        <span>&nbsp;<s>DISABLED</s></span>
-                    }
-                    <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
+                    <EditableLabel label={component.label} style={{fontSize: 16, fontWeight: 'bold'}}
+                                   onLabelEdited={l => props.onLabelEdited(component.id, l)} />
+                    &nbsp;
+                    <button onClick={e => props.onReload(component.id)}>RELOAD</button>
+                    {component.disabled && <span>&nbsp;<s>DISABLED</s></span>}
                 </span>
-                <button onClick={e => props.onReload(component.id)}>RELOAD</button>
+                &nbsp;
+                <Secure permission="component.disable">
+                    {component.disabled
+                        ? <button onClick={e => props.onEnable(component.id)}>Enable</button>
+                        : <button onClick={e => props.onDisable(component.id)}>Disable</button>
+                    }
+                </Secure>
                 <br/>
+
                 <span style={{fontSize: 9}}>{component.mvn}</span>
                 <br/>
 
@@ -132,6 +142,11 @@ function ComponentBadge(props: ComponentBadgeProps) {
                 <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
                 <button onClick={e => props.onReloadScm(component.id)}>SCM</button>
                 <br/>
+
+                <span key="type">Type &nbsp;
+                <EditableLabel label={component.type}
+                               onLabelEdited={t => props.onTypeEdited(component.id, t)}/>
+                <br/></span>
 
                 <span key="owner">Owner {component.owner || <span style={{opacity: "0.5"}}>Unknown</span>}</span><br/>
                 <span key="criticality">Criticality {component.critical || <span style={{opacity: "0.5"}}>"?"</span>}</span><br/>
@@ -187,15 +202,13 @@ function ComponentBadge(props: ComponentBadgeProps) {
                 <button onClick={e => props.onReloadBuild(component.id)}>BUILD</button>
                 <br/>
 
-                <Secure permission="component.disable">
-                    {component.disabled
-                        ? <button onClick={e => props.onEnable(component.id)}>Enable</button>
-                        : <button onClick={e => props.onDisable(component.id)}>Disable</button>
-                    }
-                </Secure>
+                <hr/>
+
                 <Secure permission="component.delete">
                     <button onClick={e => props.onDelete(component.id)}>Delete</button>
                 </Secure>
+                <br/>
+
             </div>
         )
     }

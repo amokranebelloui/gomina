@@ -36,6 +36,9 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
         TODO("not implemented")
     }
 
+    override fun editLabel(componentId: String, label: String) { TODO("not implemented") }
+    override fun editType(componentId: String, type: String) { TODO("not implemented") }
+
     override fun addSystem(componentId: String, system: String) { TODO("not implemented") }
     override fun deleteSystem(componentId: String, system: String) { TODO("not implemented") }
 
@@ -127,6 +130,21 @@ class RedisComponentRepo : ComponentRepo {
                     component.jenkinsServer?.let { "jenkinsServer" to it },
                     component.jenkinsJob?. let { "jenkinsJob" to it }
             ).toMap())
+        }
+    }
+
+    override fun editLabel(componentId: String, label: String) {
+        if (label.isBlank()) {
+            throw Exception("$componentId label cannot be blank")
+        }
+        pool.resource.use { jedis ->
+            jedis.hset("component:$componentId", "label", label)
+        }
+    }
+
+    override fun editType(componentId: String, type: String) {
+        pool.resource.use { jedis ->
+            jedis.hset("component:$componentId", "type", type)
         }
     }
 

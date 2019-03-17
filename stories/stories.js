@@ -18,6 +18,7 @@ import {LoginForm} from "../web/components/common/LoginForm";
 import {BuildStatus} from "../web/components/build/BuildStatus";
 import {BuildLink} from "../web/components/build/BuildLink";
 import {TagEditor} from "../web/components/common/TagEditor";
+import {EditableLabel} from "../web/components/common/EditableLabel";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -70,6 +71,11 @@ storiesOf('Components', module)
     .add('TagEditor', () => {
         const tags = ["java", ".net", "kotlin", "javascript"];
         return <TagEditor tags={tags} displayCount={true} selectionChanged={action("selectionChanged")} />
+    })
+    .add('EditableLabel', () => {
+        return (
+            <EditableLabel label="Some Label" style={{fontSize: 30}} />
+        )
     })
 ;
 

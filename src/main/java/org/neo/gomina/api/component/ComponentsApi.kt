@@ -159,6 +159,8 @@ class ComponentsApi {
         router.put("/reload-scm").handler(this::reloadScm)
         router.put("/reload-build").handler(this::reloadBuild)
         router.put("/reload-sonar").handler(this::reloadSonar)
+        router.put("/:componentId/label").handler(this::editLabel)
+        router.put("/:componentId/type").handler(this::editType)
         router.put("/:componentId/add-system/:system").handler(this::addSystem)
         router.put("/:componentId/delete-system/:system").handler(this::deleteSystem)
         router.put("/:componentId/add-language/:language").handler(this::addLanguage)
@@ -381,6 +383,34 @@ class ComponentsApi {
         }
         catch (e: Exception) {
             logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun editLabel(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val label = ctx.request().getParam("label")
+            logger.info("Edit Label $componentId $label ...")
+            componentRepo.editLabel(componentId, label)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot edit label", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun editType(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val type = ctx.request().getParam("type")
+            logger.info("Edit Label $componentId $type ...")
+            componentRepo.editType(componentId, type)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot edit type", e)
             ctx.fail(500)
         }
     }

@@ -99,6 +99,16 @@ class ComponentApp extends React.Component {
                 console.log("sonar reload error", error.response);
             });
     }
+    editLabel(componentId, label) {
+        axios.put('/data/components/' + componentId + '/label?label=' + label)
+            .then(() => this.retrieveComponent(componentId))
+            .catch((error) => console.error("cannot edit label", error.response));
+    }
+    editType(componentId, type) {
+        axios.put('/data/components/' + componentId + '/type?type=' + type)
+            .then(() => this.retrieveComponent(componentId))
+            .catch((error) => console.error("cannot edit type", error.response));
+    }
     addSystem(componentId, system) {
         axios.put('/data/components/' + componentId + '/add-system/' + system)
             .then(() => this.retrieveComponent(componentId))
@@ -345,12 +355,14 @@ class ComponentApp extends React.Component {
                                         onReloadScm={id => this.reloadScm(id)}
                                         onReloadBuild={id => this.reloadBuild(id)}
                                         onReloadSonar={id => this.reloadSonar(id)}
-                                        onSystemAdd={(id, s) => this.addSystem(id,s)}
-                                        onSystemDelete={(id, s) => this.deleteSystem(id,s)}
-                                        onLanguageAdd={(id, l) => this.addLanguage(id,l)}
-                                        onLanguageDelete={(id, l) => this.deleteLanguage(id,l)}
-                                        onTagAdd={(id, t) => this.addTag(id,t)}
-                                        onTagDelete={(id, t) => this.deleteTag(id,t)}
+                                        onLabelEdited={(id, l) => this.editLabel(id, l)}
+                                        onTypeEdited={(id, t) => this.editType(id, t)}
+                                        onSystemAdd={(id, s) => this.addSystem(id, s)}
+                                        onSystemDelete={(id, s) => this.deleteSystem(id, s)}
+                                        onLanguageAdd={(id, l) => this.addLanguage(id, l)}
+                                        onLanguageDelete={(id, l) => this.deleteLanguage(id, l)}
+                                        onTagAdd={(id, t) => this.addTag(id, t)}
+                                        onTagDelete={(id, t) => this.deleteTag(id, t)}
                                         onEnable={id => this.enable(id)}
                                         onDisable={id => this.disable(id)}
                                         onDelete={id => this.delete(id)}
