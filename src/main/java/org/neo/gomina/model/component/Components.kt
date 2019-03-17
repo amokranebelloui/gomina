@@ -53,6 +53,7 @@ interface ComponentRepo {
     fun add(component: NewComponent)
     fun editLabel(componentId: String, label: String)
     fun editType(componentId: String, type: String)
+    fun editScm(componentId: String, type: String, url: String, path: String?)
     fun addSystem(componentId: String, system: String)
     fun deleteSystem(componentId: String, system: String)
     fun addLanguage(componentId: String, language: String)

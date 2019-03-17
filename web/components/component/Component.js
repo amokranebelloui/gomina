@@ -18,6 +18,7 @@ import {Secure} from "../permission/Secure";
 import {TagCloud} from "../common/TagCloud";
 import {TagEditor} from "../common/TagEditor";
 import {EditableLabel} from "../common/EditableLabel";
+import {ScmEditor} from "./ScmEditor";
 
 function ComponentHeader(props: {}) {
     return (
@@ -104,6 +105,7 @@ type ComponentBadgeProps = {
     onReloadSonar: (componentId: string) => void,
     onLabelEdited: (componentId: string, label: string) => void,
     onTypeEdited: (componentId: string, type: string) => void,
+    onScmEdited: (componentId: string, type: string, url: string, path: ?string) => void,
     onSystemAdd: (componentId: string, system: string) => void,
     onSystemDelete: (componentId: string, system: string) => void,
     onLanguageAdd: (componentId: string, language: string) => void,
@@ -114,106 +116,140 @@ type ComponentBadgeProps = {
     onDisable: (componentId: string) => void,
     onDelete: (componentId: string) => void
 }
-function ComponentBadge(props: ComponentBadgeProps) {
-    const component = props.component;
-    if (component && component.id) {
-        return (
-            <div className='component-badge'>
-                <span title={component.id}>
-                    <EditableLabel label={component.label} style={{fontSize: 16, fontWeight: 'bold'}}
-                                   onLabelEdited={l => props.onLabelEdited(component.id, l)} />
-                    &nbsp;
-                    <button onClick={e => props.onReload(component.id)}>RELOAD</button>
-                    {component.disabled && <span>&nbsp;<s>DISABLED</s></span>}
-                </span>
-                &nbsp;
-                <Secure permission="component.disable">
-                    {component.disabled
-                        ? <button onClick={e => props.onEnable(component.id)}>Enable</button>
-                        : <button onClick={e => props.onDisable(component.id)}>Disable</button>
-                    }
-                </Secure>
-                <br/>
-
-                <span style={{fontSize: 9}}>{component.mvn}</span>
-                <br/>
-
-                <ScmLink type={component.scmType} url={component.scmLocation}/>
-                <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
-                <button onClick={e => props.onReloadScm(component.id)}>SCM</button>
-                <br/>
-
-                <span key="type">Type &nbsp;
-                <EditableLabel label={component.type}
-                               onLabelEdited={t => props.onTypeEdited(component.id, t)}/>
-                <br/></span>
-
-                <span key="owner">Owner {component.owner || <span style={{opacity: "0.5"}}>Unknown</span>}</span><br/>
-                <span key="criticality">Criticality {component.critical || <span style={{opacity: "0.5"}}>"?"</span>}</span><br/>
-
-                <hr/>
-
-                Systems:
-                <Secure permission="component.edit" fallback={
-                    <TagCloud tags={component.systems} />
-                }>
-                    <TagEditor tags={component.systems}
-                               onTagAdd={t => props.onSystemAdd(component.id, t)}
-                               onTagDelete={t => props.onSystemDelete(component.id, t)}
-                    />
-                </Secure>
-                <br/>
-                Languages:
-                <Secure permission="component.edit" fallback={
-                    <TagCloud tags={component.languages} />
-                }>
-                    <TagEditor tags={component.languages}
-                               onTagAdd={t => props.onLanguageAdd(component.id, t)}
-                               onTagDelete={t => props.onLanguageDelete(component.id, t)}
-                    />
-                </Secure>
-                <br/>
-                Tags:
-                <Secure permission="component.edit" fallback={
-                    <TagCloud tags={component.tags} />
-                }>
-                    <TagEditor tags={component.tags}
-                               onTagAdd={t => props.onTagAdd(component.id, t)}
-                               onTagDelete={t => props.onTagDelete(component.id, t)}
-                    />
-                </Secure>
-                <br/>
-
-                <hr/>
-
-                <LinesOfCode loc={component.loc}/>
-                <Coverage coverage={component.coverage}/>
-                <SonarLink url={component.sonarUrl} />
-                <button onClick={e => props.onReloadSonar(component.id)}>SONAR</button>
-                <br/>
-
-                <BuildLink
-                    server={component.jenkinsServer}
-                    job={component.jenkinsJob}
-                    url={component.jenkinsUrl} />
-                <BuildNumber number={component.buildNumber}/>
-                <BuildStatus status={component.buildStatus}/>
-                <DateTime date={component.buildTimestamp}/>
-                <button onClick={e => props.onReloadBuild(component.id)}>BUILD</button>
-                <br/>
-
-                <hr/>
-
-                <Secure permission="component.delete">
-                    <button onClick={e => props.onDelete(component.id)}>Delete</button>
-                </Secure>
-                <br/>
-
-            </div>
-        )
+type ComponentBadgeState = {
+    scmEdition: boolean
+}
+class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadgeState> {
+    constructor(props: ComponentBadgeProps) {
+        super(props);
+        this.state = {
+            scmEdition: false
+        }
     }
-    else {
-        return (<div>Select a component to see details</div>)
+    startEditScm() {
+        this.setState({scmEdition: true});
+        //$FlowFixMe
+        //setTimeout(() => this.textInput.current && this.textInput.current.focus(), 0)
+    }
+    cancelEditScm() {
+        this.setState({scmEdition: false});
+    }
+    editScm(componentId: string, type: string, url: string, path: ?string) {
+        this.setState({scmEdition: false});
+        this.props.onScmEdited(componentId, type, url, path)
+    }
+    render() {
+        const component = this.props.component;
+        if (component && component.id) {
+            return (
+                <div className='component-badge'>
+                    <span title={component.id}>
+                        <EditableLabel label={component.label} style={{fontSize: 16, fontWeight: 'bold'}}
+                                       onLabelEdited={l => this.props.onLabelEdited(component.id, l)} />
+                        &nbsp;
+                        <button onClick={e => this.props.onReload(component.id)}>RELOAD</button>
+                        {component.disabled && <span>&nbsp;<s>DISABLED</s></span>}
+                    </span>
+                    &nbsp;
+                    <Secure permission="component.disable">
+                        {component.disabled
+                            ? <button onClick={e => this.props.onEnable(component.id)}>Enable</button>
+                            : <button onClick={e => this.props.onDisable(component.id)}>Disable</button>
+                        }
+                    </Secure>
+                    <br/>
+
+                    <span style={{fontSize: 9}}>{component.mvn}</span>
+                    <br/>
+
+                    {!this.state.scmEdition &&
+                    <div>
+                        <ScmLink type={component.scmType} />&nbsp;
+                        <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
+                        &nbsp;
+                        <button onClick={() => this.startEditScm()}>Edit</button>
+                        <button onClick={() => this.props.onReloadScm(component.id)}>ReloadSCM</button>
+                    </div>
+                    }
+                    {this.state.scmEdition &&
+                    <ScmEditor type={component.scmType} url={component.scmUrl} path={component.scmPath}
+                               onEdited={(type, url, path) => this.editScm(component.id, type, url, path)}
+                               onEditionCancelled={() => this.cancelEditScm()} />
+                    }
+                    <br/>
+
+                    <span key="type">Type &nbsp;
+                    <EditableLabel label={component.type}
+                                   onLabelEdited={t => this.props.onTypeEdited(component.id, t)}/>
+                    <br/></span>
+
+                    <span key="owner">Owner {component.owner || <span style={{opacity: "0.5"}}>Unknown</span>}</span><br/>
+                    <span key="criticality">Criticality {component.critical || <span style={{opacity: "0.5"}}>"?"</span>}</span><br/>
+
+                    <hr/>
+
+                    Systems:
+                    <Secure permission="component.edit" fallback={
+                        <TagCloud tags={component.systems} />
+                    }>
+                        <TagEditor tags={component.systems}
+                                   onTagAdd={t => this.props.onSystemAdd(component.id, t)}
+                                   onTagDelete={t => this.props.onSystemDelete(component.id, t)}
+                        />
+                    </Secure>
+                    <br/>
+                    Languages:
+                    <Secure permission="component.edit" fallback={
+                        <TagCloud tags={component.languages} />
+                    }>
+                        <TagEditor tags={component.languages}
+                                   onTagAdd={t => this.props.onLanguageAdd(component.id, t)}
+                                   onTagDelete={t => this.props.onLanguageDelete(component.id, t)}
+                        />
+                    </Secure>
+                    <br/>
+                    Tags:
+                    <Secure permission="component.edit" fallback={
+                        <TagCloud tags={component.tags} />
+                    }>
+                        <TagEditor tags={component.tags}
+                                   onTagAdd={t => this.props.onTagAdd(component.id, t)}
+                                   onTagDelete={t => this.props.onTagDelete(component.id, t)}
+                        />
+                    </Secure>
+                    <br/>
+
+                    <hr/>
+
+                    <LinesOfCode loc={component.loc}/>
+                    <Coverage coverage={component.coverage}/>
+                    <SonarLink url={component.sonarUrl} />
+                    <button onClick={e => this.props.onReloadSonar(component.id)}>SONAR</button>
+                    <br/>
+
+                    <BuildLink
+                        server={component.jenkinsServer}
+                        job={component.jenkinsJob}
+                        url={component.jenkinsUrl} />
+                    <BuildNumber number={component.buildNumber}/>
+                    <BuildStatus status={component.buildStatus}/>
+                    <DateTime date={component.buildTimestamp}/>
+                    <button onClick={e => this.props.onReloadBuild(component.id)}>BUILD</button>
+                    <br/>
+
+                    <hr/>
+
+                    <Secure permission="component.delete">
+                        <button onClick={e => this.props.onDelete(component.id)}>Delete</button>
+                    </Secure>
+                    <br/>
+
+                </div>
+            )
+        }
+        else {
+            return (<div>Select a component to see details</div>)
+        }
     }
 }
 

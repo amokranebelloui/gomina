@@ -17,6 +17,8 @@ type ComponentType = {
     languages?: ?Array<string>,
     tags?: ?Array<string>,
     scmType?: ?string,
+    scmUrl?: ?string,
+    scmPath?: ?string,
     scmLocation?: ?string,
     mvn?: ?string,
     sonarUrl?: ?string,

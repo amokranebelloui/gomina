@@ -50,6 +50,8 @@ data class ComponentDetail(
         var languages: List<String> = emptyList(),
         var tags: List<String> = emptyList(),
         var scmType: String? = null,
+        var scmUrl: String? = null,
+        var scmPath: String? = null,
         var scmLocation: String? = null,
         var mvn: String? = null,
         var sonarUrl: String? = null,
@@ -161,6 +163,7 @@ class ComponentsApi {
         router.put("/reload-sonar").handler(this::reloadSonar)
         router.put("/:componentId/label").handler(this::editLabel)
         router.put("/:componentId/type").handler(this::editType)
+        router.put("/:componentId/scm").handler(this::editScm)
         router.put("/:componentId/add-system/:system").handler(this::addSystem)
         router.put("/:componentId/delete-system/:system").handler(this::deleteSystem)
         router.put("/:componentId/add-language/:language").handler(this::addLanguage)
@@ -405,12 +408,32 @@ class ComponentsApi {
         try {
             val componentId = ctx.request().getParam("componentId")
             val type = ctx.request().getParam("type")
-            logger.info("Edit Label $componentId $type ...")
+            logger.info("Edit Type $componentId $type ...")
             componentRepo.editType(componentId, type)
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
             logger.error("Cannot edit type", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun editScm(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val type = ctx.request().getParam("type")
+            val url = ctx.request().getParam("url")
+            val path = ctx.request().getParam("path")
+            logger.info("Edit SCM $componentId $type $url $path ...")
+            componentRepo.editScm(componentId, type, url, path)
+            componentRepo.get(componentId)?.let { component ->
+                logger.info("Reload SCM data for $componentId ...")
+                component.scm?.let { scmService.reloadScmDetails(it) }
+            }
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot edit SCM", e)
             ctx.fail(500)
         }
     }
@@ -549,6 +572,8 @@ private fun ComponentDetail.apply(component: Component) {
     this.languages = component.languages
     this.tags = component.tags
     this.scmType = component.scm?.type
+    this.scmUrl = component.scm?.url
+    this.scmPath = component.scm?.path
     this.scmLocation = component.scm?.fullUrl
     this.mvn = component.maven
     this.jenkinsServer = component.jenkinsServer

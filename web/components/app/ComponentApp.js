@@ -109,6 +109,14 @@ class ComponentApp extends React.Component {
             .then(() => this.retrieveComponent(componentId))
             .catch((error) => console.error("cannot edit type", error.response));
     }
+    editScm(componentId, type, url, path) {
+        axios.put('/data/components/' + componentId + '/scm?type=' + type + '&url=' + url + '&path=' + path)
+            .then(() => {
+                this.retrieveComponent(componentId);
+                this.retrieveBranch(componentId, this.state.branchId);
+            })
+            .catch((error) => console.error("cannot edit type", error.response));
+    }
     addSystem(componentId, system) {
         axios.put('/data/components/' + componentId + '/add-system/' + system)
             .then(() => this.retrieveComponent(componentId))
@@ -357,6 +365,7 @@ class ComponentApp extends React.Component {
                                         onReloadSonar={id => this.reloadSonar(id)}
                                         onLabelEdited={(id, l) => this.editLabel(id, l)}
                                         onTypeEdited={(id, t) => this.editType(id, t)}
+                                        onScmEdited={(id, t, u, p) => this.editScm(id, t, u, p)}
                                         onSystemAdd={(id, s) => this.addSystem(id, s)}
                                         onSystemDelete={(id, s) => this.deleteSystem(id, s)}
                                         onLanguageAdd={(id, l) => this.addLanguage(id, l)}

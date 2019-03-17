@@ -19,6 +19,7 @@ import {BuildStatus} from "../web/components/build/BuildStatus";
 import {BuildLink} from "../web/components/build/BuildLink";
 import {TagEditor} from "../web/components/common/TagEditor";
 import {EditableLabel} from "../web/components/common/EditableLabel";
+import {ScmEditor} from "../web/components/component/ScmEditor";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -75,6 +76,11 @@ storiesOf('Components', module)
     .add('EditableLabel', () => {
         return (
             <EditableLabel label="Some Label" style={{fontSize: 30}} />
+        )
+    })
+    .add('ScmEditor', () => {
+        return (
+            <ScmEditor onEdited={action('scmEdited')} onEditionCancelled={action('editionCancelled')} />
         )
     })
 ;
