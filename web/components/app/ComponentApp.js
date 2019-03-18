@@ -109,13 +109,28 @@ class ComponentApp extends React.Component {
             .then(() => this.retrieveComponent(componentId))
             .catch((error) => console.error("cannot edit type", error.response));
     }
+    editArtifactId(componentId, artifactId) {
+        axios.put('/data/components/' + componentId + '/artifactId?id=' + artifactId)
+            .then(() => this.retrieveComponent(componentId))
+            .catch((error) => console.error("cannot edit artifactId", error.response));
+    }
     editScm(componentId, type, url, path) {
         axios.put('/data/components/' + componentId + '/scm?type=' + type + '&url=' + url + '&path=' + path)
             .then(() => {
                 this.retrieveComponent(componentId);
                 this.retrieveBranch(componentId, this.state.branchId);
             })
-            .catch((error) => console.error("cannot edit type", error.response));
+            .catch((error) => console.error("cannot edit scm", error.response));
+    }
+    editSonar(componentId, server) {
+        axios.put('/data/components/' + componentId + '/sonar?server=' + server)
+            .then(() => this.retrieveComponent(componentId))
+            .catch((error) => console.error("cannot edit sonar", error.response));
+    }
+    editBuild(componentId, server, job) {
+        axios.put('/data/components/' + componentId + '/build?server=' + server + '&job=' + job)
+            .then(() => this.retrieveComponent(componentId))
+            .catch((error) => console.error("cannot edit buil", error.response));
     }
     addSystem(componentId, system) {
         axios.put('/data/components/' + componentId + '/add-system/' + system)
@@ -365,7 +380,10 @@ class ComponentApp extends React.Component {
                                         onReloadSonar={id => this.reloadSonar(id)}
                                         onLabelEdited={(id, l) => this.editLabel(id, l)}
                                         onTypeEdited={(id, t) => this.editType(id, t)}
+                                        onArtifactIdEdited={(id, artifactId) => this.editArtifactId(id, artifactId)}
                                         onScmEdited={(id, t, u, p) => this.editScm(id, t, u, p)}
+                                        onSonarEdited={(id, s) => this.editSonar(id, s)}
+                                        onBuildEdited={(id, s, j) => this.editBuild(id, s, j)}
                                         onSystemAdd={(id, s) => this.addSystem(id, s)}
                                         onSystemDelete={(id, s) => this.deleteSystem(id, s)}
                                         onLanguageAdd={(id, l) => this.addLanguage(id, l)}

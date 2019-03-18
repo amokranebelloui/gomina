@@ -17,3 +17,7 @@
 - code: 'x.oms.vac:voms-bus'
   loc: null
   coverage: null
+
+- code: 'torkjell:torkjell'
+  loc: 3000
+  coverage: 2.9

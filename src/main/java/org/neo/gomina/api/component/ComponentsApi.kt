@@ -54,6 +54,7 @@ data class ComponentDetail(
         var scmPath: String? = null,
         var scmLocation: String? = null,
         var mvn: String? = null,
+        var sonarServer: String? = null,
         var sonarUrl: String? = null,
         var jenkinsServer: String? = null,
         var jenkinsJob: String? = null,
@@ -163,7 +164,10 @@ class ComponentsApi {
         router.put("/reload-sonar").handler(this::reloadSonar)
         router.put("/:componentId/label").handler(this::editLabel)
         router.put("/:componentId/type").handler(this::editType)
+        router.put("/:componentId/artifactId").handler(this::editArtifactId)
         router.put("/:componentId/scm").handler(this::editScm)
+        router.put("/:componentId/sonar").handler(this::editSonar)
+        router.put("/:componentId/build").handler(this::editBuild)
         router.put("/:componentId/add-system/:system").handler(this::addSystem)
         router.put("/:componentId/delete-system/:system").handler(this::deleteSystem)
         router.put("/:componentId/add-language/:language").handler(this::addLanguage)
@@ -418,6 +422,20 @@ class ComponentsApi {
         }
     }
 
+    private fun editArtifactId(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val artifactId = ctx.request().getParam("id")
+            logger.info("Edit ArtifactId $componentId $artifactId ...")
+            componentRepo.editArtifactId(componentId, artifactId)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot edit artifactId", e)
+            ctx.fail(500)
+        }
+    }
+
     private fun editScm(ctx: RoutingContext) {
         try {
             val componentId = ctx.request().getParam("componentId")
@@ -434,6 +452,41 @@ class ComponentsApi {
         }
         catch (e: Exception) {
             logger.error("Cannot edit SCM", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun editSonar(ctx: RoutingContext) {
+        try {
+            logger.info("Edit Sonar...")
+            val componentId = ctx.request().getParam("componentId")
+            val server = ctx.request().getParam("server")
+            logger.info("Edit Sonar $componentId $server ...")
+            componentRepo.editSonar(componentId, server)
+            // TODO Reload sonar data
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot edit Sonar", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun editBuild(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val server = ctx.request().getParam("server")
+            val job = ctx.request().getParam("job")
+            logger.info("Edit Buil $componentId $server $job ...")
+            componentRepo.editBuild(componentId, server, job)
+            componentRepo.get(componentId)?.let { component ->
+                logger.info("Reload Jenkins data for $componentId ...")
+                jenkinsService.getStatus(component, fromCache = false)
+            }
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot edit build", e)
             ctx.fail(500)
         }
     }
@@ -576,6 +629,7 @@ private fun ComponentDetail.apply(component: Component) {
     this.scmPath = component.scm?.path
     this.scmLocation = component.scm?.fullUrl
     this.mvn = component.maven
+    this.sonarServer = component.sonarServer
     this.jenkinsServer = component.jenkinsServer
     this.jenkinsJob = component.jenkinsJob
     this.disabled = component.disabled

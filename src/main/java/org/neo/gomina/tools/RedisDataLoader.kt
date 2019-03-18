@@ -13,18 +13,18 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 
-val jsonMapper = ObjectMapper(JsonFactory())
+private val jsonMapper = ObjectMapper(JsonFactory())
         .registerKotlinModule()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
         .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
 
-val host: String = "localhost"
-val port: Int = 7070
-val jedis = Jedis(host, port)
+private val host: String = "localhost"
+private val port: Int = 7070
+private val jedis = Jedis(host, port)
 
-val md = MessageDigest.getInstance("SHA-512")
-val defaultHash = md.digest("pwd".toByteArray(StandardCharsets.UTF_8)).toString(StandardCharsets.UTF_8)
+private val md = MessageDigest.getInstance("SHA-512")
+private val defaultHash = md.digest("pwd".toByteArray(StandardCharsets.UTF_8)).toString(StandardCharsets.UTF_8)
 
 fun main(args: Array<String>) {
     load(jsonMapper.readValue<List<Component>>(File("data/components.json")), 1, "component") {
@@ -42,9 +42,9 @@ fun main(args: Array<String>) {
                     "scm_username" to (it.scm?.username ?: ""),
                     "scm_password_alias" to (it.scm?.passwordAlias ?: ""),
                     "maven" to (it.maven ?: ""),
-                    "sonarServer" to (it.sonarServer),
-                    "jenkinsServer" to (it.jenkinsServer),
-                    "jenkinsJob" to (it.jenkinsJob ?: "")
+                    "sonar_server" to (it.sonarServer),
+                    "jenkins_server" to (it.jenkinsServer),
+                    "jenkins_job" to (it.jenkinsJob ?: "")
                     //"disabled" to (it.jenkinsJob ?: "")
             ).toMap()
         )

@@ -21,6 +21,7 @@ type ComponentType = {
     scmPath?: ?string,
     scmLocation?: ?string,
     mvn?: ?string,
+    sonarServer?: ?string,
     sonarUrl?: ?string,
     jenkinsServer?: ?string,
     jenkinsJob?: ?string,

@@ -19,6 +19,8 @@ import {TagCloud} from "../common/TagCloud";
 import {TagEditor} from "../common/TagEditor";
 import {EditableLabel} from "../common/EditableLabel";
 import {ScmEditor} from "./ScmEditor";
+import {BuildEditor} from "./BuildEditor";
+import {SonarEditor} from "./SonarEditor";
 
 function ComponentHeader(props: {}) {
     return (
@@ -105,7 +107,10 @@ type ComponentBadgeProps = {
     onReloadSonar: (componentId: string) => void,
     onLabelEdited: (componentId: string, label: string) => void,
     onTypeEdited: (componentId: string, type: string) => void,
+    onArtifactIdEdited: (componentId: string, artifactId: string) => void,
     onScmEdited: (componentId: string, type: string, url: string, path: ?string) => void,
+    onSonarEdited: (componentId: string, server: ?string) => void,
+    onBuildEdited: (componentId: string, server: ?string, job: ?string) => void,
     onSystemAdd: (componentId: string, system: string) => void,
     onSystemDelete: (componentId: string, system: string) => void,
     onLanguageAdd: (componentId: string, language: string) => void,
@@ -117,15 +122,21 @@ type ComponentBadgeProps = {
     onDelete: (componentId: string) => void
 }
 type ComponentBadgeState = {
-    scmEdition: boolean
+    scmEdition: boolean,
+    sonarEdition: boolean,
+    buildEdition: boolean
 }
+
 class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadgeState> {
     constructor(props: ComponentBadgeProps) {
         super(props);
         this.state = {
-            scmEdition: false
+            scmEdition: false,
+            sonarEdition: false,
+            buildEdition: false
         }
     }
+
     startEditScm() {
         this.setState({scmEdition: true});
         //$FlowFixMe
@@ -138,6 +149,34 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
         this.setState({scmEdition: false});
         this.props.onScmEdited(componentId, type, url, path)
     }
+
+    startEditSonar() {
+        this.setState({sonarEdition: true});
+        //$FlowFixMe
+        //setTimeout(() => this.sonarServerInput.current && this.sonarServerInput.current.focus(), 0)
+    }
+    cancelEditSonar() {
+        this.setState({sonarEdition: false});
+    }
+    editSonar(componentId: string, server?: ?string) {
+        this.setState({sonarEdition: false});
+        this.props.onSonarEdited(componentId, server)
+    }
+
+    startEditBuild() {
+        this.setState({buildEdition: true});
+        //$FlowFixMe
+        //setTimeout(() => this.buildServerInput.current && this.buildServerInput.current.focus(), 0)
+    }
+    cancelEditBuild() {
+        this.setState({buildEdition: false});
+    }
+    editBuild(componentId: string, server: ?string, job?: ?string) {
+        this.setState({buildEdition: false});
+        this.props.onBuildEdited(componentId, server, job)
+    }
+
+
     render() {
         const component = this.props.component;
         if (component && component.id) {
@@ -148,7 +187,7 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                             <span style={{fontSize: 16, fontWeight: 'bold'}}>{component.label}</span>
                         }>
                             <EditableLabel label={component.label} style={{fontSize: 16, fontWeight: 'bold'}}
-                                           onLabelEdited={l => this.props.onLabelEdited(component.id, l)} />
+                                           onLabelEdited={l => this.props.onLabelEdited(component.id, l)}/>
                         </Secure>
                         &nbsp;
                         <button onClick={e => this.props.onReload(component.id)}>RELOAD</button>
@@ -163,7 +202,12 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                     </Secure>
                     <br/>
 
-                    <span style={{fontSize: 9}}>{component.mvn}</span>
+                    <Secure permission="component.edit" fallback={
+                        <span style={{fontSize: 9}}>{component.mvn}</span>
+                    }>
+                        <EditableLabel label={component.mvn}
+                                       onLabelEdited={artifactId => this.props.onArtifactIdEdited(component.id, artifactId)}/>
+                    </Secure>
                     <br/>
 
                     {!this.state.scmEdition &&
@@ -231,20 +275,47 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
 
                     <hr/>
 
-                    <LinesOfCode loc={component.loc}/>
-                    <Coverage coverage={component.coverage}/>
-                    <SonarLink url={component.sonarUrl} />
-                    <button onClick={e => this.props.onReloadSonar(component.id)}>SONAR</button>
+                    {!this.state.sonarEdition &&
+                    <div>
+                        <LinesOfCode loc={component.loc}/>
+                        <Coverage coverage={component.coverage}/>
+                        <SonarLink url={component.sonarUrl}/>
+                        <Secure permission="component.edit">
+                            <button onClick={() => this.startEditSonar()}>Edit</button>
+                        </Secure>
+                        <button onClick={e => this.props.onReloadSonar(component.id)}>ReloadSONAR</button>
+                    </div>
+                    }
+                    {this.state.sonarEdition &&
+                    <SonarEditor server={component.sonarServer}
+                                 onEdited={s => this.editSonar(component.id, s)}
+                                 onEditionCancelled={() => this.cancelEditSonar()} />
+                    }
                     <br/>
 
-                    <BuildLink
-                        server={component.jenkinsServer}
-                        job={component.jenkinsJob}
-                        url={component.jenkinsUrl} />
-                    <BuildNumber number={component.buildNumber}/>
-                    <BuildStatus status={component.buildStatus}/>
-                    <DateTime date={component.buildTimestamp}/>
-                    <button onClick={e => this.props.onReloadBuild(component.id)}>BUILD</button>
+                    {!this.state.buildEdition &&
+                    <div>
+                        <BuildLink
+                            server={component.jenkinsServer}
+                            job={component.jenkinsJob}
+                            url={component.jenkinsUrl} />
+                        <BuildNumber number={component.buildNumber}/>
+                        <BuildStatus status={component.buildStatus}/>
+                        <DateTime date={component.buildTimestamp}/>
+                        <Secure permission="component.edit">
+                            <button onClick={() => this.startEditBuild()}>Edit</button>
+                        </Secure>
+                        <button onClick={e => this.props.onReloadBuild(component.id)}>ReloadBUILD</button>
+                    </div>
+                    }
+                    {this.state.buildEdition &&
+                    <div>
+                        <BuildEditor server={component.jenkinsServer} job={component.jenkinsJob}
+                                     onEdited={(s, j) => this.editBuild(component.id, s, j)}
+                                     onEditionCancelled={() => this.cancelEditBuild()} />
+                    </div>
+                    }
+
                     <br/>
 
                     <hr/>

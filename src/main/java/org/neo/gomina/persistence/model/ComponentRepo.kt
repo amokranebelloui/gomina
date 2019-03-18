@@ -38,7 +38,10 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
 
     override fun editLabel(componentId: String, label: String) { TODO("not implemented") }
     override fun editType(componentId: String, type: String) { TODO("not implemented") }
+    override fun editArtifactId(componentId: String, artifactId: String?) { TODO("not implemented") }
     override fun editScm(componentId: String, type: String, url: String, path: String?) { TODO("not implemented") }
+    override fun editSonar(componentId: String, server: String?) { TODO("not implemented") }
+    override fun editBuild(componentId: String, server: String?, job: String?) { TODO("not implemented") }
 
     override fun addSystem(componentId: String, system: String) { TODO("not implemented") }
     override fun deleteSystem(componentId: String, system: String) { TODO("not implemented") }
@@ -106,9 +109,9 @@ class RedisComponentRepo : ComponentRepo {
                         passwordAlias = map["scm_password_alias"] ?: ""
                 ) ,
                 maven = map["maven"],
-                sonarServer = map["sonarServer"] ?: "",
-                jenkinsServer = map["jenkinsServer"] ?: "",
-                jenkinsJob = map["jenkinsJob"],
+                sonarServer = map["sonar_server"] ?: "",
+                jenkinsServer = map["jenkins_server"] ?: "",
+                jenkinsJob = map["jenkins_job"],
                 disabled = map["disabled"]?.toBoolean() == true
         )
     }
@@ -127,9 +130,9 @@ class RedisComponentRepo : ComponentRepo {
                     "scm_type" to (component.scm?.type ?: ""),
                     "scm_url" to (component.scm?.url ?: ""),
                     "scm_path" to (component.scm?.path ?: ""),
-                    component.sonarServer?.let { "sonarServer" to it },
-                    component.jenkinsServer?.let { "jenkinsServer" to it },
-                    component.jenkinsJob?. let { "jenkinsJob" to it }
+                    component.sonarServer?.let { "sonar_server" to it },
+                    component.jenkinsServer?.let { "jenkins_server" to it },
+                    component.jenkinsJob?. let { "jenkins_job" to it }
             ).toMap())
         }
     }
@@ -149,12 +152,35 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
+    override fun editArtifactId(componentId: String, artifactId: String?) {
+        pool.resource.use { jedis ->
+            jedis.hset("component:$componentId", "maven", artifactId)
+        }
+    }
+
     override fun editScm(componentId: String, type: String, url: String, path: String?) {
         pool.resource.use { jedis ->
             jedis.hmset("component:$componentId", listOfNotNull(
                     "scm_type" to type,
                     "scm_url" to url,
                     path?. let { "scm_path" to it }
+            ).toMap())
+        }
+    }
+
+    override fun editSonar(componentId: String, server: String?) {
+        pool.resource.use { jedis ->
+            jedis.hmset("component:$componentId", listOfNotNull(
+                    server?. let { "sonar_server" to it }
+            ).toMap())
+        }
+    }
+
+    override fun editBuild(componentId: String, server: String?, job: String?) {
+        pool.resource.use { jedis ->
+            jedis.hmset("component:$componentId", listOfNotNull(
+                    server?. let { "jenkins_server" to it },
+                    job?. let { "jenkins_job" to it }
             ).toMap())
         }
     }
