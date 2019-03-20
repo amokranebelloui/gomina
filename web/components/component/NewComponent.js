@@ -1,5 +1,6 @@
 // @flow
 import * as React from "react"
+import {ScmEditor} from "./ScmEditor";
 
 type NewComponentType = {
     id: string,
@@ -48,10 +49,12 @@ class NewComponent extends React.Component<Props, NewComponentType> {
                 Languages <input type="text" name="languages" placeholder="Languages" onChange={e => this.setState({languages: e.target.value.split(' ')})} /><br/>
                 Tags <input type="text" name="tags" placeholder="Tags" onChange={e => this.setState({tags: e.target.value.split(' ')})} /><br/>
 
-
-                SCM <input type="text" name="scmType" placeholder="Type" onChange={e => this.setState({scmType: e.target.value})} />
-                <input type="text" name="scmUrl" placeholder="Repo URL" onChange={e => this.setState({scmUrl: e.target.value})} />
-                <input type="text" name="scmPath" placeholder="Path" onChange={e => this.setState({scmPath: e.target.value})} /><br/>
+                SCM
+                <ScmEditor onChanged={(type, url, path) => this.setState({
+                    scmType: type,
+                    scmUrl: url,
+                    scmPath: path
+                })} onEditionCancelled={() => {}} />
 
                 {this.props.error &&
                     <span style={{color: 'red'}}><i>Error: {this.props.error}</i></span>

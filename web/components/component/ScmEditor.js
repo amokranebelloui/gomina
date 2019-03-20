@@ -6,8 +6,9 @@ type Props = {
     type?: ?string,
     url?: ?string,
     path?: ?string,
-    onEdited: (type: string, url: string, path: ?string) => void;
-    onEditionCancelled: () => void;
+    onChanged?: (type: ?string, url: ?string, path: ?string) => void,
+    onEdited?: (type: string, url: string, path: ?string) => void,
+    onEditionCancelled?: () => void
 }
 
 type State = {
@@ -27,6 +28,18 @@ class ScmEditor extends React.Component<Props, State> {
         //$FlowFixMe
         this.textInput = React.createRef();
     }
+    changeType(type?: ?string) {
+        this.setState({type: type});
+        this.props.onChanged && this.props.onChanged(type, this.state.url, this.state.path)
+    }
+    changeUrl(url?: ?string) {
+        this.setState({url: url});
+        this.props.onChanged && this.props.onChanged(this.state.type, url, this.state.path)
+    }
+    changePath(path?: ?string) {
+        this.setState({path: path});
+        this.props.onChanged && this.props.onChanged(this.state.type, this.state.url, path)
+    }
     update() {
         console.info("edited", this.state.url);
         this.props.onEdited && this.state.type && this.state.url && this.props.onEdited(this.state.type, this.state.url, this.state.path)
@@ -44,7 +57,7 @@ class ScmEditor extends React.Component<Props, State> {
         return (
             <div>
                 <select name="type" value={this.state.type}
-                        onChange={e => this.setState({type: e.target.value})}
+                        onChange={e => this.changeType(e.target.value)}
                         style={{width: '50px', fontSize: 9}}>
                     <option value=""></option>
                     <option value="git">GIT</option>
@@ -55,7 +68,7 @@ class ScmEditor extends React.Component<Props, State> {
                 </select>
                 <input type="text" name="url" placeholder="Repo URL"
                        value={this.state.url}
-                       onChange={e => this.setState({url: e.target.value})}
+                       onChange={e => this.changeUrl(e.target.value)}
                        onKeyPress={e => e.key === 'Enter' && this.update()}
                        onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
                        //$FlowFixMe
@@ -64,7 +77,7 @@ class ScmEditor extends React.Component<Props, State> {
                 />
                 <input type="text" name="path" placeholder="Path"
                        value={this.state.path}
-                       onChange={e => this.setState({path: e.target.value})}
+                       onChange={e => this.changePath(e.target.value)}
                        onKeyPress={e => e.key === 'Enter' && this.update()}
                        onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
                        style={{width: '80px', fontSize: 9}}

@@ -9,7 +9,7 @@ import type {ComponentType} from "./ComponentType";
 
 
 type Props = {
-
+    onComponentAdded?: ComponentType => void,
 }
 
 type State = {
@@ -56,6 +56,7 @@ class AddComponent extends React.Component<Props, State> {
                     successful: true,
                     data: response.data
                 });
+                thisComponent.props.onComponentAdded && thisComponent.props.onComponentAdded(response.data);
                 setTimeout(
                     () => {
                         if (this.state.successful) {
