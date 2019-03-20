@@ -94,11 +94,12 @@ class ComponentsApp extends React.Component {
     }
     selectedComponents(components) {
         const selectedComponents = components
-            .filter(component => matchesSearch(component, this.state.search, this.state.selectedSystems, this.state.selectedLanguages, this.state.selectedTags));
+            .filter(component => matchesSearch(component, this.state.search, this.state.selectedTypes, this.state.selectedSystems, this.state.selectedLanguages, this.state.selectedTags));
         return selectedComponents;
     }
     render() {
         const components = sortComponentsBy(this.state.sortBy, this.state.components);
+        const types = flatMap(this.state.components, p => [p.type]);
         const systems = extendSystems(flatMap(this.state.components, p => p.systems));
         //const systems = this.state.systems;
         const languages = flatMap(this.state.components, p => p.languages);
@@ -122,15 +123,19 @@ class ComponentsApp extends React.Component {
                             <input type="text" name="search" onChange={e => this.setState({search: e.target.value})}/>
                             &nbsp;
                             <br/>
-                            Systems:
+                            <b>Types:</b>
+                            <TagCloud tags={types} displayCount={true}
+                                      selectionChanged={values => this.setState({selectedTypes: values})} />
+                            <br/>
+                            <b>Systems:</b>
                             <TagCloud tags={systems} displayCount={true}
                                       selectionChanged={values => this.setState({selectedSystems: values})} />
                             <br/>
-                            Languages:
+                            <b>Languages:</b>
                             <TagCloud tags={languages} displayCount={true}
                                       selectionChanged={values => this.setState({selectedLanguages: values})} />
                             <br/>
-                            Tags:
+                            <b>Tags:</b>
                             <TagCloud tags={tags} displayCount={true}
                                       selectionChanged={values => this.setState({selectedTags: values})} />
                             <br/>
@@ -154,15 +159,16 @@ class ComponentsApp extends React.Component {
 }
 
 
-function matchesSearch(component, search, systems, languages, tags) {
+function matchesSearch(component, search, types, systems, languages, tags) {
     let label = (component.label || "");
     let regExp = new RegExp(search, "i");
     let matchesLabel = label.match(regExp);
+    let matchesTypes = matchesList([component.type], types);
     let matchesSystems = matchesList(extendSystems(component.systems), systems);
     let matchesLanguages = matchesList(component.languages, languages);
     let matchesTags = matchesList(component.tags, tags);
     //console.info("MATCH", component.id, matchesLabel, matchesSystems, matchesLanguages, matchesTags);
-    return matchesLabel && matchesSystems && matchesLanguages && matchesTags
+    return matchesLabel && matchesTypes && matchesSystems && matchesLanguages && matchesTags
     //(languages.filter(item => item.match(regExp))||[]).length > 0 ||
     //(tags.filter(item => item.match(regExp))||[]).length > 0;
     //return component.label && component.label.indexOf(this.state.search) !== -1;
