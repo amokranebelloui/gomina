@@ -5,6 +5,7 @@ import {uniqCount} from "./utils";
 
 type Props = {
     tags?: ?Array<string>,
+    selected?: ?Array<string>,
     sortByCount?: ?boolean, // true
     displayCount?: ?boolean,
     sortAlphabetically?: ?boolean, // true
@@ -21,7 +22,9 @@ type State = {
 class TagCloud extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
-        this.state = {selected: []}
+        this.state = {
+            selected: this.props.selected || []
+        }
     }
     onSelected(value: string, multi: boolean) {
         let nextVal: Array<string>;

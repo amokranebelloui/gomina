@@ -1,4 +1,5 @@
 import React from "react";
+import ls from "local-storage"
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import {LoggedUserContext, Secure} from "../permission/Secure"
 import {ComponentHeader, ComponentSummary} from "../component/Component";
@@ -17,12 +18,23 @@ class ComponentsApp extends React.Component {
         super(props);
         this.state = {
             components: [],
-            sortBy: 'alphabetical'
+            sortBy: ls.get('components.sort') || 'alphabetical',
+
+            search: this.split(ls.get('components.search')),
+            selectedTypes: this.split(ls.get('components.types')),
+            selectedSystems: this.split(ls.get('components.systems')),
+            selectedLanguages: this.split(ls.get('components.languages')),
+            selectedTags: this.split(ls.get('components.tags'))
         };
         //this.retrieveSystems = this.retrieveSystems.bind(this);
         this.retrieveComponents = this.retrieveComponents.bind(this);
         console.info("componentsApp !constructor ");
     }
+
+    split(tags) {
+        return tags && tags.split(',') || [];
+    }
+
     /*
     retrieveSystems() {
         axios.get('/data/components/systems')
@@ -91,11 +103,32 @@ class ComponentsApp extends React.Component {
     }
     sortChanged(sortBy) {
         this.setState({sortBy: sortBy});
+        ls.set('components.sort', sortBy)
     }
     selectedComponents(components) {
         const selectedComponents = components
             .filter(component => matchesSearch(component, this.state.search, this.state.selectedTypes, this.state.selectedSystems, this.state.selectedLanguages, this.state.selectedTags));
         return selectedComponents;
+    }
+    setFilter(search) {
+        this.setState({search: search});
+        ls.set('components.search', search)
+    }
+    selectTypes(values) {
+        this.setState({selectedTypes: values});
+        ls.set('components.types', values.join(','))
+    }
+    selectSystems(values) {
+        this.setState({selectedSystems: values});
+        ls.set('components.systems', values.join(','))
+    }
+    selectLanguages(values) {
+        this.setState({selectedLanguages: values});
+        ls.set('components.languages', values.join(','))
+    }
+    selectTags(values) {
+        this.setState({selectedTags: values});
+        ls.set('components.tags', values.join(','))
     }
     render() {
         const components = sortComponentsBy(this.state.sortBy, this.state.components);
@@ -120,24 +153,24 @@ class ComponentsApp extends React.Component {
                     <div>
                         <Well block>
                             Search:
-                            <input type="text" name="search" onChange={e => this.setState({search: e.target.value})}/>
+                            <input type="text" name="search" value={this.state.search} onChange={e => this.setFilter(e.target.value)}/>
                             &nbsp;
                             <br/>
                             <b>Types:</b>
-                            <TagCloud tags={types} displayCount={true}
-                                      selectionChanged={values => this.setState({selectedTypes: values})} />
+                            <TagCloud tags={types} selected={this.state.selectedTypes} displayCount={true}
+                                      selectionChanged={values => this.selectTypes(values)} />
                             <br/>
                             <b>Systems:</b>
-                            <TagCloud tags={systems} displayCount={true}
-                                      selectionChanged={values => this.setState({selectedSystems: values})} />
+                            <TagCloud tags={systems} selected={this.state.selectedSystems} displayCount={true}
+                                      selectionChanged={values => this.selectSystems(values)} />
                             <br/>
                             <b>Languages:</b>
-                            <TagCloud tags={languages} displayCount={true}
-                                      selectionChanged={values => this.setState({selectedLanguages: values})} />
+                            <TagCloud tags={languages} selected={this.state.selectedLanguages} displayCount={true}
+                                      selectionChanged={values => this.selectLanguages(values)} />
                             <br/>
                             <b>Tags:</b>
-                            <TagCloud tags={tags} displayCount={true}
-                                      selectionChanged={values => this.setState({selectedTags: values})} />
+                            <TagCloud tags={tags} selected={this.state.selectedTags} displayCount={true}
+                                      selectionChanged={values => this.selectTags(values)} />
                             <br/>
                         </Well>
                         <Well block>
