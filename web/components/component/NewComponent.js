@@ -1,6 +1,8 @@
 // @flow
 import * as React from "react"
 import {ScmEditor} from "./ScmEditor";
+import {SonarEditor} from "./SonarEditor";
+import {BuildEditor} from "./BuildEditor";
 
 type NewComponentType = {
     id: string,
@@ -49,13 +51,25 @@ class NewComponent extends React.Component<Props, NewComponentType> {
                 Languages <input type="text" name="languages" placeholder="Languages" onChange={e => this.setState({languages: e.target.value.split(' ')})} /><br/>
                 Tags <input type="text" name="tags" placeholder="Tags" onChange={e => this.setState({tags: e.target.value.split(' ')})} /><br/>
 
-                SCM
-                <ScmEditor onChanged={(type, url, path) => this.setState({
+                SCM <ScmEditor onChanged={(type, url, path) => this.setState({
                     scmType: type,
                     scmUrl: url,
                     scmPath: path
-                })} onEditionCancelled={() => {}} />
+                })} />
+                <br/>
 
+                Sonar <SonarEditor onChanged={(server) => this.setState({
+                    sonarServer: server
+                })} />
+                <br/>
+
+                Build <BuildEditor onChanged={(server, job) => this.setState({
+                    jenkinsServer: server,
+                    jenkinsJob: job
+                })} />
+                <br/>
+
+                <hr style={{marginTop: '4px', marginBottom: '4px'}} />
                 {this.props.error &&
                     <span style={{color: 'red'}}><i>Error: {this.props.error}</i></span>
                 }
@@ -64,6 +78,10 @@ class NewComponent extends React.Component<Props, NewComponentType> {
                     : <span><i>Adding</i></span>
                 }
                 <input type="button" value="Cancel" onClick={e => this.props.onCancel()} />
+
+                <br/>
+                {JSON.stringify(this.state)}
+
             </div>
         )
     }

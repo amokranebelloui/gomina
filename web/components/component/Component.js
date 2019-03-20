@@ -186,7 +186,7 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                         <Secure permission="component.edit" fallback={
                             <span style={{fontSize: 16, fontWeight: 'bold'}}>{component.label}</span>
                         }>
-                            <EditableLabel label={component.label} style={{fontSize: 16, fontWeight: 'bold'}}
+                            <EditableLabel label={component.label} style={{fontSize: 16, fontWeight: 'bold'}}  altText={'no label'}
                                            onLabelEdited={l => this.props.onLabelEdited(component.id, l)}/>
                         </Secure>
                         &nbsp;
@@ -203,9 +203,9 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                     <br/>
 
                     <Secure permission="component.edit" fallback={
-                        <span style={{fontSize: 9}}>{component.mvn}</span>
+                        <span style={{fontSize: 9}}>{component.mvn || 'no artifact id'}</span>
                     }>
-                        <EditableLabel label={component.mvn}
+                        <EditableLabel label={component.mvn} altText={'no artifact id'}
                                        onLabelEdited={artifactId => this.props.onArtifactIdEdited(component.id, artifactId)}/>
                     </Secure>
                     <br/>

@@ -18,6 +18,10 @@
   loc: null
   coverage: null
 
+- code: 'postx:netting'
+  loc: 2980
+  coverage: 35.4
+
 - code: 'torkjell:torkjell'
   loc: 3000
   coverage: 2.9

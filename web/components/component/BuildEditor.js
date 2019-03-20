@@ -5,8 +5,9 @@ import * as React from "react"
 type Props = {
     server?: ?string,
     job?: ?string,
-    onEdited: (server: ?string, job: ?string) => void;
-    onEditionCancelled: () => void;
+    onChanged?: (server: ?string, job: ?string) => void;
+    onEdited?: (server: ?string, job: ?string) => void;
+    onEditionCancelled?: () => void;
 }
 
 type State = {
@@ -24,6 +25,14 @@ class BuildEditor extends React.Component<Props, State> {
         //$FlowFixMe
         this.textInput = React.createRef();
     }
+    changeServer(server?: ?string) {
+        this.setState({server: server});
+        this.props.onChanged && this.props.onChanged(server, this.state.job)
+    }
+    changeJob(job?: ?string) {
+        this.setState({job: job});
+        this.props.onChanged && this.props.onChanged(this.state.server, job)
+    }
     update() {
         this.props.onEdited && this.props.onEdited(this.state.server, this.state.job)
     }
@@ -36,10 +45,10 @@ class BuildEditor extends React.Component<Props, State> {
     }
     render() {
         return (
-            <div>
+            <div style={{display: 'inline-block'}}>
                 <input type="text" name="server" placeholder="Server"
                        value={this.state.server}
-                       onChange={e => this.setState({server: e.target.value})}
+                       onChange={e => this.changeServer(e.target.value)}
                        onKeyPress={e => e.key === 'Enter' && this.update()}
                        onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
                        //$FlowFixMe
@@ -48,7 +57,7 @@ class BuildEditor extends React.Component<Props, State> {
                 />
                 <input type="text" name="job" placeholder="Job"
                        value={this.state.job}
-                       onChange={e => this.setState({job: e.target.value})}
+                       onChange={e => this.changeJob(e.target.value)}
                        onKeyPress={e => e.key === 'Enter' && this.update()}
                        onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
                        style={{width: '80px', fontSize: 9}}

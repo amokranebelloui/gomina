@@ -4,8 +4,9 @@ import * as React from "react"
 
 type Props = {
     server?: ?string,
-    onEdited: (server: ?string) => void;
-    onEditionCancelled: () => void;
+    onChanged?: (server: ?string) => void;
+    onEdited?: (server: ?string) => void;
+    onEditionCancelled?: () => void;
 }
 
 type State = {
@@ -21,6 +22,10 @@ class SonarEditor extends React.Component<Props, State> {
         //$FlowFixMe
         this.textInput = React.createRef();
     }
+    changeServer(server?: ?string) {
+        this.setState({server: server});
+        this.props.onChanged && this.props.onChanged(server)
+    }
     update() {
         this.props.onEdited && this.props.onEdited(this.state.server)
     }
@@ -31,12 +36,13 @@ class SonarEditor extends React.Component<Props, State> {
         //$FlowFixMe
         setTimeout(() => this.textInput.current && this.textInput.current.focus(), 0)
     }
+
     render() {
         return (
-            <div>
+            <div style={{display: 'inline-block'}}>
                 <input type="text" name="server" placeholder="Server"
                        value={this.state.server}
-                       onChange={e => this.setState({server: e.target.value})}
+                       onChange={e => this.changeServer(e.target.value)}
                        onKeyPress={e => e.key === 'Enter' && this.update()}
                        onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
                        style={{width: '80px', fontSize: 9}}

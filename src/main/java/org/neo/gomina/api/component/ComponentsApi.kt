@@ -325,7 +325,10 @@ class ComponentsApi {
                     systems = newComp.systems,
                     tags = newComp.tags,
                     languages = newComp.languages,
-                    scm = Scm(newComp.scmType ?: "", newComp.scmUrl ?: "", newComp.scmPath ?: "") // FIXME ????
+                    scm = Scm(newComp.scmType ?: "", newComp.scmUrl ?: "", newComp.scmPath ?: ""), // FIXME ????
+                    jenkinsServer = newComp.jenkinsServer,
+                    jenkinsJob = newComp.jenkinsJob,
+                    sonarServer = newComp.sonarServer
             ))
             logger.info("Added component " + componentId)
             val component = this.componentRepo.get(componentId)?.let { this.build(it) }

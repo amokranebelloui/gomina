@@ -55,7 +55,7 @@ class ScmEditor extends React.Component<Props, State> {
     render() {
         //<input type="text" name="scmType" placeholder="Type" onChange={e => this.setState({type: e.target.value})} />
         return (
-            <div>
+            <div style={{display: 'inline-block'}}>
                 <select name="type" value={this.state.type}
                         onChange={e => this.changeType(e.target.value)}
                         style={{width: '50px', fontSize: 9}}>
