@@ -22,6 +22,7 @@ type NewComponentType = {
 }
 
 type Props = {
+    systemsContext?: Array<string>,
     processing: boolean,
     error?: ?string,
     onAdd: NewComponentType => void,
@@ -33,7 +34,7 @@ class NewComponent extends React.Component<Props, NewComponentType> {
         super(props);
         this.state = {
             id: '',
-            systems: [],
+            systems: this.props.systemsContext || [],
             languages: [],
             tags: []
         };
@@ -50,7 +51,11 @@ class NewComponent extends React.Component<Props, NewComponentType> {
                 ArtifactId <input type="text" name="artifactId" placeholder="Artifact Id" onChange={e => this.setState({artifactId: e.target.value})} /><br/>
 
                 Type <input type="text" name="type" placeholder="Type" onChange={e => this.setState({type: e.target.value})} /><br/>
-                Systems <input type="text" name="systems" placeholder="Systems" onChange={e => this.setState({systems: e.target.value.split(' ')})} /><br/>
+                Systems
+                <input type="text" name="systems" placeholder="Systems"
+                       value={this.state.systems.join(' ')}
+                       onChange={e => this.setState({systems: e.target.value.split(' ')})} />
+                <br/>
                 Languages <input type="text" name="languages" placeholder="Languages" onChange={e => this.setState({languages: e.target.value.split(' ')})} /><br/>
                 Tags <input type="text" name="tags" placeholder="Tags" onChange={e => this.setState({tags: e.target.value.split(' ')})} /><br/>
 

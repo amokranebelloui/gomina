@@ -9,6 +9,7 @@ import type {ComponentType} from "./ComponentType";
 
 
 type Props = {
+    systemsContext?: Array<string>,
     onComponentAdded?: ComponentType => void,
 }
 
@@ -93,6 +94,7 @@ class AddComponent extends React.Component<Props, State> {
                 (this.state.successful
                         ? this.state.data && <ComponentAdded component={this.state.data}/>
                         : <NewComponent
+                            systemsContext={this.props.systemsContext}
                             processing={this.state.processing}
                             error={this.state.error}
                             onAdd={d => {this.addComponent(d) }}

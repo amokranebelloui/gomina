@@ -181,7 +181,8 @@ class ComponentsApp extends React.Component {
                         </Well>
                         <Secure permission="component.add">
                             <Well block>
-                                <AddComponent onComponentAdded={comp => this.setState({components: [...this.state.components, comp]})} />
+                                <AddComponent systemsContext={this.state.selectedSystems}
+                                              onComponentAdded={comp => this.setState({components: [...this.state.components, comp]})} />
                             </Well>
                         </Secure>
                     </div>
