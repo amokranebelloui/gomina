@@ -55,17 +55,11 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
     override fun deleteTag(componentId: String, tag: String) { TODO("not implemented")}
 
 
-    override fun disable(componentId: String) {
-        TODO("not implemented")
-    }
+    override fun disable(componentId: String) { TODO("not implemented") }
+    override fun enable(componentId: String) { TODO("not implemented") }
 
-    override fun enable(componentId: String) {
-        TODO("not implemented")
-    }
-
-    override fun updateCodeMetrics(componentId: String, loc: Double?, coverage: Double?) {
-        TODO("not implemented")
-    }
+    override fun updateCodeMetrics(componentId: String, loc: Double?, coverage: Double?) { TODO("not implemented") }
+    override fun updateBuildStatus(componentId: String, number: String?, status: String?, building: Boolean?, timestamp: Long?) { TODO("not implemented") }
 }
 
 class RedisComponentRepo : ComponentRepo {
@@ -120,6 +114,10 @@ class RedisComponentRepo : ComponentRepo {
                 jenkinsJob = map["jenkins_job"],
                 loc = map["loc"]?.toDouble(),
                 coverage = map["coverage"]?.toDouble(),
+                buildNumber = map["build_number"],
+                buildStatus = map["build_status"],
+                buildBuilding = map["build_building"]?.toBoolean(),
+                buildTimestamp = map["build_timestamp"]?.toLong(),
                 disabled = map["disabled"]?.toBoolean() == true
         )
     }
@@ -264,6 +262,18 @@ class RedisComponentRepo : ComponentRepo {
                     "code_metrics_update_time" to now(Clock.systemUTC()).format(ISO_DATE_TIME),
                     loc?. let { "loc" to it.toString() },
                     coverage?. let { "coverage" to it.toString() }
+            ).toMap())
+        }
+    }
+
+    override fun updateBuildStatus(componentId: String, number: String?, status: String?, building: Boolean?, timestamp: Long?) {
+        pool.resource.use { jedis ->
+            jedis.hmset("component:$componentId", listOfNotNull(
+                    "build_update_time" to now(Clock.systemUTC()).format(ISO_DATE_TIME),
+                    number?. let { "build_number" to it },
+                    status?. let { "build_status" to it },
+                    building?. let { "build_building" to it.toString() },
+                    timestamp?. let { "build_timestamp" to it.toString() }
             ).toMap())
         }
     }

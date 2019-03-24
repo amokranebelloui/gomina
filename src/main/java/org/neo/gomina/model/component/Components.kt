@@ -18,6 +18,11 @@ data class Component(
         var loc: Double? = null,
         var coverage: Double? = null,
 
+        var buildNumber: String? = null,
+        var buildStatus: String? = null,
+        var buildBuilding: Boolean? = null,
+        var buildTimestamp: Long? = null,
+
         var disabled: Boolean
 ) {
     fun shareSystem(other: Component): Boolean {
@@ -71,6 +76,7 @@ interface ComponentRepo {
     fun disable(componentId: String)
     fun enable(componentId: String)
     fun updateCodeMetrics(componentId: String, loc: Double?, coverage: Double?)
+    fun updateBuildStatus(componentId: String, number: String?, status: String?, building: Boolean?, timestamp: Long?)
 }
 
 

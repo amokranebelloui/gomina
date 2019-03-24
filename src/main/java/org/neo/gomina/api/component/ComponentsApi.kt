@@ -14,9 +14,7 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.common.UserRef
 import org.neo.gomina.api.instances.VersionDetail
 import org.neo.gomina.integration.jenkins.JenkinsService
-import org.neo.gomina.integration.jenkins.jenkins.BuildStatus
 import org.neo.gomina.integration.scm.ScmService
-import org.neo.gomina.integration.sonar.SonarIndicators
 import org.neo.gomina.integration.sonar.SonarService
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
@@ -324,11 +322,10 @@ class ComponentsApi {
     private fun build(component: Component): ComponentDetail? {
         try {
             return ComponentDetail(component.id).apply {
-                apply(component, sonarService)
+                apply(component, sonarService, jenkinsService)
                 component.scm
                         ?.let { scmService.getScmDetails(it) }
                         ?.let { apply(it) }
-                jenkinsService.getStatus(component, fromCache = true)?.let { apply(it) }
             }
         }
         catch (e: Exception) {
@@ -386,7 +383,7 @@ class ComponentsApi {
             ctx.request().getParam("componentIds")?.split(",")?.map { it.trim() }?.forEach {
                 componentRepo.get(it)?.let { component ->
                     logger.info("Reload Jenkins data for $it ...")
-                    jenkinsService.getStatus(component, fromCache = false)
+                    jenkinsService.reload(component)
                 }
             }
             ctx.response().putHeader("content-type", "text/javascript").end()
@@ -509,7 +506,7 @@ class ComponentsApi {
             componentRepo.editBuild(componentId, server, job)
             componentRepo.get(componentId)?.let { component ->
                 logger.info("Reload Jenkins data for $componentId ...")
-                jenkinsService.getStatus(component, fromCache = false)
+                jenkinsService.reload(component)
             }
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
@@ -646,7 +643,7 @@ class ComponentsApi {
 
 }
 
-private fun ComponentDetail.apply(component: Component, sonarService: SonarService) {
+private fun ComponentDetail.apply(component: Component, sonarService: SonarService, jenkinsService: JenkinsService) {
     this.label = component.label ?: component.id
     this.type = component.type
     this.systems = component.systems
@@ -661,8 +658,15 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     this.sonarUrl = sonarService.url(component)
     this.jenkinsServer = component.jenkinsServer
     this.jenkinsJob = component.jenkinsJob
+
     this.loc = component.loc
     this.coverage = component.coverage
+
+    this.jenkinsUrl = jenkinsService.url(component)
+    this.buildNumber = component.buildNumber
+    this.buildStatus = if (component.buildBuilding == true) "BUILDING" else component.buildStatus
+    this.buildTimestamp = component.buildTimestamp
+
     this.disabled = component.disabled
 }
 
@@ -686,19 +690,6 @@ private fun ComponentDetail.apply(scmDetails: ScmDetails) {
     } catch (e: Exception) {
         e.printStackTrace()
     }
-}
-
-private fun ComponentDetail.apply(sonarIndicators: SonarIndicators?) {
-    this.sonarUrl = sonarIndicators?.sonarUrl
-    this.loc = sonarIndicators?.loc
-    this.coverage = sonarIndicators?.coverage
-}
-
-private fun ComponentDetail.apply(status: BuildStatus?) {
-    this.jenkinsUrl = status?.url
-    this.buildNumber = status?.id
-    this.buildStatus = if (status?.building == true) "BUILDING" else status?.result
-    this.buildTimestamp = status?.timestamp
 }
 
 fun ExtInstance.toRef() = InstanceRefDetail(
