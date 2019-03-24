@@ -289,7 +289,7 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                     </div>
                     }
                     {this.state.sonarEdition &&
-                    <SonarEditor servers={this.props.buildServers}
+                    <SonarEditor servers={this.props.sonarServers}
                                  server={component.sonarServer}
                                  onEdited={s => this.editSonar(component.id, s)}
                                  onEditionCancelled={() => this.cancelEditSonar()} />
