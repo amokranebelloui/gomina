@@ -1,33 +1,36 @@
 package org.neo.gomina.integration.sonar
 
+import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.component.Component
-import org.neo.gomina.utils.Cache
+import org.neo.gomina.model.component.ComponentRepo
 import javax.inject.Inject
 
 class SonarService {
+    companion object {
+        private val logger = LogManager.getLogger(SonarService.javaClass)
+    }
 
     @Inject private lateinit var connectors: SonarConnectors
     @Inject private lateinit var sonarConfig: SonarConfig
-
-    private val sonarCache = Cache<Map<String, SonarIndicators>>("sonar")
+    @Inject private lateinit var componentRepo: ComponentRepo
 
     fun servers() = sonarConfig.servers.map { it.id }
 
-    fun getSonar(component: Component, fromCache: Boolean): SonarIndicators? {
-        val metrics = sonarCache.get(component.sonarServer, fromCache) {
-            connectors.getConnector(component.sonarServer)?.getMetrics()
-        }
-
-        return metrics?.get(component.maven)?.apply {
-            val serverUrl = sonarConfig.serverMap[component.sonarServer]?.url
-            val baseUrl = serverUrl ?: ""
-            this.sonarUrl = "$baseUrl/dashboard/index/${component.maven}"
-        }
-    }
+    fun url(component: Component) = sonarConfig.serverMap[component.sonarServer]?.url
+            ?.let { "$it/dashboard/index/${component.maven}" }
 
     fun reload(sonarServer: String) {
         val metrics = connectors.getConnector(sonarServer)?.getMetrics()
-        metrics?.let { metrics -> sonarCache.cache(sonarServer, metrics) }
+        componentRepo.getAll().forEach { component ->
+            try {
+                component.maven
+                        ?.let { metrics?.get(it) }
+                        ?.let { metrics -> componentRepo.updateCodeMetrics(component.id, metrics.loc, metrics.coverage) }
+            }
+            catch (e: Exception) {
+                logger.error("", e)
+            }
+        }
     }
 
 }

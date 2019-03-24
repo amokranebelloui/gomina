@@ -11,6 +11,9 @@ import org.neo.gomina.model.component.NewComponent
 import org.neo.gomina.model.component.Scm
 import redis.clients.jedis.JedisPool
 import java.io.File
+import java.time.Clock
+import java.time.LocalDateTime.now
+import java.time.format.DateTimeFormatter.ISO_DATE_TIME
 
 class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
     companion object {
@@ -60,6 +63,9 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
         TODO("not implemented")
     }
 
+    override fun updateCodeMetrics(componentId: String, loc: Double?, coverage: Double?) {
+        TODO("not implemented")
+    }
 }
 
 class RedisComponentRepo : ComponentRepo {
@@ -112,6 +118,8 @@ class RedisComponentRepo : ComponentRepo {
                 sonarServer = map["sonar_server"] ?: "",
                 jenkinsServer = map["jenkins_server"] ?: "",
                 jenkinsJob = map["jenkins_job"],
+                loc = map["loc"]?.toDouble(),
+                coverage = map["coverage"]?.toDouble(),
                 disabled = map["disabled"]?.toBoolean() == true
         )
     }
@@ -247,6 +255,16 @@ class RedisComponentRepo : ComponentRepo {
             "component:$componentId".let { key ->
                 if (jedis.exists(key)) jedis.hset(key, "disabled", "false")
             }
+        }
+    }
+
+    override fun updateCodeMetrics(componentId: String, loc: Double?, coverage: Double?) {
+        pool.resource.use { jedis ->
+            jedis.hmset("component:$componentId", listOfNotNull(
+                    "code_metrics_update_time" to now(Clock.systemUTC()).format(ISO_DATE_TIME),
+                    loc?. let { "loc" to it.toString() },
+                    coverage?. let { "coverage" to it.toString() }
+            ).toMap())
         }
     }
 

@@ -324,11 +324,10 @@ class ComponentsApi {
     private fun build(component: Component): ComponentDetail? {
         try {
             return ComponentDetail(component.id).apply {
-                apply(component)
+                apply(component, sonarService)
                 component.scm
                         ?.let { scmService.getScmDetails(it) }
                         ?.let { apply(it) }
-                sonarService.getSonar(component, fromCache = true)?.let { apply(it) }
                 jenkinsService.getStatus(component, fromCache = true)?.let { apply(it) }
             }
         }
@@ -647,7 +646,7 @@ class ComponentsApi {
 
 }
 
-private fun ComponentDetail.apply(component: Component) {
+private fun ComponentDetail.apply(component: Component, sonarService: SonarService) {
     this.label = component.label ?: component.id
     this.type = component.type
     this.systems = component.systems
@@ -659,8 +658,11 @@ private fun ComponentDetail.apply(component: Component) {
     this.scmLocation = component.scm?.fullUrl
     this.mvn = component.maven
     this.sonarServer = component.sonarServer
+    this.sonarUrl = sonarService.url(component)
     this.jenkinsServer = component.jenkinsServer
     this.jenkinsJob = component.jenkinsJob
+    this.loc = component.loc
+    this.coverage = component.coverage
     this.disabled = component.disabled
 }
 

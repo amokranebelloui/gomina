@@ -14,6 +14,10 @@ data class Component(
         var sonarServer: String = "",
         var jenkinsServer: String = "",
         var jenkinsJob: String? = null,
+
+        var loc: Double? = null,
+        var coverage: Double? = null,
+
         var disabled: Boolean
 ) {
     fun shareSystem(other: Component): Boolean {
@@ -66,6 +70,7 @@ interface ComponentRepo {
     fun deleteTag(componentId: String, tag: String)
     fun disable(componentId: String)
     fun enable(componentId: String)
+    fun updateCodeMetrics(componentId: String, loc: Double?, coverage: Double?)
 }
 
 
