@@ -20,6 +20,7 @@ import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.ServerStatus
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
+import org.neo.gomina.model.version.Version
 import java.util.*
 import javax.inject.Inject
 
@@ -188,9 +189,9 @@ class InstancesApi {
             vertx.executeBlocking({future: Future<Void> ->
                 val envId = ctx.request().getParam("envId")
                 logger.info("Reloading SCM data $envId ...")
-                componentRepo.getAll()
-                        .mapNotNull { it.scm }
-                        .forEach { scmService.reloadScmDetails(it) }
+                componentRepo.getAll().forEach { component ->
+                    component.scm?.let { scmService.reloadScmDetails(component.id, it) }
+                }
                 future.complete()
             }, false)
             {res: AsyncResult<Void> ->
@@ -257,8 +258,8 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
     instance.versions = VersionsDetail(
             running = ext.indicators?.version?.let { VersionDetail(it.version, it.revision) },
             deployed = ext.sshDetails?.let { VersionDetail(it.deployedVersion ?: "", it.deployedRevision ?: "") },
-            released = ext.scmDetail?.let { VersionDetail(it.released ?: "", it.releasedRevision ?: "") },
-            latest = ext.scmDetail?.let { VersionDetail(it.latest ?: "", it.latestRevision ?: "") }
+            released = ext.component?.let { it.released?.toVersionDetail() },
+            latest = ext.component?.let { it.latest?.toVersionDetail() }
     )
 
     ext.instance?.let {
@@ -293,11 +294,11 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
 
         instance.unexpectedHost = StringUtils.isNotBlank(instance.deployHost) && instance.deployHost != instance.host
     }
-    ext.scmDetail?.let {
-        instance.latestVersion = it.latest
-        instance.latestRevision = it.latestRevision
-        instance.releasedVersion = it.released
-        instance.releasedRevision = it.releasedRevision
+    ext.component?.let {
+        instance.latestVersion = it.latest?.version
+        instance.latestRevision = it.latest?.revision
+        instance.releasedVersion = it.released?.version
+        instance.releasedRevision = it.released?.revision
     }
 
     return instance
@@ -313,4 +314,4 @@ fun Service.toServiceDetail(component: Component?): ServiceDetail {
             systems = component?.systems ?: emptyList())
 }
 
-//fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision)
+fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision)

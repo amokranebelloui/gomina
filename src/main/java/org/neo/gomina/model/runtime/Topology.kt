@@ -1,5 +1,7 @@
 package org.neo.gomina.model.runtime
 
+import org.neo.gomina.model.component.Component
+import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.host.HostRepo
 import org.neo.gomina.model.host.InstanceSshDetails
 import org.neo.gomina.model.inventory.Environment
@@ -8,16 +10,12 @@ import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.RuntimeInfo
-import org.neo.gomina.model.component.Component
-import org.neo.gomina.model.component.ComponentRepo
-import org.neo.gomina.model.scm.ScmDetails
 import org.neo.gomina.model.scm.ScmRepos
 import javax.inject.Inject
 
 data class ExtInstance(
         val id: Pair<String, String>,
         val component: Component?,
-        val scmDetail: ScmDetails?,
         val service: Service,
         val instance: Instance?,
         val sshDetails: InstanceSshDetails?,
@@ -54,9 +52,8 @@ class Topology {
                     val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
                     val component = service.componentId?.let { componentRepo.get(it) }
                     val sshDetails = instance?.second?.let { hostRepo.getDetails(it) }
-                    val scmDetail = component?.scm?.let { scmRepo.getScmDetails(it) }
 
-                    ExtInstance(id, component, scmDetail, service, instance?.second, sshDetails, indicators)
+                    ExtInstance(id, component, service, instance?.second, sshDetails, indicators)
                 }
     }
 
@@ -84,9 +81,8 @@ class Topology {
                     val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
                     val component = service.componentId?.let { componentRepo.get(it) }
                     val sshDetails = instance?.second?.let { hostRepo.getDetails(it) }
-                    val scmDetail = component?.scm?.let { scmRepo.getScmDetails(it) }
 
-                    ExtInstance(id, component, scmDetail, service, instance?.second, sshDetails, indicators)
+                    ExtInstance(id, component, service, instance?.second, sshDetails, indicators)
                 }
     }
 

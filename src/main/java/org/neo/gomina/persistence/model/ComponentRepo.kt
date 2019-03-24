@@ -1,6 +1,11 @@
 package org.neo.gomina.persistence.model
 
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
@@ -9,6 +14,9 @@ import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.component.NewComponent
 import org.neo.gomina.model.component.Scm
+import org.neo.gomina.model.scm.Branch
+import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.version.Version
 import redis.clients.jedis.JedisPool
 import java.io.File
 import java.time.Clock
@@ -41,6 +49,8 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
 
     override fun editLabel(componentId: String, label: String) { TODO("not implemented") }
     override fun editType(componentId: String, type: String) { TODO("not implemented") }
+    override fun editOwner(componentId: String, owner: String?) { TODO("not implemented") }
+    override fun editCriticality(componentId: String, critical: Int?) { TODO("not implemented") }
     override fun editArtifactId(componentId: String, artifactId: String?) { TODO("not implemented") }
     override fun editScm(componentId: String, type: String, url: String, path: String?) { TODO("not implemented") }
     override fun editSonar(componentId: String, server: String?) { TODO("not implemented") }
@@ -60,6 +70,11 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
 
     override fun updateCodeMetrics(componentId: String, loc: Double?, coverage: Double?) { TODO("not implemented") }
     override fun updateBuildStatus(componentId: String, number: String?, status: String?, building: Boolean?, timestamp: Long?) { TODO("not implemented") }
+
+    override fun updateVersions(componentId: String, latest: Version?, released: Version?, changes: Int?) { TODO("not implemented") }
+    override fun updateBranches(componentId: String, branches: List<Branch>) { TODO("not implemented") }
+    override fun updateDocFiles(componentId: String, branches: List<String>) { TODO("not implemented") }
+    override fun updateCommitLog(componentId: String, commite: List<Commit>) { TODO("not implemented") }
 }
 
 class RedisComponentRepo : ComponentRepo {
@@ -68,6 +83,13 @@ class RedisComponentRepo : ComponentRepo {
     }
 
     private lateinit var pool: JedisPool
+
+    protected val jsonMapper = ObjectMapper(JsonFactory())
+            .registerKotlinModule()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            //.configure(SerializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
 
     @Inject
     private fun initialize(@Named("database.host") host: String, @Named("database.port") port: Int) {
@@ -82,18 +104,22 @@ class RedisComponentRepo : ComponentRepo {
             val pipe = jedis.pipelined()
             val data = jedis.keys("component:*").map { it.substring(10) to pipe.hgetAll(it) }
             pipe.sync()
-            return data.map { (id, data) -> toComponent(id, data.get()) }
+            return data.map { (id, data) ->
+                val commits = jedis.zrevrange("commits:$id", 0, 100).map { jsonMapper.readValue<Commit>(it) }
+                toComponent(id, data.get(), commits)
+            }
         }
     }
 
     override fun get(componentId: String): Component? {
         pool.resource.use { jedis ->
+            val commits = jedis.zrevrange("commits:$componentId", 0, 100).map { jsonMapper.readValue<Commit>(it) }
             return jedis.hgetAll("component:$componentId")
-                    ?.let { toComponent(componentId, it) }
+                    ?.let { toComponent(componentId, it, commits) }
         }
     }
 
-    private fun toComponent(id: String, map: Map<String, String>): Component {
+    private fun toComponent(id: String, map: Map<String, String>, commits: List<Commit>): Component {
         return Component(
                 id = id,
                 label = map["label"],
@@ -108,10 +134,21 @@ class RedisComponentRepo : ComponentRepo {
                         username = map["scm_username"] ?: "",
                         passwordAlias = map["scm_password_alias"] ?: ""
                 ) ,
+                owner = map["owner"],
+                critical = map["critical"]?.toInt(),
                 maven = map["maven"],
                 sonarServer = map["sonar_server"] ?: "",
                 jenkinsServer = map["jenkins_server"] ?: "",
                 jenkinsJob = map["jenkins_job"],
+
+                latest = map["latest_version"]?.let { Version(it, map["latest_revision"]) },
+                released = map["released_version"]?.let { Version(it, map["latest_revision"]) },
+                changes = map["changes"]?.toInt(),
+
+                branches = map["branches"].toList().map { Branch(it) },
+                docFiles = map["doc_files"].toList(),
+                commitLog = commits,
+
                 loc = map["loc"]?.toDouble(),
                 coverage = map["coverage"]?.toDouble(),
                 buildNumber = map["build_number"],
@@ -159,9 +196,27 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
+    override fun editOwner(componentId: String, owner: String?) {
+        owner?.let {
+            pool.resource.use { jedis ->
+                jedis.hset("component:$componentId", "owner", owner)
+            }
+        } 
+    }
+
+    override fun editCriticality(componentId: String, critical: Int?) {
+        critical?.let {
+            pool.resource.use { jedis ->
+                jedis.hset("component:$componentId", "critical", critical.toString())
+            }
+        }
+    }
+
     override fun editArtifactId(componentId: String, artifactId: String?) {
-        pool.resource.use { jedis ->
-            jedis.hset("component:$componentId", "maven", artifactId)
+        artifactId?.let {
+            pool.resource.use { jedis ->
+                jedis.hset("component:$componentId", "maven", artifactId)
+            }
         }
     }
 
@@ -275,6 +330,42 @@ class RedisComponentRepo : ComponentRepo {
                     building?. let { "build_building" to it.toString() },
                     timestamp?. let { "build_timestamp" to it.toString() }
             ).toMap())
+        }
+    }
+
+    override fun updateVersions(componentId: String, latest: Version?, released: Version?, changes: Int?) {
+        pool.resource.use { jedis ->
+            jedis.hmset("component:$componentId", listOfNotNull(
+                    "scm_update_time" to now(Clock.systemUTC()).format(ISO_DATE_TIME),
+                    latest?.version?.let { "latest_version" to it },
+                    latest?.revision?.let { "latest_revision" to it },
+                    released?.version?.let { "released_version" to it },
+                    released?.revision?.let { "released_revision" to it },
+                    changes?. let { "changes" to it.toString() }
+            ).toMap())
+        }
+    }
+
+    override fun updateBranches(componentId: String, branches: List<Branch>) {
+        pool.resource.use { jedis ->
+            jedis.hset("component:$componentId", "branches", branches.map { it.name }.toStr())
+        }
+    }
+
+    override fun updateDocFiles(componentId: String, docFiles: List<String>) {
+        pool.resource.use { jedis ->
+            jedis.hset("component:$componentId", "doc_files", docFiles.toStr())
+        }
+    }
+
+    override fun updateCommitLog(componentId: String, commits: List<Commit>) {
+        pool.resource.use { jedis ->
+            jedis.pipelined().let {
+                commits.forEach { commit ->
+                    val time = commit.date?.time?.toDouble()
+                    it.zadd("commits:$componentId", time ?: 0.0, jsonMapper.writeValueAsString(commit))
+                }
+            }
         }
     }
 

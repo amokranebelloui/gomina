@@ -1,6 +1,9 @@
 package org.neo.gomina.model.component
 
+import org.neo.gomina.model.scm.Branch
+import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.system.System
+import org.neo.gomina.model.version.Version
 
 data class Component(
         var id: String,
@@ -14,6 +17,15 @@ data class Component(
         var sonarServer: String = "",
         var jenkinsServer: String = "",
         var jenkinsJob: String? = null,
+
+        var owner: String? = null,
+        var critical: Int? = null,
+        var latest: Version? = null,
+        var released: Version? = null,
+        var changes: Int? = null,
+        var branches: List<Branch> = emptyList(),
+        var docFiles: List<String> = emptyList(),
+        var commitLog: List<Commit> = emptyList(), // FIXME Doesn't need to be here
 
         var loc: Double? = null,
         var coverage: Double? = null,
@@ -63,7 +75,9 @@ interface ComponentRepo {
     fun add(component: NewComponent)
     fun editLabel(componentId: String, label: String)
     fun editType(componentId: String, type: String)
-    fun editArtifactId(componentId: String, artifactId: String?)
+    fun editOwner(componentId: String, owner: String?) // TODO Overridable
+    fun editCriticality(componentId: String, critical: Int?) // TODO Overridable
+    fun editArtifactId(componentId: String, artifactId: String?) // TODO Overridable
     fun editScm(componentId: String, type: String, url: String, path: String?)
     fun editSonar(componentId: String, server: String?)
     fun editBuild(componentId: String, server: String?, job: String?)
@@ -77,6 +91,10 @@ interface ComponentRepo {
     fun enable(componentId: String)
     fun updateCodeMetrics(componentId: String, loc: Double?, coverage: Double?)
     fun updateBuildStatus(componentId: String, number: String?, status: String?, building: Boolean?, timestamp: Long?)
+    fun updateVersions(componentId: String, latest: Version?, released: Version?, changes: Int?)
+    fun updateBranches(componentId: String, branches: List<Branch>)
+    fun updateDocFiles(componentId: String, docFiles: List<String>)
+    fun updateCommitLog(componentId: String, commits: List<Commit>)
 }
 
 

@@ -46,11 +46,14 @@ class ScmReposImpl : ScmRepos {
     }
 
     override fun getScmDetails(scm: Scm): ScmDetails {
-        val scmClient = this.getClient(scm)
-        val mavenReleaseFlagger = MavenReleaseFlagger(scmClient) // FIXME Detect build system
-        val trunk = scmClient.getTrunk()
-        val log = scmClient.getLog(trunk, "0", 100).map { mavenReleaseFlagger.flag(it) }
-        return computeScmDetails(scm, log, scmClient)
+        return if (scm.url.isNotBlank()) {
+            val scmClient = this.getClient(scm)
+            val mavenReleaseFlagger = MavenReleaseFlagger(scmClient) // FIXME Detect build system
+            val trunk = scmClient.getTrunk()
+            val log = scmClient.getLog(trunk, "0", 100).map { mavenReleaseFlagger.flag(it) }
+            computeScmDetails(scm, log, scmClient)
+        }
+        else ScmDetails()
     }
 
     private fun computeScmDetails(scm: Scm, logEntries: List<Commit>, scmClient: ScmClient): ScmDetails {
@@ -130,31 +133,5 @@ class ScmReposImpl : ScmRepos {
             else -> null
         }
     }
-
-    // FIXME Reuse Incremental SVN loading
-    /*
-    enum class ScmRetrieveStrategy { CACHE, SCM, SCM_DELTA, }
-
-    private fun getCommits(svnRepo: String, svnUrl: String, scmClient: ScmClient, retrieve: ScmRetrieveStrategy): List<Commit> {
-        val mavenReleaseFlagger = MavenReleaseFlagger(scmClient, svnUrl)
-        return when (retrieve) {
-            CACHE -> {
-                scmCache.getLog(svnRepo, svnUrl)
-            }
-            SCM -> {
-                scmClient.getLog(svnUrl, "0", 100).map { mavenReleaseFlagger.flag(it) }
-            }
-            SCM_DELTA -> {
-                val cached = scmCache.getLog(svnRepo, svnUrl)
-                val lastKnown = cached.firstOrNull()?.revision ?: "0"
-                val commits = scmClient.getLog(svnUrl, lastKnown, 100)
-                        .map { mavenReleaseFlagger.flag(it) }
-                        .filter { it.revision != lastKnown }
-                logger.info("Get commits: cache=${cached.size} retrieved=${commits.size}")
-                commits + cached
-            }
-        }
-    }
-    */
 
 }

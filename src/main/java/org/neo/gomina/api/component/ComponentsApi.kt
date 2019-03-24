@@ -281,11 +281,11 @@ class ComponentsApi {
                 val now = LocalDateTime.now(Clock.systemUTC())
                 val mostActive = componentRepo.getAll()
                         .filter { it.shareSystem(component) }
-                        .mapNotNull { component -> component.scm?.let { component to (scmService.getScmDetails(it)?.commitLog?.activity(now) ?: 0) } }
-                        .filter { (component, activity) -> activity > 0 }
-                        .sortedBy { (component, activity) -> activity }
+                        .map { it to it.commitLog.activity(now) }
+                        .filter { (_, activity) -> activity > 0 }
+                        .sortedBy { (_, activity) -> activity }
                         .take(7 - associated.size)
-                        .map { (component, activity) -> ComponentRef(component.id, component.label) }
+                        .map { (component, _) -> ComponentRef(component.id, component.label) }
                 associated union mostActive
             }
 
@@ -323,9 +323,6 @@ class ComponentsApi {
         try {
             return ComponentDetail(component.id).apply {
                 apply(component, sonarService, jenkinsService)
-                component.scm
-                        ?.let { scmService.getScmDetails(it) }
-                        ?.let { apply(it) }
             }
         }
         catch (e: Exception) {
@@ -366,8 +363,13 @@ class ComponentsApi {
         try {
             ctx.request().getParam("componentIds")?.split(",")?.map { it.trim() }?.forEach {
                 componentRepo.get(it)?.let { component ->
-                    logger.info("Reload SCM data for $it ...")
-                    component.scm?.let { scmService.reloadScmDetails(it) }
+                    try {
+                        logger.info("Reload SCM data for $it ...")
+                        component.scm?.let { scmService.reloadScmDetails(component.id, it) }
+                    }
+                    catch (e: Exception) {
+                        logger.error("Error Reloading SCM for ${component.id}", e)
+                    }
                 }
             }
             ctx.response().putHeader("content-type", "text/javascript").end()
@@ -471,7 +473,7 @@ class ComponentsApi {
             componentRepo.editScm(componentId, type, url, path)
             componentRepo.get(componentId)?.let { component ->
                 logger.info("Reload SCM data for $componentId ...")
-                component.scm?.let { scmService.reloadScmDetails(it) }
+                component.scm?.let { scmService.reloadScmDetails(componentId, it) }
             }
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
@@ -659,6 +661,30 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     this.jenkinsServer = component.jenkinsServer
     this.jenkinsJob = component.jenkinsJob
 
+    // SCM
+    this.owner = component.owner
+    this.critical = component.critical
+    /*
+    if (!scmDetails.mavenId.isNullOrBlank()) {
+        this.mvn = scmDetails.mavenId
+    }
+    */
+    this.branches = component.branches.map {
+        BranchDetail(name = it.name, origin = it.origin, originRevision = it.originRevision)
+    }
+    this.docFiles = component.docFiles
+    this.changes = component.changes
+    this.latest = component.latest?.version
+    this.released = component.released?.version
+    this.lastCommit = component.commitLog?.firstOrNull()?.date
+    try {
+        val reference = LocalDateTime.now(Clock.systemUTC())
+        this.commitActivity = component.commitLog.activity(reference)
+    } catch (e: Exception) {
+        e.printStackTrace() // FIXME Logger
+    }
+
+
     this.loc = component.loc
     this.coverage = component.coverage
 
@@ -668,28 +694,6 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     this.buildTimestamp = component.buildTimestamp
 
     this.disabled = component.disabled
-}
-
-private fun ComponentDetail.apply(scmDetails: ScmDetails) {
-    this.owner = scmDetails.owner
-    this.critical = scmDetails.critical
-    if (!scmDetails.mavenId.isNullOrBlank()) {
-        this.mvn = scmDetails.mavenId
-    }
-    this.branches = scmDetails.branches.map {
-        BranchDetail(name = it.name, origin = it.origin, originRevision = it.originRevision)
-    }
-    this.docFiles = scmDetails.docFiles
-    this.changes = scmDetails.changes
-    this.latest = scmDetails.latest
-    this.released = scmDetails.released
-    this.lastCommit = scmDetails.commitLog?.firstOrNull()?.date
-    try {
-        val reference = LocalDateTime.now(Clock.systemUTC())
-        this.commitActivity = scmDetails.commitLog.activity(reference)
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
 }
 
 fun ExtInstance.toRef() = InstanceRefDetail(
