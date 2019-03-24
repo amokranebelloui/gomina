@@ -11,6 +11,8 @@ class SonarService {
 
     private val sonarCache = Cache<Map<String, SonarIndicators>>("sonar")
 
+    fun servers() = sonarConfig.servers.map { it.id }
+
     fun getSonar(component: Component, fromCache: Boolean): SonarIndicators? {
         val metrics = sonarCache.get(component.sonarServer, fromCache) {
             connectors.getConnector(component.sonarServer)?.getMetrics()

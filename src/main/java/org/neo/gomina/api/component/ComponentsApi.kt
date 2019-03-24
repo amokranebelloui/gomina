@@ -153,7 +153,11 @@ class ComponentsApi {
         this.router = Router.router(vertx)
 
         router.get("/").handler(this::components)
+        
         router.get("/systems").handler(this::systems)
+        router.get("/build/servers").handler(this::buildServers)
+        router.get("/sonar/servers").handler(this::sonarServers)
+
         router.get("/:componentId").handler(this::component)
         router.get("/:componentId/scm").handler(this::commitLog)
         router.get("/:componentId/associated").handler(this::associated)
@@ -196,7 +200,27 @@ class ComponentsApi {
             ctx.response().putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(systems.getSystems()))
         } catch (e: Exception) {
-            logger.error("Cannot get components", e)
+            logger.error("Cannot get Systems", e)
+            ctx.fail(500)
+        }
+    }
+
+    fun buildServers(ctx: RoutingContext) {
+        try {
+            ctx.response().putHeader("content-type", "text/javascript")
+                    .end(mapper.writeValueAsString(jenkinsService.servers()))
+        } catch (e: Exception) {
+            logger.error("Cannot get Build servers", e)
+            ctx.fail(500)
+        }
+    }
+
+    fun sonarServers(ctx: RoutingContext) {
+        try {
+            ctx.response().putHeader("content-type", "text/javascript")
+                    .end(mapper.writeValueAsString(sonarService.servers()))
+        } catch (e: Exception) {
+            logger.error("Cannot get Sonar servers", e)
             ctx.fail(500)
         }
     }

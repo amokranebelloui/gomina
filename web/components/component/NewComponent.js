@@ -23,6 +23,8 @@ type NewComponentType = {
 
 type Props = {
     systemsContext?: Array<string>,
+    buildServers?: Array<string>,
+    sonarServers?: Array<string>,
     processing: boolean,
     error?: ?string,
     onAdd: NewComponentType => void,
@@ -66,12 +68,12 @@ class NewComponent extends React.Component<Props, NewComponentType> {
                 })} />
                 <br/>
 
-                Sonar <SonarEditor onChanged={(server) => this.setState({
+                Sonar <SonarEditor servers={this.props.sonarServers} onChanged={(server) => this.setState({
                     sonarServer: server
                 })} />
                 <br/>
 
-                Build <BuildEditor onChanged={(server, job) => this.setState({
+                Build <BuildEditor servers={this.props.buildServers} onChanged={(server, job) => this.setState({
                     jenkinsServer: server,
                     jenkinsJob: job
                 })} />

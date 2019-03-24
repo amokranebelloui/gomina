@@ -13,6 +13,8 @@ class JenkinsService {
 
     private val jenkinsCache = Cache<BuildStatus>("jenkins")
 
+    fun servers() = jenkinsConfig.servers.map { it.id }
+    
     fun getStatus(component: Component, fromCache: Boolean = false): BuildStatus? {
         return if (component.jenkinsJob?.isNotBlank() == true) {
             val root = jenkinsConfig.serverMap[component.jenkinsServer]?.location

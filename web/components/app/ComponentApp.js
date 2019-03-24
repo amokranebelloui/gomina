@@ -282,6 +282,15 @@ class ComponentApp extends React.Component {
     }
     componentDidMount() {
         console.info("componentApp !mount ", this.props.match.params.id);
+
+        const thisComponent = this;
+        axios.get('/data/components/build/servers')
+            .then(response => thisComponent.setState({buildServers: response.data}))
+            .catch(() => thisComponent.setState({buildServers: []}));
+        axios.get('/data/components/sonar/servers')
+            .then(response => thisComponent.setState({sonarServers: response.data}))
+            .catch(() => thisComponent.setState({sonarServers: []}));
+
         if (this.state.componentId) {
             this.retrieveComponent(this.state.componentId);
             this.retrieveAssociated(this.state.componentId);
@@ -373,7 +382,9 @@ class ComponentApp extends React.Component {
 
                     </Container>
                     <div>
-                        <ComponentBadge component={component}
+                        <ComponentBadge buildServers={this.state.buildServers}
+                                        sonarServers={this.state.sonarServers}
+                                        component={component}
                                         onReload={id => this.retrieveComponent(id)}
                                         onReloadScm={id => this.reloadScm(id)}
                                         onReloadBuild={id => this.reloadBuild(id)}

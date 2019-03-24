@@ -100,6 +100,8 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
 }
 
 type ComponentBadgeProps = {
+    buildServers: Array<string>,
+    sonarServers: Array<string>,
     component: ComponentType,
     onReload: (componentId: string) => void,
     onReloadScm: (componentId: string) => void,
@@ -287,7 +289,8 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                     </div>
                     }
                     {this.state.sonarEdition &&
-                    <SonarEditor server={component.sonarServer}
+                    <SonarEditor servers={this.props.buildServers}
+                                 server={component.sonarServer}
                                  onEdited={s => this.editSonar(component.id, s)}
                                  onEditionCancelled={() => this.cancelEditSonar()} />
                     }
@@ -310,7 +313,8 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                     }
                     {this.state.buildEdition &&
                     <div>
-                        <BuildEditor server={component.jenkinsServer} job={component.jenkinsJob}
+                        <BuildEditor servers={this.props.buildServers}
+                                     server={component.jenkinsServer} job={component.jenkinsJob}
                                      onEdited={(s, j) => this.editBuild(component.id, s, j)}
                                      onEditionCancelled={() => this.cancelEditBuild()} />
                     </div>

@@ -3,6 +3,7 @@
 import * as React from "react"
 
 type Props = {
+    servers: Array<string>,
     server?: ?string,
     job?: ?string,
     onChanged?: (server: ?string, job: ?string) => void;
@@ -46,15 +47,21 @@ class BuildEditor extends React.Component<Props, State> {
     render() {
         return (
             <div style={{display: 'inline-block'}}>
-                <input type="text" name="server" placeholder="Server"
-                       value={this.state.server}
-                       onChange={e => this.changeServer(e.target.value)}
-                       onKeyPress={e => e.key === 'Enter' && this.update()}
-                       onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
-                       //$FlowFixMe
-                       ref={this.textInput}
-                       style={{width: '200px', fontSize: 9}}
-                />
+
+                <select name="server"
+                        value={this.state.server}
+                        onChange={e => this.changeServer(e.target.value)}
+                        onKeyPress={e => e.key === 'Enter' && this.update()}
+                        onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
+                    //$FlowFixMe
+                        ref={this.textInput}
+                        style={{width: '100px', fontSize: 9}}>
+                    <option value=""></option>
+                    {this.props.servers && this.props.servers.map(s =>
+                        <option value={s}>{s}</option>
+                    )}
+                </select>
+                
                 <input type="text" name="job" placeholder="Job"
                        value={this.state.job}
                        onChange={e => this.changeJob(e.target.value)}

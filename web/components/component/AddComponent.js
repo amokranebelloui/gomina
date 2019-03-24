@@ -14,6 +14,8 @@ type Props = {
 }
 
 type State = {
+    buildServers: Array<string>,
+    sonarServers: Array<string>,
     adding: boolean,
     processing: boolean,
     successful: boolean,
@@ -25,6 +27,8 @@ class AddComponent extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
         this.state = {
+            buildServers: [],
+            sonarServers: [],
             adding: false,
             processing: false,
             successful: false,
@@ -84,6 +88,15 @@ class AddComponent extends React.Component<Props, State> {
             error: null
         })
     }
+    componentDidMount() {
+        const thisComponent = this;
+        axios.get('/data/components/build/servers')
+            .then(response => thisComponent.setState({buildServers: response.data}))
+            .catch(() => thisComponent.setState({buildServers: []}));
+        axios.get('/data/components/sonar/servers')
+            .then(response => thisComponent.setState({sonarServers: response.data}))
+            .catch(() => thisComponent.setState({sonarServers: []}));
+    }
     render() {
         return (
             <div>
@@ -95,6 +108,8 @@ class AddComponent extends React.Component<Props, State> {
                         ? this.state.data && <ComponentAdded component={this.state.data}/>
                         : <NewComponent
                             systemsContext={this.props.systemsContext}
+                            sonarServers={this.state.sonarServers}
+                            buildServers={this.state.buildServers}
                             processing={this.state.processing}
                             error={this.state.error}
                             onAdd={d => {this.addComponent(d) }}

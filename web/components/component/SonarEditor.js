@@ -3,6 +3,7 @@
 import * as React from "react"
 
 type Props = {
+    servers: Array<string>,
     server?: ?string,
     onChanged?: (server: ?string) => void;
     onEdited?: (server: ?string) => void;
@@ -40,7 +41,20 @@ class SonarEditor extends React.Component<Props, State> {
     render() {
         return (
             <div style={{display: 'inline-block'}}>
-                <input type="text" name="server" placeholder="Server"
+
+                <select name="server"
+                        value={this.state.server}
+                        onChange={e => this.changeServer(e.target.value)}
+                        onKeyPress={e => e.key === 'Enter' && this.update()}
+                        onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
+                        style={{width: '50px', fontSize: 9}}>
+                    <option value=""></option>
+                    {this.props.servers && this.props.servers.map(s =>
+                        <option value={s}>{s}</option>
+                    )}
+                </select>
+
+                <input type="text" name="server" placeholder="Server" readOnly="true"
                        value={this.state.server}
                        onChange={e => this.changeServer(e.target.value)}
                        onKeyPress={e => e.key === 'Enter' && this.update()}
