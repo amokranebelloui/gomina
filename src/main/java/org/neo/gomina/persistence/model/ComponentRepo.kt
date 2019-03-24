@@ -123,6 +123,7 @@ class RedisComponentRepo : ComponentRepo {
             }
             jedis.hmset("component:${component.id}", listOfNotNull(
                     "label" to component.label,
+                    "maven" to component.artifactId,
                     "type" to component.type,
                     "systems" to component.systems.toStr(),
                     "languages" to component.languages.toStr(),

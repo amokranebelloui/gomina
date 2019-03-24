@@ -105,6 +105,7 @@ data class InstanceRefDetail(
 data class NewComponentDetail(
         var id: String,
         var label: String? = null,
+        var artifactId: String? = null,
         var type: String? = null,
         //var owner: String? = null,
         //var critical: Int? = null,
@@ -321,6 +322,7 @@ class ComponentsApi {
             componentRepo.add(NewComponent(
                     id = newComp.id,
                     label = newComp.label,
+                    artifactId = newComp.artifactId,
                     type = newComp.type,
                     systems = newComp.systems,
                     tags = newComp.tags,

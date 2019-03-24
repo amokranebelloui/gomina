@@ -24,6 +24,7 @@ data class Component(
 data class NewComponent(
         var id: String,
         var label: String? = null,
+        var artifactId: String? = null,
         var type: String? = null,
         //var owner: String? = null,
         //var critical: Int? = null,

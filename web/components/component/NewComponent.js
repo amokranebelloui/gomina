@@ -7,6 +7,7 @@ import {BuildEditor} from "./BuildEditor";
 type NewComponentType = {
     id: string,
     label?: ?string,
+    artifactId?: ?string,
     type?: ?string,
     systems: Array<string>,
     languages: Array<string>,
@@ -46,6 +47,8 @@ class NewComponent extends React.Component<Props, NewComponentType> {
                 ID <input type="text" name="id" placeholder="Component Id" onChange={e => this.setState({id: e.target.value})} /><br/>
 
                 Label <input type="text" name="label" placeholder="Label" onChange={e => this.setState({label: e.target.value})} /><br/>
+                ArtifactId <input type="text" name="artifactId" placeholder="Artifact Id" onChange={e => this.setState({artifactId: e.target.value})} /><br/>
+
                 Type <input type="text" name="type" placeholder="Type" onChange={e => this.setState({type: e.target.value})} /><br/>
                 Systems <input type="text" name="systems" placeholder="Systems" onChange={e => this.setState({systems: e.target.value.split(' ')})} /><br/>
                 Languages <input type="text" name="languages" placeholder="Languages" onChange={e => this.setState({languages: e.target.value.split(' ')})} /><br/>
