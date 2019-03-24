@@ -68,12 +68,12 @@ class NewComponent extends React.Component<Props, NewComponentType> {
                 })} />
                 <br/>
 
-                Sonar <SonarEditor servers={this.props.sonarServers} onChanged={(server) => this.setState({
+                Sonar <SonarEditor servers={this.props.sonarServers || []} onChanged={(server) => this.setState({
                     sonarServer: server
                 })} />
                 <br/>
 
-                Build <BuildEditor servers={this.props.buildServers} onChanged={(server, job) => this.setState({
+                Build <BuildEditor servers={this.props.buildServers || []} onChanged={(server, job) => this.setState({
                     jenkinsServer: server,
                     jenkinsJob: job
                 })} />
