@@ -1,11 +1,6 @@
 package org.neo.gomina.persistence.model
 
-import com.fasterxml.jackson.core.JsonFactory
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
@@ -17,11 +12,15 @@ import org.neo.gomina.model.component.Scm
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.version.Version
+import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool
 import java.io.File
 import java.time.Clock
+import java.time.LocalDateTime
 import java.time.LocalDateTime.now
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
+import java.util.*
 
 class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
     companion object {
@@ -84,13 +83,6 @@ class RedisComponentRepo : ComponentRepo {
 
     private lateinit var pool: JedisPool
 
-    protected val jsonMapper = ObjectMapper(JsonFactory())
-            .registerKotlinModule()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            //.configure(SerializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
-            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
-
     @Inject
     private fun initialize(@Named("database.host") host: String, @Named("database.port") port: Int) {
         pool = JedisPool(
@@ -105,7 +97,7 @@ class RedisComponentRepo : ComponentRepo {
             val data = jedis.keys("component:*").map { it.substring(10) to pipe.hgetAll(it) }
             pipe.sync()
             return data.map { (id, data) ->
-                val commits = jedis.zrevrange("commits:$id", 0, 100).map { jsonMapper.readValue<Commit>(it) }
+                val commits = getCommits(jedis, id)
                 toComponent(id, data.get(), commits)
             }
         }
@@ -113,9 +105,28 @@ class RedisComponentRepo : ComponentRepo {
 
     override fun get(componentId: String): Component? {
         pool.resource.use { jedis ->
-            val commits = jedis.zrevrange("commits:$componentId", 0, 100).map { jsonMapper.readValue<Commit>(it) }
+            val commits = getCommits(jedis, componentId)
             return jedis.hgetAll("component:$componentId")
                     ?.let { toComponent(componentId, it, commits) }
+        }
+    }
+
+    private fun getCommits(jedis: Jedis, componentId: String): List<Commit> {
+        return jedis.pipelined().let { pipe ->
+            //jsonMapper.readValue<Commit>(it)
+            val commits = jedis.zrevrange("commits:$componentId", 0, 100).map { rev ->
+                pipe.hgetAll("commit:$componentId:$rev")
+            }
+            pipe.sync()
+            commits.map { it.get() }.map {
+                Commit(
+                        revision = it["revision"] ?: "",
+                        date = it["date"]?.let { Date.from(LocalDateTime.parse(it, ISO_DATE_TIME).atZone(ZoneOffset.UTC).toInstant()) },
+                        author = it["author"],
+                        message = it["message"],
+                        release = it["release"],
+                        newVersion = it["newVersion"])
+            }
         }
     }
 
@@ -360,10 +371,18 @@ class RedisComponentRepo : ComponentRepo {
 
     override fun updateCommitLog(componentId: String, commits: List<Commit>) {
         pool.resource.use { jedis ->
-            jedis.pipelined().let {
+            jedis.pipelined().let { pipe ->
                 commits.forEach { commit ->
                     val time = commit.date?.time?.toDouble()
-                    it.zadd("commits:$componentId", time ?: 0.0, jsonMapper.writeValueAsString(commit))
+                    pipe.zadd("commits:$componentId", time ?: 0.0, commit.revision)
+                    pipe.hmset("commit:$componentId:${commit.revision}", listOfNotNull(
+                            "revision" to commit.revision,
+                            commit.date?.let { "date" to LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).format(ISO_DATE_TIME) },
+                            commit.author?.let { "author" to it },
+                            commit.message?.let { "message" to it },
+                            commit.release?.let { "release" to it },
+                            commit.newVersion?.let { "newVersion" to it }
+                    ).toMap())
                 }
             }
         }
