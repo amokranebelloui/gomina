@@ -33,7 +33,7 @@ class AddInstance extends React.Component<Props, State> {
     }
     addInstance() {
         return this.state.id
-            ? axios.post('/data/instances/add?instanceId=' + this.state.id + '&svc=' + this.props.svc + '&env=' + this.props.env, this.state)
+            ? axios.post('/data/instances/' + this.props.env + '/service/' + this.props.svc + '/instance/add?instanceId=' + this.state.id, this.state)
             : Promise.reject("Instance Id is mandatory");
     };
     render() {

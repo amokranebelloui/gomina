@@ -111,8 +111,11 @@ class InstancesApi {
 
         router.get("/").handler(this::instances)
 
-        router.post("/add/service").handler(this::addService)
-        router.post("/add").handler(this::addInstance)
+        router.post("/:envId/service/add").handler(this::addService)
+        router.post("/:envId/service/:svcId/instance/add").handler(this::addInstance)
+
+        router.delete("/:envId/service/:svcId/delete").handler(this::deleteService)
+        router.delete("/:envId/service/:svcId/instance/:instanceId/delete").handler(this::deleteInstance)
 
         //router.get("/:envId").handler(this::forEnv)
         router.get("/:envId/services").handler(this::servicesForEnv)
@@ -132,8 +135,8 @@ class InstancesApi {
     }
 
     private fun addService(ctx: RoutingContext) {
-        val svc = ctx.request().getParam("svc")
-        val env = ctx.request().getParam("env")
+        val svc = ctx.request().getParam("svcId")
+        val env = ctx.request().getParam("envId")
         try {
             val body = ctx.body.toString()
             logger.info("Adding svc $svc/$env => $body")
@@ -148,10 +151,25 @@ class InstancesApi {
         }
     }
 
+    private fun deleteService(ctx: RoutingContext) {
+        val svc = ctx.request().getParam("svcId")
+        val env = ctx.request().getParam("envId")
+        try {
+            logger.info("Deleting svc $svc/$env")
+            Thread.sleep(1000)
+            // FIXME Implement
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot delete Service", e)
+            ctx.fail(500)
+        }
+    }
+
     private fun addInstance(ctx: RoutingContext) {
         val instanceId = ctx.request().getParam("instanceId")
-        val svc = ctx.request().getParam("svc")
-        val env = ctx.request().getParam("env")
+        val svc = ctx.request().getParam("svcId")
+        val env = ctx.request().getParam("envId")
         try {
             val body = ctx.body.toString()
             logger.info("Adding Instance $instanceId/$svc/$env => $body")
@@ -162,6 +180,22 @@ class InstancesApi {
         }
         catch (e: Exception) {
             logger.error("Cannot add Instance", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun deleteInstance(ctx: RoutingContext) {
+        val instanceId = ctx.request().getParam("instanceId")
+        val svc = ctx.request().getParam("svcId")
+        val envId = ctx.request().getParam("envId")
+        try {
+            logger.info("Deleting Instance $instanceId/$svc/$envId")
+            Thread.sleep(1000)
+            // FIXME Implement
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot delete Instance", e)
             ctx.fail(500)
         }
     }

@@ -170,6 +170,23 @@ class EnvApp extends React.Component {
                 console.log("reload error", error.response);
             });
     }
+    
+    deleteEnv(env) {
+        axios.delete('/data/envs/' + env + '/delete')
+            .then(() => this.retrieveEnvs())
+            .catch((error) => console.log("env delete error", error.response));
+    }
+    deleteService(env, svc) {
+        axios.delete('/data/instances/' + this.state.env + '/service/' + svc + '/delete')
+            .then(() => this.retrieveInstances(env))
+            .catch((error) => console.log("service delete error", error.response));
+    }
+    deleteInstance(env, svc, instanceId) {
+        axios.delete('/data/instances/' + this.state.env + '/service/' + svc + '/instance/' + instanceId + '/delete')
+            .then(() => this.retrieveInstances(env))
+            .catch((error) => console.log("instance delete error", error.response));
+    }
+
     componentWillMount() {
         console.info("envApp !will-mount ");
     }
@@ -275,7 +292,10 @@ class EnvApp extends React.Component {
                                     </Well>
                                 </Secure>
                                 <Well block>
-                                    <h3>{this.state.env} selected</h3>
+                                    <b>{this.state.env} selected </b>
+                                    <Secure permission="env.delete">
+                                        <button onClick={() => this.deleteEnv(this.state.env)}>Delete</button>
+                                    </Secure>
                                     <Secure permission="env.manage">
                                         <AddService env={this.state.env} />
                                     </Secure>
@@ -283,7 +303,10 @@ class EnvApp extends React.Component {
 
                                 {svcId &&
                                 <Well block>
-                                    <h3>{svcId} selected</h3>
+                                    <b>{svcId} selected</b>
+                                    <Secure permission="env.manage">
+                                        <button onClick={() => this.deleteService(this.state.env, svcId)}>Delete</button>
+                                    </Secure>
                                     <Secure permission="env.manage">
                                         <AddInstance env={this.state.env} svc={svcId} />
                                     </Secure>
@@ -292,7 +315,11 @@ class EnvApp extends React.Component {
                                 <div>
                                     {selectedInstances.map(i =>
                                         <Well block>
-                                            <h3>{i.id} properties:</h3>
+                                            <b>{i.id} properties:</b>
+                                            <Secure permission="env.manage">
+                                                <button onClick={() => this.deleteInstance(this.state.env, svcId, i.id)}>Delete</button>
+                                            </Secure>
+                                            <br/>
                                             <InstanceProperties properties={i.properties} />
                                         </Well>
                                     )}

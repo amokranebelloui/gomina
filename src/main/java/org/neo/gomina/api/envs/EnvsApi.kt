@@ -34,6 +34,7 @@ class EnvsApi {
 
         router.get("/").handler(this::data)
         router.post("/add").handler(this::addEnv)
+        router.delete("/:envId/delete").handler(this::deleteEnv)
     }
 
     private fun data(ctx: RoutingContext) {
@@ -52,7 +53,7 @@ class EnvsApi {
         val envId = ctx.request().getParam("envId")
         try {
             val body = ctx.body.toString()
-            logger.info("Adding env $envId $body")
+            logger.info("Adding env $envId $body [TODO]")
             Thread.sleep(1000)
             // FIXME Implement
             val env = Env(envId, "DUMMY", "My System")
@@ -60,6 +61,20 @@ class EnvsApi {
         }
         catch (e: Exception) {
             logger.error("Cannot add Env", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun deleteEnv(ctx: RoutingContext) {
+        val envId = ctx.request().getParam("envId")
+        try {
+            val body = ctx.body.toString()
+            logger.info("Deleting env $envId $body [TODO]")
+            Thread.sleep(1000)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot delete Env", e)
             ctx.fail(500)
         }
     }

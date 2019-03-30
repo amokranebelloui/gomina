@@ -47,6 +47,7 @@ class AuthApi {
                         "component.delete",
 
                         "env.add",
+                        "env.delete",
                         "env.manage"
                 )
 

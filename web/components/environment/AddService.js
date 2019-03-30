@@ -40,7 +40,7 @@ class AddService extends React.Component<Props, State> {
     }
     addService() {
         return this.state.svc && this.state.mode
-            ? axios.post('/data/instances/add/service?svc=' + this.state.svc + '&env=' + this.props.env, this.state)
+            ? axios.post('/data/instances/' + this.props.env + '/service/add?svcId=' + this.state.svc, this.state)
             : Promise.reject("Service Name/Mode are mandatory");
     };
     render() {
