@@ -6,7 +6,7 @@ import {DiffView} from "../web/components/diff/DiffView";
 import {TextLines} from "../web/components/diff/TextLines";
 import "../web/components/application.css"
 import {Toggle} from "../web/components/common/Toggle";
-import { action } from '@storybook/addon-actions';
+import {action} from '@storybook/addon-actions';
 import C1 from "../web/components/sandbox/module";
 import {Clock} from "../web/components/app/common/layout";
 import {CommitLog} from "../web/components/commitlog/CommitLog";
@@ -20,6 +20,13 @@ import {BuildLink} from "../web/components/build/BuildLink";
 import {TagEditor} from "../web/components/common/TagEditor";
 import {EditableLabel} from "../web/components/common/EditableLabel";
 import {ScmEditor} from "../web/components/component/ScmEditor";
+import {MonitoringEditor} from "../web/components/environment/MonitoringEditor";
+import {ServiceModeEditor} from "../web/components/environment/ServiceModeEditor";
+import {InlineAdd} from "../web/components/common/InlineAdd";
+import * as axios from "axios";
+import {AddEnvironment} from "../web/components/environment/AddEnvironment";
+import {AddService} from "../web/components/environment/AddService";
+import {AddInstance} from "../web/components/environment/AddInstance";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -167,6 +174,58 @@ description
             <Documentation doc={doc} />
         )
     });
+
+
+
+
+storiesOf('Environment', module)
+    .add('InlineEditor', () => {
+        let envId;
+        let envName;
+        const addEnv = () => {
+            console.info("AAA");
+            return axios.post('http://localhost:8080/data/envs/add?envId=' + envId, envName);
+        };
+        return (
+            <InlineAdd type="Environment"
+                       action={() => addEnv()}
+                       onItemAdded={action('added')}
+                       onAddError={action('error')}
+                       editionForm={() =>
+                           <div style={{border: 'solid 1px red'}}>
+                               <span>Add Env</span>
+                               <input type="text" name="id" placeholder="env Id" onChange={e => envId = e.target.value}/>
+                               <input type="text" name="name" placeholder="env Name" onChange={e => envName = e.target.value}/>
+                           </div>
+                       }
+                       successDisplay={data =>
+                          <div style={{border: 'solid 1px red'}}>
+                            <b>{data ? JSON.stringify(data) : 'no data returned'}</b>
+                          </div>
+                      }
+            />
+        );
+    })
+    .add('AddEnvironment', () =>
+        <AddEnvironment onEnvironmentAdded={action('added')} />
+    )
+    .add('AddService', () =>
+        <AddService env="UAT" onServiceAdded={action('added')} />
+    )
+    .add('AddInstance', () =>
+        <AddInstance env="UAT" svc="order" onInstanceAdded={action('added')} />
+    )
+    .add('MonitoringEditor', () =>
+        <MonitoringEditor url="tc://localhost:1456" id="UAT"
+                          onChanged={action('changed')}
+                          onEditionCancelled={action('cancelled')}
+                          onEdited={action('edited')} />)
+    .add('ServiceModeEditor', () =>
+        <ServiceModeEditor mode="LEADERSHIP" count="3"
+                          onChanged={action('changed')}
+                          onEditionCancelled={action('cancelled')}
+                          onEdited={action('edited')} />);
+
 
 storiesOf('Text', module)
     .add('Diff', () => {

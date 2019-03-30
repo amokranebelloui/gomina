@@ -9,7 +9,14 @@ import {Status} from "./Status";
 import {ServiceStatus} from "./ServiceStatus";
 import Route from "react-router-dom/es/Route";
 
+type EnvType = {
+    env: string,
+    type?: ?string,
+    app?: ?string
+}
+
 type Props = {
+    env: string,
     services: Array<ServiceDetailType>,
     highlight?: ?(InstanceType => boolean),
 }
@@ -25,7 +32,8 @@ class EnvironmentLogical extends React.Component<Props, State> {
             open: {}
         }
     }
-    toggleService(service: string) {
+    toggleService(service: string, history: any) {
+        this.navigateService(service, history);
         this.isOpen(service)
             ? this.closeService(service)
             : this.openService(service)
@@ -46,8 +54,11 @@ class EnvironmentLogical extends React.Component<Props, State> {
         //console.info('is open', path, this.props.openPaths[path], this.props.openPaths[path] == true);
         return this.state.open[service] == true
     }
-    navigate(instance: InstanceType, history: any) {
-        history.push("/envs/" + instance.env + "/" + instance.id)
+    navigate(svc: string, instance: InstanceType, history: any) {
+        history.push("/envs/" + instance.env + "/svc/" + svc + "/" + instance.id)
+    }
+    navigateService(svc: string, history: any) {
+        history.push("/envs/" + this.props.env + "/svc/" + svc)
     }
     render() {
         const services = this.props.services;
@@ -67,9 +78,11 @@ class EnvironmentLogical extends React.Component<Props, State> {
 
                     const service = (
                         <tr key={'service' + svc.service.svc} className='env-row' style={{opacity: opacity}}>
+                            <Route render={({ history}) => (
                             <ServiceStatus key={'status' + svc.service.svc}
                                            status={status.status} reason={status.reason} text={status.text}
-                                           onClick={e => this.toggleService(svc.service.svc)} />
+                                           onClick={e => this.toggleService(svc.service.svc, history)} />
+                            )} />
                             <Service service={svc.service} instances={svc.instances || []} />
                         </tr>
                     );
@@ -83,7 +96,7 @@ class EnvironmentLogical extends React.Component<Props, State> {
                                     <Route render={({ history}) => (
                                         <Status key={'status' + instance.id} status={instance.status} leader={instance.leader}
                                                 participating={instance.participating} cluster={instance.cluster}
-                                                onClick={e => this.navigate(instance, history)}
+                                                onClick={e => this.navigate(svc.service.svc, instance, history)}
                                         />
                                     )} />
                                     <Instance key={'instance' + instance.id} instance={instance} />
@@ -100,3 +113,4 @@ class EnvironmentLogical extends React.Component<Props, State> {
 }
 
 export {EnvironmentLogical}
+export type {EnvType}

@@ -15,6 +15,10 @@ import {extendSystems} from "../system/system-utils";
 import {TagCloud} from "../common/TagCloud";
 import Link from "react-router-dom/es/Link";
 import {EnvInstances} from "../environment/EnvInstances";
+import {AddEnvironment} from "../environment/AddEnvironment";
+import {Secure} from "../permission/Secure";
+import {AddService} from "../environment/AddService";
+import {AddInstance} from "../environment/AddInstance";
 
 class EnvApp extends React.Component {
     constructor(props) {
@@ -196,6 +200,7 @@ class EnvApp extends React.Component {
         const envsByType = groupBy(this.state.envs, 'type');
         const services = this.state.services;
         const instances = flatMap(services, svc => svc.instances);
+        const svcId = this.props.match.params.svcId;
         const selectedInstances = instances.filter (i => i.id === this.props.match.params.instanceId);
 
         const systems = extendSystems(flatMap(services, p => p.service.systems));
@@ -237,7 +242,7 @@ class EnvApp extends React.Component {
                         <Container>
                             {
                                 this.state.group == "INSTANCES" ? <EnvInstances services={selectedServices} highlight={this.state.highlight} /> :
-                                <EnvironmentLogical services={selectedServices} highlight={this.state.highlight} />
+                                <EnvironmentLogical env={this.state.env} services={selectedServices} highlight={this.state.highlight} />
                             }
                         </Container>
                     </div>
@@ -258,10 +263,32 @@ class EnvApp extends React.Component {
                                 Systems:
                                 <TagCloud tags={systems} displayCount={true}
                                           selectionChanged={values => this.setState({selectedSystems: values})} />
+                                <br/>
                                 <button onClick={e => this.reloadInventory()}>RELOAD INV</button>
                                 <button onClick={e => this.reloadScm()}>RELOAD SCM</button>
                                 <button onClick={e => this.reloadSsh()}>RELOAD SSH</button>
                                 <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
+                                <br/>
+                                <Secure permission="env.add">
+                                    <Well block>
+                                        <AddEnvironment />
+                                    </Well>
+                                </Secure>
+                                <Well block>
+                                    <h3>{this.state.env} selected</h3>
+                                    <Secure permission="env.manage">
+                                        <AddService env={this.state.env} />
+                                    </Secure>
+                                </Well>
+
+                                {svcId &&
+                                <Well block>
+                                    <h3>{svcId} selected</h3>
+                                    <Secure permission="env.manage">
+                                        <AddInstance env={this.state.env} svc={svcId} />
+                                    </Secure>
+                                </Well>
+                                }
                                 <div>
                                     {selectedInstances.map(i =>
                                         <Well block>
