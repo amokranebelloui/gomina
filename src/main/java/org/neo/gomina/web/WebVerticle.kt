@@ -5,18 +5,20 @@ import com.google.inject.Guice
 import com.google.inject.util.Modules
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpMethod.*
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.BodyHandler
+import io.vertx.ext.web.handler.CorsHandler
 import io.vertx.ext.web.handler.StaticHandler
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.auth.AuthApi
+import org.neo.gomina.api.component.ComponentsApi
 import org.neo.gomina.api.dependencies.DependenciesApi
 import org.neo.gomina.api.diagram.DiagramApi
 import org.neo.gomina.api.envs.EnvsApi
 import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
-import org.neo.gomina.api.component.ComponentsApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.api.users.UsersApi
 import org.neo.gomina.api.work.WorkApi
@@ -39,6 +41,16 @@ class WebVerticle : AbstractVerticle() {
         router.route().handler(BodyHandler.create())
 
         injector.getInstance(PluginAssembler::class.java).init()
+
+        router.route().handler(CorsHandler.create("*")
+                .allowedHeaders(setOf(
+                        "x-requested-with",
+                        "Access-Control-Allow-Origin",
+                        "origin",
+                        "Content-Type",
+                        "accept",
+                        "X-PINGARUNER"))
+                .allowedMethods(setOf(GET, POST, OPTIONS, DELETE, PATCH, PUT)))
 
         router
                 .mountSubRouter("/authenticate", injector.getInstance(AuthApi::class.java).router)
