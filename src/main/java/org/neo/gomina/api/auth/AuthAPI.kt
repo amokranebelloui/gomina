@@ -44,7 +44,10 @@ class AuthApi {
                         "component.edit",
                         "component.knowledge",
                         "component.disable",
-                        "component.delete"
+                        "component.delete",
+
+                        "env.add",
+                        "env.manage"
                 )
 
                 var result = mapOf(

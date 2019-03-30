@@ -33,9 +33,10 @@ class EnvsApi {
         this.router = Router.router(vertx)
 
         router.get("/").handler(this::data)
+        router.post("/add").handler(this::addEnv)
     }
 
-    fun data(ctx: RoutingContext) {
+    private fun data(ctx: RoutingContext) {
         try {
             val envs = inventory.getEnvironments().map { Env(it.id, it.type, "My System") } // FIXME system
             ctx.response().putHeader("content-type", "text/javascript")
@@ -43,6 +44,22 @@ class EnvsApi {
         }
         catch (e: Exception) {
             logger.error("Cannot get envs", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun addEnv(ctx: RoutingContext) {
+        val envId = ctx.request().getParam("envId")
+        try {
+            val body = ctx.body.toString()
+            logger.info("Adding env $envId $body")
+            Thread.sleep(1000)
+            // FIXME Implement
+            val env = Env(envId, "DUMMY", "My System")
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(env))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot add Env", e)
             ctx.fail(500)
         }
     }

@@ -110,6 +110,10 @@ class InstancesApi {
         this.router = Router.router(vertx)
 
         router.get("/").handler(this::instances)
+
+        router.post("/add/service").handler(this::addService)
+        router.post("/add").handler(this::addInstance)
+
         //router.get("/:envId").handler(this::forEnv)
         router.get("/:envId/services").handler(this::servicesForEnv)
 
@@ -124,6 +128,41 @@ class InstancesApi {
             a.cluster.participating != b.cluster.participating ||
             a.cluster.leader != b.cluster.leader ||
             a.process.status != b.process.status
+        }
+    }
+
+    private fun addService(ctx: RoutingContext) {
+        val svc = ctx.request().getParam("svc")
+        val env = ctx.request().getParam("env")
+        try {
+            val body = ctx.body.toString()
+            logger.info("Adding svc $svc/$env => $body")
+            Thread.sleep(1000)
+            // FIXME Implement
+            val service = ServiceDetail(svc, "dummy", ServiceMode.ONE_ONLY, 1, null, emptyList())
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(service))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot add Service", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun addInstance(ctx: RoutingContext) {
+        val instanceId = ctx.request().getParam("instanceId")
+        val svc = ctx.request().getParam("svc")
+        val env = ctx.request().getParam("env")
+        try {
+            val body = ctx.body.toString()
+            logger.info("Adding Instance $instanceId/$svc/$env => $body")
+            Thread.sleep(1000)
+            // FIXME Implement
+            val instance = InstanceDetail(id = instanceId)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(instance))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot add Instance", e)
+            ctx.fail(500)
         }
     }
 
