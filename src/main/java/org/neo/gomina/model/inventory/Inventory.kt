@@ -2,8 +2,8 @@ package org.neo.gomina.model.inventory
 
 data class Environment(
         val id: String,
-        val name: String?,
         val type: String = "UNKNOWN", // PROD TEST
+        val name: String?, // FIXME Refactor to description
         val monitoringUrl: String?,
         val active: Boolean = false,
         val services: List<Service> = emptyList()

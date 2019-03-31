@@ -45,7 +45,7 @@ class Topology {
         val monitoring = monitoring.instancesFor(env.id)
                 .associateBy { env.id to it.instanceId }
 
-
+        // FIXME associate real time and monitoring by monitoring url@<env> and no more env.id
         return merge(inventory, monitoring)
                 .map { (id, instance, indicators) ->
                     val svc = instance?.first?.svc ?: indicators?.service ?: "x"

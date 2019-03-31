@@ -2,6 +2,7 @@ import React from "react";
 import SockJS from "sockjs-client";
 import axios from "axios/index";
 import {flatMap, groupBy} from "../common/utils";
+import type {EnvType} from "../environment/Environment";
 import {EnvironmentLogical} from "../environment/Environment";
 import {AppLayout} from "./common/layout";
 //import {Link} from "react-router-dom";
@@ -9,6 +10,7 @@ import {Toggle} from "../common/Toggle";
 import {Container} from "../common/Container";
 import {InstanceFilter} from "../environment/InstanceFilter";
 import {Events} from "../environment/Events";
+import type {InstanceType} from "../environment/Instance";
 import {InstanceProperties} from "../environment/Instance";
 import {Well} from "../common/Well";
 import {extendSystems} from "../system/system-utils";
@@ -19,6 +21,7 @@ import {AddEnvironment} from "../environment/AddEnvironment";
 import {Secure} from "../permission/Secure";
 import {AddService} from "../environment/AddService";
 import {AddInstance} from "../environment/AddInstance";
+import type {ServiceDetailType, ServiceType} from "../environment/Service";
 
 class EnvApp extends React.Component {
     constructor(props) {
@@ -30,7 +33,7 @@ class EnvApp extends React.Component {
             group: "SERVICES",
             services: [],
             filterId: 'all',
-            highlight: instance => true,
+            highlight: () => true,
             events: [],
             eventsErrors: []
         };
@@ -62,14 +65,14 @@ class EnvApp extends React.Component {
             console.log('real time event', event, thisComponent.state);
             //eventsDiv.innerHTML = eventsDiv.innerHTML + ' ' + event.env + ' ' + event.name + ' ' +
             //    event.status + ' ' + event.leader + ' ' + event.participating + '<br>';
-            thisComponent.state.events.unshift({type: 'status', message: event.env + ' ' + event.name + ' ' + event.status + ' ' + event.leader + ' ' + event.participating})
+            thisComponent.state.events.unshift({type: 'status', message: event.env + ' ' + event.name + ' ' + event.status + ' ' + event.leader + ' ' + event.participating});
             thisComponent.setState({events: thisComponent.state.events});
 
             // FIXME review how to identify services/instances
-            var found = thisComponent.state.services.find(svc => svc.instances.find(ins => ins.env == event.env && ins.name == event.name));
+            let found = thisComponent.state.services.find(svc => svc.instances.find(ins => ins.env === event.env && ins.name === event.name));
 
             if (found) {
-                found = found.instances.find(ins => ins.name == event.name);
+                found = found.instances.find(ins => ins.name === event.name);
                 //console.info("found", found);
 
                 found.status = event.status;
@@ -88,7 +91,7 @@ class EnvApp extends React.Component {
         };
     }
     switch(newStatus) {
-        if (this.state != newStatus) {
+        if (this.state !== newStatus) {
             if (newStatus) {
                 this.connect();
             }
@@ -194,7 +197,7 @@ class EnvApp extends React.Component {
         const newEnv = nextProps.match.params.id;
         console.info("envApp !props-chg ", this.props.match.params.id, newEnv);
         this.setState({env: newEnv});
-        if (this.props.match.params.id != newEnv) {
+        if (this.props.match.params.id !== newEnv) {
             this.retrieveInstances(newEnv);
             this.retrieveEvents(newEnv);
         }
@@ -217,8 +220,13 @@ class EnvApp extends React.Component {
         const envsByType = groupBy(this.state.envs, 'type');
         const services = this.state.services;
         const instances = flatMap(services, svc => svc.instances);
-        const svcId = this.props.match.params.svcId;
+
+        const selectedEnv = this.state.envs.find ((e: EnvType) => e.env === this.state.env);
         const selectedInstances = instances.filter (i => i.id === this.props.match.params.instanceId);
+        const svcId = this.props.match.params.svcId;
+        const selectedServiceDetail: ServiceDetailType = services.find (s => s.service.svc === this.props.match.params.svcId);
+        const selectedService: ServiceType = selectedServiceDetail && selectedServiceDetail.service;
+        console.info("envApp !render", svcId, selectedService);
 
         const systems = extendSystems(flatMap(services, p => p.service.systems));
 
@@ -243,7 +251,7 @@ class EnvApp extends React.Component {
                         <span>{type} </span>
                         {envsByType[type].map(env =>
                             <Link key={env.env} to={"/envs/" + env.env}>
-                                <button style={{color: this.state.env == env.env ? 'gray' : null}} onClick={e => this.selectEnv(env.env)}>{env.env}</button>
+                                <button style={{color: this.state.env === env.env ? 'gray' : null}} onClick={() => this.selectEnv(env.env)}>{env.env}</button>
                             </Link>
                         )}
                         &nbsp;
@@ -258,7 +266,7 @@ class EnvApp extends React.Component {
                     <div className='principal-content'>
                         <Container>
                             {
-                                this.state.group == "INSTANCES" ? <EnvInstances services={selectedServices} highlight={this.state.highlight} /> :
+                                this.state.group === "INSTANCES" ? <EnvInstances services={selectedServices} highlight={this.state.highlight} /> :
                                 <EnvironmentLogical env={this.state.env} services={selectedServices} highlight={this.state.highlight} />
                             }
                         </Container>
@@ -267,13 +275,13 @@ class EnvApp extends React.Component {
                         <div className='side-content-wrapper'>
                             <div className='side-primary'>
                                 <button
-                                    style={{color: this.state.group == 'SERVICES' ? 'gray' : null}}
-                                    onClick={e => this.setState({group: "SERVICES"})} >
+                                    style={{color: this.state.group === 'SERVICES' ? 'gray' : null}}
+                                    onClick={() => this.setState({group: "SERVICES"})} >
                                     SERVICES
                                 </button>
                                 <button
-                                    style={{color: this.state.group == 'INSTANCES' ? 'gray' : null}}
-                                    onClick={e => this.setState({group: "INSTANCES"})}>
+                                    style={{color: this.state.group === 'INSTANCES' ? 'gray' : null}}
+                                    onClick={() => this.setState({group: "INSTANCES"})}>
                                     INSTANCES
                                 </button>
                                 <InstanceFilter id={this.state.filterId} hosts={hosts} onFilterChanged={(e, hf) => this.changeSelected(e, hf)} />
@@ -281,9 +289,9 @@ class EnvApp extends React.Component {
                                 <TagCloud tags={systems} displayCount={true}
                                           selectionChanged={values => this.setState({selectedSystems: values})} />
                                 <br/>
-                                <button onClick={e => this.reloadInventory()}>RELOAD INV</button>
-                                <button onClick={e => this.reloadScm()}>RELOAD SCM</button>
-                                <button onClick={e => this.reloadSsh()}>RELOAD SSH</button>
+                                <button onClick={() => this.reloadInventory()}>RELOAD INV</button>
+                                <button onClick={() => this.reloadScm()}>RELOAD SCM</button>
+                                <button onClick={() => this.reloadSsh()}>RELOAD SSH</button>
                                 <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
                                 <br/>
                                 <Secure permission="env.add">
@@ -291,35 +299,60 @@ class EnvApp extends React.Component {
                                         <AddEnvironment />
                                     </Well>
                                 </Secure>
+                                
+                                {selectedEnv &&
                                 <Well block>
-                                    <b>{this.state.env} selected </b>
+                                    <b>Env: {this.state.env} </b>
+                                    <div style={{float: 'right'}}>
                                     <Secure permission="env.delete">
                                         <button onClick={() => this.deleteEnv(this.state.env)}>Delete</button>
                                     </Secure>
+                                    </div>
+                                    <br/>
+                                    {selectedEnv.env}<br/>
+                                    {selectedEnv.type}<br/>
+                                    {selectedEnv.description}<br/>
+                                    {selectedEnv.monitoringUrl}<br/>
+                                    {selectedEnv.active ? 'Enabled' : 'Disabled'}<br/>
                                     <Secure permission="env.manage">
                                         <AddService env={this.state.env} />
                                     </Secure>
                                 </Well>
-
-                                {svcId &&
+                                }
+                                
+                                {svcId && selectedService &&
                                 <Well block>
-                                    <b>{svcId} selected</b>
+                                    <b>Service: {svcId} </b>
+                                    <div style={{float: 'right'}}>
                                     <Secure permission="env.manage">
                                         <button onClick={() => this.deleteService(this.state.env, svcId)}>Delete</button>
                                     </Secure>
+                                    </div>
+                                    <br/>
+                                    {selectedService.svc}<br/>
+                                    {selectedService.type}<br/>
+                                    <b>Mode: </b>{selectedService.mode} {selectedService.activeCount}<br/>
+                                    <b>Component: </b>{selectedService.componentId}<br/>
+                                    <b>Systems: </b> <TagCloud tags={selectedService.systems}/><br/>
                                     <Secure permission="env.manage">
                                         <AddInstance env={this.state.env} svc={svcId} />
                                     </Secure>
                                 </Well>
                                 }
                                 <div>
-                                    {selectedInstances.map(i =>
+                                    {selectedInstances.map((i: InstanceType) =>
                                         <Well block>
-                                            <b>{i.id} properties:</b>
+                                            <b>Instance: {i.id}</b>
+                                            <div style={{float: 'right'}}>
                                             <Secure permission="env.manage">
                                                 <button onClick={() => this.deleteInstance(this.state.env, svcId, i.id)}>Delete</button>
                                             </Secure>
+                                            </div>
                                             <br/>
+                                            {i.id}<br/>
+                                            {i.name}<br/>
+                                            <b>Host: </b>{i.deployHost}<br/>
+                                            <b>Folder: </b>{i.deployFolder}<br/>
                                             <InstanceProperties properties={i.properties} />
                                         </Well>
                                     )}

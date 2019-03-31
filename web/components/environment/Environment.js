@@ -12,7 +12,9 @@ import Route from "react-router-dom/es/Route";
 type EnvType = {
     env: string,
     type?: ?string,
-    app?: ?string
+    description?: ?string,
+    monitoringUrl?: ?string,
+    active: boolean
 }
 
 type Props = {

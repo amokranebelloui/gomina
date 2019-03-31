@@ -11,11 +11,16 @@ interface MonitoringMapper {
 }
 
 class ZmqMonitorThreadPool {
+    companion object {
+        private val logger = LogManager.getLogger(ZmqMonitorThreadPool::class.java)
+    }
+
     @Inject lateinit var monitoring: Monitoring
     @Inject lateinit var monitoringMapper: MonitoringMapper
     val map = mutableMapOf<String, ZmqMonitorThread>()
 
     fun add(url: String, subscriptions: Collection<String>) {
+        logger.info("Monitoring $url w/ $subscriptions")
         val thread = map.getOrPut(url) {
             ZmqMonitorThread(monitoring, url, monitoringMapper).apply { start() }
         }

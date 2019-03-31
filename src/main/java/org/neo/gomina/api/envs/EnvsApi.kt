@@ -1,5 +1,6 @@
 package org.neo.gomina.api.envs
 
+import com.fasterxml.jackson.databind.BeanDescription
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
@@ -13,8 +14,10 @@ import javax.inject.Inject
  */
 data class Env(
     val env: String,
-    val type:String,
-    val app:String
+    val type: String,
+    val description: String?,
+    val monitoringUrl: String?,
+    val active: Boolean
 )
 
 class EnvsApi {
@@ -39,7 +42,7 @@ class EnvsApi {
 
     private fun data(ctx: RoutingContext) {
         try {
-            val envs = inventory.getEnvironments().map { Env(it.id, it.type, "My System") } // FIXME system
+            val envs = inventory.getEnvironments().map { Env(it.id, it.type, it.name, it.monitoringUrl, it.active) }
             ctx.response().putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(envs))
         }
@@ -56,7 +59,7 @@ class EnvsApi {
             logger.info("Adding env $envId $body [TODO]")
             Thread.sleep(1000)
             // FIXME Implement
-            val env = Env(envId, "DUMMY", "My System")
+            val env = Env(envId, "DUMMY", "$envId environment", null, true)
             ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(env))
         }
         catch (e: Exception) {

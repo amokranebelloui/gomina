@@ -15,9 +15,13 @@ class PluginAssembler {
         timer(name = "monitoring-checker", period = 5000) {
             logger.debug("Checking if any new env to monitor ...")
             inventory.getEnvironments()
-                    .groupBy { it.monitoringUrl }
-                    .filterKeys { it != null }
-                    .forEach { (url, envs) -> zmqThreadPool.add(url!!, envs.map { ".#HB.${it.id}." }) }
+                    .mapNotNull { it.monitoringUrl }
+                    .map {
+                        val sep = it.lastIndexOf('@')
+                        if (sep != -1) it.substring(0, sep) to it.substring(sep + 1) else it to null
+                    }
+                    .groupBy { (url, env) -> url }
+                    .forEach { (url, envs) -> zmqThreadPool.add(url, envs.map { (url, env) -> ".#HB.$env." }) }
         }
     }
 
