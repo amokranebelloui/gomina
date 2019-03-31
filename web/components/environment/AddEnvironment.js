@@ -10,7 +10,9 @@ type Props = {
 
 type State = {
     envId?: ?string,
-    envName?: ?string
+    type: string,
+    description: string,
+    monitoringUrl: string,
 }
 
 class AddEnvironment extends React.Component<Props, State> {
@@ -18,18 +20,22 @@ class AddEnvironment extends React.Component<Props, State> {
         super(props);
         this.state = {
             envId: "",
-            envName: "",
+            type: "",
+            description: "",
+            monitoringUrl: ""
         };
     }
     clearState() {
         this.setState({
             envId: "",
-            envName: "",
+            type: "",
+            description: "",
+            monitoringUrl: ""
         })
     }
     addEnv() {
-        return this.state.envId && this.state.envName
-            ? axios.post('/data/envs/add?envId=' + this.state.envId, this.state.envName)
+        return this.state.envId
+            ? axios.post('/data/envs/add?envId=' + this.state.envId, this.state)
             : Promise.reject("Env Id/Name are mandatory");
     };
     render() {
@@ -46,9 +52,18 @@ class AddEnvironment extends React.Component<Props, State> {
                                       value={this.state.envId}
                                       onChange={e => this.setState({envId: e.target.value})} />
                                <br/>
-                               <input type="text" name="name" placeholder="env Name"
-                                      value={this.state.envName}
-                                      onChange={e => this.setState({envName: e.target.value})} />
+                               <input type="text" name="type" placeholder="Type"
+                                      value={this.state.type}
+                                      onChange={e => this.setState({type: e.target.value})} />
+                               <br/>
+                               <input type="text" name="description" placeholder="Description"
+                                      value={this.state.description}
+                                      onChange={e => this.setState({description: e.target.value})} />
+                               <br/>
+                               <input type="text" name="monitoringUrl" placeholder="Monitoring URL"
+                                      value={this.state.monitoringUrl}
+                                      style={{width: '200px'}}
+                                      onChange={e => this.setState({monitoringUrl: e.target.value})} />
                            </div>
                        }
                        successDisplay={(data: EnvType) =>
