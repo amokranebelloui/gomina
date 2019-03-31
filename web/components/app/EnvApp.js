@@ -22,6 +22,10 @@ import {Secure} from "../permission/Secure";
 import {AddService} from "../environment/AddService";
 import {AddInstance} from "../environment/AddInstance";
 import type {ServiceDetailType, ServiceType} from "../environment/Service";
+import {EnvDetail} from "../environment/EnvDetail";
+import {EnvEditor} from "../environment/EnvEditor";
+import {ServiceDetail} from "../environment/ServiceDetail";
+import {ServiceEditor} from "../environment/ServiceEditor";
 
 class EnvApp extends React.Component {
     constructor(props) {
@@ -34,6 +38,12 @@ class EnvApp extends React.Component {
             services: [],
             filterId: 'all',
             highlight: () => true,
+
+            envEdition: false,
+            envEdited: null,
+            serviceEdition: false,
+            serviceEdited: null,
+
             events: [],
             eventsErrors: []
         };
@@ -216,6 +226,38 @@ class EnvApp extends React.Component {
         console.log('this is:', filterId, highlightFunction);
         this.setState({filterId: filterId, highlight: highlightFunction})
     }
+
+    editEnv() {
+        this.setState({"envEdition": true});
+    }
+    changeEnv(env) {
+        console.info("Env Changed", env);
+        this.setState({"envEdited": env});
+    }
+    cancelEnvEdition() {
+        this.setState({"envEdition": false});
+    }
+    updateEnv() {
+        this.setState({"envEdition": false});
+        axios.put('/data/envs/' + this.state.env + '/update', this.state.envEdited)
+    }
+
+    editService() {
+        this.setState({"serviceEdition": true});
+    }
+    changeService(service) {
+        console.info("Service Changed", service);
+        this.setState({"serviceEdited": service});
+    }
+    cancelServiceEdition() {
+        this.setState({"serviceEdition": false});
+    }
+    updateService() {
+        const svcId = this.props.match.params.svcId;
+        axios.put('/data/instances/' + this.state.env + '/service/' + svcId + '/update', this.state.serviceEdited);
+        this.setState({"serviceEdition": false}); // FIXME Display Results/Errors
+    }
+
     render() {
         const envsByType = groupBy(this.state.envs, 'type');
         const services = this.state.services;
@@ -299,44 +341,68 @@ class EnvApp extends React.Component {
                                         <AddEnvironment />
                                     </Well>
                                 </Secure>
-                                
+
                                 {selectedEnv &&
                                 <Well block>
-                                    <b>Env: {this.state.env} </b>
+                                    <b>Env: {selectedEnv.env} </b>
                                     <div style={{float: 'right'}}>
-                                    <Secure permission="env.delete">
-                                        <button onClick={() => this.deleteEnv(this.state.env)}>Delete</button>
-                                    </Secure>
+                                        <Secure permission="env.manage">
+                                            <button onClick={() => this.editEnv()}>Edit</button>
+                                        </Secure>
+                                        <Secure permission="env.delete">
+                                            <button onClick={() => this.deleteEnv(selectedEnv.env)}>Delete</button>
+                                        </Secure>
                                     </div>
                                     <br/>
-                                    {selectedEnv.env}<br/>
-                                    {selectedEnv.type}<br/>
-                                    {selectedEnv.description}<br/>
-                                    {selectedEnv.monitoringUrl}<br/>
-                                    {selectedEnv.active ? 'Enabled' : 'Disabled'}<br/>
-                                    <Secure permission="env.manage">
-                                        <AddService env={this.state.env} />
-                                    </Secure>
+                                    {!this.state.envEdition &&
+                                        <div>
+                                            <EnvDetail env={selectedEnv} />
+                                            <br/>
+                                            <Secure permission="env.manage">
+                                                <AddService env={selectedEnv.env} />
+                                            </Secure>
+                                        </div>
+                                    }
+                                    {this.state.envEdition &&
+                                        <div>
+                                            <EnvEditor env={selectedEnv} onChange={(id, e) => this.changeEnv(e)} />
+                                            <hr/>
+                                            <button onClick={() => this.updateEnv()}>Update</button>
+                                            <button onClick={() => this.cancelEnvEdition()}>Cancel</button>
+                                        </div>
+                                    }
                                 </Well>
                                 }
-                                
+
                                 {svcId && selectedService &&
                                 <Well block>
                                     <b>Service: {svcId} </b>
                                     <div style={{float: 'right'}}>
-                                    <Secure permission="env.manage">
-                                        <button onClick={() => this.deleteService(this.state.env, svcId)}>Delete</button>
-                                    </Secure>
+                                        <Secure permission="env.manage">
+                                            <button onClick={() => this.editService()}>Edit</button>
+                                        </Secure>
+                                        <Secure permission="env.manage">
+                                            <button onClick={() => this.deleteService(this.state.env, svcId)}>Delete</button>
+                                        </Secure>
                                     </div>
                                     <br/>
-                                    {selectedService.svc}<br/>
-                                    {selectedService.type}<br/>
-                                    <b>Mode: </b>{selectedService.mode} {selectedService.activeCount}<br/>
-                                    <b>Component: </b>{selectedService.componentId}<br/>
-                                    <b>Systems: </b> <TagCloud tags={selectedService.systems}/><br/>
-                                    <Secure permission="env.manage">
-                                        <AddInstance env={this.state.env} svc={svcId} />
-                                    </Secure>
+                                    {!this.state.serviceEdition &&
+                                    <div>
+                                        <ServiceDetail service={selectedService} />
+                                        <br/>
+                                        <Secure permission="env.manage">
+                                            <AddInstance env={this.state.env} svc={svcId} />
+                                        </Secure>
+                                    </div>
+                                    }
+                                    {this.state.serviceEdition &&
+                                        <div>
+                                            <ServiceEditor service={selectedService} onChange={(svc, s) => this.changeService(s)} />
+                                            <hr/>
+                                            <button onClick={() => this.updateService()}>Update</button>
+                                            <button onClick={() => this.cancelServiceEdition()}>Cancel</button>
+                                        </div>
+                                    }
                                 </Well>
                                 }
                                 <div>

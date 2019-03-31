@@ -13,7 +13,15 @@ type ServiceType = {
     mode?: ?string,
     activeCount?: ?number,
     componentId?: ?string,
-    systems?: ?Array<string>,
+    systems?: ?Array<string>
+}
+
+type ServiceDataType = {
+    svc: string,
+    type?: ?string,
+    mode?: ?string,
+    activeCount?: ?number,
+    componentId?: ?string
 }
 
 type ServiceDetailType = {
@@ -176,4 +184,4 @@ function computeServiceDetails(service: ServiceType, instances: Array<InstanceTy
 }
 
 export { Service, computeStatus }
-export type { ServiceType, ServiceDetailType }
+export type { ServiceType, ServiceDataType, ServiceDetailType }

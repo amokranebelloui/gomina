@@ -20,8 +20,8 @@ class ZmqMonitorThreadPool {
     val map = mutableMapOf<String, ZmqMonitorThread>()
 
     fun add(url: String, subscriptions: Collection<String>) {
-        logger.info("Monitoring $url w/ $subscriptions")
         val thread = map.getOrPut(url) {
+            logger.info("Monitoring $url w/ $subscriptions")
             ZmqMonitorThread(monitoring, url, monitoringMapper).apply { start() }
         }
         subscriptions.forEach { thread.subscribe(it) }

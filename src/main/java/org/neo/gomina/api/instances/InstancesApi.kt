@@ -112,9 +112,10 @@ class InstancesApi {
         router.get("/").handler(this::instances)
 
         router.post("/:envId/service/add").handler(this::addService)
-        router.post("/:envId/service/:svcId/instance/add").handler(this::addInstance)
-
+        router.put("/:envId/service/:svcId/update").handler(this::updateService)
         router.delete("/:envId/service/:svcId/delete").handler(this::deleteService)
+
+        router.post("/:envId/service/:svcId/instance/add").handler(this::addInstance)
         router.delete("/:envId/service/:svcId/instance/:instanceId/delete").handler(this::deleteInstance)
 
         //router.get("/:envId").handler(this::forEnv)
@@ -147,6 +148,23 @@ class InstancesApi {
         }
         catch (e: Exception) {
             logger.error("Cannot add Service", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun updateService(ctx: RoutingContext) {
+        val svc = ctx.request().getParam("svcId")
+        val env = ctx.request().getParam("envId")
+        try {
+            val body = ctx.body.toString()
+            logger.info("Updating svc $svc/$env => $body")
+            Thread.sleep(1000)
+            // FIXME Implement
+            val service = ServiceDetail(svc, "dummy", ServiceMode.ONE_ONLY, 1, null, emptyList())
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(service))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot Update Service", e)
             ctx.fail(500)
         }
     }

@@ -37,6 +37,7 @@ class EnvsApi {
 
         router.get("/").handler(this::data)
         router.post("/add").handler(this::addEnv)
+        router.put("/:envId/update").handler(this::updateEnv)
         router.delete("/:envId/delete").handler(this::deleteEnv)
     }
 
@@ -57,6 +58,22 @@ class EnvsApi {
         try {
             val body = ctx.body.toString()
             logger.info("Adding env $envId $body [TODO]")
+            Thread.sleep(1000)
+            // FIXME Implement
+            val env = Env(envId, "DUMMY", "$envId environment", null, true)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(env))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot add Env", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun updateEnv(ctx: RoutingContext) {
+        val envId = ctx.request().getParam("envId")
+        try {
+            val body = ctx.body.toString()
+            logger.info("Updating env $envId $body [TODO]")
             Thread.sleep(1000)
             // FIXME Implement
             val env = Env(envId, "DUMMY", "$envId environment", null, true)

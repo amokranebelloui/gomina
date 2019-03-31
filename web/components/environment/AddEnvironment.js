@@ -40,10 +40,12 @@ class AddEnvironment extends React.Component<Props, State> {
                        onItemAdded={(data: EnvType) => this.props.onEnvironmentAdded && this.props.onEnvironmentAdded(data.env)}
                        editionForm={() =>
                            <div>
-                               <span>Add Env</span>
+                               <span>New Env</span>
+                               <br/>
                                <input type="text" name="id" placeholder="env Id"
                                       value={this.state.envId}
                                       onChange={e => this.setState({envId: e.target.value})} />
+                               <br/>
                                <input type="text" name="name" placeholder="env Name"
                                       value={this.state.envName}
                                       onChange={e => this.setState({envName: e.target.value})} />

@@ -17,6 +17,12 @@ type EnvType = {
     active: boolean
 }
 
+type EnvDataType = {
+    type?: ?string,
+    description?: ?string,
+    monitoringUrl?: ?string
+}
+
 type Props = {
     env: string,
     services: Array<ServiceDetailType>,
@@ -115,4 +121,4 @@ class EnvironmentLogical extends React.Component<Props, State> {
 }
 
 export {EnvironmentLogical}
-export type {EnvType}
+export type {EnvType, EnvDataType}
