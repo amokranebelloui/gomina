@@ -41,7 +41,7 @@ class AddInstance extends React.Component<Props, State> {
             <InlineAdd type="Instance"
                        action={() => this.addInstance()}
                        onEnterAdd={() => this.clearState()}
-                       onItemAdded={(data: any) => this.props.onInstanceAdded && this.props.onInstanceAdded(data.id)}
+                       onItemAdded={(data: any) => this.props.onInstanceAdded && this.props.onInstanceAdded(data)}
                        editionForm={() =>
                            <div>
                                <span>Add Instance for <b>{this.props.env}</b>/<b>{this.props.svc}</b></span>
@@ -61,7 +61,7 @@ class AddInstance extends React.Component<Props, State> {
                        }
                        successDisplay={(data: any) =>
                            <div>
-                               <b>{data ? (data.id + " --> " + JSON.stringify(data)) : 'no data returned'}</b>
+                               <b>{data ? (data + " --> " + JSON.stringify(data)) : 'no data returned'}</b>
                            </div>
                        }
             />

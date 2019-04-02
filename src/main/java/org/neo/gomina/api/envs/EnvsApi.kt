@@ -1,6 +1,5 @@
 package org.neo.gomina.api.envs
 
-import com.fasterxml.jackson.databind.BeanDescription
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router

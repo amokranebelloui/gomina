@@ -194,11 +194,6 @@ class EnvApp extends React.Component {
             .then(() => this.retrieveInstances(env))
             .catch((error) => console.log("service delete error", error.response));
     }
-    deleteInstance(env, svc, instanceId) {
-        axios.delete('/data/instances/' + this.state.env + '/service/' + svc + '/instance/' + instanceId + '/delete')
-            .then(() => this.retrieveInstances(env))
-            .catch((error) => console.log("instance delete error", error.response));
-    }
 
     componentWillMount() {
         console.info("envApp !will-mount ");
@@ -256,6 +251,15 @@ class EnvApp extends React.Component {
         const svcId = this.props.match.params.svcId;
         axios.put('/data/instances/' + this.state.env + '/service/' + svcId + '/update', this.state.serviceEdited);
         this.setState({"serviceEdition": false}); // FIXME Display Results/Errors
+    }
+
+    instanceAdded(instanceId) {
+        this.retrieveInstances(this.state.env)
+    }
+    deleteInstance(env, svc, instanceId) {
+        axios.delete('/data/instances/' + this.state.env + '/service/' + svc + '/instance/' + instanceId + '/delete')
+            .then(() => this.retrieveInstances(env))
+            .catch((error) => console.log("instance delete error", error.response));
     }
 
     render() {
@@ -391,7 +395,7 @@ class EnvApp extends React.Component {
                                         <ServiceDetail service={selectedService} />
                                         <br/>
                                         <Secure permission="env.manage">
-                                            <AddInstance env={this.state.env} svc={svcId} />
+                                            <AddInstance env={this.state.env} svc={svcId} onInstanceAdded={i => this.instanceAdded(i)} />
                                         </Secure>
                                     </div>
                                     }
@@ -411,7 +415,7 @@ class EnvApp extends React.Component {
                                             <b>Instance: {i.id}</b>
                                             <div style={{float: 'right'}}>
                                             <Secure permission="env.manage">
-                                                <button onClick={() => this.deleteInstance(this.state.env, svcId, i.id)}>Delete</button>
+                                                <button onClick={() => this.deleteInstance(this.state.env, svcId, i.name)}>Delete</button>
                                             </Secure>
                                             </div>
                                             <br/>

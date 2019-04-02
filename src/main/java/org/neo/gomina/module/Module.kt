@@ -95,7 +95,8 @@ class GominaModule : AbstractModule() {
         bind(InteractionsFileProvider::class.java).asEagerSingleton()
         bind(WorkList::class.java).to(WorkListFile::class.java).`in`(Scopes.SINGLETON)
         bind(Hosts::class.java).to(HostsFile::class.java).`in`(Scopes.SINGLETON)
-        bind(Inventory::class.java).to(InventoryFile::class.java).`in`(Scopes.SINGLETON)
+        //bind(Inventory::class.java).to(InventoryFile::class.java).`in`(Scopes.SINGLETON)
+        bind(Inventory::class.java).to(RedisInventoryRepo::class.java).`in`(Scopes.SINGLETON)
 
         // JIRA
         bind(String::class.java).annotatedWith(named("jira.url")).toInstance(config.jiraUrl)

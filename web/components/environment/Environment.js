@@ -96,7 +96,7 @@ class EnvironmentLogical extends React.Component<Props, State> {
                     );
                     let instances = [];
                     if (this.isOpen(svc.service.svc)) {
-                        instances = (svc.instances || []).map(instance => {
+                        instances = sortInstances(svc.instances || []).map(instance => {
                             const highlighted = this.props.highlight != null && this.props.highlight(instance);
                             return (
                                 <tr key={instance.id} className='env-row instance' style={{opacity: (highlighted) ? 1 : 0.06}}>
@@ -118,6 +118,10 @@ class EnvironmentLogical extends React.Component<Props, State> {
             </table>
         )
     }
+}
+
+function sortInstances(instances: Array<InstanceType>) {
+    return instances.sort((a, b) => a.id > b.id ? 1 : -1)
 }
 
 export {EnvironmentLogical}

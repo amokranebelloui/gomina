@@ -28,7 +28,7 @@ data class ServiceDetail (
         val svc: String,
         val type: String? = null,
         val mode: ServiceMode? = ServiceMode.ONE_ONLY,
-        val activeCount: Int = 1,
+        val activeCount: Int? = 1,
         val componentId: String? = null,
         val systems: List<String>
 )
@@ -191,10 +191,9 @@ class InstancesApi {
         try {
             val body = ctx.body.toString()
             logger.info("Adding Instance $instanceId/$svc/$env => $body")
-            Thread.sleep(1000)
-            // FIXME Implement
-            val instance = InstanceDetail(id = instanceId)
-            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(instance))
+            inventory.addInstance(env, svc, instanceId, null, null)
+            //val instance = InstanceDetail(id = instanceId)
+            ctx.response().putHeader("content-type", "text/javascript").end(instanceId)
         }
         catch (e: Exception) {
             logger.error("Cannot add Instance", e)
@@ -205,11 +204,10 @@ class InstancesApi {
     private fun deleteInstance(ctx: RoutingContext) {
         val instanceId = ctx.request().getParam("instanceId")
         val svc = ctx.request().getParam("svcId")
-        val envId = ctx.request().getParam("envId")
+        val env = ctx.request().getParam("envId")
         try {
-            logger.info("Deleting Instance $instanceId/$svc/$envId")
-            Thread.sleep(1000)
-            // FIXME Implement
+            logger.info("Deleting Instance $instanceId/$svc/$env")
+            inventory.deleteInstance(env, svc, instanceId)
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
