@@ -14,7 +14,7 @@ type State = {
     svc?: ?string,
     type?: ?string,
     mode?: ?string,
-    count?: ?string,
+    activeCount?: ?string,
     componentId?: ?string
 }
 
@@ -25,7 +25,7 @@ class AddService extends React.Component<Props, State> {
             svc: "",
             type: "",
             mode: "",
-            count: "",
+            activeCount: "",
             componentId: ""
         };
     }
@@ -34,7 +34,7 @@ class AddService extends React.Component<Props, State> {
             svc: "",
             type: "",
             mode: "",
-            count: "",
+            activeCount: "",
             componentId: ""
         })
     }
@@ -62,8 +62,8 @@ class AddService extends React.Component<Props, State> {
                                       onChange={e => this.setState({type: e.target.value})} />
                                <br/>
                                <ServiceModeEditor mode={this.state.mode}
-                                                  count={this.state.count}
-                                                  onChanged={(mode, count) => this.setState({mode: mode, count: count})} />
+                                                  count={this.state.activeCount}
+                                                  onChanged={(mode, count) => this.setState({mode: mode, activeCount: count})} />
                                <br/>
                                <input type="text" name="component" placeholder="Component"
                                       value={this.state.componentId}

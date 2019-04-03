@@ -66,7 +66,7 @@ class InventoryFile : Inventory, AbstractFileRepo {
 
     override fun addService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?) { TODO("not implemented") }
     override fun updateService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?) { TODO("not implemented") }
-    override fun renameService(env: String, svc: String) { TODO("not implemented") }
+    override fun renameService(env: String, svc: String, newSvc: String) { TODO("not implemented") }
     override fun deleteService(env: String, svc: String) { TODO("not implemented") }
 
     override fun addInstance(env: String, svc: String, instanceId: String, host: String?, folder: String?) { TODO("not implemented") }
@@ -90,7 +90,12 @@ class RedisInventoryRepo : Inventory {
     }
 
 
-    override fun getEnvironments(): Collection<Environment> = listOf(Environment("UAT"))
+    override fun getEnvironments(): Collection<Environment> {
+        pool.resource.use { jedis ->
+            return jedis.keys("env:*").mapNotNull { getEnvironment(it.substring(it.lastIndexOf(':') + 1)) }
+        }
+    }
+
     override fun getEnvironment(env: String): Environment? {
         pool.resource.use { jedis ->
             //val services = jedis.keys("service:$env:*")
@@ -106,31 +111,89 @@ class RedisInventoryRepo : Inventory {
     }
 
     override fun addEnvironment(id: String, type: String, description: String?, monitoringUrl: String?) {
-        TODO("not implemented")
+        pool.resource.use { jedis ->
+            val envKey = "env:$id"
+            if (jedis.exists(envKey)) {
+                throw Exception("$id already exists")
+            }
+            jedis.hmset(envKey, listOfNotNull(
+                    "creation_time" to LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ISO_DATE_TIME),
+                    type.let { "type" to it },
+                    description?.let { "description" to it },
+                    monitoringUrl?.let { "monitoring_url" to it }
+            ).toMap())
+        }
     }
 
     override fun updateEnvironment(id: String, type: String, description: String?, monitoringUrl: String?) {
-        TODO("not implemented")
+        pool.resource.use { jedis ->
+            jedis.hmset("env:$id", listOfNotNull(
+                    "creation_time" to LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ISO_DATE_TIME),
+                    type.let { "type" to it },
+                    description?.let { "description" to it },
+                    monitoringUrl?.let { "monitoring_url" to it }
+            ).toMap())
+        }
     }
 
     override fun deleteEnvironment(id: String) {
-        TODO("not implemented")
+        pool.resource.use { jedis ->
+            jedis.del("env:$id")
+        }
     }
 
     override fun addService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?) {
-        TODO("not implemented")
+        pool.resource.use { jedis ->
+            val serviceKey = "service:$env:$svc"
+            if (jedis.exists(serviceKey)) {
+                throw Exception("$svc already exists for $env")
+            }
+            jedis.hmset(serviceKey, listOfNotNull(
+                    "creation_time" to LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ISO_DATE_TIME),
+                    type?.let { "type" to it },
+                    mode?.let { "mode" to it.name },
+                    activeCount?.let { "active_count" to it.toString() },
+                    componentId?.let { "component" to it }
+            ).toMap())
+            val servicesKey = "services:$env"
+            val max = jedis.zrevrangeWithScores(servicesKey, 0, 0).firstOrNull()?.score ?: 0.0
+            jedis.zadd(servicesKey, max + 1, svc)
+        }
     }
 
     override fun updateService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?) {
-        TODO("not implemented")
+        pool.resource.use { jedis ->
+            val serviceKey = "service:$env:$svc"
+            jedis.hmset(serviceKey, listOfNotNull(
+                    type?.let { "type" to it },
+                    mode?.let { "mode" to it.name },
+                    activeCount?.let { "active_count" to it.toString() },
+                    componentId?.let { "component" to it }
+            ).toMap())
+        }
     }
 
-    override fun renameService(env: String, svc: String) {
-        TODO("not implemented")
+    override fun renameService(env: String, svc: String, newSvc: String) {
+        pool.resource.use { jedis ->
+            val servicesKey = "services:$env"
+            val score = jedis.zscore(servicesKey, svc)
+            jedis.zrem(servicesKey, svc)
+            jedis.zadd(servicesKey, score, newSvc)
+            jedis.rename("service:$env:$svc", "service:$env:$newSvc")
+            jedis.keys("instance:$env:$svc:*").forEach {
+                jedis.rename(it, it.replace("instance:$env:$svc:", "instance:$env:$newSvc:"))
+            }
+        }
     }
 
     override fun deleteService(env: String, svc: String) {
-        TODO("not implemented")
+        pool.resource.use { jedis ->
+            jedis.del("service:$env:$svc")
+            jedis.zrem("services:$env", svc)
+            jedis.keys("instance:$env:$svc:*").forEach {
+                jedis.del(it)
+            }
+        }
     }
 
     override fun addInstance(env: String, svc: String, instanceId: String, host: String?, folder: String?) {

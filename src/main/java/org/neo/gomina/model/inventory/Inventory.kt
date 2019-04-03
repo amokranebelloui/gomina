@@ -41,7 +41,7 @@ interface Inventory {
 
     fun addService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?)
     fun updateService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?)
-    fun renameService(env: String, svc: String)
+    fun renameService(env: String, svc: String, newSvc: String)
     fun deleteService(env: String, svc: String)
 
     fun addInstance(env: String, svc: String, instanceId: String, host: String?, folder: String?)

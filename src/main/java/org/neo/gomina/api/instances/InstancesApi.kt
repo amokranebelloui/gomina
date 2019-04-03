@@ -1,6 +1,10 @@
 package org.neo.gomina.api.instances
 
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.vertx.core.AsyncResult
 import io.vertx.core.Future
 import io.vertx.core.Vertx
@@ -37,6 +41,11 @@ data class VersionDetail(val version: String = "", val revision: String?)
 data class VersionsDetail(val running: VersionDetail?, val deployed: VersionDetail?, val released: VersionDetail?, val latest: VersionDetail?)
 
 data class SidecarDetail(val status: String = "", val version: String = "", val revision: String = "")
+
+data class InstanceData(val host: String?, val folder: String?)
+data class ServiceData (val svc: String, val type: String? = null,
+                        val mode: ServiceMode?, val activeCount: Int?,
+                        val componentId: String? = null)
 
 class InstanceDetail(
 
@@ -103,6 +112,10 @@ class InstancesApi {
     @Inject lateinit private var topology: Topology
 
     private val mapper = ObjectMapper()
+            .registerKotlinModule()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
 
     @Inject
     constructor(vertx: Vertx) {
@@ -139,12 +152,10 @@ class InstancesApi {
         val svc = ctx.request().getParam("svcId")
         val env = ctx.request().getParam("envId")
         try {
-            val body = ctx.body.toString()
-            logger.info("Adding svc $svc/$env => $body")
-            Thread.sleep(1000)
-            // FIXME Implement
-            val service = ServiceDetail(svc, "dummy", ServiceMode.ONE_ONLY, 1, null, emptyList())
-            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(service))
+            val data = mapper.readValue<ServiceData>(ctx.body.toString())
+            logger.info("Adding svc $svc/$env $data")
+            inventory.addService(env, svc, data.type, data.mode, data.activeCount, data.componentId)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(svc))
         }
         catch (e: Exception) {
             logger.error("Cannot add Service", e)
@@ -156,12 +167,15 @@ class InstancesApi {
         val svc = ctx.request().getParam("svcId")
         val env = ctx.request().getParam("envId")
         try {
-            val body = ctx.body.toString()
-            logger.info("Updating svc $svc/$env => $body")
-            Thread.sleep(1000)
-            // FIXME Implement
-            val service = ServiceDetail(svc, "dummy", ServiceMode.ONE_ONLY, 1, null, emptyList())
-            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(service))
+            val data = mapper.readValue<ServiceData>(ctx.body.toString())
+            logger.info("Updating svc $svc/$env $data")
+
+            if (svc != data.svc) {
+                inventory.renameService(env, svc, data.svc)
+            }
+            inventory.updateService(env, svc, data.type, data.mode, data.activeCount, data.componentId)
+
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(svc))
         }
         catch (e: Exception) {
             logger.error("Cannot Update Service", e)
@@ -174,8 +188,7 @@ class InstancesApi {
         val env = ctx.request().getParam("envId")
         try {
             logger.info("Deleting svc $svc/$env")
-            Thread.sleep(1000)
-            // FIXME Implement
+            inventory.deleteService(env, svc)
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
@@ -189,10 +202,9 @@ class InstancesApi {
         val svc = ctx.request().getParam("svcId")
         val env = ctx.request().getParam("envId")
         try {
-            val body = ctx.body.toString()
-            logger.info("Adding Instance $instanceId/$svc/$env => $body")
-            inventory.addInstance(env, svc, instanceId, null, null)
-            //val instance = InstanceDetail(id = instanceId)
+            val instanceData = mapper.readValue<InstanceData>(ctx.body.toString())
+            logger.info("Adding Instance $instanceId/$svc/$env $instanceData")
+            inventory.addInstance(env, svc, instanceId, instanceData.host, instanceData.folder)
             ctx.response().putHeader("content-type", "text/javascript").end(instanceId)
         }
         catch (e: Exception) {
@@ -253,15 +265,25 @@ class InstancesApi {
 
             val components = componentRepo.getAll().associateBy { it.id }
 
+            val res = mutableMapOf<Service, MutableList<ExtInstance>>()
+
             val instances = inventory.getEnvironment(envId)?.let {
+                it.services.forEach { service ->
+                    res.getOrPut(service) { mutableListOf() }
+                }
                 topology.buildExtInstances(it)
-                        .groupBy { it.service }
-                        .map { (service, extInstances) ->
-                            mapOf(
-                                    "service" to service.toServiceDetail(components[service.componentId]),
-                                    "instances" to extInstances.map { buildInstanceDetail(envId, it) }
-                            )
+                        .forEach {
+                            res.getOrPut(it.service) { mutableListOf() }.add(it)
                         }
+                        /*
+                        .groupBy { it.service }
+                        */
+                res.map { (service, extInstances) ->
+                    mapOf(
+                            "service" to service.toServiceDetail(components[service.componentId]),
+                            "instances" to extInstances.map { buildInstanceDetail(envId, it) }
+                    )
+                }
             }
             ?: emptyList()
             ctx.response()

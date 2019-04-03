@@ -237,6 +237,9 @@ class EnvApp extends React.Component {
         axios.put('/data/envs/' + this.state.env + '/update', this.state.envEdited)
     }
 
+    serviceAdded(s) {
+        this.retrieveInstances(this.state.env)
+    }
     editService() {
         this.setState({"serviceEdition": true});
     }
@@ -249,7 +252,9 @@ class EnvApp extends React.Component {
     }
     updateService() {
         const svcId = this.props.match.params.svcId;
-        axios.put('/data/instances/' + this.state.env + '/service/' + svcId + '/update', this.state.serviceEdited);
+        axios.put('/data/instances/' + this.state.env + '/service/' + svcId + '/update', this.state.serviceEdited)
+            .then(() => this.retrieveInstances(this.state.env))
+            .catch((error) => console.log("service update error", error.response));
         this.setState({"serviceEdition": false}); // FIXME Display Results/Errors
     }
 
@@ -363,7 +368,7 @@ class EnvApp extends React.Component {
                                             <EnvDetail env={selectedEnv} />
                                             <br/>
                                             <Secure permission="env.manage">
-                                                <AddService env={selectedEnv.env} />
+                                                <AddService env={selectedEnv.env} onServiceAdded={s => this.serviceAdded(s)} />
                                             </Secure>
                                         </div>
                                     }

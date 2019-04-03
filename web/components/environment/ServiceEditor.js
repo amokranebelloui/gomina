@@ -12,7 +12,7 @@ type State = {
     svc: string,
     type?: ?string,
     mode?: ?string,
-    count?: ?string,
+    activeCount?: ?string,
     componentId?: ?string
 }
 
@@ -23,7 +23,7 @@ class ServiceEditor extends React.Component<Props, State> {
             svc: this.props.service.svc,
             type: this.props.service.type,
             mode: this.props.service.mode,
-            count: this.props.service.activeCount ? this.props.service.activeCount.toString() : "",
+            activeCount: this.props.service.activeCount ? this.props.service.activeCount.toString() : "",
             componentId: this.props.service.componentId
         };
     }
@@ -37,8 +37,8 @@ class ServiceEditor extends React.Component<Props, State> {
         this.notifyChange({type: type});
     }
     changeMode(mode: ?string, count: ?string) {
-        this.setState({mode: mode, count: count});
-        this.notifyChange({mode: mode, count: count});
+        this.setState({mode: mode, activeCount: count});
+        this.notifyChange({mode: mode, activeCount: count});
     }
     changeComponentId(componentId: string) {
         this.setState({componentId: componentId});
@@ -50,7 +50,7 @@ class ServiceEditor extends React.Component<Props, State> {
             svc: this.state.svc,
             type: this.state.type,
             mode: this.state.mode,
-            count: this.state.count ? parseInt(this.state.count) : null,
+            activeCount: this.state.activeCount ? parseInt(this.state.activeCount) : null,
             componentId: this.state.componentId
         };
         const data = Object.assign({}, fromState, delta);
@@ -69,7 +69,7 @@ class ServiceEditor extends React.Component<Props, State> {
                        onChange={e => this.changeType(e.target.value)} />
                 <br/>
                 <ServiceModeEditor mode={this.state.mode}
-                                   count={this.state.count}
+                                   count={this.state.activeCount}
                                    onChanged={(mode, count) => this.changeMode(mode, count)} />
                 <br/>
                 <input type="text" name="component" placeholder="Component"
