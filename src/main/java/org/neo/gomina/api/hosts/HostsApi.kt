@@ -8,20 +8,22 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.model.host.Host
 import org.neo.gomina.model.host.Hosts
+import org.neo.gomina.model.inventory.Inventory
 import javax.inject.Inject
 
 data class HostDetail(
         val host: String,
-        val dataCenter: String?,
-        val group: String?,
-        val type: String,
+        val managed: Boolean,
+        val dataCenter: String? = null,
+        val group: String? = null,
+        val type: String? = null,
         val tags: List<String> = emptyList(),
 
-        val username: String?,
+        val username: String? = null,
         val passwordAlias: String? = null,
         val sudo: String? = null,
 
-        val unexpected: List<String>
+        val unexpected: List<String> = emptyList()
 )
 
 class HostsApi {
@@ -34,6 +36,7 @@ class HostsApi {
     val router: Router
 
     @Inject lateinit var hosts: Hosts
+    @Inject lateinit var inventory: Inventory
     @Inject lateinit var sshService: SshService
 
     private val mapper = ObjectMapper()
@@ -52,10 +55,19 @@ class HostsApi {
         try {
             val host = ctx.request().getParam("host")
             logger.info("Host '$host' details")
-            val hosts = hosts.getHosts().map { it.map() }
+            val hostMap = hosts.getHosts().map { it.map() }.associateBy { it.host }
+
+            val unmanaged = inventory.getEnvironments()
+                    .flatMap { it.services }
+                    .flatMap { it.instances }
+                    .mapNotNull { it.host } // FIXME Add Running host, after refactoring monitoring data to be on the instance object
+                    .filter { !it.isBlank() }
+                    .filter { !hostMap.containsKey(it) }
+                    .map { HostDetail(host = it, managed = false) }
+
             ctx.response()
                     .putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(hosts))
+                    .end(mapper.writeValueAsString(hostMap.values + unmanaged))
         }
         catch (e: Exception) {
             logger.error("Cannot get hosts", e)
@@ -97,6 +109,7 @@ class HostsApi {
 private fun Host.map(): HostDetail {
     return HostDetail(
             host = host,
+            managed = true,
             dataCenter = dataCenter,
             group = group,
             type = type,

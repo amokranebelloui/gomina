@@ -58,7 +58,7 @@ class HostsApp extends React.Component {
         return (
             <AppLayout title="Hosts">
                 <PrimarySecondaryLayout>
-                    <div style={{display: 'flex'}}>
+                    <div style={{display: 'flex', flexFlow: 'row wrap'}}>
                         {hosts.map(host =>
                             <Host key={host.host} host={host}></Host>
                         )}
@@ -67,7 +67,9 @@ class HostsApp extends React.Component {
                         {host &&
                         <Well block>
                             <h3>Detail {host && host.host}</h3>
-                            <button onClick={() => this.reloadSsh()}>RELOAD SSH</button>
+                            {host.managed &&
+                                <button onClick={() => this.reloadSsh()}>RELOAD SSH</button>
+                            }
                             {host && <Host host={host}></Host>}
                             <hr/>
                             <b>Should not be there</b>
@@ -89,7 +91,7 @@ function Host(props) {
     const host = props.host;
     //border: '1px solid blue'
     return (
-        <div style={{border: '1px solid gray', padding: '2px', minWidth: '80px'}}>
+        <div style={{display: 'inline-bloc', border: '1px solid #DDDDDD', padding: '2px', margin: '2px', width: '120px'}}>
             <div>
                 <Link to={"/host/" + host.host}>
                     <h3 style={{display: 'inline-block'}}>{host.host}</h3>
@@ -99,9 +101,14 @@ function Host(props) {
                     <Badge backgroundColor='#EAA910' color='white'>{host.unexpected.length}</Badge>
                     }
                 </div>
+                <div style={{float: 'right', verticalAlign: 'top'}}>
+                    {!host.managed &&
+                        <Badge backgroundColor='#4479ce' color='white'>?</Badge>
+                    }
+                </div>
             </div>
             <div><i>&lt;{host.dataCenter}&gt;</i></div>
-            <hr/>
+            <hr style={{border: '1px solid #DDDDDD'}}/>
             <div>
                 {host.username} / {host.passwordAlias}
                 {host.sudo && <span> [{host.sudo}]</span>}
