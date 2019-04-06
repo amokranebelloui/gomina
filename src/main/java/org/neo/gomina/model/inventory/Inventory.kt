@@ -1,5 +1,7 @@
 package org.neo.gomina.model.inventory
 
+import org.neo.gomina.model.version.Version
+
 data class Environment(
         val id: String,
         val type: String = "UNKNOWN", // PROD TEST
@@ -28,7 +30,12 @@ data class Service(
 data class Instance(
         val id: String,
         val host: String?,
-        val folder: String?
+        val folder: String?,
+
+        var deployedVersion: Version? = null,
+        var confRevision: String? = null,
+        var confCommitted: Boolean? = null,
+        var confUpToDate: Boolean? = null
 )
 
 interface Inventory {
@@ -39,12 +46,17 @@ interface Inventory {
     fun updateEnvironment(id: String, type: String, description: String?, monitoringUrl: String?)
     fun deleteEnvironment(id: String)
 
-    fun addService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?)
-    fun updateService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?)
+    fun addService(env: String, svc: String,
+                   type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?)
+    fun updateService(env: String, svc: String,
+                      type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?)
     fun renameService(env: String, svc: String, newSvc: String)
     fun deleteService(env: String, svc: String)
 
     fun addInstance(env: String, svc: String, instanceId: String, host: String?, folder: String?)
     fun deleteInstance(env: String, svc: String, instanceId: String)
 
+    fun updateDeployedRevision(env: String, svc: String, instanceId: String, version: Version?)
+    fun updateConfigStatus(env: String, svc: String, instanceId: String,
+                           confRevision: String?, confCommitted: Boolean?, confUpToDate: Boolean?)
 }

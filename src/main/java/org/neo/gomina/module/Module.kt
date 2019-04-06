@@ -39,7 +39,6 @@ import org.neo.gomina.model.dependency.EnrichDependencies
 import org.neo.gomina.model.dependency.InteractionsRepository
 import org.neo.gomina.model.dependency.ProviderBasedInteractionRepository
 import org.neo.gomina.model.event.EventsProviderConfig
-import org.neo.gomina.model.host.HostRepo
 import org.neo.gomina.model.host.HostUtils
 import org.neo.gomina.model.host.Hosts
 import org.neo.gomina.model.inventory.Inventory
@@ -125,7 +124,6 @@ class GominaModule : AbstractModule() {
         bind(SshClient::class.java).`in`(Scopes.SINGLETON)
         bind(SshOnDemandConnector::class.java).`in`(Scopes.SINGLETON)
         bind(SshService::class.java).`in`(Scopes.SINGLETON)
-        bind(HostRepo::class.java).to(SshService::class.java).`in`(Scopes.SINGLETON)
 
         // Topology
         bind(Topology::class.java).`in`(Scopes.SINGLETON)

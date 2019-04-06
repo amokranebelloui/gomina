@@ -2,15 +2,12 @@ package org.neo.gomina.model.runtime
 
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
-import org.neo.gomina.model.host.HostRepo
-import org.neo.gomina.model.host.InstanceSshDetails
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.RuntimeInfo
-import org.neo.gomina.model.scm.ScmRepos
 import javax.inject.Inject
 
 data class ExtInstance(
@@ -18,7 +15,6 @@ data class ExtInstance(
         val component: Component?,
         val service: Service,
         val instance: Instance?,
-        val sshDetails: InstanceSshDetails?,
         val indicators: RuntimeInfo?
 ) {
     val completeId get() = id.first + "-" + id.second
@@ -34,9 +30,6 @@ class Topology {
     @Inject private lateinit var componentRepo: ComponentRepo
     @Inject lateinit private var monitoring: Monitoring
 
-    @Inject lateinit private var scmRepo: ScmRepos
-    @Inject lateinit private var hostRepo: HostRepo
-
     fun buildExtInstances(env: Environment): List<ExtInstance> {
         val services = env ?. services ?. associateBy { it.svc }
         val inventory = env.services
@@ -51,9 +44,8 @@ class Topology {
                     val svc = instance?.first?.svc ?: indicators?.service ?: "x"
                     val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
                     val component = service.componentId?.let { componentRepo.get(it) }
-                    val sshDetails = instance?.second?.let { hostRepo.getDetails(it) }
 
-                    ExtInstance(id, component, service, instance?.second, sshDetails, indicators)
+                    ExtInstance(id, component, service, instance?.second, indicators)
                 }
     }
 
@@ -80,9 +72,8 @@ class Topology {
                     val svc = instance?.first?.svc ?: indicators?.service ?: "x"
                     val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
                     val component = service.componentId?.let { componentRepo.get(it) }
-                    val sshDetails = instance?.second?.let { hostRepo.getDetails(it) }
 
-                    ExtInstance(id, component, service, instance?.second, sshDetails, indicators)
+                    ExtInstance(id, component, service, instance?.second, indicators)
                 }
     }
 

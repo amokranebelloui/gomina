@@ -1,6 +1,5 @@
 package org.neo.gomina.model.host
 
-import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.version.Version
 
 data class InstanceSshDetails(
@@ -11,14 +10,10 @@ data class InstanceSshDetails(
         var confUpToDate: Boolean? = null,
         var confRevision: String? = null
 ) {
-    val version get() = if (this.deployedVersion?.isNotEmpty() == true) Version(this.deployedVersion, this.deployedRevision) else null
+    val version get() = Version.of(this.deployedVersion, this.deployedRevision)
 }
 
 data class HostSshDetails(
         var analyzed: Boolean = false,
         var unexpectedFolders: List<String> = emptyList()
 )
-
-interface HostRepo {
-    fun getDetails(instance: Instance): InstanceSshDetails?
-}

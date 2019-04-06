@@ -69,7 +69,7 @@ class DummyScmClient : ScmClient {
     }
 
     override fun getFile(url: String, rev: String): String? {
-        val projectData = getProjectData(url.replace("/trunk/pom.xml", ""))
+        val projectData = getProjectData(this.url)
         if (projectData != null) {
             val log = projectData["log"] as List<Map<String, Any>>?
             val commit = if (rev == "-1") (if (log?.isNotEmpty() == true) log[0] else null) else findRevision(log, rev)

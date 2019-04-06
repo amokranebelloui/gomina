@@ -13,6 +13,7 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.common.UserRef
 import org.neo.gomina.api.instances.VersionDetail
+import org.neo.gomina.api.instances.toVersionDetail
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.sonar.SonarService
@@ -22,11 +23,9 @@ import org.neo.gomina.model.component.NewComponent
 import org.neo.gomina.model.component.Scm
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
-import org.neo.gomina.model.scm.ScmDetails
 import org.neo.gomina.model.scm.activity
 import org.neo.gomina.model.system.Systems
 import org.neo.gomina.model.user.Users
-import org.neo.gomina.model.version.Version
 import org.neo.gomina.model.work.WorkList
 import java.time.Clock
 import java.time.LocalDateTime
@@ -699,7 +698,6 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
 fun ExtInstance.toRef() = InstanceRefDetail(
         id = this.completeId, env = this.envId, name = this.instanceId,
         running = this.indicators?.version?.toVersionDetail(),
-        deployed = this.sshDetails?.let { VersionDetail(it.deployedVersion ?: "", it.deployedRevision ?: "") }
+        deployed = this.instance?.let { it.deployedVersion?.toVersionDetail() }
 )
 
-private fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision)

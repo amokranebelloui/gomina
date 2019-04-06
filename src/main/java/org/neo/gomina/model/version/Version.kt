@@ -7,6 +7,10 @@ data class Version(val version: String = "", val revision: String?) : Comparable
     companion object {
         fun isSnapshot(version: String) = version.endsWith("-SNAPSHOT")
         fun isStable(version: String) = !isSnapshot(version)
+        fun from(version: String?, revision: String?) =
+                version?.let { Version(it, revision) }
+        fun of(version: String?, revision: String?) =
+                if (version?.isNotEmpty() == true) Version(version, revision) else null
     }
 
     constructor(version: String = "") : this(version, null)

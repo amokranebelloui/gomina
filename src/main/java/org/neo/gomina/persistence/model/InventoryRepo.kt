@@ -7,6 +7,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.inventory.*
 import org.neo.gomina.model.monitoring.asInt
+import org.neo.gomina.model.version.Version
 import redis.clients.jedis.JedisPool
 import java.io.File
 import java.time.Clock
@@ -71,6 +72,9 @@ class InventoryFile : Inventory, AbstractFileRepo {
 
     override fun addInstance(env: String, svc: String, instanceId: String, host: String?, folder: String?) { TODO("not implemented") }
     override fun deleteInstance(env: String, svc: String, instanceId: String) { TODO("not implemented") }
+
+    override fun updateDeployedRevision(env: String, svc: String, instanceId: String, version: Version?) { TODO("not implemented") }
+    override fun updateConfigStatus(env: String, svc: String, instanceId: String, confRevision: String?, confCommitted: Boolean?, confUpToDate: Boolean?) { TODO("not implemented") }
 }
 
 class RedisInventoryRepo : Inventory {
@@ -214,6 +218,27 @@ class RedisInventoryRepo : Inventory {
             jedis.del("instance:$env:$svc:$instanceId")
         }
     }
+
+    override fun updateDeployedRevision(env: String, svc: String, instanceId: String, version: Version?) {
+        pool.resource.use { jedis ->
+            jedis.hmset("instance:$env:$svc:$instanceId", listOfNotNull(
+                    "deployed_version_update_time" to LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ISO_DATE_TIME),
+                    version?.version?.let { "deployed_version" to it },
+                    version?.revision?.let { "deployed_revision" to it }
+            ).toMap())
+        }
+    }
+
+    override fun updateConfigStatus(env: String, svc: String, instanceId: String, confRevision: String?, confCommitted: Boolean?, confUpToDate: Boolean?) {
+        pool.resource.use { jedis ->
+            jedis.hmset("instance:$env:$svc:$instanceId", listOfNotNull(
+                    "config_status_update_time" to LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ISO_DATE_TIME),
+                    confRevision?.let { "conf_revision" to it },
+                    confCommitted?.let { "conf_committed" to it.toString() },
+                    confUpToDate?.let { "conf_up_to_date" to it.toString() }
+            ).toMap())
+        }
+    }
 }
 
 private fun Map<String, String>.asEnv(id: String, services: List<Service>) =
@@ -237,5 +262,10 @@ private fun Map<String, String>.asService(id: String, instances: List<Instance>)
 private fun Map<String, String>.asInstance(id: String) =
         Instance(id,
                 this["host"],
-                this["folder"]
+                this["folder"],
+
+                Version.from(this["deployed_version"], this["deployed_revision"]),
+                this["conf_revision"],
+                this["conf_committed"]?.toBoolean(),
+                this["conf_up_to_date"]?.toBoolean()
         )

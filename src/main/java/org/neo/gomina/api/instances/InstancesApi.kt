@@ -368,7 +368,7 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
 
     instance.versions = VersionsDetail(
             running = ext.indicators?.version?.let { VersionDetail(it.version, it.revision) },
-            deployed = ext.sshDetails?.let { VersionDetail(it.deployedVersion ?: "", it.deployedRevision ?: "") },
+            deployed = ext.instance?.let { it.deployedVersion?.toVersionDetail() },
             released = ext.component?.let { it.released?.toVersionDetail() },
             latest = ext.component?.let { it.latest?.toVersionDetail() }
     )
@@ -380,10 +380,8 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
         if (ext.indicators == null) {
             instance.status = ServerStatus.OFFLINE
         }
-    }
-    ext.sshDetails?.let {
-        instance.deployVersion = it.deployedVersion
-        instance.deployRevision = it.deployedRevision
+        instance.deployVersion = it.deployedVersion?.version
+        instance.deployRevision = it.deployedVersion?.revision
         instance.confCommited = it.confCommitted
         instance.confUpToDate = it.confUpToDate
         instance.confRevision = it.confRevision

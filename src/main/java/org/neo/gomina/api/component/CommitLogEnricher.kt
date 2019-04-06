@@ -16,7 +16,7 @@ class CommitLogEnricher {
         val unresolved = mutableListOf<ExtInstance>()
         instances.forEach { instance ->
             val runningVersion = instance.indicators?.version
-            val deployedVersion = instance.sshDetails?.version
+            val deployedVersion = instance.instance?.deployedVersion
             val commitR = tmp.find { item -> runningVersion?.let { item.first.match(it) } == true }
             val commitD = tmp.find { item -> deployedVersion?.let { item.first.match(it) } == true }
 
