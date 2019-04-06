@@ -18,7 +18,7 @@ data class HostDetail(
         val type: String,
         val tags: List<String> = emptyList(),
 
-        val username: String,
+        val username: String?,
         val passwordAlias: String? = null,
         val sudo: String? = null,
 

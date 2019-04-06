@@ -93,7 +93,7 @@ class GominaModule : AbstractModule() {
         bind(InteractionsRepository::class.java).to(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsFileProvider::class.java).asEagerSingleton()
         bind(WorkList::class.java).to(WorkListFile::class.java).`in`(Scopes.SINGLETON)
-        bind(Hosts::class.java).to(HostsFile::class.java).`in`(Scopes.SINGLETON)
+        bind(Hosts::class.java).to(RedisHosts::class.java).`in`(Scopes.SINGLETON)
         //bind(Inventory::class.java).to(InventoryFile::class.java).`in`(Scopes.SINGLETON)
         bind(Inventory::class.java).to(RedisInventoryRepo::class.java).`in`(Scopes.SINGLETON)
 

@@ -6,7 +6,7 @@ data class Host(
     val group: String?, // several servers forming a group
     val type: String, // PROD, TEST, etc
     val tags: List<String> = emptyList(),
-    val username: String,
+    val username: String?,
     val passwordAlias: String? = null,
     val proxyUser: String? = null,
     val proxyHost: String? = null,

@@ -388,8 +388,4 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
-    private fun String?.toList() = this?.split(",")?.map { it.trim() } ?: emptyList()
-
-    private fun Collection<String>.toStr() = this.joinToString(separator = ",")
-
 }
