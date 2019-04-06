@@ -7,7 +7,6 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.model.host.Host
-import org.neo.gomina.model.host.HostSshDetails
 import org.neo.gomina.model.host.Hosts
 import javax.inject.Inject
 
@@ -53,9 +52,7 @@ class HostsApi {
         try {
             val host = ctx.request().getParam("host")
             logger.info("Host '$host' details")
-            val hosts = hosts.getHosts().map {
-                it.map(sshService.getDetails(it.host))
-            }
+            val hosts = hosts.getHosts().map { it.map() }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(hosts))
@@ -70,9 +67,7 @@ class HostsApi {
         try {
             val hostId = ctx.request().getParam("hostId")
             logger.info("Host '$hostId' details")
-            val host = hosts.getHost(hostId)?.let {
-                it.map(sshService.getDetails(hostId))
-            }
+            val host = hosts.getHost(hostId)?.let { it.map() }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(host))
@@ -99,7 +94,7 @@ class HostsApi {
     }
 }
 
-private fun Host.map(details: HostSshDetails?): HostDetail {
+private fun Host.map(): HostDetail {
     return HostDetail(
             host = host,
             dataCenter = dataCenter,
@@ -109,6 +104,6 @@ private fun Host.map(details: HostSshDetails?): HostDetail {
             username = username,
             passwordAlias = passwordAlias,
             sudo = sudo,
-            unexpected = details?.unexpectedFolders ?: emptyList()
+            unexpected = unexpectedFolders
     )
 }

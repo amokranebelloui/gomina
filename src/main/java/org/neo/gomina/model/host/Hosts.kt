@@ -10,10 +10,13 @@ data class Host(
     val passwordAlias: String? = null,
     val proxyUser: String? = null,
     val proxyHost: String? = null,
-    val sudo: String? = null
+    val sudo: String? = null,
+
+    var unexpectedFolders: List<String> = emptyList()
 )
 
 interface Hosts {
     fun getHosts(): List<Host>
     fun getHost(host: String): Host?
+    fun updateUnexpectedFolders(host: String, unexpectedFolders: List<String>)
 }

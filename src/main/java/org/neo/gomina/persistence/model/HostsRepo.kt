@@ -9,6 +9,9 @@ import org.neo.gomina.model.host.Host
 import org.neo.gomina.model.host.Hosts
 import redis.clients.jedis.JedisPool
 import java.io.File
+import java.time.Clock
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class HostsFile : Hosts, AbstractFileRepo() {
 
@@ -40,6 +43,9 @@ class HostsFile : Hosts, AbstractFileRepo() {
         } catch (e: Exception) {
             null
         }
+    }
+    override fun updateUnexpectedFolders(host: String, unexpectedFolders: List<String>) {
+        TODO("not implemented")
     }
 }
 
@@ -85,7 +91,17 @@ class RedisHosts : Hosts {
                 passwordAlias = this["password_alias"],
                 proxyHost = this["proxy_host"],
                 proxyUser = this["proxy_user"],
-                sudo = this["sudo"]
+                sudo = this["sudo"],
+                unexpectedFolders = this["unexpected_folders"].toList()
         )
+    }
+
+    override fun updateUnexpectedFolders(host: String, unexpectedFolders: List<String>) {
+        pool.resource.use { jedis ->
+            jedis.hmset("host:$host", listOfNotNull(
+                    "ssh_update_time" to LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ISO_DATE_TIME),
+                    unexpectedFolders.let { "unexpected_folders" to it.toStr() }
+            ).toMap())
+        }
     }
 }

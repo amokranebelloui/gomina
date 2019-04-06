@@ -32,6 +32,13 @@ class HostsApp extends React.Component {
             });
     }
 
+    reloadSsh() {
+        const thisComponent = this;
+        axios.post('/data/hosts/' + this.state.hostId + '/reload')
+            .then(() => thisComponent.retrieveHosts())
+            .catch((error) => console.log("reload error", error.response));
+    }
+
     componentDidMount() {
         this.retrieveHosts()
     }
@@ -57,8 +64,10 @@ class HostsApp extends React.Component {
                         )}
                     </div>
                     <div>
+                        {host &&
                         <Well block>
                             <h3>Detail {host && host.host}</h3>
+                            <button onClick={() => this.reloadSsh()}>RELOAD SSH</button>
                             {host && <Host host={host}></Host>}
                             <hr/>
                             <b>Should not be there</b>
@@ -68,6 +77,7 @@ class HostsApp extends React.Component {
                                 )
                             }
                         </Well>
+                        }
                     </div>
                 </PrimarySecondaryLayout>
             </AppLayout>
@@ -94,7 +104,7 @@ function Host(props) {
             <hr/>
             <div>
                 {host.username} / {host.passwordAlias}
-                {host.sudo && <span> ({host.sudo})</span>}
+                {host.sudo && <span> [{host.sudo}]</span>}
             </div>
             <div>
                 {host.type} {host.group}
