@@ -1,0 +1,53 @@
+package org.neo.gomina.persistence.model
+
+import com.google.inject.Inject
+import com.google.inject.name.Named
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig
+import org.apache.logging.log4j.LogManager
+import org.neo.gomina.model.work.Work
+import org.neo.gomina.model.work.WorkList
+import org.neo.gomina.model.work.WorkStatus
+import redis.clients.jedis.JedisPool
+
+class RedisWorkList : WorkList {
+
+    companion object {
+        private val logger = LogManager.getLogger(javaClass)
+    }
+
+    private lateinit var pool: JedisPool
+
+    @Inject
+    private fun initialize(@Named("database.host") host: String, @Named("database.port") port: Int) {
+        pool = JedisPool(
+                GenericObjectPoolConfig().apply { testOnBorrow = true },
+                host, port, 10000, null, 5)
+        logger.info("Hosts Database connected $host $port")
+    }
+
+    override fun getAll(): List<Work> {
+        pool.resource.use { jedis ->
+            return jedis.keys("work:*").mapNotNull {
+                jedis.hgetAll(it).toWork(it.substring(it.lastIndexOf(':') + 1))
+            }
+        }
+    }
+
+    override fun get(workId: String): Work? {
+        pool.resource.use { jedis ->
+            return jedis.hgetAll("work:$workId").toWork(workId)
+        }
+    }
+
+    private fun Map<String, String>.toWork(id: String): Work {
+        return Work(
+                id = id,
+                label = this["label"] ?: "Work {$id}",
+                type = this["type"],
+                jira = this["jira"],
+                status = this["status"] ?.let { WorkStatus.valueOf(it) } ?: WorkStatus.OFF,
+                people = this["people"].toList(),
+                components = this["components"].toList()
+        )
+    }
+}
