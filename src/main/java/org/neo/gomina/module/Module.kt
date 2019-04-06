@@ -36,8 +36,8 @@ import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.EnrichDependencies
+import org.neo.gomina.model.dependency.InteractionProviders
 import org.neo.gomina.model.dependency.InteractionsRepository
-import org.neo.gomina.model.dependency.ProviderBasedInteractionRepository
 import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.HostUtils
 import org.neo.gomina.model.host.Hosts
@@ -89,8 +89,8 @@ class GominaModule : AbstractModule() {
 
         bind(ComponentRepo::class.java).to(RedisComponentRepo::class.java).`in`(Scopes.SINGLETON)
         bind(Systems::class.java).to(InferredSystems::class.java).`in`(Scopes.SINGLETON)
-        bind(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
-        bind(InteractionsRepository::class.java).to(ProviderBasedInteractionRepository::class.java).`in`(Scopes.SINGLETON)
+        bind(InteractionProviders::class.java).`in`(Scopes.SINGLETON)
+        bind(InteractionsRepository::class.java).to(RedisInteractionsRepository::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsFileProvider::class.java).asEagerSingleton()
         bind(WorkList::class.java).to(WorkListFile::class.java).`in`(Scopes.SINGLETON)
         bind(Hosts::class.java).to(RedisHosts::class.java).`in`(Scopes.SINGLETON)

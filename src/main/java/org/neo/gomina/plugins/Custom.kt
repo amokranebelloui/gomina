@@ -287,11 +287,11 @@ val referential = Interactions(serviceId = "tradex-referential",
 )
 
 class CustomInteractionProvider : InteractionsProvider {
-    @Inject lateinit var repository: ProviderBasedInteractionRepository
+    @Inject lateinit var providers: InteractionProviders
     @Inject lateinit var componentsRepo: ComponentRepo
     @Inject lateinit var enrichDependencies: EnrichDependencies
     @Inject fun init() {
-        repository.providers.add(this)
+        providers.providers.add(this)
     }
     override fun getAll(): List<Interactions> {
         // Get the dependencies

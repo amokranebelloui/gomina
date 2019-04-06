@@ -1,5 +1,5 @@
 [
-  { "serviceId": "tradex-referential",
+  { "serviceId": "referential",
     "exposed": [
       {"name": "addCustomer", "type": "command"},
       {"name": "getCustomer", "type": "request"}
@@ -35,10 +35,12 @@
   },
   { "serviceId": "basket",
     "exposed": [
-      {"name": "createBasket", "type": "command"}
+      {"name": "createBasket", "type": "command"},
+      {"name": "validateBasket", "type": "command"}
     ],
     "used": [
       {"function": {"name": "createBasket", "type": "command"}},
+      {"function": {"name": "validateBasket", "type": "command"}},
       {"function": {"name": "bookBasket", "type": "command"}},
       {"function": {"name": "orderDb", "type": "database"}, "usage": {"usage": "READ"}},
       {"function": {"name": "validateOrder", "type": "command"}}
