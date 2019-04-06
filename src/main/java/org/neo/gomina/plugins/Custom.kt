@@ -1,8 +1,16 @@
 package org.neo.gomina.plugins
 
+import com.fasterxml.jackson.core.JsonFactory
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.Inject
+import com.google.inject.name.Named
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
+import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.MavenId
 import org.neo.gomina.integration.ssh.SshAnalysis
 import org.neo.gomina.integration.ssh.sudo
@@ -16,6 +24,7 @@ import org.neo.gomina.model.host.InstanceSshDetails
 import org.neo.gomina.model.inventory.Instance
 import org.neo.gomina.model.monitoring.*
 import org.neo.gomina.model.version.Version
+import java.io.File
 import java.time.Clock
 import java.time.LocalDateTime
 
@@ -286,6 +295,41 @@ val referential = Interactions(serviceId = "tradex-referential",
         )
 )
 
+class InteractionsFileProvider : InteractionsProvider {
+
+    companion object {
+        private val logger = LogManager.getLogger(InteractionsFileProvider.javaClass)
+    }
+
+    @Inject @Named("interactions.file") private lateinit var file: File
+    @Inject private lateinit var providers: InteractionProviders
+
+    val jsonMapper = ObjectMapper(JsonFactory())
+            .registerKotlinModule()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
+
+    @Inject fun init() {
+        providers.providers.add(this)
+    }
+
+    fun read(file: File): List<Interactions> {
+        return when (file.extension) {
+            "json" -> jsonMapper.readValue(file)
+            else -> throw IllegalArgumentException("Format not supported for $file, please use .json")
+        }
+    }
+
+    override fun name(): String {
+        return "auto2"
+    }
+
+    override fun getAll(): List<Interactions> {
+        return read(file)
+    }
+}
+
 class CustomInteractionProvider : InteractionsProvider {
     @Inject lateinit var providers: InteractionProviders
     @Inject lateinit var componentsRepo: ComponentRepo
@@ -293,6 +337,11 @@ class CustomInteractionProvider : InteractionsProvider {
     @Inject fun init() {
         providers.providers.add(this)
     }
+
+    override fun name(): String {
+        return "auto"
+    }
+
     override fun getAll(): List<Interactions> {
         // Get the dependencies
         val misReadOnly = listOf("BASKET", "ORDER", "EXEC", "ORDER_MARKET", "EXEC_MARKET", "BOOKING")

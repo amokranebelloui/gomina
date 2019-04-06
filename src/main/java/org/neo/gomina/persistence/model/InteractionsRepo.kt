@@ -1,6 +1,5 @@
 package org.neo.gomina.persistence.model
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
@@ -9,33 +8,6 @@ import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool
-import java.io.File
-
-class InteractionsFileProvider : InteractionsProvider, AbstractFileRepo() {
-
-    companion object {
-        private val logger = LogManager.getLogger(InteractionsFileProvider.javaClass)
-    }
-
-    @Inject @Named("interactions.file") private lateinit var file: File
-    @Inject private lateinit var providers: InteractionProviders
-
-    @Inject fun init() {
-        providers.providers.add(this)
-    }
-    
-    fun read(file: File): List<Interactions> {
-        return when (file.extension) {
-            "yaml" -> yamlMapper.readValue(file)
-            "json" -> jsonMapper.readValue(file)
-            else -> throw IllegalArgumentException("Format not supported for $file, please use .yaml .json")
-        }
-    }
-
-    override fun getAll(): List<Interactions> {
-        return read(file)
-    }
-}
 
 class RedisInteractionsRepository : InteractionsRepository {
 
@@ -106,6 +78,32 @@ class RedisInteractionsRepository : InteractionsRepository {
             = this["name"]?.let { Function(it, this["type"] ?: "unknown") }
     private fun Map<String, String>.toFunctionUsage()
             = this["name"]?.let { FunctionUsage(it, this["type"] ?: "unknown", this["usage"]?.let { Usage(it) }) }
+
+    override fun update(source: String, interactions: List<Interactions>) {
+        pool.resource.use { jedis ->
+            val pipe = jedis.pipelined()
+            jedis.keys("api:$source:*").forEach { pipe.del(it) }
+            pipe.sync()
+
+            interactions.forEach { service ->
+                service.exposed.forEach {
+                    jedis.hmset("api:$source:${service.serviceId}:exposes:${it.name}", mapOf(
+                            "name" to it.name,
+                            "type" to it.type
+                    ))
+                }
+                service.used.forEach {
+                    jedis.hmset("api:$source:${service.serviceId}:uses:${it.function.name}", listOfNotNull(
+                            "name" to it.function.name,
+                            "type" to it.function.type,
+                            it.usage?.usage?.let { "usage" to it.toString() }
+                    ).toMap())
+                }
+
+            }
+        }
+    }
+
 }
 
 

@@ -46,6 +46,12 @@ class DependenciesApp extends React.Component {
                 console.log("dependencies data error", error);
             });
     }
+    reloadSources() {
+        const thisComponent = this;
+        axios.post('/data/dependencies/reload')
+            .then(() => thisComponent.retrieveDependencies())
+            .catch((error) => console.log("dependencies data error", error));
+    }
     selectedSystemsChanged(systems) {
         console.info("selected systems", systems);
         this.setState({selectedSystems: systems});
@@ -73,6 +79,7 @@ class DependenciesApp extends React.Component {
                     <div>
                         <h3>Filter:</h3>
                         <button onClick={e => this.retrieveDependencies()}>Refresh</button>
+                        <button onClick={() => this.reloadSources()}>Reload Sources</button>
                         <br/>
                         <TagCloud tags={this.state.systems} selectionChanged={e => this.selectedSystemsChanged(e)} />
                         <br/>

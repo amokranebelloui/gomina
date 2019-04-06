@@ -1,0 +1,24 @@
+[
+  { "serviceId": "torkjell",
+    "exposed": [
+      {"name": "ride-booked", "type": "event"},
+      {"name": "ride-started", "type": "event"},
+      {"name": "ride-done", "type": "event"},
+      {"name": "ride-payed", "type": "event"}
+    ],
+    "used": [
+
+    ]
+  },
+  { "serviceId": "torkjell-dispatch",
+    "exposed": [
+
+    ],
+    "used": [
+      {"function": {"name": "ride-booked", "type": "event"}},
+      {"function": {"name": "ride-started", "type": "event"}},
+      {"function": {"name": "ride-done", "type": "event"}},
+      {"function": {"name": "ride-payed", "type": "event"}}
+    ]
+  }
+]

@@ -10,7 +10,7 @@ database:
 
 inventory:
   componentsFile: 'data/components.json'
-  interactionsFile: 'data/interactions.json'
+  interactionsFile: 'data/interactions2.json'
   workFile: 'data/work.json'
   hostsFile: 'data/hosts.json'
   inventoryDir: 'data'

@@ -28,6 +28,7 @@ class DependenciesApi {
 
     @Inject lateinit var componentRepo: ComponentRepo
     @Inject lateinit var interactionsRepository: InteractionsRepository
+    @Inject lateinit var interactionProviders: InteractionProviders
 
     @Inject
     constructor(vertx: Vertx) {
@@ -38,6 +39,7 @@ class DependenciesApi {
         router.get("/incoming/:componentId").handler(this::getIncoming)
         router.get("/invocation/chain/:componentId").handler(this::getInvocationChain)
         router.get("/call/chain/:componentId").handler(this::getCallChain)
+        router.post("/reload").handler(this::reload)
     }
 
     fun get(ctx: RoutingContext) {
@@ -146,6 +148,26 @@ class DependenciesApi {
         }
         catch (e: Exception) {
             logger.error("Cannot get Call Chain $componentId", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun reload(ctx: RoutingContext) {
+        logger.info("Reload dependency sources")
+        try {
+            interactionProviders.providers.forEach { provider ->
+                try {
+                    logger.info("Reload '${provider.name()}' dependency source")
+                    interactionsRepository.update(provider.name(), provider.getAll())
+                }
+                catch (e: Exception) {
+                    logger.error("Error reloading '${provider.name()}' dependency source")
+                }
+            }
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot reload dependency sources", e)
             ctx.fail(500)
         }
     }
