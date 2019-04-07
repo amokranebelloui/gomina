@@ -28,14 +28,9 @@ class RedisInteractionsRepository : InteractionsRepository {
     @Inject lateinit var enrichDependencies: EnrichDependencies // FIXME Get out, to higher level
 
     override fun getAll(): List<Interactions> {
-        //val all = providers.flatMap { it.getAll() }
         val all = doGetAll()
         val enriched = enrichDependencies.enrich(all)
         return (all + enriched).merge().toList()
-    }
-
-    override fun getFor(serviceId: String): Interactions {
-        return getAll().merge().find { it.serviceId == serviceId } ?: Interactions(serviceId)
     }
 
     private fun doGetAll(): List<Interactions> {
@@ -51,21 +46,14 @@ class RedisInteractionsRepository : InteractionsRepository {
         }
     }
 
-    private fun doGetFor(serviceId: String): Interactions {
-        pool.resource.use { jedis ->
-            return jedis.keys("api:*:$serviceId:*").let {
-                load(it, serviceId, jedis)
-            }
-        }
-    }
-
     private fun load(keys: Collection<String>, service: String, jedis:Jedis): Interactions {
         val interactions = keys.map { key: String ->
+            val source = key.split(':')[1]
             val type = key.split(':')[3]
             val data = jedis.hgetAll(key)
             when (type) {
-                "exposes" -> data.toFunction()
-                "uses" -> data.toFunctionUsage()
+                "exposes" -> data.toFunction(listOf(source))
+                "uses" -> data.toFunctionUsage(listOf(source))
                 else -> null
             }
         }
@@ -74,10 +62,23 @@ class RedisInteractionsRepository : InteractionsRepository {
                 interactions.filterIsInstance<FunctionUsage>())
     }
 
-    private fun Map<String, String>.toFunction()
-            = this["name"]?.let { Function(it, this["type"] ?: "unknown") }
-    private fun Map<String, String>.toFunctionUsage()
-            = this["name"]?.let { FunctionUsage(it, this["type"] ?: "unknown", this["usage"]?.let { Usage(it) }) }
+    private fun Map<String, String>.toFunction(sources: List<String>): Function? {
+        return this["name"]?.let {
+            Function(it,
+                    this["type"] ?: "unknown",
+                    sources
+            )
+        }
+    }
+    private fun Map<String, String>.toFunctionUsage(sources: List<String>): FunctionUsage? {
+        return this["name"]?.let {
+            FunctionUsage(it,
+                    this["type"] ?: "unknown",
+                    this["usage"]?.let { Usage(it) },
+                    sources
+            )
+        }
+    }
 
     override fun update(source: String, interactions: List<Interactions>) {
         pool.resource.use { jedis ->

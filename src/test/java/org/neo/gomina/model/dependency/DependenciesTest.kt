@@ -32,27 +32,29 @@ class DependenciesTest {
     fun testMerge() {
         val p1 = Interactions(serviceId = "p1",
                 exposed = listOf(
-                        Function("f1", "command")
+                        Function("f1", "command", sources = listOf("auto"))
                 ),
                 used = listOf(
-                        FunctionUsage("f2", "request"),
-                        FunctionUsage("f3", "database", Usage(DbMode.WRITE))
+                        FunctionUsage("f2", "request", sources = listOf("auto")),
+                        FunctionUsage("f3", "database", Usage(DbMode.WRITE), sources = listOf("auto")),
+                        FunctionUsage("f5", "request", sources = listOf("auto"))
                 )
         )
         val p1ext = Interactions(serviceId = "p1",
                 used = listOf(
-                        FunctionUsage("f5", "request")
+                        FunctionUsage("f5", "request", sources = listOf("ext"))
                 )
         )
         val p2 = Interactions(serviceId = "p2",
                 exposed = listOf(
-                        Function("f2", "request"),
-                        Function("f4", "request")
+                        Function("f2", "request", sources = listOf("auto")),
+                        Function("f4", "request", sources = listOf("auto"))
                 )
         )
         val p2ext  = Interactions(serviceId = "p2",
                 exposed = listOf(
-                        Function("f5", "request")
+                        Function("f2", "request", sources = listOf("ext")),
+                        Function("f5", "request", sources = listOf("ext"))
                 )
         )
         val merge = listOf(p1, p1ext, p2, p2ext).merge().toList()
@@ -95,7 +97,7 @@ class DependenciesTest {
                 .let { Dependencies.functions(it) }
                 .filter { (f, stakeholders) -> stakeholders.usageExists }
                 .mapValues { (f, stakeholders) ->
-                    Dependencies.infer(stakeholders.users, DbMode.READ, DbMode.WRITE) { it?.usage }
+                    Dependencies.infer("inferred", stakeholders.users, DbMode.READ, DbMode.WRITE) { it?.usage }
                 }
         specialFunctions.forEach { println("$it")}
 

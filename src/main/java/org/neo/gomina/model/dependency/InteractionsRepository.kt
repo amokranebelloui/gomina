@@ -2,7 +2,6 @@ package org.neo.gomina.model.dependency
 
 interface InteractionsRepository {
     fun getAll(): List<Interactions>
-    fun getFor(serviceId: String): Interactions
     fun update(source: String, interactions: List<Interactions>)
 }
 

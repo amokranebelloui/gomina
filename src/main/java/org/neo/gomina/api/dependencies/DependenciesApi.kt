@@ -10,13 +10,20 @@ import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.*
 
 
-data class FunctionDetail(val name: String, val type: String, val usage: String? = null)
+data class FunctionDetail(val name: String, val type: String, val usage: String? = null, var sources:List<String>)
 
 data class DependencyDetail(var from: String, var to: String, var functions: List<FunctionDetail>)
-data class DependencyService(val serviceId: String, val inScope: Boolean)
-data class DependenciesDetail(val services: List<DependencyService>, val functionTypes: Set<String>, val dependencies: List<DependencyDetail>)
 
-data class CallChainDetail(val serviceId: String, val recursive: Boolean, val functions: List<FunctionDetail> = emptyList(), val calls: List<CallChainDetail> = emptyList())
+data class DependencyService(val serviceId: String, val inScope: Boolean)
+
+data class DependenciesDetail(val services: List<DependencyService>,
+                              val functionTypes: Set<String>,
+                              val dependencies: List<DependencyDetail>)
+
+data class CallChainDetail(val serviceId: String,
+                           val recursive: Boolean,
+                           val functions: List<FunctionDetail> = emptyList(),
+                           val calls: List<CallChainDetail> = emptyList())
 
 class DependenciesApi {
 
@@ -173,7 +180,10 @@ class DependenciesApi {
     }
 
     private fun FunctionUsage.toDetail() = FunctionDetail(
-            name = this.function.name, type = this.function.type, usage = this.usage?.usage?.toString()
+            name = this.function.name,
+            type = this.function.type,
+            usage = this.usage?.usage?.toString(),
+            sources = this.sources
     )
 
     private fun Dependency.toDetail() = DependencyDetail(

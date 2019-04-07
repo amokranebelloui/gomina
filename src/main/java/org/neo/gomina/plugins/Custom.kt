@@ -424,8 +424,8 @@ class CustomInteractionProvider : InteractionsProvider {
             .let { Dependencies.functions(it) }
             .flatMap { (f, stakeholders) ->
                 listOf(
-                    Pair(Function(f.name, "db-read"), Dependencies.infer(stakeholders.users, "R", "RW") { it?.usage }),
-                    Pair(Function(f.name, "db-multi"), Dependencies.infer(stakeholders.users, "RW", "RW") { it?.usage })
+                    Pair(Function(f.name, "db-read", listOf("inferred")), Dependencies.infer("inferred", stakeholders.users, "R", "RW") { it?.usage }),
+                    Pair(Function(f.name, "db-multi", listOf("inferred")), Dependencies.infer("inferred", stakeholders.users, "RW", "RW") { it?.usage })
                 )
             }
             .toMap()
@@ -447,7 +447,9 @@ class CustomEnrichDependencies : EnrichDependencies {
                 .let { Dependencies.functions(it) }
                 .filter { (f, stakeholders) -> stakeholders.usageExists }
                 .map { (f, stakeholders) ->
-                    Pair(Function(f.name, "db-interaction"), Dependencies.infer(stakeholders.users, "R", "RW") { it?.usage })
+                    val function = Function(f.name, "db-interaction", listOf("inferred"))
+                    val stakeHolders = Dependencies.infer("inferred", stakeholders.users, "R", "RW") { it?.usage }
+                    Pair(function, stakeHolders)
                 }
                 .toMap()
         return Dependencies.interactions(specialFunctions)

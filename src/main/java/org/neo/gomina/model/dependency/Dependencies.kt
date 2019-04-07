@@ -1,17 +1,34 @@
 package org.neo.gomina.model.dependency
 
-data class Function(var name: String, var type: String) {
-    override fun toString() = "F('$name' '$type')"
+import java.util.*
+
+data class Function(var name: String, var type: String, var sources: List<String> = emptyList()) {
+    override fun toString() = "F('$name' '$type') $sources"
+    override fun equals(other: Any?): Boolean {
+        if (other == null || other !is Function)
+            return false
+        return name == other.name && type == other.type
+    }
+    override fun hashCode(): Int {
+        return Objects.hash(name, type)
+    }
 }
 
 data class Usage(var usage:Any) {
     override fun toString() = "Usage($usage)"
 }
 
-data class FunctionUsage(val function: Function, val usage: Usage? = null) {
-    constructor(name: String, type: String, usage: Usage? = null): this(Function(name, type), usage)
-    override fun toString() = "FUsage(${function.name} ${function.type}${usage?.let {" ${usage.usage}"} ?: ""})"
-
+data class FunctionUsage(val function: Function, val usage: Usage? = null, var sources: List<String> = emptyList()) {
+    constructor(name: String, type: String, usage: Usage? = null, sources: List<String> = emptyList()): this(Function(name, type), usage, sources)
+    override fun toString() = "FUsage(${function.name} ${function.type}${usage?.let {" ${usage.usage}"} ?: ""}) $sources"
+    override fun equals(other: Any?): Boolean {
+        if (other == null || other !is FunctionUsage)
+            return false
+        return function == other.function && usage == other.usage
+    }
+    override fun hashCode(): Int {
+        return Objects.hash(function, usage)
+    }
 }
 
 data class Interactions(
@@ -25,11 +42,19 @@ data class Interactions(
 }
 
 fun Collection<Interactions>.merge(): Collection<Interactions> {
-    val exposed = this.groupBy({ it.serviceId }) { it.exposed }.mapValues { (p, exposed) -> exposed.flatMap { it } }
-    val used = this.groupBy({ it.serviceId }) { it.used }.mapValues { (p, used) -> used.flatMap { it } }
+    val exposed = this.groupBy({ it.serviceId }) { it.exposed }.mapValues { (p, exposed) -> exposed.flatMap { it }.mergeFunctions() }
+    val used = this.groupBy({ it.serviceId }) { it.used }.mapValues { (p, used) -> used.flatMap { it }.mergeFunctionUsage() }
     return (used.keys + exposed.keys).map {
         Interactions(serviceId = it, exposed = exposed[it] ?: emptyList(), used = used[it] ?: emptyList())
     }
+}
+
+fun List<Function>.mergeFunctions(): List<Function> {
+    return this.groupBy({ it }) { it.sources }.map { (f, sources) -> Function(f.name, f.type, sources.flatMap { it }) }
+}
+
+fun List<FunctionUsage>.mergeFunctionUsage(): List<FunctionUsage> {
+    return this.groupBy({ it }) { it.sources }.map { (f, sources) -> FunctionUsage(f.function.name, f.function.type, f.usage, sources.flatMap { it }) }
 }
 
 data class Link(val from: String, val to: String) {
@@ -51,9 +76,10 @@ fun <T:Collection<Dependency>> T.invert(): T {
     return this.map { Dependency(it.to, it.from, it.functions) } as T
 }
 
-data class Stakeholder(val serviceId: String, val usage: Usage? = null)
+data class Stakeholder(val serviceId: String, val usage: Usage? = null, val sources: List<String> = emptyList())
 
 data class Stakeholders(var users: MutableSet<Stakeholder> = mutableSetOf(), var exposers: MutableSet<String> = mutableSetOf()) {
+    // FIXME Is it really used?
     fun getLinks(): List<Link> {
         return users.flatMap { user -> exposers.map { exposer -> Link(user.serviceId, exposer) } }
     }
@@ -77,7 +103,7 @@ object Dependencies {
             }
             dep.used.forEach { fUsage ->
                 val stakeholders = result.getOrPut(fUsage.function) { Stakeholders() }
-                stakeholders.users.add(Stakeholder(dep.serviceId, fUsage.usage))
+                stakeholders.users.add(Stakeholder(dep.serviceId, fUsage.usage, fUsage.sources))
             }
         }
         result.forEach { (f, stakeholders) ->
@@ -93,7 +119,7 @@ object Dependencies {
                 .flatMap { (f, stakeholders) -> stakeholders.exposers.map { Pair(it, f) } }
                 .groupBy( { (p,_) -> p }) { (_,v) -> v }
         val used: Map<String, List<FunctionUsage>> = functions
-                .flatMap { (f, stakeholders) -> stakeholders.users.map { Pair(it.serviceId, FunctionUsage(f, it.usage)) } }
+                .flatMap { (f, stakeholders) -> stakeholders.users.map { Pair(it.serviceId, FunctionUsage(f, it.usage, it.sources)) } }
                 .groupBy( { (p,_) -> p }) { (_,v) -> v }
         return (exposed.keys + used.keys).map {
             Interactions(serviceId = it, exposed = exposed[it] ?: emptyList(), used = used[it] ?: emptyList())
@@ -104,7 +130,7 @@ object Dependencies {
         return functions
                 .map { (function, stakeholders) -> Pair(function, stakeholders) }
                 .flatMap { (function, stakeholders) -> stakeholders.users.map { Triple(function, it, stakeholders.exposers) } }
-                .flatMap { (function, user, exposers) -> exposers.map { Triple(FunctionUsage(function, user.usage), user, it) } }
+                .flatMap { (function, user, exposers) -> exposers.map { Triple(FunctionUsage(function, user.usage, user.sources), user, it) } }
                 .groupBy { (fUsage, user, exposer ) -> Link(user.serviceId, exposer) }
                 .map { (link, group) -> Dependency(link.from, link.to, group.map { it.first}) }
     }
@@ -141,12 +167,12 @@ object Dependencies {
         return buildCallChain(serviceId, dependencies.invert(), seen = mutableListOf())
     }
 
-    fun infer(users: Set<Stakeholder>, from: Any?, to: Any?, usageSelector: (Usage?) -> Any?): Stakeholders {
+    fun infer(source: String, users: Set<Stakeholder>, from: Any?, to: Any?, usageSelector: (Usage?) -> Any?): Stakeholders {
         return users
                 .groupBy( { usageSelector(it.usage)} ) { it.serviceId }
                 .let { map ->
                     Stakeholders(
-                            users = map[from]?.map { Stakeholder(it, Usage("$from->$to")) }?.toMutableSet() ?: mutableSetOf(),
+                            users = map[from]?.map { Stakeholder(it, Usage("$from->$to"), listOf(source)) }?.toMutableSet() ?: mutableSetOf(),
                             exposers = map[to]?.toMutableSet() ?: mutableSetOf()
                     )
                 }
