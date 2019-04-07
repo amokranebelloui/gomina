@@ -1,11 +1,12 @@
 import React from "react";
 import axios from "axios/index";
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
-import {ArchiDiagram} from "../archidiagram/ArchiDiagram";
 import {DSM} from "../dependency/DSM";
 import {Dependencies} from "../dependency/Dependencies";
 import {TagCloud} from "../common/TagCloud";
 import {Container} from "../common/Container";
+import ls from "local-storage"
+import {Well} from "../common/Well";
 
 class DependenciesApp extends React.Component {
     constructor(props) {
@@ -14,12 +15,16 @@ class DependenciesApp extends React.Component {
             systems: [],
             components: [],
             dependencies: [],
-            selectedSystems: [],
-            selectedFunctionTypes: [],
+            selectedSystems: this.split(ls.get('components.systems')),
+            selectedFunctionTypes: this.split(ls.get('components.function.types')),
             selectedDependencies: [],
 
             deps: {services: [], functionTypes: [], dependencies: []}
         };
+    }
+
+    split(tags) {
+        return tags && tags.split(',') || [];
     }
 
     componentDidMount() {
@@ -56,11 +61,13 @@ class DependenciesApp extends React.Component {
         console.info("selected systems", systems);
         this.setState({selectedSystems: systems});
         this.retrieveDependencies(systems, this.state.selectedFunctionTypes)
+        ls.set('components.systems', systems.join(','));
     }
     selectedFunctionTypesChanged(functionTypes) {
         console.info("selected functionTypes", functionTypes);
         this.setState({selectedFunctionTypes: functionTypes});
         this.retrieveDependencies(this.state.selectedSystems, functionTypes)
+        ls.set('components.function.types', functionTypes.join(','));
     }
 
     onSelectedDependenciesChanged(selectedDeps) {
@@ -76,22 +83,25 @@ class DependenciesApp extends React.Component {
                              dependencies={this.state.deps.dependencies.map(d => {return {"from": d.from, "to": d.to, "count": d.functions.length, "detail": d.functions}})}
                              onSelectedDependenciesChanged={e => this.onSelectedDependenciesChanged(e)}  />
                     </Container>
-                    <div>
-                        <h3>Filter:</h3>
+                    <Well block>
+                        <b>Systems:</b>
+                        <TagCloud tags={this.state.systems} selected={this.state.selectedSystems}
+                                  selectionChanged={e => this.selectedSystemsChanged(e)} />
+                        <br/>
+                        <b>Function Types:</b>
+                        <TagCloud tags={this.state.deps.functionTypes} selected={this.state.selectedFunctionTypes}
+                                  selectionChanged={e => this.selectedFunctionTypesChanged(e)} />
+                        <hr/>
                         <button onClick={e => this.retrieveDependencies()}>Refresh</button>
                         <button onClick={() => this.reloadSources()}>Reload Sources</button>
-                        <br/>
-                        <TagCloud tags={this.state.systems} selectionChanged={e => this.selectedSystemsChanged(e)} />
-                        <br/>
-                        <TagCloud tags={this.state.deps.functionTypes} selectionChanged={e => this.selectedFunctionTypesChanged(e)} />
-                        <hr/>
+                    </Well>
+                    <Well block>
                         <h3>Dependency Details</h3>
                         {selectedDeps && selectedDeps.length > 0
                             ? <Dependencies dependencies={selectedDeps} />
                             : <span>Select some dependencies to see the details</span>
                         }
-
-                    </div>
+                    </Well>
                 </PrimarySecondaryLayout>
             </AppLayout>
         );
