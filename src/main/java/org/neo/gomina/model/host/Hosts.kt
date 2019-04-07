@@ -18,5 +18,8 @@ data class Host(
 interface Hosts {
     fun getHosts(): List<Host>
     fun getHost(host: String): Host?
+    fun addHost(hostId: String)
+    fun updateHost(hostId: String, dataCenter: String?, group: String?, type: String, tags: List<String>)
+    fun updateConnectivity(hostId: String, username: String?, passwordAlias: String?, proxyHost: String?, proxyUser: String?, sudo: String?)
     fun updateUnexpectedFolders(host: String, unexpectedFolders: List<String>)
 }

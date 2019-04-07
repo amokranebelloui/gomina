@@ -1,6 +1,5 @@
 package org.neo.gomina.persistence.model
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
@@ -8,46 +7,9 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.host.Host
 import org.neo.gomina.model.host.Hosts
 import redis.clients.jedis.JedisPool
-import java.io.File
 import java.time.Clock
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-class HostsFile : Hosts, AbstractFileRepo() {
-
-    companion object {
-        private val logger = LogManager.getLogger(HostsFile.javaClass)
-    }
-
-    @Inject @Named("hosts.file") private lateinit var file: File
-
-    fun read(file: File): List<Host> {
-        return when (file.extension) {
-            "yaml" -> yamlMapper.readValue(file)
-            "json" -> jsonMapper.readValue(file)
-            else -> throw IllegalArgumentException("Format not supported for $file, please use .yaml .json")
-        }
-    }
-
-    override fun getHosts(): List<Host> {
-        return try {
-            read(file)
-        } catch (e: Exception) {
-            logger.error("", e)
-            emptyList()
-        }
-    }
-    override fun getHost(host: String): Host? {
-        return try {
-            read(file).find { it.host == host }
-        } catch (e: Exception) {
-            null
-        }
-    }
-    override fun updateUnexpectedFolders(host: String, unexpectedFolders: List<String>) {
-        TODO("not implemented")
-    }
-}
 
 class RedisHosts : Hosts {
 
@@ -94,6 +56,43 @@ class RedisHosts : Hosts {
                 sudo = this["sudo"],
                 unexpectedFolders = this["unexpected_folders"].toList()
         )
+    }
+
+    override fun addHost(hostId: String) {
+        pool.resource.use { jedis ->
+            val envKey = "host:$hostId"
+            if (jedis.exists(envKey)) {
+                throw Exception("$hostId already exists")
+            }
+            jedis.hmset(envKey, listOfNotNull(
+                    "creation_time" to LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ISO_DATE_TIME)
+            ).toMap())
+        }
+    }
+
+    override fun updateHost(hostId: String, dataCenter: String?, group: String?, type: String, tags: List<String>) {
+        pool.resource.use { jedis ->
+            jedis.hmset("host:$hostId", listOfNotNull(
+                    "update_time" to LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ISO_DATE_TIME),
+                    dataCenter.let { "data_center" to it },
+                    group?.let { "group" to it },
+                    type.let { "type" to it },
+                    tags.let { "tags" to it.toStr() }
+            ).toMap())
+        }
+    }
+
+    override fun updateConnectivity(hostId: String, username: String?, passwordAlias: String?, proxyHost: String?, proxyUser: String?, sudo: String?) {
+        pool.resource.use { jedis ->
+            jedis.hmset("host:$hostId", listOfNotNull(
+                    "update_time" to LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ISO_DATE_TIME),
+                    username.let { "username" to it },
+                    passwordAlias?.let { "password_alias" to it },
+                    proxyHost.let { "proxy_host" to it },
+                    proxyUser.let { "proxy_user" to it },
+                    sudo.let { "sudo" to it }
+            ).toMap())
+        }
     }
 
     override fun updateUnexpectedFolders(host: String, unexpectedFolders: List<String>) {

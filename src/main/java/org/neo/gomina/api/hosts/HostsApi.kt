@@ -1,6 +1,10 @@
 package org.neo.gomina.api.hosts
 
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
@@ -26,6 +30,21 @@ data class HostDetail(
         val unexpected: List<String> = emptyList()
 )
 
+data class HostData(
+        val dataCenter: String?,
+        val group: String?, // several servers forming a group
+        val type: String, // PROD, TEST, etc
+        val tags: List<String> = emptyList()
+)
+
+data class HostConnectivityData(
+        val username: String?,
+        val passwordAlias: String? = null,
+        val proxyUser: String? = null,
+        val proxyHost: String? = null,
+        val sudo: String? = null
+)
+
 class HostsApi {
 
     companion object {
@@ -39,7 +58,10 @@ class HostsApi {
     @Inject lateinit var inventory: Inventory
     @Inject lateinit var sshService: SshService
 
-    private val mapper = ObjectMapper()
+    private val mapper = ObjectMapper().registerKotlinModule()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
 
     @Inject
     constructor(vertx: Vertx) {
@@ -48,6 +70,9 @@ class HostsApi {
 
         router.get("/").handler(this::hosts)
         router.get("/:hostId").handler(this::host)
+        router.post("/add").handler(this::add)
+        router.put("/:hostId/update").handler(this::update)
+        router.put("/:hostId/update/connectivity").handler(this::updateConnectivity)
         router.post("/:hostId/reload").handler(this::reload)
     }
 
@@ -86,6 +111,48 @@ class HostsApi {
         }
         catch (e: Exception) {
             logger.error("Cannot get host", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun add(ctx: RoutingContext) {
+        val hostId = ctx.request().getParam("hostId")
+        try {
+            //val data = mapper.readValue<HostData>(ctx.body.toString())
+            logger.info("Adding host $hostId")
+            hosts.addHost(hostId)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(hostId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot add Host", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun update(ctx: RoutingContext) {
+        val hostId = ctx.request().getParam("hostId")
+        try {
+            val data = mapper.readValue<HostData>(ctx.body.toString())
+            logger.info("Update host $hostId $data")
+            hosts.updateHost(hostId, data.dataCenter, data.group, data.type, data.tags)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(hostId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot update Host", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun updateConnectivity(ctx: RoutingContext) {
+        val hostId = ctx.request().getParam("hostId")
+        try {
+            val d = mapper.readValue<HostConnectivityData>(ctx.body.toString())
+            logger.info("Update host $hostId $d")
+            hosts.updateConnectivity(hostId, d.username, d.passwordAlias, d.proxyHost, d.proxyUser, d.sudo)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(hostId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot update Host", e)
             ctx.fail(500)
         }
     }
