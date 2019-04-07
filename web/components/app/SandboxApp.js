@@ -39,6 +39,41 @@ class SandboxApp extends React.Component {
                 <button onClick={() => this.removeUsage()}>Remove Usage</button>
                 <br/>
 
+                <hr/>
+
+                <button onClick={() => {
+                    console.info("Add Work");
+                    axios.post('/data/work/add', {
+                        label: null,
+                        //label: "Event based dispatching",
+                        type: "Dev",
+                        jira: "",
+                        people: ["amokrane.belloui"],
+                        components: ["torkjell", 'torkjell-dispatch'],
+                    })
+                }}>
+                Add Work</button>
+                <br/>
+
+                <button onClick={() => {
+                    console.info("Update Work");
+                    axios.put('/data/work/' + '1' + '/update', {
+                        label: "Location services",
+                        type: "Dev",
+                        jira: "",
+                        people: ["amokrane.belloui"],
+                        components: ["torkjell"],
+                    })
+
+                }}>Update Work</button>
+                <br/>
+
+                <button onClick={() => {
+                    console.info("Delete Work");
+                    axios.delete('/data/work/' + '1' + '/archive')
+                }}>Archive Work</button>
+                <br/>
+
             </AppLayout>
         );
     }

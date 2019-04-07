@@ -1,6 +1,10 @@
 package org.neo.gomina.api.work
 
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.name.Named
 import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
@@ -20,7 +24,9 @@ data class WorkDetail(val id: String, val label: String, val type: String?,
               val jira: String?, val jiraUrl: String?,
               val status: String,
               val people: List<String>, // TODO User Ref
-              val components: List<String> = emptyList())
+              val components: List<String> = emptyList(),
+              val archived: Boolean
+)
 
 data class WorkManifestDetail(val work: WorkDetail?,
                               val details: List<ComponentWorkDetail> = emptyList())
@@ -36,6 +42,13 @@ data class CommitDetail(
 
         var version: String? = null)
 */
+
+data class WorkData(val label: String?,
+                    val type: String?,
+                    val jira: String?,
+                    val people: List<String> = emptyList(),
+                    val components: List<String> = emptyList())
+
 
 class WorkApi {
 
@@ -56,7 +69,10 @@ class WorkApi {
     @Inject private lateinit var topology: Topology
     @Inject private lateinit var users: Users
 
-    private val mapper = ObjectMapper()
+    private val mapper = ObjectMapper().registerKotlinModule()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
 
     @Inject
     constructor(vertx: Vertx) {
@@ -64,6 +80,10 @@ class WorkApi {
         this.router = Router.router(vertx)
 
         router.get("/list").handler(this::workList)
+        router.post("/add").handler(this::add)
+        router.put("/:workId/update").handler(this::update)
+        router.delete("/:workId/archive").handler(this::archive)
+
         router.get("/detail/:workId").handler(this::workDetail)
         router.get("/detail").handler(this::workDetail)
     }
@@ -78,6 +98,46 @@ class WorkApi {
         }
         catch (e: Exception) {
             logger.error("Cannot get Work List", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun add(ctx: RoutingContext) {
+        try {
+            val data = mapper.readValue<WorkData>(ctx.body.toString())
+            logger.info("Adding work")
+            val workId = workList.addWork(data.label, data.type, data.jira, data.people, data.components)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(workId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot add Work", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun update(ctx: RoutingContext) {
+        val workId = ctx.request().getParam("workId")
+        try {
+            val data = mapper.readValue<WorkData>(ctx.body.toString())
+            logger.info("Updating work $workId")
+            workList.updateWork(workId, data.label, data.type, data.jira, data.people, data.components)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(workId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot update Work", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun archive(ctx: RoutingContext) {
+        val workId = ctx.request().getParam("workId")
+        try {
+            logger.info("Archiving work $workId")
+            workList.archiveWork(workId)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(workId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot archive Work", e)
             ctx.fail(500)
         }
     }
@@ -140,6 +200,7 @@ private fun Work.map(jiraUrl: String): WorkDetail {
                     ?.let { "$it/$jira" },
             status = status.toString(),
             people = people,
-            components = components
+            components = components,
+            archived = archived
     )
 }

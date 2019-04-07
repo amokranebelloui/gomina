@@ -42,12 +42,47 @@ class RedisWorkList : WorkList {
     private fun Map<String, String>.toWork(id: String): Work {
         return Work(
                 id = id,
-                label = this["label"] ?: "Work {$id}",
+                label = this["label"] ?: defaultLabel(id),
                 type = this["type"],
                 jira = this["jira"],
                 status = this["status"] ?.let { WorkStatus.valueOf(it) } ?: WorkStatus.OFF,
                 people = this["people"].toList(),
-                components = this["components"].toList()
+                components = this["components"].toList(),
+                archived = this["archived"]?.toBoolean() == true
         )
+    }
+
+    private fun defaultLabel(id: String) = "Work {$id}"
+
+    override fun addWork(label: String?, type: String?, jira: String?, people: List<String>, components: List<String>): String {
+        pool.resource.use { jedis ->
+            val id = jedis.incr("_work:seq").toString()
+            jedis.hmset("work:$id", listOfNotNull(
+                    "label" to (label ?: defaultLabel(id)),
+                    "type" to type,
+                    jira.let { "jira" to it },
+                    people.let { "people" to it.toStr() },
+                    components.let { "components" to it.toStr() }
+            ).toMap())
+            return id
+        }
+    }
+
+    override fun updateWork(workId: String, label: String?, type: String?, jira: String?, people: List<String>, components: List<String>) {
+        pool.resource.use { jedis ->
+            jedis.hmset("work:$workId", listOfNotNull(
+                    "label" to (label ?: defaultLabel(workId)),
+                    "type" to type,
+                    jira.let { "jira" to it },
+                    people.let { "people" to it.toStr() },
+                    components.let { "components" to it.toStr() }
+            ).toMap())
+        }
+    }
+
+    override fun archiveWork(workId: String) {
+        pool.resource.use { jedis ->
+            jedis.hmset("work:$workId", mapOf("archived" to true.toString()))
+        }
     }
 }

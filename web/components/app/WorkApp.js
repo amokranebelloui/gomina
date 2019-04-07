@@ -107,7 +107,7 @@ class WorkApp extends React.Component {
                                 <td><b>people</b></td>
                             </tr>
                             {workList.map(work =>
-                                <tr>
+                                <tr style={{opacity: work.archived ? .5 : 1}}>
                                     <td>
                                         <Link to={"/work/" + work.id}>{work.id}</Link>
                                     </td>
