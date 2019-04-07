@@ -64,10 +64,10 @@ class ScmReposImpl : ScmRepos {
                     .firstOrNull()?.revision
             
             // FIXME there shouldn't be trunk in here
-            val metadataFile = scmClient.getFile("/trunk/project.yaml", "-1")
+            val metadataFile = scmClient.getFile("project.yaml", "-1")
             val metadata = metadataFile?.let { metadataMapper.map(metadataFile) }
 
-            val pomFile = scmClient.getFile("/trunk/pom.xml", "-1")
+            val pomFile = scmClient.getFile("pom.xml", "-1")
 
             val scmDetails = ScmDetails(
                     owner = metadata?.owner,
@@ -81,7 +81,7 @@ class ScmReposImpl : ScmRepos {
                             .firstOrNull()?.release,
                     releasedRevision = lastReleasedRev,
                     branches = scmClient.getBranches(),
-                    docFiles = scmClient.listFiles("/trunk/", "-1").filter { it.endsWith(".md") },
+                    docFiles = scmClient.listFiles("/", "-1").filter { it.endsWith(".md") },
                     commitLog = logEntries,
                     changes = commitCountTo(logEntries, lastReleasedRev)
             )
@@ -122,7 +122,7 @@ class ScmReposImpl : ScmRepos {
     override fun getDocument(scm: Scm, docId: String): String? {
         val scmClient = this.getClient(scm)
         // FIXME no TRUNK
-        return scmClient.getFile("/trunk/$docId", "-1")
+        return scmClient.getFile("$docId", "-1")
     }
 
     private fun buildScmClient(scm: Scm, passwords: Passwords): ScmClient? {

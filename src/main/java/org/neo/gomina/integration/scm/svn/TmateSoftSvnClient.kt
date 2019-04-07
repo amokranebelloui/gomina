@@ -104,19 +104,21 @@ class TmateSoftSvnClient : ScmClient {
     }
 
     override fun getFile(path: String, rev: String): String? {
+        val trunk = getTrunk()
         try {
             val baos = ByteArrayOutputStream()
-            repository.getFile("$projectUrl/$path", java.lang.Long.valueOf(rev), SVNProperties(), baos)
+            repository.getFile("$projectUrl/$trunk/$path", java.lang.Long.valueOf(rev), SVNProperties(), baos)
             return String(baos.toByteArray())
         } catch (e: Exception) {
-            logger.info("Cannot find file $path")
+            logger.info("Cannot find file $projectUrl/$trunk/$path")
         }
         return null
     }
 
     override fun listFiles(path: String, rev: String): List<String> {
+        val trunk = getTrunk()
         val dirEntries = ArrayList<SVNDirEntry>()
-        repository.getDir("$projectUrl/$path", rev.toLong(), SVNProperties()) { dirEntries.add(it) }
+        repository.getDir("$projectUrl/$trunk/$path", rev.toLong(), SVNProperties()) { dirEntries.add(it) }
         return dirEntries.map { it.relativePath }
     }
 

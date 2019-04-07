@@ -20,13 +20,13 @@ class TmateSoftSvnClientTest {
     @Test
     fun testListFiles() {
         val svnClient = TmateSoftSvnClient(root, projectUrl)
-        svnClient.listFiles("/trunk/", "-1").forEach { println(it) }
+        svnClient.listFiles("/", "-1").forEach { println(it) }
     }
 
     @Test
     fun testGetFile() {
         val svnClient = TmateSoftSvnClient(root, projectUrl)
-        svnClient.getFile("trunk/README.md", "-1")?.let { println(it) }
+        svnClient.getFile("README.md", "-1")?.let { println(it) }
     }
 
     @Test

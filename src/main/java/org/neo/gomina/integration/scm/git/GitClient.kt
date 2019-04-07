@@ -6,6 +6,7 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.eclipse.jgit.treewalk.TreeWalk
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
@@ -75,12 +76,49 @@ class GitClient : ScmClient {
     }
 
     override fun getFile(url: String, rev: String): String? {
-        // FIXME Implement
-        return null
+        val trunk = getTrunk()
+        val head = repository.getRef(trunk)
+        val walk = RevWalk(repository)
+        val commit = walk.parseCommit(head.getObjectId())
+        val tree = commit.tree
+
+        val reader = repository.newObjectReader()
+        try {
+            val treeWalk = TreeWalk.forPath(repository, url, tree)
+            return if (treeWalk != null) {
+                // use the blob id to read the file's data
+                val data = reader.open(treeWalk.getObjectId(0)).bytes
+                String(data, Charsets.UTF_8)
+            }
+            else null
+        }
+        finally {
+            reader.release()
+        }
     }
 
     override fun listFiles(url: String, rev: String): List<String> {
-        // FIXME Implement
-        return arrayListOf()
+        val head = repository.getRef(masterName)
+        val walk = RevWalk(repository)
+        val commit = walk.parseCommit(head.getObjectId())
+        val tree = commit.tree
+
+        val treeWalk =
+                if (url.isNotBlank() && url != "/") TreeWalk.forPath(repository, url, tree)
+                else TreeWalk(repository).apply { addTree(tree) }
+
+        treeWalk.isRecursive = true
+        val files = mutableListOf<String>()
+        while (treeWalk.next()) {
+            if (treeWalk.isSubtree) {
+                //println("dir: " + treeWalk.pathString)
+                treeWalk.enterSubtree()
+            }
+            else {
+                //println("file: " + treeWalk.pathString)
+                files.add(treeWalk.pathString)
+            }
+        }
+        return files
     }
 }

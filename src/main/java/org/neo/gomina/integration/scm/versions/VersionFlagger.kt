@@ -16,11 +16,11 @@ class NoOpReleaseFlagger : ReleaseFlagger {
 class MavenReleaseFlagger(private val scmClient: ScmClient) : ReleaseFlagger {
     override fun flag(commit: Commit): Commit {
         if (StringUtils.startsWith(commit.message, "[maven-release-plugin] prepare release")) {
-            val pom = scmClient.getFile("/trunk/pom.xml", commit.revision)
+            val pom = scmClient.getFile("pom.xml", commit.revision)
             commit.release = MavenUtils.extractVersion(pom)
         }
         if (StringUtils.startsWith(commit.message, "[maven-release-plugin]")) {
-            val pom = scmClient.getFile("/trunk/pom.xml", commit.revision)
+            val pom = scmClient.getFile("pom.xml", commit.revision)
             commit.newVersion = MavenUtils.extractVersion(pom)
         }
         return commit // FIXME Make immutable
