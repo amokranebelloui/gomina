@@ -29,7 +29,7 @@
       {"name": "validateOrder", "type": "command"}
     ],
     "used": [
-      {"function": {"name": "orderDb", "type": "database"}, "usage": {"usage": "WRITE"}},
+      {"function": {"name": "orderDb", "type": "database"}, "usage": {"usage": "RW"}},
       {"function": {"name": "getCustomer", "type": "request"}}
     ]
   },
@@ -42,7 +42,7 @@
       {"function": {"name": "createBasket", "type": "command"}},
       {"function": {"name": "validateBasket", "type": "command"}},
       {"function": {"name": "bookBasket", "type": "command"}},
-      {"function": {"name": "orderDb", "type": "database"}, "usage": {"usage": "READ"}},
+      {"function": {"name": "orderDb", "type": "database"}, "usage": {"usage": "R"}},
       {"function": {"name": "validateOrder", "type": "command"}}
     ]
   },

@@ -83,23 +83,30 @@ private fun loadComponents() {
 }
 
 private fun loadInteractions() {
+    jedis.select(2)
     val source = "manual"
 
     val interactions: List<Interactions> = jsonMapper.readValue(File("data/interactions.json"))
 
     interactions.forEach { service ->
         service.exposed.forEach {
-            jedis.hmset("api:$source:${service.serviceId}:exposes:${it.name}", mapOf(
+            val key = "api:$source:${service.serviceId}:exposes:${it.name}"
+            val map = mapOf(
                     "name" to it.name,
                     "type" to it.type
-            ))
+            )
+            println("exposed. $key $map")
+            jedis.hmset(key, map)
         }
         service.used.forEach {
-            jedis.hmset("api:$source:${service.serviceId}:uses:${it.function.name}", listOfNotNull(
+            val key = "api:$source:${service.serviceId}:uses:${it.function.name}"
+            val map = listOfNotNull(
                     "name" to it.function.name,
                     "type" to it.function.type,
                     it.usage?.usage?.let { "usage" to it.toString() }
-            ).toMap())
+            ).toMap()
+            println("used. $key $map")
+            jedis.hmset(key, map)
         }
 
     }
