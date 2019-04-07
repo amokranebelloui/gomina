@@ -1,5 +1,10 @@
 package org.neo.gomina.api.dependencies
 
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.Inject
 import io.vertx.core.Vertx
 import io.vertx.core.json.Json
@@ -8,6 +13,7 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.*
+import org.neo.gomina.model.dependency.Function
 
 
 data class FunctionDetail(val name: String, val type: String, val usage: String? = null, var sources:List<String>)
@@ -25,6 +31,9 @@ data class CallChainDetail(val serviceId: String,
                            val functions: List<FunctionDetail> = emptyList(),
                            val calls: List<CallChainDetail> = emptyList())
 
+data class FunctionData(val name: String, val type: String)
+data class FunctionUsageData(val name: String, val type: String, val usage: String? = null)
+
 class DependenciesApi {
 
     companion object {
@@ -32,6 +41,11 @@ class DependenciesApi {
     }
 
     val router: Router
+
+    private val mapper = ObjectMapper().registerKotlinModule()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
 
     @Inject lateinit var componentRepo: ComponentRepo
     @Inject lateinit var interactionsRepository: InteractionsRepository
@@ -46,7 +60,16 @@ class DependenciesApi {
         router.get("/incoming/:componentId").handler(this::getIncoming)
         router.get("/invocation/chain/:componentId").handler(this::getInvocationChain)
         router.get("/call/chain/:componentId").handler(this::getCallChain)
+
         router.post("/reload").handler(this::reload)
+
+        router.get("/api/:componentId").handler(this::getApi)
+        router.post("/api/:componentId/add").handler(this::addApi)
+        router.delete("/api/:componentId/remove").handler(this::removeApi)
+
+        router.get("/usage/:componentId").handler(this::getUsage)
+        router.post("/usage/:componentId/add").handler(this::addUsage)
+        router.delete("/usage/:componentId/remove").handler(this::removeUsage)
     }
 
     fun get(ctx: RoutingContext) {
@@ -178,6 +201,94 @@ class DependenciesApi {
             ctx.fail(500)
         }
     }
+
+    private fun getApi(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
+        logger.info("Get API $componentId")
+        try {
+            val api = interactionsRepository.getApi(componentId)
+            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(api.map { it.toDetail() }))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get API $componentId", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun addApi(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
+        try {
+            val data = mapper.readValue<FunctionData>(ctx.body.toString())
+            logger.info("Adding API $componentId $data")
+            interactionsRepository.addApi(componentId, Function(data.name, data.type))
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(componentId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot Add API $componentId", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun removeApi(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
+        try {
+            val data = mapper.readValue<FunctionData>(ctx.body.toString())
+            logger.info("Removing API $componentId $data")
+            interactionsRepository.removeApi(componentId, data.name)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(componentId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot Remove API $componentId", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun getUsage(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
+        logger.info("Get Usage $componentId")
+        try {
+            val api = interactionsRepository.getUsage(componentId)
+            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(api.map { it.toDetail() }))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get Usage $componentId", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun addUsage(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
+        try {
+            val data = mapper.readValue<FunctionUsageData>(ctx.body.toString())
+            logger.info("Adding Usage $componentId $data")
+            interactionsRepository.addUsage(componentId, FunctionUsage(data.name, data.type, data.usage?.let { Usage(it) }))
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(componentId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot Add Usage $componentId", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun removeUsage(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
+        try {
+            val data = mapper.readValue<FunctionUsageData>(ctx.body.toString())
+            logger.info("Removing Usage $componentId $data")
+            interactionsRepository.removeUsage(componentId, data.name)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(componentId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot Remove Usage $componentId", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun Function.toDetail() = FunctionDetail(
+            name = this.name,
+            type = this.type,
+            sources = this.sources
+    )
 
     private fun FunctionUsage.toDetail() = FunctionDetail(
             name = this.function.name,

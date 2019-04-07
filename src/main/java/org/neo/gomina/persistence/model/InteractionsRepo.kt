@@ -27,6 +27,8 @@ class RedisInteractionsRepository : InteractionsRepository {
 
     @Inject lateinit var enrichDependencies: EnrichDependencies // FIXME Get out, to higher level
 
+    private val manualSource = "manual"
+
     override fun getAll(): List<Interactions> {
         val all = doGetAll()
         val enriched = enrichDependencies.enrich(all)
@@ -105,6 +107,58 @@ class RedisInteractionsRepository : InteractionsRepository {
         }
     }
 
+    override fun getApi(componentId: String): List<Function> {
+        pool.resource.use { jedis ->
+            return jedis.keys("api:*:$componentId:exposes:*")
+                    .mapNotNull { key ->
+                        val source = key.split(':')[1]
+                        jedis.hgetAll(key).toFunction(listOf(source))
+                    }
+                    .mergeFunctions()
+        }
+    }
+
+    override fun addApi(componentId: String, function: Function) {
+        pool.resource.use { jedis ->
+            jedis.hmset("api:$manualSource:$componentId:exposes:${function.name}", mapOf(
+                    "name" to function.name,
+                    "type" to function.type
+            ))
+        }
+    }
+
+    override fun removeApi(componentId: String, name: String) {
+        pool.resource.use { jedis ->
+            jedis.del("api:$manualSource:$componentId:exposes:$name")
+        }
+    }
+
+    override fun getUsage(componentId: String): List<FunctionUsage> {
+        pool.resource.use { jedis ->
+            return jedis.keys("api:*:$componentId:uses:*")
+                    .mapNotNull { key ->
+                        val source = key.split(':')[1]
+                        jedis.hgetAll(key).toFunctionUsage(listOf(source))
+                    }
+                    .mergeFunctionUsage()
+        }
+    }
+
+    override fun addUsage(componentId: String, functionUsage: FunctionUsage) {
+        pool.resource.use { jedis ->
+            jedis.hmset("api:$manualSource:$componentId:uses:${functionUsage.function.name}", listOfNotNull(
+                    "name" to functionUsage.function.name,
+                    "type" to functionUsage.function.type,
+                    functionUsage.usage?.usage?.let { "usage" to it.toString() }
+            ).toMap())
+        }
+    }
+
+    override fun removeUsage(componentId: String, name: String) {
+        pool.resource.use { jedis ->
+            jedis.del("api:$manualSource:$componentId:uses:$name")
+        }
+    }
 }
 
 
