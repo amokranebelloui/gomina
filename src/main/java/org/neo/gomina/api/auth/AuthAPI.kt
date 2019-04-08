@@ -48,7 +48,11 @@ class AuthApi {
 
                         "env.add",
                         "env.delete",
-                        "env.manage"
+                        "env.manage",
+
+                        "host.add",
+                        "host.delete",
+                        "host.manage"
                 )
 
                 var result = mapOf(

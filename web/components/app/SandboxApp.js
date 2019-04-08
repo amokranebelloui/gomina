@@ -74,39 +74,6 @@ class SandboxApp extends React.Component {
                 }}>Archive Work</button>
                 <br/>
 
-                <hr/>
-
-                <button onClick={() => {
-                    console.info("Add Host");
-                    axios.post('/data/hosts/add?hostId=' + 'local-12')
-                }}>
-                    Add Host</button>
-                <br/>
-
-                <button onClick={() => {
-                    console.info("Update Host");
-                    axios.put('/data/hosts/' + 'local-12' + '/update', {
-                        dataCenter: 'myplace',
-                        group: 'myservers',
-                        type: 'PERSONAL',
-                        tags: ['perso', 'raspberry']
-                    })
-
-                }}>Update Host</button>
-                <br/>
-
-                <button onClick={() => {
-                    console.info("Update Host Connectivity");
-                    axios.put('/data/hosts/' + 'local-12' + '/update/connectivity', {
-                        username: 'root',
-                        passwordAlias: '@root',
-                        proxyUser: "pu",
-                        proxyHost: "proxy-12",
-                        sudo: "svc"
-                    })
-
-                }}>Update Host Connectivity</button>
-                <br/>
 
             </AppLayout>
         );

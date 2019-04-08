@@ -9,7 +9,7 @@ type Props = {
 }
 
 type State = {
-    svc: string,
+    svc?: string,
     type?: ?string,
     mode?: ?string,
     activeCount?: ?string,

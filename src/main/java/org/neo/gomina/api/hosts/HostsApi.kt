@@ -25,6 +25,8 @@ data class HostDetail(
 
         val username: String? = null,
         val passwordAlias: String? = null,
+        val proxyUser: String? = null,
+        val proxyHost: String? = null,
         val sudo: String? = null,
 
         val unexpected: List<String> = emptyList()
@@ -183,6 +185,8 @@ private fun Host.map(): HostDetail {
             tags = tags,
             username = username,
             passwordAlias = passwordAlias,
+            proxyHost = proxyHost,
+            proxyUser = proxyUser,
             sudo = sudo,
             unexpected = unexpectedFolders
     )

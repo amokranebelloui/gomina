@@ -4,6 +4,11 @@ import React from "react";
 import {Well} from "../common/Well";
 import Link from "react-router-dom/es/Link";
 import {Badge} from "../common/Badge";
+import {InlineAdd} from "../common/InlineAdd";
+import Route from "react-router-dom/es/Route";
+import {HostEditor} from "../environment/HostEditor";
+import {Secure} from "../permission/Secure";
+import {HostConnectivityEditor} from "../environment/HostConnectivityEditor";
 
 class HostsApp extends React.Component {
 
@@ -13,6 +18,10 @@ class HostsApp extends React.Component {
         this.state = {
             hosts: [],
             hostId: this.props.match.params.id,
+            hostEdition: false,
+            hostEdited: null,
+            hostConnectivityEdition: false,
+            hostConnectivityEdited: null
         };
         this.retrieveHosts = this.retrieveHosts.bind(this);
         console.info("hostsApp !constructor ");
@@ -48,9 +57,64 @@ class HostsApp extends React.Component {
         this.setState({hostId: newHostId});
         if (this.props.match.params.id != newHostId && newHostId) {
             // do something with newHostId
+            this.setState({"hostEdition": false, "hostConnectivityEdition": false});
         }
     }
-    
+
+    clearNewHostState() {
+        this.setState({
+            hostname: ""
+        })
+    }
+    addHost() {
+        return this.state.hostname
+            ? axios.post('/data/hosts/add?hostId=' + this.state.hostname)
+            : Promise.reject("Hostname is mandatory");
+    };
+    onHostAdded(hostname, history) {
+        this.retrieveHosts();
+        history.push("/host/" + hostname)
+    };
+
+
+    editHost() {
+        this.setState({"hostEdition": true, "hostConnectivityEdition": false});
+    }
+    changeHost(host) {
+        console.info("Host Changed", host);
+        this.setState({"hostEdited": host});
+    }
+    cancelHostEdition() {
+        this.setState({"hostEdition": false});
+    }
+    updateHost() {
+        const thisComponent = this;
+        const hostname = this.props.match.params.id;
+        axios.put('/data/hosts/' + hostname + '/update', this.state.hostEdited)
+            .then(() => thisComponent.retrieveHosts())
+            .catch((error) => console.log("host update error", error.response));
+        this.setState({"hostEdition": false}); // FIXME Display Results/Errors
+    }
+
+    editHostConnectivity() {
+        this.setState({"hostConnectivityEdition": true, "hostEdition": false});
+    }
+    changeHostConnectivity(hostConnectivity) {
+        console.info("Host Connectivity Changed", hostConnectivity);
+        this.setState({"hostConnectivityEdited": hostConnectivity});
+    }
+    cancelHostConnectivityEdition() {
+        this.setState({"hostConnectivityEdition": false});
+    }
+    updateHostConnectivity() {
+        const thisComponent = this;
+        const hostname = this.props.match.params.id;
+        axios.put('/data/hosts/' + hostname + '/update/connectivity', this.state.hostConnectivityEdited)
+            .then(() => thisComponent.retrieveHosts())
+            .catch((error) => console.log("host connectivity update error", error.response));
+        this.setState({"hostConnectivityEdition": false}); // FIXME Display Results/Errors
+    }
+
     render()  {
         const hosts = this.state.hosts;
         const hostId = this.state.hostId;
@@ -64,20 +128,74 @@ class HostsApp extends React.Component {
                         )}
                     </div>
                     <div>
+                        <Secure permission="host.add">
+                            <Route render={({ history }) => (
+                                <InlineAdd type="Host"
+                                           action={() => this.addHost()}
+                                           onEnterAdd={() => this.clearNewHostState()}
+                                           onItemAdded={(host) => this.onHostAdded(host, history)}
+                                           editionForm={() =>
+                                               <div>
+                                                   <input type="text" name="hostname" placeholder="Hostname"
+                                                          value={this.state.hostname}
+                                                          onChange={e => this.setState({hostname: e.target.value})} />
+                                                   <br/>
+                                               </div>
+                                           }
+                                           successDisplay={(data: any) =>
+                                               <div>
+                                                   <b>{data ? ("Added " + JSON.stringify(data)) : 'no data returned'}</b>
+                                               </div>
+                                           }
+                                />
+                            )} />
+                        </Secure>
+
                         {host &&
                         <Well block>
                             <h3>Detail {host && host.host}</h3>
-                            {host.managed &&
-                                <button onClick={() => this.reloadSsh()}>RELOAD SSH</button>
-                            }
-                            {host && <Host host={host}></Host>}
-                            <hr/>
-                            <b>Should not be there</b>
-                            {host && host.unexpected && host.unexpected.length > 0 &&
-                                host.unexpected.map(f =>
+                            <div style={{float: 'right'}}>
+                                <Secure permission="host.manage">
+                                    <button onClick={() => this.editHost()}>Edit</button>
+                                </Secure>
+                                <Secure permission="host.manage">
+                                    <button onClick={() => this.editHostConnectivity()}>Connectivity</button>
+                                </Secure>
+                            </div>
+
+                            {!this.state.hostEdition && !this.state.hostConnectivityEdition &&
+                            <div>
+                                {host.managed &&
+                                    <button onClick={() => this.reloadSsh()}>RELOAD SSH</button>
+                                }
+                                {host && <Host host={host}></Host>}
+                                    <hr/>
+                                    <b>Should not be there</b>
+                                {host && host.unexpected && host.unexpected.length > 0 &&
+                                    host.unexpected.map(f =>
                                     <div>{f}</div>
-                                )
+                                    )
+                                }
+                            </div>
                             }
+                            {this.state.hostEdition &&
+                            <div>
+                                <HostEditor host={host} onChange={(hostname, h) => this.changeHost(h)} />
+                                <hr/>
+                                <button onClick={() => this.updateHost()}>Update</button>
+                                <button onClick={() => this.cancelHostEdition()}>Cancel</button>
+                            </div>
+                            }
+
+                            {this.state.hostConnectivityEdition &&
+                            <div>
+                                <HostConnectivityEditor host={host} onChange={(hostname, hc) => this.changeHostConnectivity(hc)} />
+                                <hr/>
+                                <button onClick={() => this.updateHostConnectivity()}>Update</button>
+                                <button onClick={() => this.cancelHostConnectivityEdition()}>Cancel</button>
+                            </div>
+                            }
+
                         </Well>
                         }
                     </div>
