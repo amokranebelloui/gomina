@@ -13,6 +13,8 @@ import {CallChain} from "../dependency/CallChain";
 import Link from "react-router-dom/es/Link";
 import {ScmLink} from "../component/ScmLink";
 import {UnreleasedChangeCount} from "../component/UnreleasedChangeCount";
+import {ApiDefinition} from "../component/ApiDefinition";
+import {ApiUsage} from "../component/ApiUsage";
 
 class ComponentApp extends React.Component {
     
@@ -24,6 +26,8 @@ class ComponentApp extends React.Component {
             component: {},
             associated: [],
 
+            api: [],
+            usage: [],
             dependencies: [],
             impacted: [],
             invocationChain: null,
@@ -208,6 +212,40 @@ class ComponentApp extends React.Component {
                 thisComponent.setState({branch: null});
             });
     }
+    retrieveApi(componentId) {
+        const thisComponent = this;
+        axios.get('/data/dependencies/api/' + componentId)
+            .then(response => {
+                console.log("API data");
+                thisComponent.setState({api: response.data});
+            })
+            .catch(function (error) {
+                console.log("API error", error.response);
+                thisComponent.setState({api: null});
+            });
+    }
+    removeApi(componentId, fName, fType) {
+        axios.delete('/data/dependencies/api/' + componentId + '/remove', { data: {name: fName, type: fType} })
+            .then(() => this.retrieveApi(componentId))
+            .catch((error) => console.log("component delete error", error.response));
+    }
+    retrieveUsage(componentId) {
+        const thisComponent = this;
+        axios.get('/data/dependencies/usage/' + componentId)
+            .then(response => {
+                console.log("Usage data");
+                thisComponent.setState({usage: response.data});
+            })
+            .catch(function (error) {
+                console.log("Usage error", error.response);
+                thisComponent.setState({usage: null});
+            });
+    }
+    removeUsage(componentId, fName, fType) {
+        axios.delete('/data/dependencies/usage/' + componentId + '/remove', { data: {name: fName, type: fType} })
+            .then(() => this.retrieveUsage(componentId))
+            .catch((error) => console.log("component delete error", error.response));
+    }
     retrieveDependencies(componentId) {
         const thisComponent = this;
         axios.get('/data/dependencies/outgoing/' + componentId)
@@ -294,6 +332,8 @@ class ComponentApp extends React.Component {
         if (this.state.componentId) {
             this.retrieveComponent(this.state.componentId);
             this.retrieveAssociated(this.state.componentId);
+            this.retrieveApi(this.state.componentId);
+            this.retrieveUsage(this.state.componentId);
             this.retrieveDependencies(this.state.componentId);
             this.retrieveImpacted(this.state.componentId);
             this.retrieveInvocationChain(this.state.componentId);
@@ -323,6 +363,8 @@ class ComponentApp extends React.Component {
             this.retrieveComponent(newComponent);
             this.retrieveAssociated(newComponent);
             //this.retrieveInstances(newComponent);
+            this.retrieveApi(newComponent);
+            this.retrieveUsage(newComponent);
             this.retrieveDependencies(newComponent);
             this.retrieveImpacted(newComponent);
             this.retrieveInvocationChain(newComponent);
@@ -415,6 +457,16 @@ class ComponentApp extends React.Component {
                         <hr/>
                     </div>
                     <Container>
+                        <h3>API</h3>
+                        {(this.state.api || []).map(api =>
+                            <ApiDefinition api={api} onManualApiRemove={() => this.removeApi(component.id, api.name, api.type)} />
+                        )}
+
+                        <h3>Usage</h3>
+                        {(this.state.usage || []).map(usage =>
+                            <ApiUsage usage={usage} onManualUsageRemove={() => this.removeUsage(component.id, usage.name, usage.type)} />
+                        )}
+                        
                         <h3>Invocation Chain</h3>
                         <CallChain chain={this.state.invocationChain} displayFirst={true}
                                    onDependencySelected={(child, parent) => this.selectInvocationDependency(child, parent)}/>

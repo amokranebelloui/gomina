@@ -42,6 +42,8 @@ class AuthApi {
                 val permissions = listOf(
                         "component.add",
                         "component.edit",
+                        "component.edit.api",
+                        "component.edit.usage",
                         "component.knowledge",
                         "component.disable",
                         "component.delete",
