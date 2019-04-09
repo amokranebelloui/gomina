@@ -82,7 +82,8 @@ class WorkApi {
         router.get("/list").handler(this::workList)
         router.post("/add").handler(this::add)
         router.put("/:workId/update").handler(this::update)
-        router.delete("/:workId/archive").handler(this::archive)
+        router.put("/:workId/archive").handler(this::archive)
+        router.put("/:workId/unarchive").handler(this::unarchive)
 
         router.get("/detail/:workId").handler(this::workDetail)
         router.get("/detail").handler(this::workDetail)
@@ -138,6 +139,19 @@ class WorkApi {
         }
         catch (e: Exception) {
             logger.error("Cannot archive Work", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun unarchive(ctx: RoutingContext) {
+        val workId = ctx.request().getParam("workId")
+        try {
+            logger.info("Unarchive work $workId")
+            workList.unarchiveWork(workId)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(workId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot unarchive Work", e)
             ctx.fail(500)
         }
     }

@@ -52,7 +52,11 @@ class AuthApi {
 
                         "host.add",
                         "host.delete",
-                        "host.manage"
+                        "host.manage",
+
+                        "work.add",
+                        "work.manage",
+                        "work.archive"
                 )
 
                 var result = mapOf(

@@ -85,4 +85,10 @@ class RedisWorkList : WorkList {
             jedis.hmset("work:$workId", mapOf("archived" to true.toString()))
         }
     }
+
+    override fun unarchiveWork(workId: String) {
+        pool.resource.use { jedis ->
+            jedis.hmset("work:$workId", mapOf("archived" to false.toString()))
+        }
+    }
 }

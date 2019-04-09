@@ -18,4 +18,5 @@ interface WorkList {
     fun addWork(label: String?, type: String?, jira: String?, people: List<String>, components: List<String>): String
     fun updateWork(workId: String, label: String?, type: String?, jira: String?, people: List<String>, components: List<String>)
     fun archiveWork(workId: String)
+    fun unarchiveWork(workId: String)
 }

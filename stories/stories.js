@@ -27,6 +27,9 @@ import * as axios from "axios";
 import {AddEnvironment} from "../web/components/environment/AddEnvironment";
 import {AddService} from "../web/components/environment/AddService";
 import {AddInstance} from "../web/components/environment/AddInstance";
+import {HostEditor} from "../web/components/environment/HostEditor";
+import {HostConnectivityEditor} from "../web/components/environment/HostConnectivityEditor";
+import {WorkEditor} from "../web/components/work/WorkEditor";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -224,8 +227,20 @@ storiesOf('Environment', module)
         <ServiceModeEditor mode="LEADERSHIP" count="3"
                           onChanged={action('changed')}
                           onEditionCancelled={action('cancelled')}
-                          onEdited={action('edited')} />);
+                          onEdited={action('edited')} />)
+    .add('HostEditor', () =>
+        <HostEditor host={{host: "localhost", dataCenter: "DC", type: "TEST"}}
+                           onChange={action('changed')} />)
+    .add('HostConnectivityEditor', () =>
+        <HostConnectivityEditor host={{host: "localhost", username: "john.doe", passwordAlias: "@jd"}}
+                    onChange={action('changed')} />)
+;
 
+
+storiesOf('Work', module)
+    .add('WorkEditor', () =>
+        <WorkEditor work={{host: "localhost", dataCenter: "DC", type: "TEST"}}
+                    onChange={action('changed')} />)
 
 storiesOf('Text', module)
     .add('Diff', () => {
