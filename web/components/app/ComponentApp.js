@@ -15,6 +15,8 @@ import {ScmLink} from "../component/ScmLink";
 import {UnreleasedChangeCount} from "../component/UnreleasedChangeCount";
 import {ApiDefinition} from "../component/ApiDefinition";
 import {ApiUsage} from "../component/ApiUsage";
+import {ApiDefinitionEditor} from "../component/ApiDefinitionEditor";
+import {Secure} from "../permission/Secure";
 
 class ComponentApp extends React.Component {
     
@@ -224,10 +226,15 @@ class ComponentApp extends React.Component {
                 thisComponent.setState({api: null});
             });
     }
+    addApi(componentId, fName, fType) {
+        axios.post('/data/dependencies/api/' + componentId + '/add', {name: fName, type: fType})
+            .then(() => this.retrieveApi(componentId))
+            .catch((error) => console.log("component api add error", error.response));
+    }
     removeApi(componentId, fName, fType) {
         axios.delete('/data/dependencies/api/' + componentId + '/remove', { data: {name: fName, type: fType} })
             .then(() => this.retrieveApi(componentId))
-            .catch((error) => console.log("component delete error", error.response));
+            .catch((error) => console.log("component api delete error", error.response));
     }
     retrieveUsage(componentId) {
         const thisComponent = this;
@@ -241,10 +248,15 @@ class ComponentApp extends React.Component {
                 thisComponent.setState({usage: null});
             });
     }
+    addUsage(componentId, fName, fType, fUsage) {
+        axios.post('/data/dependencies/usage/' + componentId + '/add', {name: fName, type: fType, usage: fUsage})
+            .then(() => this.retrieveUsage(componentId))
+            .catch((error) => console.log("component usage delete error", error.response));
+    }
     removeUsage(componentId, fName, fType) {
         axios.delete('/data/dependencies/usage/' + componentId + '/remove', { data: {name: fName, type: fType} })
             .then(() => this.retrieveUsage(componentId))
-            .catch((error) => console.log("component delete error", error.response));
+            .catch((error) => console.log("component usage delete error", error.response));
     }
     retrieveDependencies(componentId) {
         const thisComponent = this;
@@ -447,31 +459,40 @@ class ComponentApp extends React.Component {
                                         onDisable={id => this.disable(id)}
                                         onDelete={id => this.delete(id)}
                         />
-                        <hr/>
+                        <br/>
                         <h3>Other Components</h3>
                         <div className="items">
                             {this.state.associated.map(componentRef =>
                                 <Link to={"/component/" + componentRef.id}>{componentRef.label || componentRef.id}</Link>
                             )}
                         </div>
-                        <hr/>
+                        <br/>
                     </div>
                     <Container>
                         <h3>API</h3>
                         {(this.state.api || []).map(api =>
                             <ApiDefinition api={api} onManualApiRemove={() => this.removeApi(component.id, api.name, api.type)} />
                         )}
-
+                        <Secure permission="component.edit.api">
+                            <ApiDefinitionEditor type="definition" api={{name: "", type: ""}} onAdd={(f) => this.addApi(component.id, f.name, f.type)} />
+                        </Secure>
+                        <br/>
+                        
                         <h3>Usage</h3>
                         {(this.state.usage || []).map(usage =>
                             <ApiUsage usage={usage} onManualUsageRemove={() => this.removeUsage(component.id, usage.name, usage.type)} />
                         )}
+                        <Secure permission="component.edit.usage">
+                            <ApiDefinitionEditor type="usage" api={{name: "", type: ""}} onAdd={(f) => this.addUsage(component.id, f.name, f.type, f.usage)} />
+                        </Secure>
+                        <br/>
                         
                         <h3>Invocation Chain</h3>
                         <CallChain chain={this.state.invocationChain} displayFirst={true}
                                    onDependencySelected={(child, parent) => this.selectInvocationDependency(child, parent)}/>
                         <Dependencies dependencies={this.state.chainSelectedInvocation} />
-                        <hr />
+                        <br/>
+                        
                         <h3>Call Chain</h3>
                         <CallChain chain={this.state.callChain} displayFirst={true}
                                    onDependencySelected={(child, parent) => this.selectCallDependency(child, parent)} />

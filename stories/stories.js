@@ -30,6 +30,7 @@ import {AddInstance} from "../web/components/environment/AddInstance";
 import {HostEditor} from "../web/components/environment/HostEditor";
 import {HostConnectivityEditor} from "../web/components/environment/HostConnectivityEditor";
 import {WorkEditor} from "../web/components/work/WorkEditor";
+import {ApiDefinitionEditor} from "../web/components/component/ApiDefinitionEditor";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -91,6 +92,22 @@ storiesOf('Components', module)
     .add('ScmEditor', () => {
         return (
             <ScmEditor onEdited={action('scmEdited')} onEditionCancelled={action('editionCancelled')} />
+        )
+    })
+    .add('ApiEditor', () => {
+        return (
+            <div>
+                <h4>Api</h4>
+                <ApiDefinitionEditor type="api"
+                                     onChange={action('api def changed')}
+                                     onAdd={action('api def add')}
+                                     onCancel={action('api def cancel')} />
+                <h4>Usage</h4>
+                <ApiDefinitionEditor type="usage"
+                                     onChange={action('api usage changed')}
+                                     onAdd={action('api usage add')}
+                                     onCancel={action('api usage cancel')} />
+            </div>
         )
     })
 ;

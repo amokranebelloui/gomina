@@ -8,4 +8,6 @@ type FunctionType = {
     sources: Array<string>
 }
 
-export type {FunctionType}
+type ApiDefinitionType = "definition" | "usage"
+
+export type {FunctionType, ApiDefinitionType}
