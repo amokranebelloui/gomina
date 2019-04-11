@@ -31,6 +31,7 @@ import {HostEditor} from "../web/components/environment/HostEditor";
 import {HostConnectivityEditor} from "../web/components/environment/HostConnectivityEditor";
 import {WorkEditor} from "../web/components/work/WorkEditor";
 import {ApiDefinitionEditor} from "../web/components/component/ApiDefinitionEditor";
+import {Autocomplete} from "../web/components/common/AutoComplete";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -89,6 +90,28 @@ storiesOf('Components', module)
             <EditableLabel label="Some Label" style={{fontSize: 30}} />
         )
     })
+    .add('Autocomplete', () => {
+        return (
+            <div>
+                <h4>Simple text</h4>
+                <Autocomplete suggestions={["java", "javascript", "c#", "c++", "kotlin", "go", "gherkin", "css", "python"]} />
+                <h4>Objects</h4>
+                <Autocomplete suggestions={[
+                    {id: 1, name: "java"},
+                    {id: 2, name: "javascript"},
+                    {id: 3, name: "c#"},
+                    {id: 4, name: "c++"},
+                    {id: 5, name: "kotlin"},
+                    {id: 6, name: "go"},
+                    {id: 7, name: "gherkin"},
+                    {id: 8, name: "css"},
+                    {id: 9, name: "python", version: "2"},
+                    {id: 10, name: "python", version: "3"},
+                ]} idProperty="id" labelProperty="name" />
+            </div>
+        )
+    })
+
     .add('ScmEditor', () => {
         return (
             <ScmEditor onEdited={action('scmEdited')} onEditionCancelled={action('editionCancelled')} />
