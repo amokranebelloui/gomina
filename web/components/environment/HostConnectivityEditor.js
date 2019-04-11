@@ -1,7 +1,7 @@
 // @flow
 import * as React from "react"
 import type {HostType} from "./HostType";
-import {HostConnectivityDataType} from "./HostType";
+import type {HostConnectivityDataType} from "./HostType";
 
 type Props = {
     host: HostType,

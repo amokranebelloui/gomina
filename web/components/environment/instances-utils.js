@@ -20,7 +20,7 @@ function score(instance: InstanceType) {
     return score
 }
 
-function sortInstances(instances: Array<InstanceType>) {
+function sortInstances(instances: Array<InstanceType>): Array<InstanceType> {
     return instances.sort((a, b) => score(a) < score(b) ? 1 : -1);
 }
 
