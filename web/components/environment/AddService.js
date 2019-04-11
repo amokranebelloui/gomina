@@ -2,11 +2,13 @@
 import * as React from "react"
 import {InlineAdd} from "../common/InlineAdd";
 import * as axios from "axios";
-import type {EnvType} from "./Environment";
 import {ServiceModeEditor} from "./ServiceModeEditor";
+import {Autocomplete} from "../common/AutoComplete";
+import type {ComponentRefType} from "../component/ComponentType";
 
 type Props = {
     env: string,
+    components: Array<ComponentRefType>,
     onServiceAdded?: string => void,
 }
 
@@ -15,7 +17,7 @@ type State = {
     type?: ?string,
     mode?: ?string,
     activeCount?: ?string,
-    componentId?: ?string
+    component?: ?ComponentRefType
 }
 
 class AddService extends React.Component<Props, State> {
@@ -26,7 +28,7 @@ class AddService extends React.Component<Props, State> {
             type: "",
             mode: "",
             activeCount: "",
-            componentId: ""
+            component: null
         };
     }
     clearState() {
@@ -35,12 +37,13 @@ class AddService extends React.Component<Props, State> {
             type: "",
             mode: "",
             activeCount: "",
-            componentId: ""
+            component: null
         })
     }
     addService() {
+        const data = Object.assign({}, this.state, {componentId: this.state.component && this.state.component.id});
         return this.state.svc && this.state.mode
-            ? axios.post('/data/instances/' + this.props.env + '/service/add?svcId=' + this.state.svc, this.state)
+            ? axios.post('/data/instances/' + this.props.env + '/service/add?svcId=' + this.state.svc, data)
             : Promise.reject("Service Name/Mode are mandatory");
     };
     render() {
@@ -65,9 +68,10 @@ class AddService extends React.Component<Props, State> {
                                                   count={this.state.activeCount}
                                                   onChanged={(mode, count) => this.setState({mode: mode, activeCount: count})} />
                                <br/>
-                               <input type="text" name="component" placeholder="Component"
-                                      value={this.state.componentId}
-                                      onChange={e => this.setState({componentId: e.target.value})} />
+                               <Autocomplete value={this.state.component}
+                                             suggestions={this.props.components}
+                                             idProperty="id" labelProperty="label"
+                                             onChange={c => this.setState({component: c})} />
                            </div>
                        }
                        successDisplay={(data: any) =>

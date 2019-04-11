@@ -150,7 +150,8 @@ class ComponentsApi {
         this.router = Router.router(vertx)
 
         router.get("/").handler(this::components)
-        
+        router.get("/refs").handler(this::componentsRefs)
+
         router.get("/systems").handler(this::systems)
         router.get("/build/servers").handler(this::buildServers)
         router.get("/sonar/servers").handler(this::sonarServers)
@@ -184,6 +185,17 @@ class ComponentsApi {
     fun components(ctx: RoutingContext) {
         try {
             val components = this.componentRepo.getAll().mapNotNull { this.build(it) }
+            ctx.response().putHeader("content-type", "text/javascript")
+                    .end(mapper.writeValueAsString(components))
+        } catch (e: Exception) {
+            logger.error("Cannot get components", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun componentsRefs(ctx: RoutingContext) {
+        try {
+            val components = this.componentRepo.getAll().mapNotNull { ComponentRef(it.id, it.label) }
             ctx.response().putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(components))
         } catch (e: Exception) {

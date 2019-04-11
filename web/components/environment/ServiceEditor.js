@@ -2,9 +2,12 @@
 import * as React from "react"
 import {ServiceModeEditor} from "./ServiceModeEditor";
 import type {ServiceDataType, ServiceType} from "./Service";
+import {Autocomplete} from "../common/AutoComplete";
+import type {ComponentRefType} from "../component/ComponentType";
 
 type Props = {
     service: ServiceType,
+    components: Array<ComponentRefType>,
     onChange?: (svc: string, data: ServiceDataType) => void
 }
 
@@ -13,7 +16,7 @@ type State = {
     type?: ?string,
     mode?: ?string,
     activeCount?: ?string,
-    componentId?: ?string
+    component?: ?ComponentRefType
 }
 
 class ServiceEditor extends React.Component<Props, State> {
@@ -24,7 +27,7 @@ class ServiceEditor extends React.Component<Props, State> {
             type: this.props.service.type,
             mode: this.props.service.mode,
             activeCount: this.props.service.activeCount ? this.props.service.activeCount.toString() : "",
-            componentId: this.props.service.componentId
+            component: this.props.service.component
         };
     }
     
@@ -40,9 +43,9 @@ class ServiceEditor extends React.Component<Props, State> {
         this.setState({mode: mode, activeCount: count});
         this.notifyChange({mode: mode, activeCount: count});
     }
-    changeComponentId(componentId: string) {
-        this.setState({componentId: componentId});
-        this.notifyChange({componentId: componentId});
+    changeComponentId(component: ComponentRefType) {
+        this.setState({component: component});
+        this.notifyChange({componentId: component && component.id});
     }
 
     notifyChange(delta: any) {
@@ -51,7 +54,7 @@ class ServiceEditor extends React.Component<Props, State> {
             type: this.state.type,
             mode: this.state.mode,
             activeCount: this.state.activeCount ? parseInt(this.state.activeCount) : null,
-            componentId: this.state.componentId
+            componentId: this.state.component && this.state.component.id
         };
         const data = Object.assign({}, fromState, delta);
         this.props.onChange && this.props.onChange(this.props.service.svc, data)
@@ -72,9 +75,11 @@ class ServiceEditor extends React.Component<Props, State> {
                                    count={this.state.activeCount}
                                    onChanged={(mode, count) => this.changeMode(mode, count)} />
                 <br/>
-                <input type="text" name="component" placeholder="Component"
-                       value={this.state.componentId}
-                       onChange={e => this.changeComponentId(e.target.value)} />
+                <Autocomplete value={this.state.component}
+                              suggestions={this.props.components}
+                              idProperty="id" labelProperty="label"
+                              onChange={c => this.changeComponentId(c)} />
+
             </div>
         );
     }

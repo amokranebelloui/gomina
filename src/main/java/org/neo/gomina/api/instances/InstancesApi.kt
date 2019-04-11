@@ -13,6 +13,7 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.common.toDateUtc
+import org.neo.gomina.api.component.ComponentRef
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.model.component.Component
@@ -33,7 +34,8 @@ data class ServiceDetail (
         val type: String? = null,
         val mode: ServiceMode? = ServiceMode.ONE_ONLY,
         val activeCount: Int? = 1,
-        val componentId: String? = null,
+        @Deprecated("") val componentId: String? = null,
+        val component: ComponentRef? = null,
         val systems: List<String>
 )
 
@@ -420,6 +422,7 @@ fun Service.toServiceDetail(component: Component?): ServiceDetail {
             mode = this.mode,
             activeCount = this.activeCount,
             componentId = this.componentId,
+            component = component?.let { ComponentRef(component.id, component.label) },
             systems = component?.systems ?: emptyList())
 }
 

@@ -18,7 +18,7 @@ class ServiceDetail extends React.Component<Props> {
                 {service.svc}<br/>
                 {service.type}<br/>
                 <b>Mode: </b>{service.mode} {service.activeCount}<br/>
-                <b>Component: </b>{service.componentId}<br/>
+                <b>Component: </b>{service.component && service.component.label}<br/>
                 <b>Systems: </b> <TagCloud tags={service.systems}/><br/>
             </div>
         );

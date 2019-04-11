@@ -6,6 +6,7 @@ import type {InstanceType} from "./Instance";
 import Link from "react-router-dom/es/Link";
 import {InstanceBadge} from "./InstanceBadge";
 import {sortInstances} from "./instances-utils";
+import type {ComponentRefType} from "../component/ComponentType";
 
 type ServiceType = {
     svc: string,
@@ -13,6 +14,7 @@ type ServiceType = {
     mode?: ?string,
     activeCount?: ?number,
     componentId?: ?string,
+    component?: ?ComponentRefType,
     systems?: ?Array<string>
 }
 

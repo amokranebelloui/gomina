@@ -113,14 +113,14 @@ class EnvApp extends React.Component {
     retrieveEnvs() {
         const thisComponent = this;
         axios.get('/data/envs')
-            .then(response => {
-                console.log("envApp data envs", response.data);
-                thisComponent.setState({envs: response.data});
-            })
-            .catch(function (error) {
-                console.log("envApp error envs", error.response);
-                thisComponent.setState({envs: []});
-            });
+            .then(response => thisComponent.setState({envs: response.data}))
+            .catch(error => thisComponent.setState({envs: []}));
+    }
+    retrieveComponentRefs() {
+        const thisComponent = this;
+        axios.get('/data/components/refs')
+            .then(response => thisComponent.setState({components: response.data}))
+            .catch(error => thisComponent.setState({components: []}));
     }
     retrieveInstances(env) {
         console.log("Retr... " + env);
@@ -211,6 +211,7 @@ class EnvApp extends React.Component {
         console.info("envApp !mount ");
         //this.connect();
         this.retrieveEnvs();
+        this.retrieveComponentRefs();
         this.retrieveInstances(this.state.env);
         this.retrieveEvents(this.state.env);
     }
@@ -368,7 +369,9 @@ class EnvApp extends React.Component {
                                             <EnvDetail env={selectedEnv} />
                                             <br/>
                                             <Secure permission="env.manage">
-                                                <AddService env={selectedEnv.env} onServiceAdded={s => this.serviceAdded(s)} />
+                                                <AddService env={selectedEnv.env}
+                                                            components={this.state.components}
+                                                            onServiceAdded={s => this.serviceAdded(s)} />
                                             </Secure>
                                         </div>
                                     }
@@ -406,7 +409,9 @@ class EnvApp extends React.Component {
                                     }
                                     {this.state.serviceEdition &&
                                         <div>
-                                            <ServiceEditor service={selectedService} onChange={(svc, s) => this.changeService(s)} />
+                                            <ServiceEditor components={this.state.components}
+                                                           service={selectedService}
+                                                           onChange={(svc, s) => this.changeService(s)} />
                                             <hr/>
                                             <button onClick={() => this.updateService()}>Update</button>
                                             <button onClick={() => this.cancelServiceEdition()}>Cancel</button>

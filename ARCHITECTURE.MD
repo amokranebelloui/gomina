@@ -1,4 +1,16 @@
 
+#### Entity refs
+**component**
+- api usage -> api definition (dependency)
+
+**environment**
+- service -> component
+- instance -> host
+
+**work**
+- -> component
+- -> user (people involved)
+
 
 ####Packages
 model: basic model: components, systems, envs, services, instances, hosts
