@@ -7,7 +7,8 @@ type T = any
 type Props = {
     suggestions: Array<T>,
     idProperty?: string,
-    labelProperty?: string
+    labelProperty?: string,
+    onChange?: T => void
 }
 
 type State = {
@@ -45,7 +46,11 @@ class Autocomplete extends React.Component<Props, State> {
         const matchingSuggestions = this.props.suggestions.filter(s =>
             this.label(s).toLowerCase() === userInput.toLowerCase()
         );
+        const newlySelected:T = matchingSuggestions.length === 1 ? matchingSuggestions[0] : null;
 
+        if (newlySelected !== this.state.selectedItem) {
+            this.props.onChange && this.props.onChange(newlySelected)
+        }
         // Update the user input and filtered suggestions, reset the active suggestion and make sure suggestions are shown
         this.setState({
             activeSuggestion: 0,
@@ -53,7 +58,7 @@ class Autocomplete extends React.Component<Props, State> {
             showSuggestions: true,
             userInput: e.currentTarget.value,
             // FIXME Equality => selectedItem
-            selectedItem: matchingSuggestions.length == 1 ? matchingSuggestions[0] : null
+            selectedItem: newlySelected
         });
     };
     onClick(suggestion: T) {
@@ -65,9 +70,9 @@ class Autocomplete extends React.Component<Props, State> {
             userInput: this.label(suggestion),
             selectedItem: suggestion
         });
+        this.props.onChange && this.props.onChange(suggestion)
     };
     onKeyDown(e: SyntheticKeyboardEvent<any>) {
-        //const { activeSuggestion, filteredSuggestions } = this.state;
         if (e.keyCode === 13) { // enter key, update the input and close the suggestions
             const selectedSuggestion = this.state.filteredSuggestions[this.state.activeSuggestion];
             this.setState({
@@ -76,6 +81,10 @@ class Autocomplete extends React.Component<Props, State> {
                 userInput: this.label(selectedSuggestion),
                 selectedItem: selectedSuggestion
             });
+            this.props.onChange && this.props.onChange(selectedSuggestion)
+        }
+        else if (e.keyCode === 27) { // up arrow, decrement the index
+            this.setState({ showSuggestions: false });
         }
         else if (e.keyCode === 38) { // up arrow, decrement the index
             if (this.state.activeSuggestion === 0) { return; }
@@ -118,10 +127,10 @@ class Autocomplete extends React.Component<Props, State> {
                 );
             }
         }
+        // <span>{JSON.stringify(this.state.selectedItem)}</span>
         return (
             <Fragment>
                 <input type="text" onChange={e => this.onChange(e)} onKeyDown={e => this.onKeyDown(e)} value={this.state.userInput}/>
-                <span>{JSON.stringify(this.state.selectedItem)}</span>
                 {suggestionsListComponent}
             </Fragment>
         );

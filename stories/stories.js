@@ -94,7 +94,9 @@ storiesOf('Components', module)
         return (
             <div>
                 <h4>Simple text</h4>
-                <Autocomplete suggestions={["java", "javascript", "c#", "c++", "kotlin", "go", "gherkin", "css", "python"]} />
+                <Autocomplete
+                    suggestions={["java", "javascript", "c#", "c++", "kotlin", "go", "gherkin", "css", "python"]}
+                    onChange={action('language change')} />
                 <h4>Objects</h4>
                 <Autocomplete suggestions={[
                     {id: 1, name: "java"},
@@ -107,7 +109,7 @@ storiesOf('Components', module)
                     {id: 8, name: "css"},
                     {id: 9, name: "python", version: "2"},
                     {id: 10, name: "python", version: "3"},
-                ]} idProperty="id" labelProperty="name" />
+                ]} idProperty="id" labelProperty="name" onChange={action('language change {}')} />
             </div>
         )
     })
