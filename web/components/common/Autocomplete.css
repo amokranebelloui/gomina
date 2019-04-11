@@ -24,6 +24,10 @@
     font-weight: 700;
 }
 
+.suggestion-unknown-item {
+    background-color: #ffdbc8;
+}
+
 .suggestions li:hover {
     color: gold;
     cursor: pointer;

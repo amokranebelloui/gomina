@@ -5,6 +5,7 @@ import "./Autocomplete.css"
 type T = any
 
 type Props = {
+    value?: T;
     suggestions: Array<T>,
     idProperty?: string,
     labelProperty?: string,
@@ -22,19 +23,24 @@ type State = {
 class Autocomplete extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
+        const userInput = this.label(this.props.value) || "";
+        const matchingSuggestions = this.props.suggestions.filter(s =>
+            this.label(s).toLowerCase() === userInput.toLowerCase()
+        );
+        const newlySelected:T = matchingSuggestions.length === 1 ? matchingSuggestions[0] : null;
         this.state = {
             activeSuggestion: 0,
             filteredSuggestions: [],
             showSuggestions: false,
-            userInput: "",
-            selectedItem: null
+            userInput: userInput,
+            selectedItem: newlySelected
         };
     }
     id(suggestion: T) {
-        return this.props.idProperty ? suggestion[this.props.idProperty] : suggestion;
+        return this.props.idProperty && suggestion ? suggestion[this.props.idProperty] : suggestion;
     }
     label(suggestion: T) {
-        return this.props.labelProperty ? suggestion[this.props.labelProperty] : suggestion;
+        return this.props.labelProperty && suggestion ? suggestion[this.props.labelProperty] : suggestion;
     }
     onChange(e: SyntheticKeyboardEvent<any>) {
         const userInput = e.currentTarget.value;
@@ -103,15 +109,10 @@ class Autocomplete extends React.Component<Props, State> {
                 suggestionsListComponent = (
                     <ul class="suggestions">
                         {this.state.filteredSuggestions.map((suggestion, index) => {
-                            let className;
-
-                            // Flag the active suggestion with a class
-                            if (index === this.state.activeSuggestion) {
-                                className = "suggestion-active";
-                            }
-
                             return (
-                                <li key={this.id(suggestion)} className={className} onClick={() => this.onClick(suggestion)}>
+                                <li key={this.id(suggestion)}
+                                    className={index === this.state.activeSuggestion ? "suggestion-active" : null}
+                                    onClick={() => this.onClick(suggestion)}>
                                     {this.label(suggestion)}
                                 </li>
                             );
@@ -130,7 +131,11 @@ class Autocomplete extends React.Component<Props, State> {
         // <span>{JSON.stringify(this.state.selectedItem)}</span>
         return (
             <Fragment>
-                <input type="text" onChange={e => this.onChange(e)} onKeyDown={e => this.onKeyDown(e)} value={this.state.userInput}/>
+                <input type="text"
+                       className={this.state.userInput && !this.state.selectedItem ? "suggestion-unknown-item" : null}
+                       onChange={e => this.onChange(e)}
+                       onKeyDown={e => this.onKeyDown(e)}
+                       value={this.state.userInput} />
                 {suggestionsListComponent}
             </Fragment>
         );
