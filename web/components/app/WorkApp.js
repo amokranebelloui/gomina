@@ -8,12 +8,15 @@ import {InlineAdd} from "../common/InlineAdd";
 import {Secure} from "../permission/Secure";
 import Route from "react-router-dom/es/Route";
 import {WorkEditor} from "../work/WorkEditor";
+import {Autocomplete} from "../common/AutoComplete";
 
 class WorkApp extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
+            components: [],
+            users: [],
             workList: [],
             workDetail: [],
             workId: this.props.match.params.id,
@@ -22,6 +25,20 @@ class WorkApp extends React.Component {
         this.retrieveWorkList = this.retrieveWorkList.bind(this);
         this.retrieveWorkDetail = this.retrieveWorkDetail.bind(this);
         console.info("workApp !constructor ");
+    }
+
+    retrieveComponentRefs() {
+        const thisComponent = this;
+        axios.get('/data/components/refs')
+            .then(response => thisComponent.setState({components: response.data}))
+            .catch(error => thisComponent.setState({components: []}));
+    }
+
+    retrieveUserRefs() {
+        const thisComponent = this;
+        axios.get('/data/user/refs')
+            .then(response => thisComponent.setState({users: response.data}))
+            .catch(error => thisComponent.setState({users: []}));
     }
 
     retrieveWorkList() {
@@ -55,6 +72,8 @@ class WorkApp extends React.Component {
         console.info("workApp !did mount ", this.props.match.params.id);
         this.retrieveWorkList();
         this.retrieveWorkDetail(this.props.match.params.id);
+        this.retrieveComponentRefs();
+        this.retrieveUserRefs();
     }
 
     componentWillReceiveProps(nextProps) {
@@ -179,6 +198,11 @@ class WorkApp extends React.Component {
                                 <li>Components involved</li>
                                 <li>Commit logs</li>
                                 <li>etc...</li>
+
+                                <Autocomplete suggestions={this.state.components}
+                                              idProperty="id" labelProperty="label" />
+                                <Autocomplete suggestions={this.state.users}
+                                              idProperty="id" labelProperty="shortName" />
                             </div>
                         }
                     </div>
