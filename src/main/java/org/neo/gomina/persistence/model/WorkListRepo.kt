@@ -60,7 +60,7 @@ class RedisWorkList : WorkList {
             jedis.hmset("work:$id", listOfNotNull(
                     "label" to (label ?: defaultLabel(id)),
                     "type" to type,
-                    jira.let { "jira" to it },
+                    jira?.let { "jira" to it },
                     people.let { "people" to it.toStr() },
                     components.let { "components" to it.toStr() }
             ).toMap())
@@ -73,7 +73,7 @@ class RedisWorkList : WorkList {
             jedis.hmset("work:$workId", listOfNotNull(
                     "label" to (label ?: defaultLabel(workId)),
                     "type" to type,
-                    jira.let { "jira" to it },
+                    jira?.let { "jira" to it },
                     people.let { "people" to it.toStr() },
                     components.let { "components" to it.toStr() }
             ).toMap())

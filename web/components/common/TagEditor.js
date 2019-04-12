@@ -57,11 +57,15 @@ class TagEditor extends React.Component<Props, State> {
         return this.state.selected === value
     }
     onNewTag() {
-        console.info("New tag");
+        //console.info("New tag");
         this.setState({additionMode: true});
     }
+    onNewTagChanged(e: T) {
+        this.setState({newTag: e});
+        e && this.onAddTag();
+    }
     onAddTag() {
-        console.info("Add tag", this.state.newTag);
+        //console.info("Add tag", this.state.newTag);
         this.props.onTagAdd && this.state.newTag && this.props.onTagAdd(this.state.newTag)
     }
     onCancelAddTag() {
@@ -69,7 +73,7 @@ class TagEditor extends React.Component<Props, State> {
         this.setState({additionMode: false});
     }
     onDeleteTag(value: string) {
-        console.info("Delete tag", value);
+        //console.info("Delete tag", value);
         this.props.onTagDelete && this.props.onTagDelete(value)
     }
     componentDidUpdate(prevProps: Props, prevState: State) {
@@ -95,7 +99,7 @@ class TagEditor extends React.Component<Props, State> {
                 <Autocomplete suggestions={this.props.suggestions}
                               idProperty={this.props.idProperty}
                               labelProperty={this.props.labelProperty}
-                              onChange={e => {this.setState({newTag: e}); this.onAddTag(); }} />
+                              onChange={e => this.onNewTagChanged(e)} />
             )
         }
         else {

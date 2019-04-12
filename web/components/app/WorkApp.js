@@ -145,7 +145,7 @@ class WorkApp extends React.Component {
     render()  {
         const workList = this.state.workList || [];
         const workDetail = this.state.workDetail;
-        console.info("workDetail", workDetail);
+        //console.info("workDetail", workDetail);
         return (
             <AppLayout title="Work List">
                 <PrimarySecondaryLayout>

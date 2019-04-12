@@ -53,10 +53,12 @@ class WorkEditor extends React.Component<Props, State> {
         this.notifyChange({jira: val});
     }
     addPeople(val: UserRefType) {
-        const newVal = [...this.state.people];
-        newVal.push(val);
-        this.setState({people: newVal});
-        this.notifyChange({people: newVal.map(p => p.id)});
+        if (!this.state.people.find(p => p.id === val.id)) {
+            const newVal = [...this.state.people];
+            newVal.push(val);
+            this.setState({people: newVal});
+            this.notifyChange({people: newVal.map(p => p.id)});
+        }
     }
     deletePeople(val: UserRefType) {
         const newVal = [...this.state.people].filter(i => i !== val);
@@ -64,10 +66,12 @@ class WorkEditor extends React.Component<Props, State> {
         this.notifyChange({people: newVal.map(p => p.id)});
     }
     addComponent(val: ComponentRefType) {
-        const newVal = [...this.state.components];
-        newVal.push(val);
-        this.setState({components: newVal});
-        this.notifyChange({components: newVal.map(c => c.id)});
+        if (!this.state.components.find(c => c.id === val.id)) {
+            const newVal = [...this.state.components];
+            newVal.push(val);
+            this.setState({components: newVal});
+            this.notifyChange({components: newVal.map(c => c.id)});
+        }
     }
     deleteComponent(val: ComponentRefType) {
         const newVal = [...this.state.components].filter(i => i !== val);
