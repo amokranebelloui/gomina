@@ -5,6 +5,8 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.api.common.UserRef
+import org.neo.gomina.model.user.User
 import org.neo.gomina.model.user.Users
 import javax.inject.Inject
 
@@ -35,21 +37,28 @@ class UsersApi {
         this.router = Router.router(vertx)
 
         router.get("/").handler(this::users)
+        router.get("/refs").handler(this::usersRefs)
         router.get("/:userId").handler(this::user)
     }
 
     private fun users(ctx: RoutingContext) {
         try {
             logger.info("Users")
-            val hosts = users.getUsers().map {
-                UserDetail(
-                        id = it.id,
-                        login = it.login,
-                        firstName = it.firstName,
-                        lastName = it.lastName,
-                        disabled = it.disabled
-                )
-            }
+            val hosts = users.getUsers().map { it.toUserDetail() }
+            ctx.response()
+                    .putHeader("content-type", "text/javascript")
+                    .end(mapper.writeValueAsString(hosts))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get users", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun usersRefs(ctx: RoutingContext) {
+        try {
+            logger.info("Users")
+            val hosts = users.getUsers().map { UserRef(it.id, it.shortName ?: it.id) }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(hosts))
@@ -64,15 +73,7 @@ class UsersApi {
         try {
             val userId = ctx.request().getParam("userId")
             logger.info("User '$userId' details")
-            val user = users.getUser(userId)?.let {
-                UserDetail(
-                        id = it.id,
-                        login = it.login,
-                        firstName = it.firstName,
-                        lastName = it.lastName,
-                        disabled = it.disabled
-                )
-            }
+            val user = users.getUser(userId)?.let { it.toUserDetail() }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(user))
@@ -83,4 +84,14 @@ class UsersApi {
         }
     }
 
+}
+
+fun User.toUserDetail(): UserDetail {
+    return UserDetail(
+            id = this.id,
+            login = this.login,
+            firstName = this.firstName,
+            lastName = this.lastName,
+            disabled = this.disabled
+    )
 }
