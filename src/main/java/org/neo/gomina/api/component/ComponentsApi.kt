@@ -195,7 +195,7 @@ class ComponentsApi {
 
     private fun componentsRefs(ctx: RoutingContext) {
         try {
-            val components = this.componentRepo.getAll().mapNotNull { ComponentRef(it.id, it.label) }
+            val components = this.componentRepo.getAll().mapNotNull { it.toComponentRef() }
             ctx.response().putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(components))
         } catch (e: Exception) {
@@ -713,3 +713,4 @@ fun ExtInstance.toRef() = InstanceRefDetail(
         deployed = this.instance?.let { it.deployedVersion?.toVersionDetail() }
 )
 
+fun Component.toComponentRef() = ComponentRef(this.id, this.label)

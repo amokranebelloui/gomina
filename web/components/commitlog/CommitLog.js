@@ -8,11 +8,7 @@ import {Badge} from "../common/Badge";
 import './CommitLog.css'
 import {DateTime} from "../common/DateTime";
 import {Revision} from "./Revision";
-
-type UserRefType = {
-    id?: ?string,
-    shortName: ?string,
-}
+import type {UserRefType} from "../misc/UserType";
 
 type CommitType = {
     author?: ?UserRefType,

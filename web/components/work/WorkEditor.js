@@ -2,13 +2,23 @@
 import * as React from "react"
 import {TagEditor} from "../common/TagEditor";
 import type {WorkDataType, WorkType} from "./WorkType";
+import type {UserRefType} from "../misc/UserType";
+import type {ComponentRefType} from "../component/ComponentType";
 
 type Props = {
     work?: WorkType,
+    peopleRefs: Array<UserRefType>,
+    componentsRefs: Array<ComponentRefType>,
     onChange?: (workId?: string, data: WorkDataType) => void
 }
 
-type State = WorkDataType
+type State = {
+    label: ?string,
+    type: ?string,
+    jira: ?string,
+    people: Array<UserRefType>,
+    components: Array<ComponentRefType>
+}
 
 /*
 label: ?string,
@@ -42,36 +52,36 @@ class WorkEditor extends React.Component<Props, State> {
         this.setState({jira: val});
         this.notifyChange({jira: val});
     }
-    addPeople(val: string) {
+    addPeople(val: UserRefType) {
         const newVal = [...this.state.people];
         newVal.push(val);
         this.setState({people: newVal});
-        this.notifyChange({people: newVal});
+        this.notifyChange({people: newVal.map(p => p.id)});
     }
-    deletePeople(val: string) {
+    deletePeople(val: UserRefType) {
         const newVal = [...this.state.people].filter(i => i !== val);
         this.setState({people: newVal});
-        this.notifyChange({people: newVal});
+        this.notifyChange({people: newVal.map(p => p.id)});
     }
-    addComponent(val: string) {
+    addComponent(val: ComponentRefType) {
         const newVal = [...this.state.components];
         newVal.push(val);
         this.setState({components: newVal});
-        this.notifyChange({components: newVal});
+        this.notifyChange({components: newVal.map(c => c.id)});
     }
-    deleteComponent(val: string) {
+    deleteComponent(val: ComponentRefType) {
         const newVal = [...this.state.components].filter(i => i !== val);
         this.setState({components: newVal});
-        this.notifyChange({components: newVal});
+        this.notifyChange({components: newVal.map(c => c.id)});
     }
 
     notifyChange(delta: any) {
-        const fromState = {
+        const fromState: WorkDataType = {
             label: this.state.label,
             type: this.state.type,
             jira: this.state.jira,
-            people: this.state.people,
-            components: this.state.components
+            people: this.state.people.map(p => p.id),
+            components: this.state.components.map(c => c.id)
         };
         const data = Object.assign({}, fromState, delta);
         this.props.onChange && this.props.onChange(this.props.work && this.props.work.id, data)
@@ -95,10 +105,20 @@ class WorkEditor extends React.Component<Props, State> {
                        onChange={e => this.changeJira(e.target.value)} />
                 <br/>
                 <b>People </b>
-                <TagEditor tags={this.state.people} onTagAdd={p => this.addPeople(p)} onTagDelete={p => this.deletePeople(p)} />
+                <TagEditor tags={this.state.people}
+                           suggestions={this.props.peopleRefs}
+                           idProperty="id"
+                           labelProperty="shortName"
+                           onTagAdd={p => this.addPeople(p)}
+                           onTagDelete={p => this.deletePeople(p)} />
                 <br/>
                 <b>Components </b>
-                <TagEditor tags={this.state.components} onTagAdd={c => this.addComponent(c)} onTagDelete={c => this.deleteComponent(c)} />
+                <TagEditor tags={this.state.components}
+                           suggestions={this.props.componentsRefs}
+                           idProperty="id"
+                           labelProperty="label"
+                           onTagAdd={c => this.addComponent(c)}
+                           onTagDelete={c => this.deleteComponent(c)} />
                 <br/>
             </div>
         );

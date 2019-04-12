@@ -1,5 +1,7 @@
 // @flow
 import * as React from "react"
+import type {ComponentRefType} from "../component/ComponentType";
+import type {UserRefType} from "../misc/UserType";
 
 type WorkType = {
     id: string,
@@ -8,8 +10,8 @@ type WorkType = {
     jira: ?string,
     jiraUrl: ?string,
     status: string,
-    people: Array<string>,
-    components: Array<string>,
+    people: Array<UserRefType>,
+    components: Array<ComponentRefType>,
     archived: boolean
 }
 

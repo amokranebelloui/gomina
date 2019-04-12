@@ -10,8 +10,12 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.api.common.UserRef
+import org.neo.gomina.api.common.toRef
 import org.neo.gomina.api.component.CommitDetail
 import org.neo.gomina.api.component.CommitLogEnricher
+import org.neo.gomina.api.component.ComponentRef
+import org.neo.gomina.api.component.toComponentRef
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.runtime.Topology
@@ -23,8 +27,8 @@ import javax.inject.Inject
 data class WorkDetail(val id: String, val label: String, val type: String?,
               val jira: String?, val jiraUrl: String?,
               val status: String,
-              val people: List<String>, // TODO User Ref
-              val components: List<String> = emptyList(),
+              val people: List<UserRef>,
+              val components: List<ComponentRef> = emptyList(),
               val archived: Boolean
 )
 
@@ -92,7 +96,14 @@ class WorkApi {
     private fun workList(ctx: RoutingContext) {
         try {
             logger.info("Get Work List")
-            val workList = workList.getAll().map { it.map(jiraUrl) }
+            val userMap = users.getUsers().map { it.toRef() }.associateBy { it.id }
+            val componentMap = componentRepo.getAll().map { it.toComponentRef() }.associateBy { it.id }
+            val workList = workList.getAll().map {
+                it.toWorkDetail(jiraUrl,
+                        it.people.mapNotNull { userMap[it] },
+                        it.components.mapNotNull { componentMap[it] }
+                )
+            }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(workList))
@@ -161,6 +172,9 @@ class WorkApi {
         try {
             logger.info("Get Work Detail")
 
+            val userMap = users.getUsers().map { it.toRef() }.associateBy { it.id }
+            val componentMap = componentRepo.getAll().map { it.toComponentRef() }.associateBy { it.id }
+
             val work = workId?.let { workList.get(it) }
             val detail = work?.components
                     ?.mapNotNull { componentRepo.get(it) }
@@ -189,7 +203,10 @@ class WorkApi {
                         ComponentWorkDetail(component.id, commits)
                     }
                     ?: emptyList()
-            val workDetail = work?.map(jiraUrl)
+            val workDetail = work?.toWorkDetail(jiraUrl,
+                    work.people.mapNotNull { userMap[it] },
+                    work.components.mapNotNull { componentMap[it] }
+            )
             val manifest = WorkManifestDetail(workDetail, detail)
             ctx.response()
                     .putHeader("content-type", "text/javascript")
@@ -203,7 +220,7 @@ class WorkApi {
 
 }
 
-private fun Work.map(jiraUrl: String): WorkDetail {
+private fun Work.toWorkDetail(jiraUrl: String, people: List<UserRef>, components: List<ComponentRef>): WorkDetail {
     return WorkDetail(
             id = id,
             label = label,

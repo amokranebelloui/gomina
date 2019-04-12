@@ -3,23 +3,25 @@ import * as React from "react"
 import {Badge} from "./Badge";
 import {Autocomplete} from "./AutoComplete";
 
+type T = any
+
 type Props = {
-    tags?: ?Array<string>,
+    tags?: ?Array<T>,
     sortAlphabetically?: ?boolean, // true
 
-    suggestions?: Array<any>,
+    suggestions?: Array<T>,
     idProperty?: string,
     labelProperty?: string,
 
-    onTagAdd?: ?(string => void),
-    onTagDelete?: ?(string => void)
+    onTagAdd?: ?(T => void),
+    onTagDelete?: ?(T => void)
 }
 type State = {
     editionMode: boolean,
     additionMode: boolean,
     selected?: ?string,
     timeoutId?: ?TimeoutID,
-    newTag?: ?string
+    newTag?: ?T
 }
 
 class TagEditor extends React.Component<Props, State> {
@@ -75,10 +77,16 @@ class TagEditor extends React.Component<Props, State> {
         //$FlowFixMe
         this.textInput.current && this.textInput.current.focus();
     }
+    id(suggestion: T) {
+        return this.props.idProperty && suggestion ? suggestion[this.props.idProperty] : suggestion;
+    }
+    label(suggestion: T) {
+        return this.props.labelProperty && suggestion ? suggestion[this.props.labelProperty] : suggestion;
+    }
     render() {
         let tags = this.props.tags || [];
         if (this.props.sortAlphabetically || true) {
-            tags = tags.sort((i1, i2) => i2 > i1 ? -1 : 1);
+            tags = tags.sort((i1, i2) => this.label(i2) > this.label(i1) ? -1 : 1);
         }
 
         let editor;
@@ -108,8 +116,8 @@ class TagEditor extends React.Component<Props, State> {
                  onMouseLeave={() => this.onLeave()}>
                 {tags.map(t =>
                     <span onMouseEnter={() => this.onSelected(t)}>
-                    <Badge key={t} value={t}>
-                        {t}
+                    <Badge key={this.id(t)} value={this.label(t)}>
+                        {this.label(t)}
                         {this.isSelected(t) &&
                             <input type="button" value="-"
                                    style={{borderRadius: 20, marginLeft: 1, paddingLeft: 2, paddingRight: 2}}

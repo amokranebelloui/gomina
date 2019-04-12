@@ -176,7 +176,10 @@ class WorkApp extends React.Component {
                                         }
                                         {this.state.workEdition &&
                                             <div>
-                                                <WorkEditor key={workDetail.work.id} work={workDetail.work}
+                                                <WorkEditor key={workDetail.work.id}
+                                                            work={workDetail.work}
+                                                            peopleRefs={this.state.users}
+                                                            componentsRefs={this.state.components}
                                                             onChange={(id, w) => this.changeWork(w)} />
                                                 <hr/>
                                                 <button onClick={() => this.updateWork()}>Update</button>
@@ -218,7 +221,10 @@ class WorkApp extends React.Component {
                                            onEnterAdd={() => this.clearNewWorkState()}
                                            onItemAdded={(work) => this.onWorkAdded(work, history)}
                                            editionForm={() =>
-                                               <WorkEditor work={{}} onChange={(id, w) => this.setState({newWorkData: w})} />
+                                               <WorkEditor work={{}}
+                                                           peopleRefs={this.state.users}
+                                                           componentsRefs={this.state.components}
+                                                           onChange={(id, w) => this.setState({newWorkData: w})} />
                                            }
                                            successDisplay={(data: any) =>
                                                <div>
@@ -255,12 +261,12 @@ class WorkApp extends React.Component {
                                     <td>{work.status}</td>
                                     <td>
                                         {work.components.map(p =>
-                                            <span><Link to={"/component/" + p}>{p}</Link> </span>
+                                            <span><Link to={"/component/" + p.id}>{p.label}</Link> </span>
                                         )}
                                     </td>
                                     <td>
                                         {work.people.map(p =>
-                                            <span><Link to={"/user/" + p}>{p}</Link> </span>
+                                            <span><Link to={"/user/" + p.id}>{p.shortName}</Link> </span>
                                         )}
                                     </td>
                                 </tr>
@@ -291,14 +297,14 @@ function Work(props) {
             <div>
                 {work.people.map(p =>
                     <span style={{color: 'blue'}}>
-                        <Link to={"/user/" + p}>{p} </Link>
+                        <Link to={"/user/" + p.id}>{p.shortName} </Link>
                     </span>
                 )}
             </div>
             <hr/>
             <div>
-                {work.components.map(p =>
-                    <span style={{color: 'blue'}}>{p} </span>
+                {work.components.map(c =>
+                    <span style={{color: 'blue'}}>{c.label} </span>
                 )}
             </div>
         </div>
