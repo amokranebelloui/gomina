@@ -1,11 +1,16 @@
 // @flow
 import * as React from "react"
 import {Badge} from "./Badge";
-import {uniqCount} from "./utils";
+import {Autocomplete} from "./AutoComplete";
 
 type Props = {
     tags?: ?Array<string>,
     sortAlphabetically?: ?boolean, // true
+
+    suggestions?: Array<any>,
+    idProperty?: string,
+    labelProperty?: string,
+
     onTagAdd?: ?(string => void),
     onTagDelete?: ?(string => void)
 }
@@ -76,6 +81,27 @@ class TagEditor extends React.Component<Props, State> {
             tags = tags.sort((i1, i2) => i2 > i1 ? -1 : 1);
         }
 
+        let editor;
+        if (this.props.suggestions) {
+            editor = (
+                <Autocomplete suggestions={this.props.suggestions}
+                              idProperty={this.props.idProperty}
+                              labelProperty={this.props.labelProperty}
+                              onChange={e => {this.setState({newTag: e}); this.onAddTag(); }} />
+            )
+        }
+        else {
+            editor = (
+                <input type="text" name="tag" placeholder="tag"
+                    //$FlowFixMe
+                       ref={this.textInput}
+                       onChange={e => this.setState({newTag: e.target.value})}
+                       onKeyPress={e => e.key === 'Enter' && this.onAddTag()}
+                       onKeyDown={e => e.key === 'Escape' && this.onCancelAddTag()}
+                />
+            );
+        }
+
         return (
             <div style={{display: 'inline-block'}}
                  onMouseEnter={() => this.onEnter()}
@@ -100,13 +126,7 @@ class TagEditor extends React.Component<Props, State> {
                         />
                     }
                     {this.state.additionMode &&
-                        <input type="text" name="tag" placeholder="tag"
-                               //$FlowFixMe
-                               ref={this.textInput}
-                               onChange={e => this.setState({newTag: e.target.value})}
-                               onKeyPress={e => e.key === 'Enter' && this.onAddTag()}
-                               onKeyDown={e => e.key === 'Escape' && this.onCancelAddTag()}
-                        />
+                        editor
                     }
                 </Badge>
             </div>

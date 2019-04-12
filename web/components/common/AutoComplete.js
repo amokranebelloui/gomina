@@ -1,6 +1,6 @@
 // @flow
 import React, {Fragment} from "react";
-import "./Autocomplete.css"
+import "./AutoComplete.css"
 
 type T = any
 
@@ -131,12 +131,16 @@ class Autocomplete extends React.Component<Props, State> {
         // <span>{JSON.stringify(this.state.selectedItem)}</span>
         return (
             <Fragment>
-                <input type="text"
-                       className={this.state.userInput && !this.state.selectedItem ? "suggestion-unknown-item" : null}
-                       onChange={e => this.onChange(e)}
-                       onKeyDown={e => this.onKeyDown(e)}
-                       value={this.state.userInput} />
-                {suggestionsListComponent}
+                <div style={{position: 'relative'}}>
+                    <input type="text"
+                           className={this.state.userInput && !this.state.selectedItem ? "suggestion-unknown-item" : null}
+                           onChange={e => this.onChange(e)}
+                           onKeyDown={e => this.onKeyDown(e)}
+                           value={this.state.userInput} />
+                    <div style={{position: 'absolute', zIndex: 5}}>
+                        {suggestionsListComponent}
+                    </div>
+                </div>
             </Fragment>
         );
     }

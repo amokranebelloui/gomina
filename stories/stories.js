@@ -73,18 +73,6 @@ storiesOf('Components', module)
             <Badge title='Kotlin' value='kotlin' onSelected={action('selected')}>Kotlin</Badge>
         ]
     )
-    .add('Tags', () => {
-        const tags = [{value: "java", count: 13}, {value: ".net", count: 8}];
-        return <Tags tags={tags} />
-    })
-    .add('TagCloud', () => {
-        const tags = ["java", ".net", "java", "java", "kotlin", "javascript", "java"];
-        return <TagCloud tags={tags} displayCount={true} selectionChanged={action("selectionChanged")} />
-    })
-    .add('TagEditor', () => {
-        const tags = ["java", ".net", "kotlin", "javascript"];
-        return <TagEditor tags={tags} displayCount={true} selectionChanged={action("selectionChanged")} />
-    })
     .add('EditableLabel', () => {
         return (
             <EditableLabel label="Some Label" style={{fontSize: 30}} />
@@ -112,6 +100,23 @@ storiesOf('Components', module)
                 ]} idProperty="id" labelProperty="name" onChange={action('language change {}')} />
             </div>
         )
+    })
+    .add('Tags', () => {
+        const tags = [{value: "java", count: 13}, {value: ".net", count: 8}];
+        return <Tags tags={tags} />
+    })
+    .add('TagCloud', () => {
+        const tags = ["java", ".net", "java", "java", "kotlin", "javascript", "java"];
+        return <TagCloud tags={tags} displayCount={true} selectionChanged={action("selectionChanged")} />
+    })
+    .add('TagEditor', () => {
+        const tags = ["java", ".net", "kotlin", "javascript"];
+        return <TagEditor tags={tags} displayCount={true} onTagAdd={action("tag add")} onTagDelete={action("tag del")} />
+    })
+    .add('Autocomplete TagEditor', () => {
+        const tags = ["java", ".net", "kotlin", "javascript"];
+        const suggestions = ["java", ".net", "kotlin", "javascript", "c#", "c++", "rust", "scala", "clojure", "erlang", "haskell"];
+        return <TagEditor suggestions={suggestions} tags={tags} displayCount={true} onTagAdd={action("tag add")} onTagDelete={action("tag del")} />
     })
 
     .add('ScmEditor', () => {
