@@ -78,11 +78,17 @@ class EnvironmentLogical extends React.Component<Props, State> {
                     const status = computeStatus(svc.service, svc.instances);
 
                     const highlightFunction = this.props.highlight || (instance => true);
-                    var serviceHighlighted = false;
-                    {svc.instances.map(instance =>
-                        serviceHighlighted = serviceHighlighted || highlightFunction(instance)
-                    )}
-                    const opacity = serviceHighlighted ? 1 : 0.1;
+                    let serviceHighlighted;
+                    if (svc.instances && svc.instances.length > 0) {
+                        serviceHighlighted = false;
+                        {svc.instances.map(instance =>
+                            serviceHighlighted = serviceHighlighted || highlightFunction(instance)
+                        )}
+                    }
+                    else if (!this.props.highlight) {
+                        serviceHighlighted = true
+                    }
+                    const opacity = serviceHighlighted ? 1 : 0.2;
 
                     const service = (
                         <tr key={'service' + svc.service.svc} className='env-row' style={{opacity: opacity}}>
@@ -97,9 +103,10 @@ class EnvironmentLogical extends React.Component<Props, State> {
                     let instances = [];
                     if (this.isOpen(svc.service.svc)) {
                         instances = sortInstances(svc.instances || []).map(instance => {
-                            const highlighted = this.props.highlight != null && this.props.highlight(instance);
+                            const highlightFunction = this.props.highlight || (instance => true);
+                            const highlighted = highlightFunction(instance);
                             return (
-                                <tr key={instance.id} className='env-row instance' style={{opacity: (highlighted) ? 1 : 0.06}}>
+                                <tr key={instance.id} className='env-row instance' style={{opacity: (highlighted) ? 1 : 0.1}}>
                                     <td key={'space' + instance.id} style={{display: 'table-cell', minWidth: '30px'}}></td>
                                     <Route render={({ history}) => (
                                         <Status key={'status' + instance.id} status={instance.status} leader={instance.leader}

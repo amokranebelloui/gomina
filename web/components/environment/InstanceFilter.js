@@ -4,14 +4,16 @@ import {isSnapshot} from "../common/version-utils";
 import {Well} from "../common/Well";
 import type {InstanceType} from "./Instance"
 
+type HighlightFunctionType = (instance: InstanceType) => boolean;
+
 type InstanceFilterProps = {
     id: ?string,
     hosts: Array<string>,
-    onFilterChanged: (id: string, (instance: InstanceType) => boolean) => void
+    onFilterChanged: (id: string, ?HighlightFunctionType) => void
 }
 class InstanceFilter extends React.Component<InstanceFilterProps> {
 
-    changeSelected(id: string, highlightFunction: (instance: InstanceType) => boolean) {
+    changeSelected(id: string, highlightFunction: ?HighlightFunctionType) {
         console.log('filter change:', id, highlightFunction);
         //this.setState({id: id, highlight: highlightFunction});
         this.props.onFilterChanged && this.props.onFilterChanged(id, highlightFunction);
@@ -22,7 +24,7 @@ class InstanceFilter extends React.Component<InstanceFilterProps> {
             <Well block>
                 <h4>Filters</h4>
                 <Selection id='all' label='ALL' selected={this.props.id}
-                           onSelectionChanged={e => this.changeSelected('all', instance => true)}/>
+                           onSelectionChanged={e => this.changeSelected('all', null)}/>
                 <br/>
 
                 <div style={{display: 'inline-block'}}>

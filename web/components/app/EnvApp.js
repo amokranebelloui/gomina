@@ -37,7 +37,7 @@ class EnvApp extends React.Component {
             group: "SERVICES",
             services: [],
             filterId: 'all',
-            highlight: () => true,
+            highlight: null,
 
             envEdition: false,
             envEdited: null,

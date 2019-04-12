@@ -40,16 +40,14 @@ class Service extends React.Component<Props> {
     render() {
         const service = this.props.service;
         const instances = this.props.instances ? sortInstances(this.props.instances) : [];
-        const componentSet = new Set(instances.map(instance => instance.componentId).filter(p => p != null));
-        const components = [...componentSet];
         //const status = computeStatus(service, instances);
         const d = computeServiceDetails(service, instances);
         return ([
             <td key={'detail' + service.svc} className="service" valign="middle">
                 <span>
                     <b style={{fontSize: '16px'}}>{service.svc}</b>&nbsp;
-                    {service.componentId &&
-                        <Link to={'/component/' + service.componentId}>
+                    {service.component &&
+                        <Link to={'/component/' + service.component.id}>
                             <span>&rarr;</span>
                         </Link>
                     }
@@ -59,9 +57,9 @@ class Service extends React.Component<Props> {
                 <Badge backgroundColor="">{instances.length}</Badge>
                 <span>{service.mode}</span>
                 <span>|{service.systems}|</span>
-                {components.map(component =>
-                    <BuildLink key={component} url={'navigate/' + (component||'')}/>
-                )}
+                {service.component &&
+                    <BuildLink key={service.component.id} url={'navigate2/' + (service.component.id)}/>
+                }
                 {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge>}
                 {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
                 {d.configs && <Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge>}
