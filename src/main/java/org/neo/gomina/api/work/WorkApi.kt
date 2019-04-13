@@ -231,12 +231,11 @@ class WorkApi {
 }
 
 private fun Work.toWorkDetail(issueTrackerUrl: String, people: List<UserRef>, components: List<ComponentRef>): WorkDetail {
-    val url = if (issueTrackerUrl.isNotBlank()) issueTrackerUrl else null
     return WorkDetail(
             id = id,
             label = label,
             type = type,
-            issues = issues.map { issue -> IssueRef(issue, url?.let { "$it/$issue" }) },
+            issues = issues.map { it.toIssueRef(issueTrackerUrl) },
             status = status.toString(),
             people = people,
             components = components,
@@ -244,4 +243,9 @@ private fun Work.toWorkDetail(issueTrackerUrl: String, people: List<UserRef>, co
             dueDate = dueDate?.toString,
             archived = archived
     )
+}
+
+fun String.toIssueRef(issueTrackerUrl: String): IssueRef {
+    val url = if (issueTrackerUrl.isNotBlank()) issueTrackerUrl else null
+    return IssueRef(this, url?.let { "$it/$this" })
 }

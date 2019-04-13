@@ -17,6 +17,7 @@ import {filterWork, WorkFilter} from "../work/WorkFilter";
 import type {ComponentRefType} from "../component/ComponentType";
 import type {UserRefType} from "../misc/UserType";
 import type {WorkDataType, WorkManifestType, WorkType} from "../work/WorkType";
+import {Issue} from "../misc/Issue";
 
 type Props = {
     match: any
@@ -291,9 +292,8 @@ class WorkApp extends React.Component<Props, State> {
                                     </td>
                                     <td>{work.type}</td>
                                     <td>
-                                        {work.issues.map(issue => issue.issueUrl
-                                            ? (<a href={issue.issueUrl} target="_blank">{issue.issue}</a>)
-                                            : (issue.issue)
+                                        {work.issues.map(issue =>
+                                            <Issue issue={issue} />
                                         )}
                                     </td>
                                     <td>{work.status}</td>

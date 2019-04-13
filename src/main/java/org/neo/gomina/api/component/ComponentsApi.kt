@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.common.UserRef
 import org.neo.gomina.api.instances.VersionDetail
 import org.neo.gomina.api.instances.toVersionDetail
+import org.neo.gomina.api.work.IssueRef
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.sonar.SonarService
@@ -88,6 +89,7 @@ data class CommitDetail(
         var message: String? = null,
 
         var version: String? = null,
+        var issues: List<IssueRef> = emptyList(),
 
         val instances: List<InstanceRefDetail> = emptyList(),
         val deployments: List<InstanceRefDetail> = emptyList())

@@ -12,7 +12,8 @@ data class Commit (
     val message: String? = null,
 
     var release: String? = null, // new version: if the commit is a prepare release version change
-    var newVersion: String? = null // version: if the commit is a release
+    var newVersion: String? = null, // version: if the commit is a release
+    var issues: List<String> = emptyList() // issue tracking system id
 ) {
     fun match(version: Version): Boolean {
         return this.release == version.version && this.revision == version.revision ||

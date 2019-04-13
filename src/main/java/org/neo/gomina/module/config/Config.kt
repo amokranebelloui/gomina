@@ -35,6 +35,7 @@ data class Config (
         val usersFile: String?,
         var domains: List<String> = emptyList(),
         val jiraUrl: String = "",
+        val jiraProjects: List<String> = emptyList(),
         var database: DatabaseConfig = DatabaseConfig(),
         var inventory: InventoryConfig = InventoryConfig(),
         var work: WorkConfig = WorkConfig(),

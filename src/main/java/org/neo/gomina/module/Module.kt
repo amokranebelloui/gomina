@@ -24,6 +24,7 @@ import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
 import org.neo.gomina.integration.scm.ScmService
+import org.neo.gomina.integration.scm.impl.CommitDecorator
 import org.neo.gomina.integration.scm.impl.ScmReposImpl
 import org.neo.gomina.integration.sonar.SonarConfig
 import org.neo.gomina.integration.sonar.SonarConnectors
@@ -99,6 +100,7 @@ class GominaModule : AbstractModule() {
 
         // JIRA
         bind(String::class.java).annotatedWith(named("jira.url")).toInstance(config.jiraUrl)
+        bind(typeLiteral<List<@JvmSuppressWildcards String>>()).annotatedWith(named("jira.projects")).toInstance(config.jiraProjects)
 
         // Monitoring
         bind(Int::class.java).annotatedWith(named("monitoring.timeout")).toInstance(config.monitoring.timeout)
@@ -106,6 +108,7 @@ class GominaModule : AbstractModule() {
         bind(ZmqMonitorThreadPool::class.java).`in`(Scopes.SINGLETON)
 
         // SCM
+        bind(CommitDecorator::class.java).`in`(Scopes.SINGLETON)
         bind(ScmReposImpl::class.java).`in`(Scopes.SINGLETON)
         bind(ScmService::class.java).`in`(Scopes.SINGLETON)
         bind(ScmRepos::class.java).to(ScmService::class.java).`in`(Scopes.SINGLETON)

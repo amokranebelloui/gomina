@@ -17,7 +17,7 @@ class ComponentsApp extends React.Component {
     constructor(props) {
         super(props);
         const filter = {
-            search: this.split(ls.get('components.search')),
+            search: ls.get('components.search'),
             types: this.split(ls.get('components.types')),
             systems: this.split(ls.get('components.systems')),
             languages: this.split(ls.get('components.languages')),
@@ -35,7 +35,13 @@ class ComponentsApp extends React.Component {
     }
 
     split(tags) {
-        return tags && tags.split(',') || [];
+        try {
+            return tags && tags.split(',') || [];
+        }
+        catch (e) {
+            console.error("Error splitting", tags, typeof tags);
+            return []
+        }
     }
 
     /*

@@ -1,13 +1,17 @@
 package org.neo.gomina.api.component
 
+import com.google.inject.name.Named
 import org.neo.gomina.api.common.UserRef
 import org.neo.gomina.api.common.toRef
+import org.neo.gomina.api.work.toIssueRef
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.user.Users
 import javax.inject.Inject
 
 class CommitLogEnricher {
+
+    @Inject @Named("jira.url") lateinit var issueTrackerUrl: String
 
     @Inject private lateinit var users: Users
 
@@ -36,6 +40,7 @@ class CommitLogEnricher {
                             author = commit.author?.let { users.findForAccount(it) }?.toRef() ?: commit.author?.let { UserRef(shortName = commit.author) },
                             message = commit.message,
                             version = commit.release ?: commit.newVersion,
+                            issues = commit.issues.map { it.toIssueRef(issueTrackerUrl) },
                             instances = running.map { it.toRef() },
                             deployments = deployed.map { it.toRef() }
                     )

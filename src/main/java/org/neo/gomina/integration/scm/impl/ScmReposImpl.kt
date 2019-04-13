@@ -8,7 +8,6 @@ import org.neo.gomina.integration.scm.git.GitClient
 import org.neo.gomina.integration.scm.metadata.ProjectMetadataMapper
 import org.neo.gomina.integration.scm.none.NoneScmClient
 import org.neo.gomina.integration.scm.svn.TmateSoftSvnClient
-import org.neo.gomina.integration.scm.versions.MavenReleaseFlagger
 import org.neo.gomina.model.component.Scm
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
@@ -27,6 +26,8 @@ class ScmReposImpl : ScmRepos {
     companion object {
         private val logger = LogManager.getLogger(ScmReposImpl::class.java)
     }
+
+    @Inject lateinit var commitDecorator: CommitDecorator
 
     private val clients = HashMap<String, ScmClient>()
 
@@ -48,9 +49,8 @@ class ScmReposImpl : ScmRepos {
     override fun getScmDetails(scm: Scm): ScmDetails {
         return if (scm.url.isNotBlank()) {
             val scmClient = this.getClient(scm)
-            val mavenReleaseFlagger = MavenReleaseFlagger(scmClient) // FIXME Detect build system
             val trunk = scmClient.getTrunk()
-            val log = scmClient.getLog(trunk, "0", 100).map { mavenReleaseFlagger.flag(it) }
+            val log = scmClient.getLog(trunk, "0", 100).map { commitDecorator.flag(it, scmClient) }
             computeScmDetails(scm, log, scmClient)
         }
         else ScmDetails()
@@ -107,16 +107,14 @@ class ScmReposImpl : ScmRepos {
 
     override fun getTrunk(scm: Scm): List<Commit> {
         val scmClient = this.getClient(scm)
-        val mavenReleaseFlagger = MavenReleaseFlagger(scmClient) // FIXME Detect build system
         return scmClient.getLog(scmClient.getTrunk(), "0", -1)
-                .map { mavenReleaseFlagger.flag(it) }
+                .map { commitDecorator.flag(it, scmClient) }
     }
 
     override fun getBranch(scm: Scm, branchId: String): List<Commit> {
         val scmClient = this.getClient(scm)
-        val mavenReleaseFlagger = MavenReleaseFlagger(scmClient) // FIXME Detect build system
         return scmClient.getLog(branchId, "0", -1)
-                .map { mavenReleaseFlagger.flag(it) }
+                .map { commitDecorator.flag(it, scmClient) }
     }
 
     override fun getDocument(scm: Scm, docId: String): String? {

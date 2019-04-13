@@ -9,6 +9,8 @@ import './CommitLog.css'
 import {DateTime} from "../common/DateTime";
 import {Revision} from "./Revision";
 import type {UserRefType} from "../misc/UserType";
+import type {IssueRefType} from "../work/WorkType";
+import {Issue} from "../misc/Issue";
 
 type CommitType = {
     author?: ?UserRefType,
@@ -16,6 +18,7 @@ type CommitType = {
     message?: ?string,
     version?: ?string,
     revision?: ?number,
+    issues?: Array<IssueRefType>,
     instances?: Array<InstanceRefType>,
     deployments?: Array<InstanceRefType>
 }
@@ -81,6 +84,9 @@ class CommitLog extends React.Component<Props> {
                                         )}
                                         {(commit.deployments||[]).map(instance =>
                                             <Badge key={instance.id} backgroundColor="#EEEEAA">{instance.env} {instance.name} <VersionLabel version={instance.deployed} /></Badge>
+                                        )}
+                                        {(commit.issues||[]).map(issue =>
+                                            <Badge key={issue.issue} backgroundColor="#c1e2ff"><Issue issue={issue} /></Badge>
                                         )}
 
                                     </span>
