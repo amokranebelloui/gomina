@@ -1,30 +1,33 @@
 import React from "react";
 import ls from "local-storage"
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
-import {LoggedUserContext, Secure} from "../permission/Secure"
+import {Secure} from "../permission/Secure"
 import {ComponentHeader, ComponentSummary} from "../component/Component";
 import axios from "axios/index";
 import {Container} from "../common/Container";
-import {TagCloud} from "../common/TagCloud";
 import {Well} from "../common/Well";
 import {flatMap} from "../common/utils";
 import {ComponentSort, sortComponentsBy} from "../component/ComponentSort";
 import {extendSystems} from "../system/system-utils";
 import {AddComponent} from "../component/AddComponent";
+import {ComponentFilter, filterComponents} from "../component/ComponentFilter";
 
 class ComponentsApp extends React.Component {
 
     constructor(props) {
         super(props);
+        const filter = {
+            search: this.split(ls.get('components.search')),
+            types: this.split(ls.get('components.types')),
+            systems: this.split(ls.get('components.systems')),
+            languages: this.split(ls.get('components.languages')),
+            tags: this.split(ls.get('components.tags'))
+        };
         this.state = {
             components: [],
             sortBy: ls.get('components.sort') || 'alphabetical',
 
-            search: this.split(ls.get('components.search')),
-            selectedTypes: this.split(ls.get('components.types')),
-            selectedSystems: this.split(ls.get('components.systems')),
-            selectedLanguages: this.split(ls.get('components.languages')),
-            selectedTags: this.split(ls.get('components.tags'))
+            filter: filter
         };
         //this.retrieveSystems = this.retrieveSystems.bind(this);
         this.retrieveComponents = this.retrieveComponents.bind(this);
@@ -106,29 +109,15 @@ class ComponentsApp extends React.Component {
         ls.set('components.sort', sortBy)
     }
     selectedComponents(components) {
-        const selectedComponents = components
-            .filter(component => matchesSearch(component, this.state.search, this.state.selectedTypes, this.state.selectedSystems, this.state.selectedLanguages, this.state.selectedTags));
-        return selectedComponents;
+        return filterComponents(components, this.state.filter);
     }
-    setFilter(search) {
-        this.setState({search: search});
-        ls.set('components.search', search)
-    }
-    selectTypes(values) {
-        this.setState({selectedTypes: values});
-        ls.set('components.types', values.join(','))
-    }
-    selectSystems(values) {
-        this.setState({selectedSystems: values});
-        ls.set('components.systems', values.join(','))
-    }
-    selectLanguages(values) {
-        this.setState({selectedLanguages: values});
-        ls.set('components.languages', values.join(','))
-    }
-    selectTags(values) {
-        this.setState({selectedTags: values});
-        ls.set('components.tags', values.join(','))
+    setFilter(filter) {
+        this.setState({filter: filter});
+        ls.set('components.search', filter.search);
+        ls.set('components.types', filter.types.join(','));
+        ls.set('components.systems', filter.systems.join(','));
+        ls.set('components.languages', filter.languages.join(','));
+        ls.set('components.tags', filter.tags.join(','));
     }
     render() {
         const components = sortComponentsBy(this.state.components, this.state.sortBy);
@@ -152,26 +141,10 @@ class ComponentsApp extends React.Component {
                     </Container>
                     <div>
                         <Well block>
-                            Search:
-                            <input type="text" name="search" value={this.state.search} onChange={e => this.setFilter(e.target.value)}/>
-                            &nbsp;
-                            <br/>
-                            <b>Types:</b>
-                            <TagCloud tags={types} selected={this.state.selectedTypes} displayCount={true}
-                                      selectionChanged={values => this.selectTypes(values)} />
-                            <br/>
-                            <b>Systems:</b>
-                            <TagCloud tags={systems} selected={this.state.selectedSystems} displayCount={true}
-                                      selectionChanged={values => this.selectSystems(values)} />
-                            <br/>
-                            <b>Languages:</b>
-                            <TagCloud tags={languages} selected={this.state.selectedLanguages} displayCount={true}
-                                      selectionChanged={values => this.selectLanguages(values)} />
-                            <br/>
-                            <b>Tags:</b>
-                            <TagCloud tags={tags} selected={this.state.selectedTags} displayCount={true}
-                                      selectionChanged={values => this.selectTags(values)} />
-                            <br/>
+                            <ComponentFilter filter={this.state.filter}
+                                             onFilterChanged={(filter) => this.setFilter(filter)}
+                                             types={types} systems={systems} languages={languages} tags={tags}
+                             />
                         </Well>
                         <Well block>
                             <button onClick={e => this.retrieveComponents()}>RELOAD</button>
@@ -190,29 +163,6 @@ class ComponentsApp extends React.Component {
             </AppLayout>
         );
     }
-}
-
-
-function matchesSearch(component, search, types, systems, languages, tags) {
-    let label = (component.label || "");
-    let regExp = new RegExp(search, "i");
-    let matchesLabel = label.match(regExp);
-    let matchesTypes = matchesList([component.type], types);
-    let matchesSystems = matchesList(extendSystems(component.systems), systems);
-    let matchesLanguages = matchesList(component.languages, languages);
-    let matchesTags = matchesList(component.tags, tags);
-    //console.info("MATCH", component.id, matchesLabel, matchesSystems, matchesLanguages, matchesTags);
-    return matchesLabel && matchesTypes && matchesSystems && matchesLanguages && matchesTags
-    //(languages.filter(item => item.match(regExp))||[]).length > 0 ||
-    //(tags.filter(item => item.match(regExp))||[]).length > 0;
-    //return component.label && component.label.indexOf(this.state.search) !== -1;
-}
-function matchesList(componentValues, selectedValues) {
-    if (selectedValues && selectedValues.length > 0) {
-        const values = (componentValues||[]);
-        return (selectedValues||[]).find(value => values.indexOf(value) !== -1);
-    }
-    return true
 }
 
 export {ComponentsApp};
