@@ -10,6 +10,8 @@ import Route from "react-router-dom/es/Route";
 import {WorkEditor} from "../work/WorkEditor";
 import {Autocomplete} from "../common/AutoComplete";
 import {DateTime} from "../common/DateTime";
+import {sortWorkBy, WorkSort} from "../work/WorkSort";
+import ls from "local-storage";
 
 class WorkApp extends React.Component {
 
@@ -18,6 +20,7 @@ class WorkApp extends React.Component {
         this.state = {
             components: [],
             users: [],
+            sortBy: ls.get('work.list.sort') || 'due-date',
             workList: [],
             workDetail: [],
             workId: this.props.match.params.id,
@@ -42,6 +45,10 @@ class WorkApp extends React.Component {
             .catch(error => thisComponent.setState({users: []}));
     }
 
+    sortChanged(sortBy) {
+        this.setState({sortBy: sortBy});
+        ls.set('work.list.sort', sortBy)
+    }
     retrieveWorkList() {
         console.log("workApp Retr Hosts ... ");
         const thisComponent = this;
@@ -236,6 +243,7 @@ class WorkApp extends React.Component {
                             )} />
                         </Secure>
 
+                        <WorkSort sortBy={this.state.sortBy} onSortChanged={sortBy => this.sortChanged(sortBy)} />
                         <table width="100%">
                             <tbody>
                             <tr key="header">
@@ -248,7 +256,7 @@ class WorkApp extends React.Component {
                                 <td><b>created</b></td>
                                 <td><b>due</b></td>
                             </tr>
-                            {workList.map(work =>
+                            {sortWorkBy(workList, this.state.sortBy).map(work =>
                                 <tr key={work.id} style={{opacity: work.archived ? .5 : 1}}>
                                     <td>
                                         <Link to={"/work/" + work.id}>{work.label}</Link>
