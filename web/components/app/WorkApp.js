@@ -239,7 +239,6 @@ class WorkApp extends React.Component {
                         <table width="100%">
                             <tbody>
                             <tr key="header">
-                                <td><b>id</b></td>
                                 <td><b>label</b></td>
                                 <td><b>type</b></td>
                                 <td><b>jira</b></td>
@@ -252,9 +251,8 @@ class WorkApp extends React.Component {
                             {workList.map(work =>
                                 <tr key={work.id} style={{opacity: work.archived ? .5 : 1}}>
                                     <td>
-                                        <Link to={"/work/" + work.id}>{work.id}</Link>
+                                        <Link to={"/work/" + work.id}>{work.label}</Link>
                                     </td>
-                                    <td>{work.label}</td>
                                     <td>{work.type}</td>
                                     <td>
                                         {work.jiraUrl
@@ -300,22 +298,22 @@ function Work(props) {
                     <h3 style={{display: 'inline-block'}}>{work.label} {work.archived && "(Archived)"}</h3>
                 </Link>
             </div>
-            <div><i>&lt;{work.id}&gt;</i></div>
-            <div><i>&lt;{work.type}&gt;</i></div>
-            <div><i>&lt;{work.jira}&gt;</i></div>
-            <div><i>&lt;{work.status}&gt;</i></div>
-            <hr/>
+            <div><i>&lt;{work.type}&gt;</i><i>&lt;{work.status}&gt;</i></div>
+            <div><b>JIRAs </b><i>{work.jira}</i></div>
             <div>
+                <b>People </b>
                 {work.people.map(p =>
                     <span key={p.id} style={{color: 'blue'}}>
                         <Link to={"/user/" + p.id}>{p.shortName} </Link>
                     </span>
                 )}
             </div>
-            <hr/>
             <div>
+                <b>Components </b>
                 {work.components.map(c =>
-                    <span key={c.id} style={{color: 'blue'}}>{c.label} </span>
+                    <span key={c.id} style={{color: 'blue'}}>
+                        <Link to={"/component/" + c.id}>{c.label} </Link>
+                    </span>
                 )}
             </div>
             <div><b>Created </b><DateTime date={work.creationDate} /></div>
