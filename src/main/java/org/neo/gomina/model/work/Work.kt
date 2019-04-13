@@ -8,7 +8,7 @@ enum class WorkStatus {
     fun isOpen() = this != COMPLETED
 }
 
-data class Work(val id: String, val label: String, val type: String?, val jira: String?,
+data class Work(val id: String, val label: String, val type: String?, val issues: List<String>,
                 val status: WorkStatus = WorkStatus.OFF,
                 val people: List<String> = emptyList(),
                 val components: List<String> = emptyList(),
@@ -20,10 +20,10 @@ data class Work(val id: String, val label: String, val type: String?, val jira: 
 interface WorkList {
     fun getAll(): List<Work>
     fun get(workId: String): Work?
-    fun addWork(label: String?, type: String?, jira: String?,
+    fun addWork(label: String?, type: String?, issues: List<String>,
                 people: List<String>, components: List<String>,
                 dueDate: LocalDate?): String
-    fun updateWork(workId: String, label: String?, type: String?, jira: String?,
+    fun updateWork(workId: String, label: String?, type: String?, issues: List<String>,
                    people: List<String>, components: List<String>,
                    dueDate: LocalDate?)
     fun archiveWork(workId: String)

@@ -39,8 +39,8 @@ function filterWork(workList: Array<WorkType>, search: string) {
 function matchesSearch(work: WorkType, search: string) {
     let regExp = new RegExp(search, "i");
     let matchesLabel = work.label && work.label.match(regExp);
-    let matchesJira = work.jira && work.jira.match(regExp);
-    return matchesLabel || matchesJira
+    let matchesIssues = work.issues && work.issues.find(value => value && value.issue.match(regExp));
+    return matchesLabel || matchesIssues
 }
 
 export { WorkFilter, filterWork }

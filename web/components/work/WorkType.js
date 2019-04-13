@@ -3,12 +3,16 @@ import * as React from "react"
 import type {ComponentRefType} from "../component/ComponentType";
 import type {UserRefType} from "../misc/UserType";
 
+type IssueRefType = {
+    issue: string,
+    issueUrl?: ?string
+}
+
 type WorkType = {
     id: string,
     label: string,
     type: ?string,
-    jira: ?string,
-    jiraUrl: ?string,
+    issues: Array<IssueRefType>,
     status: string,
     people: Array<UserRefType>,
     components: Array<ComponentRefType>,
@@ -30,10 +34,10 @@ type ComponentWorkType = {
 type WorkDataType = {
     label: ?string,
     type?: ?string,
-    jira?: ?string,
+    issues: Array<string>,
     people: Array<string>,
     components: Array<string>,
     dueDate?: ?string
 }
 
-export type { WorkType, WorkManifestType, ComponentWorkType, WorkDataType }
+export type { WorkType, WorkManifestType, ComponentWorkType, WorkDataType, IssueRefType }

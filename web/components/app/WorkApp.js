@@ -277,7 +277,7 @@ class WorkApp extends React.Component<Props, State> {
                             <tr key="header">
                                 <td><b>label</b></td>
                                 <td><b>type</b></td>
-                                <td><b>jira</b></td>
+                                <td><b>issues</b></td>
                                 <td><b>status</b></td>
                                 <td><b>components</b></td>
                                 <td><b>people</b></td>
@@ -291,10 +291,10 @@ class WorkApp extends React.Component<Props, State> {
                                     </td>
                                     <td>{work.type}</td>
                                     <td>
-                                        {work.jiraUrl
-                                            ? (<a href={work.jiraUrl} target="_blank">{work.jira}</a>)
-                                            : (work.jira)
-                                        }
+                                        {work.issues.map(issue => issue.issueUrl
+                                            ? (<a href={issue.issueUrl} target="_blank">{issue.issue}</a>)
+                                            : (issue.issue)
+                                        )}
                                     </td>
                                     <td>{work.status}</td>
                                     <td>
@@ -335,7 +335,7 @@ function Work(props) {
                 </Link>
             </div>
             <div><i>&lt;{work.type}&gt;</i><i>&lt;{work.status}&gt;</i></div>
-            <div><b>JIRAs </b><i>{work.jira}</i></div>
+            <div><b>Issues </b>{work.issues.map(issue => <i>{issue.issue}</i>)}</div>
             <div>
                 <b>People </b>
                 {work.people.map(p =>

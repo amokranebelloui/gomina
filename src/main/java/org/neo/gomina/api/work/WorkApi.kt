@@ -25,7 +25,7 @@ import java.util.*
 import javax.inject.Inject
 
 data class WorkDetail(val id: String, val label: String, val type: String?,
-                      val jira: String?, val jiraUrl: String?,
+                      val issues: List<IssueRef>, 
                       val status: String,
                       val people: List<UserRef>,
                       val components: List<ComponentRef> = emptyList(),
@@ -33,6 +33,8 @@ data class WorkDetail(val id: String, val label: String, val type: String?,
                       var dueDate: String? = null,
                       val archived: Boolean
 )
+
+data class IssueRef(val issue: String, val issueUrl: String?)
 
 data class WorkManifestDetail(val work: WorkDetail?,
                               val details: List<ComponentWorkDetail> = emptyList())
@@ -51,7 +53,7 @@ data class CommitDetail(
 
 data class WorkData(val label: String?,
                     val type: String?,
-                    val jira: String?,
+                    val issues: List<String> = emptyList(),
                     val people: List<String> = emptyList(),
                     val components: List<String> = emptyList(),
                     var dueDate: String? = null)
@@ -67,7 +69,7 @@ class WorkApi {
     val router: Router
 
     @Inject lateinit var workList: WorkList
-    @Inject @Named("jira.url") lateinit var jiraUrl: String
+    @Inject @Named("jira.url") lateinit var issueTrackerUrl: String
     @Inject @Named("work.reference.env") lateinit var workReferenceEnv: String
 
     @Inject private lateinit var componentRepo: ComponentRepo
@@ -102,7 +104,7 @@ class WorkApi {
             val userMap = users.getUsers().map { it.toRef() }.associateBy { it.id }
             val componentMap = componentRepo.getAll().map { it.toComponentRef() }.associateBy { it.id }
             val workList = workList.getAll().map {
-                it.toWorkDetail(jiraUrl,
+                it.toWorkDetail(issueTrackerUrl,
                         it.people.mapNotNull { userMap[it] },
                         it.components.mapNotNull { componentMap[it] }
                 )
@@ -121,7 +123,7 @@ class WorkApi {
         try {
             val data = mapper.readValue<WorkData>(ctx.body.toString())
             logger.info("Adding work")
-            val workId = workList.addWork(data.label, data.type, data.jira, data.people, data.components, data.dueDate.toLocalDate())
+            val workId = workList.addWork(data.label, data.type, data.issues, data.people, data.components, data.dueDate.toLocalDate())
             ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(workId))
         }
         catch (e: Exception) {
@@ -135,7 +137,7 @@ class WorkApi {
         try {
             val data = mapper.readValue<WorkData>(ctx.body.toString())
             logger.info("Updating work $workId $data ${data.dueDate.toLocalDate()}")
-            workList.updateWork(workId, data.label, data.type, data.jira, data.people, data.components, data.dueDate.toLocalDate())
+            workList.updateWork(workId, data.label, data.type, data.issues, data.people, data.components, data.dueDate.toLocalDate())
             ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(workId))
         }
         catch (e: Exception) {
@@ -211,7 +213,7 @@ class WorkApi {
                         ComponentWorkDetail(component.id, commits ?: emptyList())
                     }
                     ?: emptyList()
-            val workDetail = work?.toWorkDetail(jiraUrl,
+            val workDetail = work?.toWorkDetail(issueTrackerUrl,
                     work.people.mapNotNull { userMap[it] },
                     work.components.mapNotNull { componentMap[it] }
             )
@@ -228,15 +230,13 @@ class WorkApi {
 
 }
 
-private fun Work.toWorkDetail(jiraUrl: String, people: List<UserRef>, components: List<ComponentRef>): WorkDetail {
+private fun Work.toWorkDetail(issueTrackerUrl: String, people: List<UserRef>, components: List<ComponentRef>): WorkDetail {
+    val url = if (issueTrackerUrl.isNotBlank()) issueTrackerUrl else null
     return WorkDetail(
             id = id,
             label = label,
             type = type,
-            jira = jira,
-            jiraUrl = jiraUrl
-                    .takeIf { it.isNotBlank() && jira?.isNotBlank() ?: false }
-                    ?.let { "$it/$jira" },
+            issues = issues.map { issue -> IssueRef(issue, url?.let { "$it/$issue" }) },
             status = status.toString(),
             people = people,
             components = components,

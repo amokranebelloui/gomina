@@ -1,7 +1,7 @@
 // @flow
 import * as React from "react"
 import {TagEditor} from "../common/TagEditor";
-import type {WorkDataType, WorkType} from "./WorkType";
+import type {IssueRefType, WorkDataType, WorkType} from "./WorkType";
 import type {UserRefType} from "../misc/UserType";
 import type {ComponentRefType} from "../component/ComponentType";
 import DatePicker from "react-datepicker"
@@ -17,19 +17,11 @@ type Props = {
 type State = {
     label: ?string,
     type: ?string,
-    jira: ?string,
+    issues: Array<string>,
     people: Array<UserRefType>,
     components: Array<ComponentRefType>,
     dueDate: ?string
 }
-
-/*
-label: ?string,
-    type: ?string,
-    jira: ?string,
-    people: Array<string>,
-    components: Array<string>
- */
 
 class WorkEditor extends React.Component<Props, State> {
     constructor(props: Props) {
@@ -38,7 +30,7 @@ class WorkEditor extends React.Component<Props, State> {
         this.state = {
             label: work && work.label,
             type: work && work.type,
-            jira: work && work.jira,
+            issues: work && work.issues.map(i => i.issue) || [],
             people: work && work.people || [],
             components: work && work.components || [],
             dueDate: work && work.dueDate
@@ -52,10 +44,21 @@ class WorkEditor extends React.Component<Props, State> {
         this.setState({type: val});
         this.notifyChange({type: val});
     }
-    changeJira(val: string) {
-        this.setState({jira: val});
-        this.notifyChange({jira: val});
+
+    addIssue(val: string) {
+        if (!this.state.issues.find(p => p === val)) {
+            const newVal = [...this.state.issues];
+            newVal.push(val);
+            this.setState({issues: newVal});
+            this.notifyChange({issues: newVal});
+        }
     }
+    deleteIssue(val: string) {
+        const newVal = [...this.state.issues].filter(i => i !== val);
+        this.setState({issues: newVal});
+        this.notifyChange({issues: newVal});
+    }
+
     addPeople(val: UserRefType) {
         if (!this.state.people.find(p => p.id === val.id)) {
             const newVal = [...this.state.people];
@@ -92,7 +95,7 @@ class WorkEditor extends React.Component<Props, State> {
         const fromState: WorkDataType = {
             label: this.state.label,
             type: this.state.type,
-            jira: this.state.jira,
+            issues: this.state.issues,
             people: this.state.people.map(p => p.id),
             components: this.state.components.map(c => c.id),
             dueDate: this.state.dueDate
@@ -113,10 +116,11 @@ class WorkEditor extends React.Component<Props, State> {
                        value={this.state.type}
                        onChange={e => this.changeType(e.target.value)} />
                 <br/>
-                <b>Jira </b>
-                <input type="text" name="jira" placeholder="Jira"
-                       value={this.state.jira}
-                       onChange={e => this.changeJira(e.target.value)} />
+                <b>Issues </b>
+                <TagEditor tags={this.state.issues}
+                           onTagAdd={p => this.addIssue(p)}
+                           onTagDelete={p => this.deleteIssue(p)} />
+
                 <br/>
                 <b>People </b>
                 <TagEditor tags={this.state.people}

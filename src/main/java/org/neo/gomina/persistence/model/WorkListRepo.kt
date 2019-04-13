@@ -48,7 +48,7 @@ class RedisWorkList : WorkList {
                 id = id,
                 label = this["label"] ?: defaultLabel(id),
                 type = this["type"],
-                jira = this["jira"],
+                issues = this["jira"].toList(),
                 status = this["status"] ?.let { WorkStatus.valueOf(it) } ?: WorkStatus.OFF,
                 people = this["people"].toList(),
                 components = this["components"].toList(),
@@ -60,7 +60,7 @@ class RedisWorkList : WorkList {
 
     private fun defaultLabel(id: String) = "Work {$id}"
 
-    override fun addWork(label: String?, type: String?, jira: String?,
+    override fun addWork(label: String?, type: String?, issues: List<String>,
                          people: List<String>, components: List<String>,
                          dueDate: LocalDate?): String {
         pool.resource.use { jedis ->
@@ -68,7 +68,7 @@ class RedisWorkList : WorkList {
             jedis.hmset("work:$id", listOfNotNull(
                     "label" to (label ?: defaultLabel(id)),
                     "type" to type,
-                    jira?.let { "jira" to it },
+                    issues.let { "jira" to it.toStr() },
                     people.let { "people" to it.toStr() },
                     components.let { "components" to it.toStr() },
                     "creation_date" to LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ISO_DATE_TIME),
@@ -78,14 +78,14 @@ class RedisWorkList : WorkList {
         }
     }
 
-    override fun updateWork(workId: String, label: String?, type: String?, jira: String?,
+    override fun updateWork(workId: String, label: String?, type: String?, issues: List<String>,
                             people: List<String>, components: List<String>,
                             dueDate: LocalDate?) {
         pool.resource.use { jedis ->
             jedis.hmset("work:$workId", listOfNotNull(
                     "label" to (label ?: defaultLabel(workId)),
                     "type" to type,
-                    jira?.let { "jira" to it },
+                    issues.let { "jira" to it.toStr() },
                     people.let { "people" to it.toStr() },
                     components.let { "components" to it.toStr() },
                     dueDate?.let { "due_date" to dueDate.format(DateTimeFormatter.ISO_DATE) }
