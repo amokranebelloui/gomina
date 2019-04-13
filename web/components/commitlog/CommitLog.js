@@ -34,9 +34,20 @@ type Props = {
     commits: Array<CommitType>,
     unresolved?: Array<InstanceRefType>,
     //instances: Array<Instance>,
-    type?: ?string
+    type?: ?string,
+    highlightedIssues?: ?Array<string>
 }
 class CommitLog extends React.Component<Props> {
+    highlight(commit: CommitType) {
+        const highlight = this.props.highlightedIssues;
+        const issues = commit.issues && commit.issues.map(i => i.issue) || [];
+        if (highlight && highlight.length > 0) {
+            return issues.filter(i => highlight.indexOf(i) > -1).length > 0
+        }
+        else {
+            return true
+        }
+    }
     render() {
         if (this.props.commits) {
             /*
@@ -68,7 +79,8 @@ class CommitLog extends React.Component<Props> {
                     <table className="commit-log-table">
                         <tbody>
                         {log.map(commit =>
-                            <tr block="true" key={commit.revision}>
+                            <tr block="true" key={commit.revision}
+                                style={{opacity: this.highlight(commit) ? 1.0 : 0.15}}>
                                 <td style={{width: '30px'}}><Revision revision={commit.revision} type={this.props.type}></Revision></td>
                                 <td style={{width: '20px'}}>{commit.author && <UserRef user={commit.author} /> || '-'}</td>
                                 <td style={{width: '80px'}}>

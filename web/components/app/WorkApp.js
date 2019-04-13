@@ -32,6 +32,7 @@ type State = {
     workDetail?: ?WorkManifestType,
     workId: ?string,
     newWorkData?: ?WorkDataType,
+    commitHighlight: string,
 
     workEdition: boolean,
     workEdited?: ?WorkDataType,
@@ -48,6 +49,7 @@ class WorkApp extends React.Component<Props, State> {
             sortBy: ls.get('work.list.sort') || 'due-date',
             workList: [],
             workDetail: null,
+            commitHighlight: ls.get('work.list.commit.highlight') || 'all',
             workId: this.props.match.params.id,
             newWorkData: null,
             workEdition: false
@@ -79,6 +81,11 @@ class WorkApp extends React.Component<Props, State> {
         this.setState({sortBy: sortBy});
         ls.set('work.list.sort', sortBy)
     }
+    setCommitHighlight(commitHighlight: string, save: boolean = true) {
+        this.setState({commitHighlight: commitHighlight});
+        save && ls.set('work.list.commit.highlight', commitHighlight)
+    }
+
     retrieveWorkList() {
         console.log("workApp Retr Hosts ... ");
         const thisComponent = this;
@@ -119,6 +126,7 @@ class WorkApp extends React.Component<Props, State> {
         console.info("workApp !did willRecProps ", newWorkId, nextProps);
         this.setState({workId: newWorkId});
         if (this.props.match.params.id !== newWorkId && newWorkId) {
+            this.setState({commitHighlight: ls.get('work.list.commit.highlight') || 'all',});
             this.retrieveWorkDetail(newWorkId)
         }
     }
@@ -184,52 +192,68 @@ class WorkApp extends React.Component<Props, State> {
         const workList = filterWork(this.state.workList || [], this.state.search);
         const workDetail = this.state.workDetail;
         //console.info("workDetail", workDetail);
+        let highlightedIssues = [this.state.commitHighlight];
+        if (this.state.commitHighlight === 'all') {
+            highlightedIssues = null
+        }
+        else if (this.state.commitHighlight === 'work') {
+            highlightedIssues = workDetail && workDetail.work && workDetail.work.issues.map(i => i.issue) || []
+        }
         return (
             <AppLayout title="Work List">
                 <PrimarySecondaryLayout>
                     <div>
                         {workDetail && workDetail.work ?
                             <div>
-                                {workDetail.work &&
+                                <div>
+                                    {!this.state.workEdition &&
                                     <div>
-                                        {!this.state.workEdition &&
-                                            <div>
-                                                <div style={{float: 'right'}}>
-                                                    {!workDetail.work.archived && [
-                                                        <Secure key="Edit" permission="work.manage">
-                                                            <button onClick={() => this.editWork()}>Edit</button>
-                                                        </Secure>,
-                                                        <Secure key="Archive" permission="work.archive">
-                                                            <button onClick={() => this.archiveWork()}>Archive</button>
-                                                        </Secure>
-                                                    ]}
-                                                    {workDetail.work.archived &&
-                                                        <Secure permission="work.archive">
-                                                            <button onClick={() => this.unarchiveWork()}>Restore</button>
-                                                        </Secure>
-                                                    }
-                                                </div>
-                                                <Work key={workDetail.work.id} work={workDetail.work}></Work>
-                                            </div>
-                                        }
-                                        {this.state.workEdition &&
-                                            <div>
-                                                <WorkEditor key={workDetail.work.id}
-                                                            work={workDetail.work}
-                                                            peopleRefs={this.state.users}
-                                                            componentsRefs={this.state.components}
-                                                            onChange={(id, w) => this.changeWork(w)} />
-                                                <hr/>
-                                                <button onClick={() => this.updateWork()}>Update</button>
-                                                <button onClick={() => this.cancelWorkEdition()}>Cancel</button>
-                                            </div>
-                                        }
+                                        <div style={{float: 'right'}}>
+                                            {!workDetail.work.archived && [
+                                                <Secure key="Edit" permission="work.manage">
+                                                    <button onClick={() => this.editWork()}>Edit</button>
+                                                </Secure>,
+                                                <Secure key="Archive" permission="work.archive">
+                                                    <button onClick={() => this.archiveWork()}>Archive</button>
+                                                </Secure>
+                                            ]}
+                                            {workDetail.work.archived &&
+                                            <Secure permission="work.archive">
+                                                <button onClick={() => this.unarchiveWork()}>Restore</button>
+                                            </Secure>
+                                            }
+                                        </div>
+                                        <Work key={workDetail.work.id} work={workDetail.work}></Work>
                                     </div>
-                                }
+                                    }
+                                    {this.state.workEdition &&
+                                    <div>
+                                        <WorkEditor key={workDetail.work.id}
+                                                    work={workDetail.work}
+                                                    peopleRefs={this.state.users}
+                                                    componentsRefs={this.state.components}
+                                                    onChange={(id, w) => this.changeWork(w)} />
+                                        <hr/>
+                                        <button onClick={() => this.updateWork()}>Update</button>
+                                        <button onClick={() => this.cancelWorkEdition()}>Cancel</button>
+                                    </div>
+                                    }
+                                </div>
+
+                                <div>
+                                    <button disabled={this.state.commitHighlight === 'all'} onClick={e => this.setCommitHighlight('all')}>ALL</button>
+                                    <button disabled={this.state.commitHighlight === 'work'} onClick={e => this.setCommitHighlight('work')}>WORK</button>
+                                    {workDetail.work.issues.map(issue =>
+                                        <button key={issue.issue} disabled={this.state.commitHighlight === issue.issue} onClick={e => this.setCommitHighlight(issue.issue, false)}>{issue.issue}</button>
+                                    )}
+                                    <br/>
+                                    Highlighted {highlightedIssues}
+                                </div>
+
                                 {workDetail.details && workDetail.details.map(d =>
                                     <div key={d.componentId}>
                                         <h3>{d.componentId}</h3>
-                                        <CommitLog commits={d.commits} />
+                                        <CommitLog commits={d.commits} highlightedIssues={highlightedIssues} />
                                     </div>
                                 )}
                             </div>
@@ -293,7 +317,7 @@ class WorkApp extends React.Component<Props, State> {
                                     <td>{work.type}</td>
                                     <td>
                                         {work.issues.map(issue =>
-                                            <Issue issue={issue} />
+                                            <Issue key={issue.issue} issue={issue} />
                                         )}
                                     </td>
                                     <td>{work.status}</td>
@@ -335,7 +359,7 @@ function Work(props) {
                 </Link>
             </div>
             <div><i>&lt;{work.type}&gt;</i><i>&lt;{work.status}&gt;</i></div>
-            <div><b>Issues </b>{work.issues.map(issue => <i>{issue.issue}</i>)}</div>
+            <div><b>Issues </b>{work.issues.map(issue => <i key={issue.issue}>{issue.issue} </i>)}</div>
             <div>
                 <b>People </b>
                 {work.people.map(p =>
