@@ -12,6 +12,7 @@ import {Autocomplete} from "../common/AutoComplete";
 import {DateTime} from "../common/DateTime";
 import {sortWorkBy, WorkSort} from "../work/WorkSort";
 import ls from "local-storage";
+import {filterWork, matchesSearch, WorkFilter} from "../work/WorkFilter";
 
 class WorkApp extends React.Component {
 
@@ -20,6 +21,7 @@ class WorkApp extends React.Component {
         this.state = {
             components: [],
             users: [],
+            search: ls.get('work.list.search') || '',
             sortBy: ls.get('work.list.sort') || 'due-date',
             workList: [],
             workDetail: [],
@@ -45,6 +47,10 @@ class WorkApp extends React.Component {
             .catch(error => thisComponent.setState({users: []}));
     }
 
+    setFilter(search) {
+        this.setState({search: search});
+        ls.set('work.list.search', search)
+    }
     sortChanged(sortBy) {
         this.setState({sortBy: sortBy});
         ls.set('work.list.sort', sortBy)
@@ -151,7 +157,7 @@ class WorkApp extends React.Component {
     }
 
     render()  {
-        const workList = this.state.workList || [];
+        const workList = filterWork(this.state.workList || [], this.state.search);
         const workDetail = this.state.workDetail;
         //console.info("workDetail", workDetail);
         return (
@@ -219,7 +225,7 @@ class WorkApp extends React.Component {
                     </div>
                     <div>
                         <Well block>
-                            Filtering
+                            <WorkFilter search={this.state.search} onFilterChanged={s => this.setFilter(s)} />
                         </Well>
 
                         <Secure permission="work.add">
