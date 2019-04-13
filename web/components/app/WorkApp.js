@@ -9,6 +9,7 @@ import {Secure} from "../permission/Secure";
 import Route from "react-router-dom/es/Route";
 import {WorkEditor} from "../work/WorkEditor";
 import {Autocomplete} from "../common/AutoComplete";
+import {DateTime} from "../common/DateTime";
 
 class WorkApp extends React.Component {
 
@@ -244,6 +245,8 @@ class WorkApp extends React.Component {
                                 <td><b>status</b></td>
                                 <td><b>components</b></td>
                                 <td><b>people</b></td>
+                                <td><b>created</b></td>
+                                <td><b>due</b></td>
                             </tr>
                             {workList.map(work =>
                                 <tr style={{opacity: work.archived ? .5 : 1}}>
@@ -268,6 +271,12 @@ class WorkApp extends React.Component {
                                         {work.people.map(p =>
                                             <span><Link to={"/user/" + p.id}>{p.shortName}</Link> </span>
                                         )}
+                                    </td>
+                                    <td>
+                                        <DateTime date={work.creationDate} />
+                                    </td>
+                                    <td>
+                                        <DateTime date={work.dueDate} />
                                     </td>
                                 </tr>
                             )}
@@ -307,6 +316,8 @@ function Work(props) {
                     <span style={{color: 'blue'}}>{c.label} </span>
                 )}
             </div>
+            <div><b>Created </b><DateTime date={work.creationDate} /></div>
+            <div><b>Due </b><DateTime date={work.dueDate} /></div>
         </div>
     )
 }

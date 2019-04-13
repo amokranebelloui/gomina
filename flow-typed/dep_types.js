@@ -17,3 +17,9 @@ declare module 'axios' {
 declare module 'axios/index' {
     declare module.exports: any;
 }
+declare module 'react-datepicker' {
+    declare module.exports: any;
+}
+declare module 'react-datepicker/dist/react-datepicker.css' {
+    declare module.exports: any;
+}

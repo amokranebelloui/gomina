@@ -1,19 +1,15 @@
 import React from "react";
 import {AppLayout} from "./common/layout";
-import axios from "axios/index";
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css";
+import axios from "axios/index"
 
 class SandboxApp extends React.Component {
     constructor(props) {
         super(props);
-    }
-
-    addApi() {
-        console.info("Add Api");
-        axios.post('/data/dependencies/api/' + 'torkjell' + '/add', {name: 'dispatch-ride', type: 'command'})
-    }
-    addUsage() {
-        console.info("Add Usage");
-        axios.post('/data/dependencies/usage/' + 'torkjell-dispatch' + '/add', {name: 'dispatch-ride', type: 'command', usage: 'async'})
+        this.state = {
+            startDate: new Date()
+        }
     }
 
     render() {
@@ -21,15 +17,26 @@ class SandboxApp extends React.Component {
             <AppLayout title={'Sandbox'}>
                 <h3>Sandbox</h3>
 
-                <button onClick={() => this.addApi()}>Add API</button>
+                <DatePicker
+                    dateFormat="dd/MM/yyyy"
+                    selected={this.state.startDate}
+                    onChange={date => this.changeDate(date)}
+                />
                 <br/>
+                <b>Date: </b>{JSON.stringify(this.state.startDate)}<br/>
+                <b>Date: </b>{JSON.stringify(this.state.startDate && this.state.startDate.getFullYear())}<br/>
+                <b>Month: </b>{JSON.stringify(this.state.startDate && this.state.startDate.getMonth())}<br/>
+                <b>Day: </b>{JSON.stringify(this.state.startDate && this.state.startDate.getDay())}<br/>
 
-                <button onClick={() => this.addUsage()}>Add Usage</button>
-                <br/>
-                
-                
             </AppLayout>
         );
+    }
+
+    changeDate(date) {
+        console.log(date);
+        console.log(new Date(date));
+        this.setState({startDate: new Date(date)});
+        axios.put("/date", {date: date, date2: new Date(date)})
     }
 }
 

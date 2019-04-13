@@ -4,6 +4,8 @@ import {TagEditor} from "../common/TagEditor";
 import type {WorkDataType, WorkType} from "./WorkType";
 import type {UserRefType} from "../misc/UserType";
 import type {ComponentRefType} from "../component/ComponentType";
+import DatePicker from "react-datepicker"
+import "react-datepicker/dist/react-datepicker.css";
 
 type Props = {
     work?: WorkType,
@@ -17,7 +19,8 @@ type State = {
     type: ?string,
     jira: ?string,
     people: Array<UserRefType>,
-    components: Array<ComponentRefType>
+    components: Array<ComponentRefType>,
+    dueDate: ?Date
 }
 
 /*
@@ -37,7 +40,8 @@ class WorkEditor extends React.Component<Props, State> {
             type: work && work.type,
             jira: work && work.jira,
             people: work && work.people || [],
-            components: work && work.components || []
+            components: work && work.components || [],
+            dueDate: work && work.dueDate
         };
     }
     changeLabel(value: string) {
@@ -78,6 +82,12 @@ class WorkEditor extends React.Component<Props, State> {
         this.setState({components: newVal});
         this.notifyChange({components: newVal.map(c => c.id)});
     }
+    changeDueDate(val: Date) {
+        val.setHours(23);
+        val.setMinutes(59);
+        this.setState({dueDate: val});
+        this.notifyChange({dueDate: val});
+    }
 
     notifyChange(delta: any) {
         const fromState: WorkDataType = {
@@ -85,7 +95,8 @@ class WorkEditor extends React.Component<Props, State> {
             type: this.state.type,
             jira: this.state.jira,
             people: this.state.people.map(p => p.id),
-            components: this.state.components.map(c => c.id)
+            components: this.state.components.map(c => c.id),
+            dueDate: this.state.dueDate
         };
         const data = Object.assign({}, fromState, delta);
         this.props.onChange && this.props.onChange(this.props.work && this.props.work.id, data)
@@ -123,6 +134,12 @@ class WorkEditor extends React.Component<Props, State> {
                            labelProperty="label"
                            onTagAdd={c => this.addComponent(c)}
                            onTagDelete={c => this.deleteComponent(c)} />
+                <br/>
+                <DatePicker
+                    dateFormat="dd/MM/yyyy"
+                    selected={this.state.dueDate}
+                    onChange={date => this.changeDueDate(date)}
+                />
                 <br/>
             </div>
         );

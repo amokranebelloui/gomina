@@ -12,6 +12,8 @@ type WorkType = {
     status: string,
     people: Array<UserRefType>,
     components: Array<ComponentRefType>,
+    creationDate: ?Date,
+    dueDate: ?Date,
     archived: boolean
 }
 
@@ -30,7 +32,8 @@ type WorkDataType = {
     type: ?string,
     jira: ?string,
     people: Array<string>,
-    components: Array<string>
+    components: Array<string>,
+    dueDate: ?Date
 }
 
 export type { WorkType, WorkManifestType, ComponentWorkType, WorkDataType }

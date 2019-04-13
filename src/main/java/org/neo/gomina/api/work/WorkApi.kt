@@ -10,8 +10,7 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.api.common.UserRef
-import org.neo.gomina.api.common.toRef
+import org.neo.gomina.api.common.*
 import org.neo.gomina.api.component.CommitDetail
 import org.neo.gomina.api.component.CommitLogEnricher
 import org.neo.gomina.api.component.ComponentRef
@@ -22,14 +21,17 @@ import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.work.Work
 import org.neo.gomina.model.work.WorkList
+import java.util.*
 import javax.inject.Inject
 
 data class WorkDetail(val id: String, val label: String, val type: String?,
-              val jira: String?, val jiraUrl: String?,
-              val status: String,
-              val people: List<UserRef>,
-              val components: List<ComponentRef> = emptyList(),
-              val archived: Boolean
+                      val jira: String?, val jiraUrl: String?,
+                      val status: String,
+                      val people: List<UserRef>,
+                      val components: List<ComponentRef> = emptyList(),
+                      var creationDate: Date? = null,
+                      var dueDate: Date? = null,
+                      val archived: Boolean
 )
 
 data class WorkManifestDetail(val work: WorkDetail?,
@@ -51,7 +53,9 @@ data class WorkData(val label: String?,
                     val type: String?,
                     val jira: String?,
                     val people: List<String> = emptyList(),
-                    val components: List<String> = emptyList())
+                    val components: List<String> = emptyList(),
+                    var creationDate: Date? = null,
+                    var dueDate: Date? = null)
 
 
 class WorkApi {
@@ -118,7 +122,7 @@ class WorkApi {
         try {
             val data = mapper.readValue<WorkData>(ctx.body.toString())
             logger.info("Adding work")
-            val workId = workList.addWork(data.label, data.type, data.jira, data.people, data.components)
+            val workId = workList.addWork(data.label, data.type, data.jira, data.people, data.components, data.dueDate.toLocalDate())
             ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(workId))
         }
         catch (e: Exception) {
@@ -131,8 +135,8 @@ class WorkApi {
         val workId = ctx.request().getParam("workId")
         try {
             val data = mapper.readValue<WorkData>(ctx.body.toString())
-            logger.info("Updating work $workId")
-            workList.updateWork(workId, data.label, data.type, data.jira, data.people, data.components)
+            logger.info("Updating work $workId $data ${data.dueDate.toLocalDate()}")
+            workList.updateWork(workId, data.label, data.type, data.jira, data.people, data.components, data.dueDate.toLocalDate())
             ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(workId))
         }
         catch (e: Exception) {
@@ -179,28 +183,33 @@ class WorkApi {
             val detail = work?.components
                     ?.mapNotNull { componentRepo.get(it) }
                     ?.map { component ->
-                        val commits = component.scm?.let {scm ->
-                            scmService.getTrunk(scm)
-                                    .let { log -> commitLogEnricher.enrichLog(log, topology.buildExtInstances(component.id)).log }
-                                    .takeWhile { commit ->
-                                        !commit.instances.map { it.env }.contains(workReferenceEnv) &&
-                                        !commit.deployments.map { it.env }.contains(workReferenceEnv)
-                                    }
-                                    /*
-                                    .map { commit ->
-                                        CommitDetail(
+                        val commits = try {
+                            component.scm?.let {scm ->
+                                scmService.getTrunk(scm)
+                                        .let { log -> commitLogEnricher.enrichLog(log, topology.buildExtInstances(component.id)).log }
+                                        .takeWhile { commit ->
+                                            !commit.instances.map { it.env }.contains(workReferenceEnv) &&
+                                            !commit.deployments.map { it.env }.contains(workReferenceEnv)
+                                        }
+                                /*
+                                .map { commit ->
+                                    CommitDetail(
                                         revision = commit.revision,
                                         date = commit.date,
                                         author = commit.author?.let { users.findForAccount(it) }?.toRef()
                                                 ?: commit.author?.let { UserRef(shortName = commit.author) },
                                         message = commit.message,
                                         version = commit.release ?: commit.newVersion
-                                )
+                                    )
 
-                            }*/
+                                }*/
+                            }
                         }
-                        ?: emptyList()
-                        ComponentWorkDetail(component.id, commits)
+                        catch (e: Exception) {
+                            logger.error("", e)
+                            null
+                        }
+                        ComponentWorkDetail(component.id, commits ?: emptyList())
                     }
                     ?: emptyList()
             val workDetail = work?.toWorkDetail(jiraUrl,
@@ -232,6 +241,8 @@ private fun Work.toWorkDetail(jiraUrl: String, people: List<UserRef>, components
             status = status.toString(),
             people = people,
             components = components,
+            creationDate = creationDate?.toDateUtc,
+            dueDate = dueDate?.toDateUtc,
             archived = archived
     )
 }

@@ -8,6 +8,10 @@ import org.neo.gomina.model.work.Work
 import org.neo.gomina.model.work.WorkList
 import org.neo.gomina.model.work.WorkStatus
 import redis.clients.jedis.JedisPool
+import java.time.Clock
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class RedisWorkList : WorkList {
 
@@ -48,13 +52,17 @@ class RedisWorkList : WorkList {
                 status = this["status"] ?.let { WorkStatus.valueOf(it) } ?: WorkStatus.OFF,
                 people = this["people"].toList(),
                 components = this["components"].toList(),
+                creationDate = this["creation_date"]?.let { LocalDateTime.parse(it, DateTimeFormatter.ISO_DATE_TIME) },
+                dueDate = this["due_date"]?.let { LocalDate.parse(it, DateTimeFormatter.ISO_DATE) },
                 archived = this["archived"]?.toBoolean() == true
         )
     }
 
     private fun defaultLabel(id: String) = "Work {$id}"
 
-    override fun addWork(label: String?, type: String?, jira: String?, people: List<String>, components: List<String>): String {
+    override fun addWork(label: String?, type: String?, jira: String?,
+                         people: List<String>, components: List<String>,
+                         dueDate: LocalDate?): String {
         pool.resource.use { jedis ->
             val id = jedis.incr("_work:seq").toString()
             jedis.hmset("work:$id", listOfNotNull(
@@ -62,20 +70,25 @@ class RedisWorkList : WorkList {
                     "type" to type,
                     jira?.let { "jira" to it },
                     people.let { "people" to it.toStr() },
-                    components.let { "components" to it.toStr() }
+                    components.let { "components" to it.toStr() },
+                    "creation_date" to LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ISO_DATE_TIME),
+                    dueDate?.let { "due_date" to dueDate.format(DateTimeFormatter.ISO_DATE) }
             ).toMap())
             return id
         }
     }
 
-    override fun updateWork(workId: String, label: String?, type: String?, jira: String?, people: List<String>, components: List<String>) {
+    override fun updateWork(workId: String, label: String?, type: String?, jira: String?,
+                            people: List<String>, components: List<String>,
+                            dueDate: LocalDate?) {
         pool.resource.use { jedis ->
             jedis.hmset("work:$workId", listOfNotNull(
                     "label" to (label ?: defaultLabel(workId)),
                     "type" to type,
                     jira?.let { "jira" to it },
                     people.let { "people" to it.toStr() },
-                    components.let { "components" to it.toStr() }
+                    components.let { "components" to it.toStr() },
+                    dueDate?.let { "due_date" to dueDate.format(DateTimeFormatter.ISO_DATE) }
             ).toMap())
         }
     }
