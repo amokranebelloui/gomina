@@ -20,7 +20,7 @@ type State = {
     jira: ?string,
     people: Array<UserRefType>,
     components: Array<ComponentRefType>,
-    dueDate: ?Date
+    dueDate: ?string
 }
 
 /*
@@ -83,10 +83,9 @@ class WorkEditor extends React.Component<Props, State> {
         this.notifyChange({components: newVal.map(c => c.id)});
     }
     changeDueDate(val: Date) {
-        val.setHours(23);
-        val.setMinutes(59);
-        this.setState({dueDate: val});
-        this.notifyChange({dueDate: val});
+        const newVal = val.toISOString().substring(0, 10);
+        this.setState({dueDate: newVal});
+        this.notifyChange({dueDate: newVal});
     }
 
     notifyChange(delta: any) {
@@ -137,7 +136,7 @@ class WorkEditor extends React.Component<Props, State> {
                 <br/>
                 <DatePicker
                     dateFormat="dd/MM/yyyy"
-                    selected={this.state.dueDate}
+                    selected={this.state.dueDate && new Date(this.state.dueDate)}
                     onChange={date => this.changeDueDate(date)}
                 />
                 <br/>

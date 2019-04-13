@@ -4,6 +4,7 @@ import org.neo.gomina.model.user.User
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 data class UserRef(
@@ -19,10 +20,18 @@ val LocalDateTime.toDateUtc: Date
 val LocalDate.toDateUtc: Date
     get() = this.let { Date.from(this.atStartOfDay(ZoneOffset.UTC).toInstant()) }
 
+val LocalDate.toString: String
+    get() = this.format(DateTimeFormatter.ISO_DATE)
+
+
 fun Date?.toLocalDateTime(): LocalDateTime? {
     return this?.toInstant()?.atZone(ZoneOffset.UTC)?.toLocalDateTime()
 }
 
 fun Date?.toLocalDate(): LocalDate? {
     return this?.toInstant()?.atZone(ZoneOffset.UTC)?.toLocalDate()
+}
+
+fun String?.toLocalDate(): LocalDate? {
+    return LocalDate.parse(this, DateTimeFormatter.ISO_DATE)
 }

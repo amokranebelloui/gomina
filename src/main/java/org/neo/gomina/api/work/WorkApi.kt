@@ -30,7 +30,7 @@ data class WorkDetail(val id: String, val label: String, val type: String?,
                       val people: List<UserRef>,
                       val components: List<ComponentRef> = emptyList(),
                       var creationDate: Date? = null,
-                      var dueDate: Date? = null,
+                      var dueDate: String? = null,
                       val archived: Boolean
 )
 
@@ -54,8 +54,7 @@ data class WorkData(val label: String?,
                     val jira: String?,
                     val people: List<String> = emptyList(),
                     val components: List<String> = emptyList(),
-                    var creationDate: Date? = null,
-                    var dueDate: Date? = null)
+                    var dueDate: String? = null)
 
 
 class WorkApi {
@@ -242,7 +241,7 @@ private fun Work.toWorkDetail(jiraUrl: String, people: List<UserRef>, components
             people = people,
             components = components,
             creationDate = creationDate?.toDateUtc,
-            dueDate = dueDate?.toDateUtc,
+            dueDate = dueDate?.toString,
             archived = archived
     )
 }
