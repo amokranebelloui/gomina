@@ -17,6 +17,9 @@ declare module 'axios' {
 declare module 'axios/index' {
     declare module.exports: any;
 }
+declare module 'local-storage' {
+    declare module.exports: any;
+}
 declare module 'react-datepicker' {
     declare module.exports: any;
 }

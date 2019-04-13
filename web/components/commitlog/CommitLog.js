@@ -29,7 +29,7 @@ type InstanceRefType = {
 
 type Props = {
     commits: Array<CommitType>,
-    unresolved: Array<InstanceRefType>,
+    unresolved?: Array<InstanceRefType>,
     //instances: Array<Instance>,
     type?: ?string
 }

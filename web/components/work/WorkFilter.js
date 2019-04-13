@@ -43,28 +43,4 @@ function matchesSearch(work: WorkType, search: string) {
     return matchesLabel || matchesJira
 }
 
-/*
-function matchesSearch(component, search: string, types, systems, languages, tags) {
-    let label = (component.label || "");
-    let regExp = new RegExp(search, "i");
-    let matchesLabel = label.match(regExp);
-    let matchesTypes = matchesList([component.type], types);
-    let matchesSystems = matchesList(extendSystems(component.systems), systems);
-    let matchesLanguages = matchesList(component.languages, languages);
-    let matchesTags = matchesList(component.tags, tags);
-    //console.info("MATCH", component.id, matchesLabel, matchesSystems, matchesLanguages, matchesTags);
-    return matchesLabel && matchesTypes && matchesSystems && matchesLanguages && matchesTags
-    //(languages.filter(item => item.match(regExp))||[]).length > 0 ||
-    //(tags.filter(item => item.match(regExp))||[]).length > 0;
-    //return component.label && component.label.indexOf(this.state.search) !== -1;
-}
-function matchesList(componentValues, selectedValues) {
-    if (selectedValues && selectedValues.length > 0) {
-        const values = (componentValues||[]);
-        return (selectedValues||[]).find(value => values.indexOf(value) !== -1);
-    }
-    return true
-}
-*/
-
 export { WorkFilter, filterWork }

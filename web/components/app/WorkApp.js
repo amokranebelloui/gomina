@@ -1,3 +1,4 @@
+// @flow
 import axios from "axios/index";
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import React from "react";
@@ -12,11 +13,32 @@ import {Autocomplete} from "../common/AutoComplete";
 import {DateTime} from "../common/DateTime";
 import {sortWorkBy, WorkSort} from "../work/WorkSort";
 import ls from "local-storage";
-import {filterWork, matchesSearch, WorkFilter} from "../work/WorkFilter";
+import {filterWork, WorkFilter} from "../work/WorkFilter";
+import type {ComponentRefType} from "../component/ComponentType";
+import type {UserRefType} from "../misc/UserType";
+import type {WorkDataType, WorkManifestType, WorkType} from "../work/WorkType";
 
-class WorkApp extends React.Component {
+type Props = {
+    match: any
+}
 
-    constructor(props) {
+type State = {
+    components: Array<ComponentRefType>,
+    users: Array<UserRefType>,
+    search: string,
+    sortBy: string,
+    workList: Array<WorkType>,
+    workDetail?: ?WorkManifestType,
+    workId: ?string,
+    newWorkData?: ?WorkDataType,
+
+    workEdition: boolean,
+    workEdited?: ?WorkDataType,
+}
+
+class WorkApp extends React.Component<Props, State> {
+
+    constructor(props: Props) {
         super(props);
         this.state = {
             components: [],
@@ -24,12 +46,13 @@ class WorkApp extends React.Component {
             search: ls.get('work.list.search') || '',
             sortBy: ls.get('work.list.sort') || 'due-date',
             workList: [],
-            workDetail: [],
+            workDetail: null,
             workId: this.props.match.params.id,
-            newWorkData: null
+            newWorkData: null,
+            workEdition: false
         };
-        this.retrieveWorkList = this.retrieveWorkList.bind(this);
-        this.retrieveWorkDetail = this.retrieveWorkDetail.bind(this);
+        //this.retrieveWorkList = this.retrieveWorkList.bind(this);
+        //this.retrieveWorkDetail = this.retrieveWorkDetail.bind(this);
         console.info("workApp !constructor ");
     }
 
@@ -47,11 +70,11 @@ class WorkApp extends React.Component {
             .catch(error => thisComponent.setState({users: []}));
     }
 
-    setFilter(search) {
+    setFilter(search: string) {
         this.setState({search: search});
         ls.set('work.list.search', search)
     }
-    sortChanged(sortBy) {
+    sortChanged(sortBy: string) {
         this.setState({sortBy: sortBy});
         ls.set('work.list.sort', sortBy)
     }
@@ -68,7 +91,7 @@ class WorkApp extends React.Component {
                 thisComponent.setState({workList: []});
             });
     }
-    retrieveWorkDetail(workId) {
+    retrieveWorkDetail(workId: string) {
         console.log("workApp Retr Hosts ... ");
         const thisComponent = this;
         axios.get('/data/work/detail' + (workId ? '/' + workId : ''))
@@ -90,7 +113,7 @@ class WorkApp extends React.Component {
         this.retrieveUserRefs();
     }
 
-    componentWillReceiveProps(nextProps) {
+    componentWillReceiveProps(nextProps: Props) {
         const newWorkId = nextProps.match.params.id;
         console.info("workApp !did willRecProps ", newWorkId, nextProps);
         this.setState({workId: newWorkId});
@@ -107,7 +130,7 @@ class WorkApp extends React.Component {
     addWork() {
         return axios.post('/data/work/add', this.state.newWorkData);
     };
-    onWorkAdded(workId, history) {
+    onWorkAdded(workId: string, history: any) {
         this.retrieveWorkList();
         history.push("/work/" + workId)
     };
@@ -116,7 +139,7 @@ class WorkApp extends React.Component {
     editWork() {
         this.setState({"workEdition": true});
     }
-    changeWork(work) {
+    changeWork(work: WorkDataType) {
         console.info("Work Changed", work);
         this.setState({"workEdited": work});
     }
@@ -126,7 +149,7 @@ class WorkApp extends React.Component {
     updateWork() {
         const thisComponent = this;
         const workId = this.state.workId;
-        axios.put('/data/work/' + workId + '/update', this.state.workEdited)
+        workId && axios.put('/data/work/' + workId + '/update', this.state.workEdited)
             .then(() => {
                 thisComponent.retrieveWorkList();
                 thisComponent.retrieveWorkDetail(workId);
@@ -138,7 +161,7 @@ class WorkApp extends React.Component {
     archiveWork() {
         const thisComponent = this;
         const workId = this.state.workId;
-        axios.put('/data/work/' + workId + '/archive')
+        workId && axios.put('/data/work/' + workId + '/archive')
             .then(() => {
                 thisComponent.retrieveWorkList();
                 thisComponent.retrieveWorkDetail(workId);
@@ -148,7 +171,7 @@ class WorkApp extends React.Component {
     unarchiveWork() {
         const thisComponent = this;
         const workId = this.state.workId;
-        axios.put('/data/work/' + workId + '/unarchive')
+        workId && axios.put('/data/work/' + workId + '/unarchive')
             .then(() => {
                 thisComponent.retrieveWorkList();
                 thisComponent.retrieveWorkDetail(workId);
@@ -235,8 +258,7 @@ class WorkApp extends React.Component {
                                            onEnterAdd={() => this.clearNewWorkState()}
                                            onItemAdded={(work) => this.onWorkAdded(work, history)}
                                            editionForm={() =>
-                                               <WorkEditor work={{}}
-                                                           peopleRefs={this.state.users}
+                                               <WorkEditor peopleRefs={this.state.users}
                                                            componentsRefs={this.state.components}
                                                            onChange={(id, w) => this.setState({newWorkData: w})} />
                                            }

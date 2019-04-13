@@ -29,11 +29,11 @@ type ComponentWorkType = {
 
 type WorkDataType = {
     label: ?string,
-    type: ?string,
-    jira: ?string,
+    type?: ?string,
+    jira?: ?string,
     people: Array<string>,
     components: Array<string>,
-    dueDate: ?string
+    dueDate?: ?string
 }
 
 export type { WorkType, WorkManifestType, ComponentWorkType, WorkDataType }
