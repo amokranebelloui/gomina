@@ -1,8 +1,11 @@
-
+// @flow
 import React from 'react'
-import PropTypes from 'prop-types'
 
-function DateTime(props) {
+type Props = {
+    date?: ?Date | ?number | ?string
+}
+
+function DateTime(props: Props) {
     if (props.date) {
         const date = new Date(props.date);
         return ([
@@ -19,9 +22,5 @@ function DateTime(props) {
         return null
     }
 }
-
-DateTime.propTypes = {
-    date: PropTypes.number
-};
 
 export {DateTime}

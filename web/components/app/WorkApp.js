@@ -159,10 +159,10 @@ class WorkApp extends React.Component {
                                             <div>
                                                 <div style={{float: 'right'}}>
                                                     {!workDetail.work.archived && [
-                                                        <Secure permission="work.manage">
+                                                        <Secure key="Edit" permission="work.manage">
                                                             <button onClick={() => this.editWork()}>Edit</button>
                                                         </Secure>,
-                                                        <Secure permission="work.archive">
+                                                        <Secure key="Archive" permission="work.archive">
                                                             <button onClick={() => this.archiveWork()}>Archive</button>
                                                         </Secure>
                                                     ]}
@@ -190,7 +190,7 @@ class WorkApp extends React.Component {
                                     </div>
                                 }
                                 {workDetail.details && workDetail.details.map(d =>
-                                    <div>
+                                    <div key={d.componentId}>
                                         <h3>{d.componentId}</h3>
                                         <CommitLog commits={d.commits} />
                                     </div>
@@ -237,7 +237,8 @@ class WorkApp extends React.Component {
                         </Secure>
 
                         <table width="100%">
-                            <tr>
+                            <tbody>
+                            <tr key="header">
                                 <td><b>id</b></td>
                                 <td><b>label</b></td>
                                 <td><b>type</b></td>
@@ -249,7 +250,7 @@ class WorkApp extends React.Component {
                                 <td><b>due</b></td>
                             </tr>
                             {workList.map(work =>
-                                <tr style={{opacity: work.archived ? .5 : 1}}>
+                                <tr key={work.id} style={{opacity: work.archived ? .5 : 1}}>
                                     <td>
                                         <Link to={"/work/" + work.id}>{work.id}</Link>
                                     </td>
@@ -263,13 +264,13 @@ class WorkApp extends React.Component {
                                     </td>
                                     <td>{work.status}</td>
                                     <td>
-                                        {work.components.map(p =>
-                                            <span><Link to={"/component/" + p.id}>{p.label}</Link> </span>
+                                        {work.components.map(c =>
+                                            <span key={c.id}><Link to={"/component/" + c.id}>{c.label}</Link> </span>
                                         )}
                                     </td>
                                     <td>
                                         {work.people.map(p =>
-                                            <span><Link to={"/user/" + p.id}>{p.shortName}</Link> </span>
+                                            <span key={p.id}><Link to={"/user/" + p.id}>{p.shortName}</Link> </span>
                                         )}
                                     </td>
                                     <td>
@@ -280,6 +281,7 @@ class WorkApp extends React.Component {
                                     </td>
                                 </tr>
                             )}
+                            </tbody>
                         </table>
                     </div>
                 </PrimarySecondaryLayout>
@@ -305,7 +307,7 @@ function Work(props) {
             <hr/>
             <div>
                 {work.people.map(p =>
-                    <span style={{color: 'blue'}}>
+                    <span key={p.id} style={{color: 'blue'}}>
                         <Link to={"/user/" + p.id}>{p.shortName} </Link>
                     </span>
                 )}
@@ -313,7 +315,7 @@ function Work(props) {
             <hr/>
             <div>
                 {work.components.map(c =>
-                    <span style={{color: 'blue'}}>{c.label} </span>
+                    <span key={c.id} style={{color: 'blue'}}>{c.label} </span>
                 )}
             </div>
             <div><b>Created </b><DateTime date={work.creationDate} /></div>

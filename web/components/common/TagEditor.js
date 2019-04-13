@@ -119,8 +119,8 @@ class TagEditor extends React.Component<Props, State> {
                  onMouseEnter={() => this.onEnter()}
                  onMouseLeave={() => this.onLeave()}>
                 {tags.map(t =>
-                    <span onMouseEnter={() => this.onSelected(t)}>
-                    <Badge key={this.id(t)} value={this.label(t)}>
+                    <span key={this.id(t)} onMouseEnter={() => this.onSelected(t)}>
+                    <Badge value={this.label(t)}>
                         {this.label(t)}
                         {this.isSelected(t) &&
                             <input type="button" value="-"
