@@ -28,4 +28,31 @@ ComponentSort.propTypes = {
     onSortChanged: PropTypes.func
 };
 
-export { ComponentSort }
+function sortComponentsBy(components, sortBy) {
+    let result;
+    switch (sortBy) {
+        case 'alphabetical' :
+            result = components.sort((a, b) => a.label > b.label ? 1 : -1);
+            break;
+        case 'loc' :
+            result = components.sort((a, b) => (b.loc - a.loc) * 10 + (a.label > b.label ? 1 : -1));
+            break;
+        case 'coverage' :
+            result = components.sort((a, b) => (b.coverage - a.coverage) * 10 + (a.label > b.label ? 1 : -1));
+            break;
+        case 'last-commit' :
+            result = components.sort((a, b) => (b.lastCommit - a.lastCommit) * 10 + (a.label > b.label ? 1 : -1));
+            break;
+        case 'commit-activity' :
+            result = components.sort((a, b) => (b.commitActivity - a.commitActivity) * 10 + (a.label > b.label ? 1 : -1));
+            break;
+        case 'unreleased-changes' :
+            result = components.sort((a, b) => (b.changes - a.changes) * 10 + (a.label > b.label ? 1 : -1));
+            break;
+        default :
+            result = components
+    }
+    return result;
+}
+
+export { ComponentSort, sortComponentsBy }

@@ -8,7 +8,7 @@ import {Container} from "../common/Container";
 import {TagCloud} from "../common/TagCloud";
 import {Well} from "../common/Well";
 import {flatMap} from "../common/utils";
-import {ComponentSort} from "../component/ComponentSort";
+import {ComponentSort, sortComponentsBy} from "../component/ComponentSort";
 import {extendSystems} from "../system/system-utils";
 import {AddComponent} from "../component/AddComponent";
 
@@ -131,7 +131,7 @@ class ComponentsApp extends React.Component {
         ls.set('components.tags', values.join(','))
     }
     render() {
-        const components = sortComponentsBy(this.state.sortBy, this.state.components);
+        const components = sortComponentsBy(this.state.components, this.state.sortBy);
         const types = flatMap(this.state.components, p => [p.type]);
         const systems = extendSystems(flatMap(this.state.components, p => p.systems));
         //const systems = this.state.systems;
@@ -213,33 +213,6 @@ function matchesList(componentValues, selectedValues) {
         return (selectedValues||[]).find(value => values.indexOf(value) !== -1);
     }
     return true
-}
-
-function sortComponentsBy(sortBy, components) {
-    let result;
-    switch (sortBy) {
-        case 'alphabetical' :
-            result = components.sort((a, b) => a.label > b.label ? 1 : -1);
-            break;
-        case 'loc' :
-            result = components.sort((a, b) => (b.loc - a.loc) * 10 + (a.label > b.label ? 1 : -1));
-            break;
-        case 'coverage' :
-            result = components.sort((a, b) => (b.coverage - a.coverage) * 10 + (a.label > b.label ? 1 : -1));
-            break;
-        case 'last-commit' :
-            result = components.sort((a, b) => (b.lastCommit - a.lastCommit) * 10 + (a.label > b.label ? 1 : -1));
-            break;
-        case 'commit-activity' :
-            result = components.sort((a, b) => (b.commitActivity - a.commitActivity) * 10 + (a.label > b.label ? 1 : -1));
-            break;
-        case 'unreleased-changes' :
-            result = components.sort((a, b) => (b.changes - a.changes) * 10 + (a.label > b.label ? 1 : -1));
-            break;
-        default :
-            result = components
-    }
-    return result;
 }
 
 export {ComponentsApp};
