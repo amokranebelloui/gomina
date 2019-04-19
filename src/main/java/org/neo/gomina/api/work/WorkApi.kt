@@ -39,7 +39,7 @@ data class IssueRef(val issue: String, val issueUrl: String?)
 data class WorkManifestDetail(val work: WorkDetail?,
                               val details: List<ComponentWorkDetail> = emptyList())
 
-data class ComponentWorkDetail(val componentId: String, val commits: List<CommitDetail>)
+data class ComponentWorkDetail(val componentId: String, val scmType: String?, val commits: List<CommitDetail>)
 
 /*
 data class CommitDetail(
@@ -210,7 +210,7 @@ class WorkApi {
                             logger.error("", e)
                             null
                         }
-                        ComponentWorkDetail(component.id, commits ?: emptyList())
+                        ComponentWorkDetail(component.id, component.scm?.type, commits ?: emptyList())
                     }
             val workDetail = work?.toWorkDetail(issueTrackerUrl,
                     work.people.mapNotNull { userMap[it] },

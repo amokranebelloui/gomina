@@ -320,7 +320,7 @@ class WorkApp extends React.Component<Props, State> {
                             (workDetail.work || d.commits.length > 0) &&
                                 <div key={d.componentId}>
                                     <h3>{d.componentId}</h3>
-                                    <CommitLog commits={this.commitsNotInEnv(d.commits)} highlightedIssues={highlightedIssues} />
+                                    <CommitLog type={d.scmType} commits={this.commitsNotInEnv(d.commits)} highlightedIssues={highlightedIssues} />
                                 </div>
                         )}
                         </div>

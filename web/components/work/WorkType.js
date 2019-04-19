@@ -27,7 +27,8 @@ type WorkManifestType = {
 }
 
 type ComponentWorkType = {
-    componentId: string, 
+    componentId: string,
+    scmType?: ?string,
     commits: Array<any> // FIXME Replace by CommitDetail
 }
 
