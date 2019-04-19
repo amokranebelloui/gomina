@@ -2,6 +2,7 @@ package org.neo.gomina.integration.events
 
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.events.EventsProviderFactory
+import org.neo.gomina.dummy.DummyEventsProviderConfig
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProviderConfig
 import org.neo.gomina.integration.monitoring.MonitoringEventsProviderConfig
 import org.neo.gomina.model.event.Events
@@ -29,6 +30,7 @@ class EventsService {
             when (it) {
                 is MonitoringEventsProviderConfig -> factory.create(it)
                 is ElasticEventsProviderConfig -> factory.create(it)
+                is DummyEventsProviderConfig -> factory.create(it)
                 else -> null
             }
         }
@@ -44,6 +46,7 @@ class EventsService {
         val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
         eventProviders.forEach {
             try {
+                logger.error("Reload events for '${it.name()}'")
                 events.save(it.events(since), it.name())
             }
             catch (e: Exception) {

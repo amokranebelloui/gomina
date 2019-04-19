@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.dummy.DummyEventsProviderConfig
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProviderConfig
 import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.monitoring.MonitoringEventsProviderConfig
@@ -23,9 +24,10 @@ data class WorkConfig(var referenceEnv: String = "")
 data class MonitoringConfig(var timeout: Int = 5)
 data class EventsConfig(
         var elasticSearch: List<ElasticEventsProviderConfig> = emptyList(),
-        var internalMonitoring: List<MonitoringEventsProviderConfig> = emptyList()
+        var internalMonitoring: List<MonitoringEventsProviderConfig> = emptyList(),
+        var dummy: List<DummyEventsProviderConfig> = emptyList()
 ) {
-    fun all() = internalMonitoring + elasticSearch
+    fun all() = internalMonitoring + elasticSearch + dummy
 }
 
 data class Config (

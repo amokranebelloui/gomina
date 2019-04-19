@@ -35,6 +35,9 @@ events:
     - id: 'logs'
       host: 'localhost'
       port: 9300
+  dummy:
+    - id: 'dummy'
+      file: 'datadummy/events.json'
 
 jenkins:
   servers:

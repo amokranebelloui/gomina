@@ -1,0 +1,14 @@
+// @formatter:off
+[
+  {
+    "id": "dummy1",
+    "timestamp": "2019-04-18T09:13:50.526Z",
+    "type": "release",
+    "message": "Release order to UAT",
+    "envId": "UAT",
+    "instanceId": "order1",
+    "component": "x.oms.vac:voms-ordermanager",
+    "version": "2.1.1"
+  }
+]
+// @formatter:on

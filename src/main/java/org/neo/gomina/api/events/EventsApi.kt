@@ -8,6 +8,8 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.common.toDateUtc
+import org.neo.gomina.dummy.DummyEventsProvider
+import org.neo.gomina.dummy.DummyEventsProviderConfig
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProvider
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProviderConfig
 import org.neo.gomina.integration.events.EventsService
@@ -15,8 +17,6 @@ import org.neo.gomina.integration.monitoring.MonitoringEventsProvider
 import org.neo.gomina.integration.monitoring.MonitoringEventsProviderConfig
 import org.neo.gomina.model.event.Event
 import org.neo.gomina.model.event.Events
-import org.neo.gomina.model.event.EventsProvider
-import org.neo.gomina.model.event.EventsProviderConfig
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.*
@@ -106,6 +106,7 @@ class EventsApi {
 interface EventsProviderFactory {
     fun create(config: MonitoringEventsProviderConfig): MonitoringEventsProvider
     fun create(config: ElasticEventsProviderConfig): ElasticEventsProvider
+    fun create(config: DummyEventsProviderConfig): DummyEventsProvider
 }
 
 
