@@ -16,6 +16,7 @@ import javax.inject.Inject
 
 data class InstanceRealTime (
         var env: String? = null ,
+        var service: String? = null ,
         var id: String? = null, // Unique by env
         var name: String? = null ,// X Replication
         var participating: Boolean = false,
@@ -63,8 +64,8 @@ class NotificationsApi {
 
     fun start() {
         val mapper = ObjectMapper()
-        monitoring.onMessage { env, instanceId, oldValues, newValues ->
-            val instanceRT = InstanceRealTime(env = env, id = instanceId, name = instanceId)
+        monitoring.onMessage { env, service, instanceId, oldValues, newValues ->
+            val instanceRT = InstanceRealTime(env = env, service = service, id = instanceId, name = instanceId)
             instanceRT.applyRealTime(newValues)
             try {
                 val message = mapper.writeValueAsString(instanceRT)

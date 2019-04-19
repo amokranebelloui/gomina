@@ -2,6 +2,7 @@ package org.neo.gomina.model.monitoring
 
 import com.google.inject.name.Named
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.model.inventory.Service
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.ConcurrentHashMap
@@ -16,7 +17,7 @@ val String?.asLong: Long? get() = this.clean()?.toLong()
 val String?.asBoolean: Boolean? get() = this.clean()?.toBoolean()
 val String?.asTime: LocalDateTime? get() = this.clean()?.let { LocalDateTime.parse(it, DateTimeFormatter.ISO_DATE_TIME) }
 
-typealias MonitoringEventListener = (env: String, instanceId: String, oldValues: RuntimeInfo?, newValues: RuntimeInfo) -> Unit
+typealias MonitoringEventListener = (env: String, service: String?, instanceId: String, oldValues: RuntimeInfo?, newValues: RuntimeInfo) -> Unit
 
 class Monitoring {
 
@@ -47,7 +48,7 @@ class Monitoring {
                                     delayed = true,
                                     process = indicators.process.copy(status = ServerStatus.OFFLINE)
                             )
-                            notify(env, instanceId, delay, touch = false)
+                            notify(env, indicators.service, instanceId, delay, touch = false)
                         }
                     }
                 }
@@ -56,7 +57,7 @@ class Monitoring {
         }
     }
 
-    fun notify(env: String, instanceId: String, newValues: RuntimeInfo, touch: Boolean = true) {
+    fun notify(env: String, service: String?, instanceId: String, newValues: RuntimeInfo, touch: Boolean = true) {
         try {
             val envMonitoring = topology.getOrPut(env) { ConcurrentHashMap() }
             val oldValues = envMonitoring[instanceId]
@@ -79,7 +80,7 @@ class Monitoring {
             envMonitoring.put(instanceId, newValues)
 
             if (rt) {
-                listeners.forEach { listener -> listener(env, instanceId, oldValues, newValues) }
+                listeners.forEach { listener -> listener(env, service, instanceId, oldValues, newValues) }
             }
         }
         catch (e: Exception) {

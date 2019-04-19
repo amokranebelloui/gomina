@@ -25,7 +25,11 @@ data class Service(
         val activeCount: Int? = 1,
         val componentId: String? = null,
         val instances: List<Instance> = emptyList()
-)
+) {
+    companion object {
+        fun safe(service: String?) = service ?: "x"
+    }
+}
 
 data class Instance(
         val id: String,

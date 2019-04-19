@@ -50,4 +50,8 @@ Contexts, entities, schemas
 - `hmset work:facilitation label "Facilitation" type "Dev" jira "DEMO-671" people "amokrane.belloui" components "facilitation, order" status DEV`
 - `hmset work:refacto label "refacto 1" type "Dev" people "amokrane.belloui, john.doe" components "libbus" status COMPLETED`
 
+### Events (6)
+- event:<source>:<eventId> (hash) timestamp type message \[env instance component version\]
+
+ 
 

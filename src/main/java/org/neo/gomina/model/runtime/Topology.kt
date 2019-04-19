@@ -69,7 +69,7 @@ class Topology {
 
         return merge(definition, monitoring)
                 .map { (id, instance, indicators) ->
-                    val svc = instance?.first?.svc ?: indicators?.service ?: "x"
+                    val svc = Service.safe(instance?.first?.svc ?: indicators?.service)
                     val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
                     val component = service.componentId?.let { componentRepo.get(it) }
 

@@ -10,9 +10,11 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.common.toDateUtc
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProvider
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProviderConfig
+import org.neo.gomina.integration.events.EventsService
 import org.neo.gomina.integration.monitoring.MonitoringEventsProvider
 import org.neo.gomina.integration.monitoring.MonitoringEventsProviderConfig
 import org.neo.gomina.model.event.Event
+import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.event.EventsProvider
 import org.neo.gomina.model.event.EventsProviderConfig
 import java.time.LocalDate
@@ -45,12 +47,10 @@ class EventsApi {
     val vertx: Vertx
     val router: Router
 
-    @Inject lateinit var factory: EventsProviderFactory
-    @JvmSuppressWildcards @Inject lateinit var config: List<EventsProviderConfig>
+    @Inject lateinit var eventsService: EventsService
+    @Inject lateinit var events: Events
 
     private val mapper = ObjectMapper()
-
-    lateinit var eventProviders: List<EventsProvider>
 
     @Inject
     constructor(vertx: Vertx) {
@@ -60,17 +60,6 @@ class EventsApi {
         router.get("/:envId").handler(this::eventsForEnv)
     }
 
-    @Inject
-    fun init() {
-        eventProviders = config.mapNotNull {
-            when (it) {
-                is MonitoringEventsProviderConfig -> factory.create(it)
-                is ElasticEventsProviderConfig -> factory.create(it)
-                else -> null
-            }
-        }
-    }
-    
     private fun eventsForEnv(ctx: RoutingContext) {
         try {
             vertx.executeBlocking({future: Future<Pair<List<EventDetail>, List<String>>> ->
@@ -78,8 +67,11 @@ class EventsApi {
                 logger.info("Events for $envId")
                 val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
 
+                eventsService.reload()
+
                 val errors = mutableListOf<String>()
-                val events = eventProviders()
+                /*
+                val events = eventsService.eventProviders()
                         .flatMap {
                             try {
                                 it.events(since)
@@ -88,6 +80,11 @@ class EventsApi {
                                 emptyList<Event>()
                             }
                         }
+                        .sortedByDescending { it.timestamp }
+                        .map { it.toEventDetail() }
+                */
+                val events = events.all()
+                        .filter { it.timestamp > since }
                         .sortedByDescending { it.timestamp }
                         .map { it.toEventDetail() }
                 future.complete(events to errors)
@@ -102,10 +99,6 @@ class EventsApi {
             logger.error("Cannot get instances", e)
             ctx.fail(500)
         }
-    }
-
-    private fun eventProviders(): List<EventsProvider> {
-        return eventProviders
     }
     
 }

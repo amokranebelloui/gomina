@@ -1,6 +1,7 @@
 package org.neo.gomina.integration.zmqmonitoring
 
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.RuntimeInfo
 import org.zeromq.ZMQ
@@ -64,7 +65,7 @@ class ZmqMonitorThread(
                 val message = MessageParser.parse(obj)
                 val info = monitoringMapper.map(message.instanceId, message.indicators)
                 info?.let {
-                    monitoring.notify(message.env, message.instanceId, info, touch = true)
+                    monitoring.notify(message.env, info.service, message.instanceId, info, touch = true)
                 }
                 logger.trace(message)
             }

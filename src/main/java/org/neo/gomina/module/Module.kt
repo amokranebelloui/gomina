@@ -19,6 +19,7 @@ import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.api.users.UsersApi
 import org.neo.gomina.api.work.WorkApi
+import org.neo.gomina.integration.events.EventsService
 import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.JenkinsService
@@ -39,6 +40,7 @@ import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.EnrichDependencies
 import org.neo.gomina.model.dependency.InteractionProviders
 import org.neo.gomina.model.dependency.InteractionsRepository
+import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.HostUtils
 import org.neo.gomina.model.host.Hosts
@@ -139,6 +141,10 @@ class GominaModule : AbstractModule() {
         install(FactoryModuleBuilder()
                 //.implement(EventsProvider::class.java, ElasticEvents::class.java)
                 .build(EventsProviderFactory::class.java))
+
+        // Events
+        bind(EventsService::class.java).`in`(Scopes.SINGLETON)
+        bind(Events::class.java).to(RedisEvents::class.java).`in`(Scopes.SINGLETON)
 
         // Hosts
         bind(HostUtils::class.java).`in`(Scopes.SINGLETON)

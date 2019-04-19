@@ -10,8 +10,16 @@ data class Event (
         // Optional metadata
         val envId: String? = null,
         val instanceId: String? = null,
+        val componentId: String? = null,
         val version: String? = null
 )
+
+interface Events {
+    fun all(): List<Event>
+    fun forEnv(envId: String): List<Event>
+    fun forComponent(componentId: String): List<Event>
+    fun save(events: List<Event>, source: String)
+}
 
 interface EventsProviderConfig
 
