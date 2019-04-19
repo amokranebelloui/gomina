@@ -1,7 +1,7 @@
 // @flow
 import axios from "axios/index";
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
-import React from "react";
+import React, {Fragment} from "react";
 import {Well} from "../common/Well";
 import Link from "react-router-dom/es/Link";
 import {CommitLog} from "../commitlog/CommitLog";
@@ -18,12 +18,17 @@ import type {ComponentRefType} from "../component/ComponentType";
 import type {UserRefType} from "../misc/UserType";
 import type {WorkDataType, WorkManifestType, WorkType} from "../work/WorkType";
 import {Issue} from "../misc/Issue";
+import type {EnvType} from "../environment/Environment";
+import type {CommitType} from "../commitlog/CommitLog";
 
 type Props = {
     match: any
 }
 
 type State = {
+    envs: Array<EnvType>,
+    refEnv: ?string,
+    commitLimit: number,
     components: Array<ComponentRefType>,
     users: Array<UserRefType>,
     search: string,
@@ -43,6 +48,9 @@ class WorkApp extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
         this.state = {
+            envs: [],
+            refEnv: ls.get('work.list.ref.env'),
+            commitLimit: ls.get('work.list.commit.limit') || 100,
             components: [],
             users: [],
             search: ls.get('work.list.search') || '',
@@ -86,6 +94,13 @@ class WorkApp extends React.Component<Props, State> {
         save && ls.set('work.list.commit.highlight', commitHighlight)
     }
 
+    retrieveEnvs() {
+        const thisComponent = this;
+        axios.get('/data/envs')
+            .then(response => thisComponent.setState({envs: response.data}))
+            .catch(error => thisComponent.setState({envs: []}));
+    }
+    
     retrieveWorkList() {
         console.log("workApp Retr Hosts ... ");
         const thisComponent = this;
@@ -115,6 +130,7 @@ class WorkApp extends React.Component<Props, State> {
 
     componentDidMount() {
         console.info("workApp !did mount ", this.props.match.params.id);
+        this.retrieveEnvs();
         this.retrieveWorkList();
         this.retrieveWorkDetail(this.props.match.params.id);
         this.retrieveComponentRefs();
@@ -125,10 +141,19 @@ class WorkApp extends React.Component<Props, State> {
         const newWorkId = nextProps.match.params.id;
         console.info("workApp !did willRecProps ", newWorkId, nextProps);
         this.setState({workId: newWorkId});
-        if (this.props.match.params.id !== newWorkId && newWorkId) {
-            this.setState({commitHighlight: ls.get('work.list.commit.highlight') || 'all',});
+        if (this.props.match.params.id !== newWorkId) {
+            this.setState({commitHighlight: ls.get('work.list.commit.highlight') || 'all'});
             this.retrieveWorkDetail(newWorkId)
         }
+    }
+
+    changeRefEnv(refEnv: string) {
+        this.setState({"refEnv": refEnv});
+        ls.set('work.list.ref.env', refEnv)
+    }
+    changeCommitLimit(limit: string) {
+        this.setState({"commitLimit": limit && parseInt(limit) || 0});
+        ls.set('work.list.commit.limit', limit)
     }
 
     clearNewWorkState() {
@@ -188,6 +213,19 @@ class WorkApp extends React.Component<Props, State> {
             .catch((error) => console.log("Work unarchive error", error.response));
     }
 
+    commitsNotInEnv(commits: Array<CommitType>): Array<CommitType> {
+        let index = null;
+        for (let i = 0; i < commits.length; i++) {
+            const commit = commits[i];
+            if (commit.instances && commit.instances.filter(i => i.env === this.state.refEnv).length > 0 ||
+                commit.deployments && commit.deployments.filter(i => i.env === this.state.refEnv).length > 0) {
+                index = i;
+            }
+        }
+        const count = index ? Math.min(index + 1, this.state.commitLimit) : this.state.commitLimit;
+        return commits.slice(0, count);
+    }
+
     render()  {
         const workList = filterWork(this.state.workList || [], this.state.search);
         const workDetail = this.state.workDetail;
@@ -203,7 +241,18 @@ class WorkApp extends React.Component<Props, State> {
             <AppLayout title="Work List">
                 <PrimarySecondaryLayout>
                     <div>
-                        {workDetail && workDetail.work ?
+                        {!(workDetail && workDetail.work) &&
+                            <Fragment>
+                                <div>
+                                    Select a Work to see details<br/>
+                                    <li>Components involved</li>
+                                    <li>Commit logs</li>
+                                    <li>etc...</li>
+                                </div>
+                                <hr/>
+                            </Fragment>
+                        }
+                        {workDetail && workDetail.work &&
                             <div>
                                 <div>
                                     {!this.state.workEdition &&
@@ -239,37 +288,42 @@ class WorkApp extends React.Component<Props, State> {
                                     </div>
                                     }
                                 </div>
-
-                                <div>
+                            </div>
+                        }
+                        <div>
+                            {workDetail && workDetail.work &&
+                                <Fragment>
                                     <button disabled={this.state.commitHighlight === 'all'} onClick={e => this.setCommitHighlight('all')}>ALL</button>
                                     <button disabled={this.state.commitHighlight === 'work'} onClick={e => this.setCommitHighlight('work')}>WORK</button>
                                     {workDetail.work.issues.map(issue =>
                                         <button key={issue.issue} disabled={this.state.commitHighlight === issue.issue} onClick={e => this.setCommitHighlight(issue.issue, false)}>{issue.issue}</button>
                                     )}
-                                    <br/>
-                                    Highlighted {highlightedIssues}
+                                </Fragment>
+                            }
+                            <div style={{float: 'right', display: 'inline-block'}}>
+                                {this.state.refEnv}
+                                <select name="type" value={this.state.refEnv}
+                                        onChange={e => this.changeRefEnv(e.target.value)}
+                                        style={{width: '150px', fontSize: 9}}>
+                                    <option value=""></option>
+                                    {this.state.envs.map(e =>
+                                        <option value={e.env}>{e.description}</option>
+                                    )}
+                                </select>
+                                <input type="text" value={this.state.commitLimit}
+                                       onChange={e => this.changeCommitLimit(e.target.value)}
+                                       style={{width: '30px'}} />
+                            </div>
+                        </div>
+                        <div>
+                        {workDetail && workDetail.details && workDetail.details.map(d =>
+                            (workDetail.work || d.commits.length > 0) &&
+                                <div key={d.componentId}>
+                                    <h3>{d.componentId}</h3>
+                                    <CommitLog commits={this.commitsNotInEnv(d.commits)} highlightedIssues={highlightedIssues} />
                                 </div>
-
-                                {workDetail.details && workDetail.details.map(d =>
-                                    <div key={d.componentId}>
-                                        <h3>{d.componentId}</h3>
-                                        <CommitLog commits={d.commits} highlightedIssues={highlightedIssues} />
-                                    </div>
-                                )}
-                            </div>
-                            :
-                            <div>
-                                Select a Work to see details<br/>
-                                <li>Components involved</li>
-                                <li>Commit logs</li>
-                                <li>etc...</li>
-
-                                <Autocomplete suggestions={this.state.components}
-                                              idProperty="id" labelProperty="label" />
-                                <Autocomplete suggestions={this.state.users}
-                                              idProperty="id" labelProperty="shortName" />
-                            </div>
-                        }
+                        )}
+                        </div>
                     </div>
                     <div>
                         <Well block>

@@ -23,7 +23,7 @@
   {
     "url": "dummy://OMS/Server/tradex-basketmanager",
     "log": [
-      {"revision": "35990", "author": "amokrane", "message": "Big refacto", "version": "5.1.3-SNAPSHOT"},
+      {"revision": "35990", "author": "amokrane", "message": "Big refacto", "version": "5.1.4-SNAPSHOT"},
       {"revision": "35931", "author": "amokrane", "message": "[maven-release-plugin] 5.1.4-SNAPSHOT", "version": "5.1.4-SNAPSHOT"},
       {"revision": "35930", "author": "amokrane", "message": "[maven-release-plugin] prepare release 5.1.3", "version": "5.1.3"},
       {"revision": "35490", "author": "amokrane", "message": "[JIRA-5409] feature 2 (bis)"},
@@ -47,8 +47,8 @@
   {
     "url": "dummy://OMS/Server/tradex-ordermanager",
     "log": [
-      {"revision": "35490", "author": "amokrane", "message": "[maven-release-plugin] 5.1.4-SNAPSHOT", "version": "5.1.4-SNAPSHOT"},
-      {"revision": "35489", "author": "amokrane", "message": "[maven-release-plugin] prepare release 5.1.3", "version": "5.1.3"},
+      {"revision": "35490", "author": "amokrane", "message": "[maven-release-plugin] 2.1.2-SNAPSHOT", "version": "2.1.2-SNAPSHOT"},
+      {"revision": "35489", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.1.1", "version": "2.1.1"},
       {"revision": "35488", "author": "amokrane", "message": "[JIRA-5409] feature 2"},
       {"revision": "35002", "author": "amokrane", "message": "[DEMO-671]Handle Order Lifecycle"}
     ]

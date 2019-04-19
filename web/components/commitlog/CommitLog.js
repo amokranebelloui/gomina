@@ -24,7 +24,7 @@ type CommitType = {
 }
 type InstanceRefType = {
     id: string,
-    env: number,
+    env: string,
     name: string,
     running: VersionType,
     deployed: VersionType
@@ -208,3 +208,4 @@ function addToDeployments(line: Object, i: Object) { // Deployed but not yet run
 }
 */
 export {CommitLog};
+export type {CommitType}

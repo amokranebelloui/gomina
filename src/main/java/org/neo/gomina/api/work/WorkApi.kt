@@ -181,9 +181,9 @@ class WorkApi {
             val componentMap = componentRepo.getAll().map { it.toComponentRef() }.associateBy { it.id }
 
             val work = workId?.let { workList.get(it) }
-            val detail = work?.components
-                    ?.mapNotNull { componentRepo.get(it) }
-                    ?.map { component ->
+            val components = work?.components?.mapNotNull { componentRepo.get(it) } ?: componentRepo.getAll()
+            val detail = components
+                    .map { component ->
                         val commits = try {
                             component.scm?.let {scm ->
                                 scmService.getTrunk(scm)
@@ -212,7 +212,6 @@ class WorkApi {
                         }
                         ComponentWorkDetail(component.id, commits ?: emptyList())
                     }
-                    ?: emptyList()
             val workDetail = work?.toWorkDetail(issueTrackerUrl,
                     work.people.mapNotNull { userMap[it] },
                     work.components.mapNotNull { componentMap[it] }

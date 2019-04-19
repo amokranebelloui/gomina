@@ -2,35 +2,35 @@
 
 - id: uat1
   env: 'UAT'
-  name: 'viewkernel1'
+  name: 'order1'
   TYPE: 'app'
-  SERVICE: 'viewkernel'
+  SERVICE: 'order'
   HOST: '10.2.29.42'
-  folder: '/home/svc/uat-viewkernel'
-  VERSION: '0.2.0'
-  REVISION: 34561
+  folder: '/home/svc/uat-order'
+  VERSION: '2.1.1'
+  REVISION: 35489
   STATUS: 'LIVE'
   LEADER: true
 
 - id: uat2
   env: 'UAT'
-  name: 'viewkernel2'
+  name: 'order2'
   TYPE: 'app'
-  SERVICE: 'viewkernel'
+  SERVICE: 'order'
   HOST: '10.2.29.43'
-  folder: '/home/svc/uat-viewkernel'
-  VERSION: '0.2.0'
-  REVISION: 34561
+  folder: '/home/svc/uat-order'
+  VERSION: '2.1.1'
+  REVISION: 35489
   STATUS: 'LIVE'
   LEADER: true
 
 - id: 7
   env: 'UAT'
-  name: 'kernel'
+  name: 'referential1'
   TYPE: 'app'
-  SERVICE: 'kernel'
+  SERVICE: 'referential'
   HOST: '10.2.29.42'
-  folder: '/home/svc/uat-kernel'
+  folder: '/home/svc/uat-referential'
   VERSION: '2.3.0-SNAPSHOT'
   REVISION: 35816
   STATUS: 'LIVE'
@@ -41,11 +41,11 @@
 
 - id: 8
   env: 'UAT'
-  name: 'kernel2'
+  name: 'referential2'
   TYPE: 'app'
-  SERVICE: 'kernel'
+  SERVICE: 'referential'
   HOST: '10.2.29.41'
-  folder: '/home/svc/uat-kernel'
+  folder: '/home/svc/uat-referential'
   VERSION: '2.3.0-SNAPSHOT'
   REVISION: 35815
   STATUS: 'LIVE'
@@ -56,12 +56,12 @@
 
 - id: 9
   env: 'UAT'
-  name: 'basket'
+  name: 'basket1'
   TYPE: 'app'
   SERVICE: 'basket'
   HOST: '10.2.3.58'
   folder: '/home/svc/uat-basket'
-  VERSION: '5.1.3-SNAPSHOT'
+  VERSION: '5.1.3'
   REVISION: 35490
   STATUS: 'LIVE'
 
@@ -76,7 +76,7 @@
   SERVICE: 'basket'
   HOST: '10.2.3.56'
   folder: '/home/svc/uat-basket'
-  VERSION: '5.1.3-SNAPSHOT'
+  VERSION: '5.1.3'
   REVISION: 35488
   STATUS: 'DOWN'
 
@@ -86,11 +86,11 @@
 
 - id: 11
   env: 'UAT'
-  name: 'fixintbx1'
+  name: 'fixin1'
   TYPE: 'app'
-  SERVICE: 'fixintbx'
+  SERVICE: 'fixin'
   HOST: '10.2.3.58'
-  folder: '/home/svc/uat-fixintbx'
+  folder: '/home/svc/uat-fixin'
   VERSION: '0.9.0-SNAPSHOT'
   REVISION: 34433
   STATUS: 'LIVE'
