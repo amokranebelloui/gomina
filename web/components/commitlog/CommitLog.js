@@ -88,7 +88,7 @@ class CommitLog extends React.Component<Props> {
                                 </td>
                                 <td style={{verticalAlign: 'middle'}}>
                                     <span style={{verticalAlign: 'middle'}}>
-                                        {(commit.message || '') + ' ' || '-'}
+                                        <CommitMessage message={commit.message} issues={commit.issues} />
                                     </span>
                                     <span className="items" style={{float: 'right'}}>
                                         {(commit.instances||[]).map(instance =>
@@ -97,10 +97,6 @@ class CommitLog extends React.Component<Props> {
                                         {(commit.deployments||[]).map(instance =>
                                             <Badge key={instance.id} backgroundColor="#EEEEAA">{instance.env} {instance.name} <VersionLabel version={instance.deployed} /></Badge>
                                         )}
-                                        {(commit.issues||[]).map(issue =>
-                                            <Badge key={issue.issue} backgroundColor="#c1e2ff"><Issue issue={issue} /></Badge>
-                                        )}
-
                                     </span>
                                     {commit.version &&
                                     <span className="items" style={{float: 'right'}}>
@@ -120,7 +116,30 @@ class CommitLog extends React.Component<Props> {
             )
         }
         return null
+        /*
+        {(commit.issues||[]).map(issue =>
+            <Badge key={issue.issue} backgroundColor="#c1e2ff"><Issue issue={issue} /></Badge>
+        )}
+        */
     }
+}
+
+function CommitMessage(props: {message: ?string, issues: ?Array<IssueRefType>}) {
+    if (props.message && props.issues) {
+        const issuesRegexp = new RegExp('(' + props.issues.map(i => i.issue).join("|") + ')');
+        return (
+            (props.message||'').split(issuesRegexp).map(txt => {
+                const issue = props.issues && props.issues.filter(i => i.issue === txt);
+                if (issue && issue.length > 0) {
+                    return <Badge key={issue[0].issue} backgroundColor="#c1e2ff"><Issue issue={issue[0]} /></Badge>
+                }
+                else {
+                    return txt
+                }
+            })
+        )
+    }
+    return <span>{props.message}</span>
 }
 
 function UserRef(props: {user: UserRefType}) {
