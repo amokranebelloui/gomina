@@ -10,6 +10,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.assistedinject.Assisted
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.event.Event
+import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.event.EventsProvider
 import org.neo.gomina.model.event.EventsProviderConfig
 import java.io.File
@@ -25,6 +26,7 @@ data class DummyEventsProviderConfig(
 class DummyEventsProvider : EventsProvider {
 
     @Inject private lateinit var components: ComponentRepo
+    @Inject private lateinit var events: Events
 
     private val mapper = ObjectMapper(JsonFactory()).registerKotlinModule()
             .registerModule(JodaModule())
@@ -43,21 +45,22 @@ class DummyEventsProvider : EventsProvider {
 
     override fun name() = config.id
 
-    override fun events(since: LocalDateTime): List<Event> {
+    override fun reload(since: LocalDateTime) {
         val map = components.getAll().associateBy { it.maven }
-        val events = mapper.readValue<List<DummyEvent>>(file).map {
-            Event(
-                    id = "${it.timestamp}-dummy",
-                    timestamp = LocalDateTime.parse(it.timestamp, DateTimeFormatter.ISO_DATE_TIME),
-                    type = it.type,
-                    message = it.message,
-                    envId = it.envId,
-                    instanceId = it.instanceId,
-                    componentId = it.component?.let { map[it]?.id },
-                    version = it.version
-            )
-        }
-        return events.filter { it.timestamp > since }
+        val eventsToSave = mapper.readValue<List<DummyEvent>>(file).map {
+                    Event(
+                            id = "${it.timestamp}-dummy",
+                            timestamp = LocalDateTime.parse(it.timestamp, DateTimeFormatter.ISO_DATE_TIME),
+                            type = it.type,
+                            message = it.message,
+                            envId = it.envId,
+                            instanceId = it.instanceId,
+                            componentId = it.component?.let { map[it]?.id },
+                            version = it.version
+                    )
+                }
+                .filter { it.timestamp > since }
+        events.save(eventsToSave, name())
     }
 
 }

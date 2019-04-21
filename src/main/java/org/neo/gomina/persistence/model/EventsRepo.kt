@@ -31,17 +31,35 @@ class RedisEvents : Events {
     override fun all(): List<Event> {
         pool.resource.use { jedis ->
             return jedis.keys("event:*:*").mapNotNull {
-                jedis.hgetAll(it).toEvent(it.substring(it.lastIndexOf(':') + 1))
+                jedis.hgetAll(it).toEvent(it.substring(it.indexOf(':') + 1)?.let { it.substring(it.indexOf(':') + 1) })
             }
         }
     }
 
     override fun forEnv(envId: String): List<Event> {
-        TODO("not implemented")
+        pool.resource.use { jedis ->
+            val pipe = jedis.pipelined()
+            val vals = (
+                    jedis.zrange("events:env:$envId", 0, -1) +
+                    jedis.zrange("events:global", 0, -1)
+                    )
+                    .map { it to pipe.hgetAll("event:$it") }
+            pipe.sync()
+            return vals.map { (idWithSource, data) -> data.get().toEvent(idWithSource.substring(idWithSource.indexOf(':') + 1)) }
+        }
     }
 
     override fun forComponent(componentId: String): List<Event> {
-        TODO("not implemented")
+        pool.resource.use { jedis ->
+            val pipe = jedis.pipelined()
+            val vals = (
+                    jedis.zrange("events:component:$componentId", 0, -1) +
+                    jedis.zrange("events:global", 0, -1)
+                    )
+                    .map { it to pipe.hgetAll("event:$it") }
+            pipe.sync()
+            return vals.map { (idWithSource, data) -> data.get().toEvent(idWithSource.substring(idWithSource.indexOf(':') + 1)) }
+        }
     }
 
     private fun Map<String, String>.toEvent(id: String): Event {
@@ -61,7 +79,8 @@ class RedisEvents : Events {
         pool.resource.use { jedis ->
             val pipe = jedis.pipelined()
             events.forEach { event ->
-                pipe.hmset("event:$source:${event.id}", listOfNotNull(
+                val eventId = event.id.replace(':', '-')
+                pipe.hmset("event:$source:$eventId", listOfNotNull(
                         "timestamp" to event.timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
                         event.type?.let { "type" to it },
                         event.message?.let { "message" to it },
@@ -72,9 +91,11 @@ class RedisEvents : Events {
                 ).toMap())
 
                 val time = Date.from(event.timestamp.atZone(ZoneOffset.UTC).toInstant()).time.toDouble()
-                event.envId?.let { pipe.zadd("events:env:$it", time, event.id) }
-                event.instanceId?.let { pipe.zadd("events:instance:$it", time, event.id) }
-                event.componentId?.let { pipe.zadd("events:component:$it", time, event.id) }
+                val idWithSource = source + ":" + eventId
+                event.envId?.let { pipe.zadd("events:env:$it", time, idWithSource) }
+                event.instanceId?.let { pipe.zadd("events:instance:$it", time, idWithSource) }
+                event.componentId?.let { pipe.zadd("events:component:$it", time, idWithSource) }
+                event.global.let { pipe.zadd("events:global", time, idWithSource) }
             }
             pipe.sync()
         }

@@ -47,7 +47,7 @@ class EventsService {
         eventProviders.forEach {
             try {
                 logger.error("Reload events for '${it.name()}'")
-                events.save(it.events(since), it.name())
+                it.reload(since)
             }
             catch (e: Exception) {
                 logger.error("Cannot reload events for '${it.name()}'", e)

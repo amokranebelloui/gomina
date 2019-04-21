@@ -17,6 +17,7 @@ import {ApiDefinition} from "../component/ApiDefinition";
 import {ApiUsage} from "../component/ApiUsage";
 import {ApiDefinitionEditor} from "../component/ApiDefinitionEditor";
 import {Secure} from "../permission/Secure";
+import {Events} from "../environment/Events";
 
 class ComponentApp extends React.Component {
     
@@ -40,7 +41,9 @@ class ComponentApp extends React.Component {
             branchId: queryParams.branchId,
             branch: null,
             docId: this.props.match.params.docId,
-            doc: null
+            doc: null,
+
+            events: []
             };
         this.retrieveComponent = this.retrieveComponent.bind(this);
         this.retrieveAssociated= this.retrieveAssociated.bind(this);
@@ -330,6 +333,15 @@ class ComponentApp extends React.Component {
                 thisComponent.setState({doc: null});
             });
     }
+    retrieveEvents() {
+        const thisComponent = this;
+        axios.get('/data/events/component/' + this.state.componentId)
+            .then(response => {
+                console.info("events", typeof response.data, response.data.events)
+                thisComponent.setState({events: response.data.events})
+            })
+            .catch(() => thisComponent.setState({events: []}))
+    }
     componentDidMount() {
         console.info("componentApp !mount ", this.props.match.params.id);
 
@@ -360,6 +372,7 @@ class ComponentApp extends React.Component {
             else {
                 this.retrieveBranch(this.state.componentId, null);
             }
+            this.retrieveEvents()
         }
     }
     componentWillReceiveProps(nextProps) {
@@ -381,7 +394,8 @@ class ComponentApp extends React.Component {
             this.retrieveImpacted(newComponent);
             this.retrieveInvocationChain(newComponent);
             this.retrieveCallChain(newComponent);
-            this.selectChainDependency()
+            this.selectChainDependency();
+            this.retrieveEvents()
         }
         if (newComponent && newDoc &&
             (this.props.match.params.id !== newComponent || this.props.match.params.docId !== newDoc)) {
@@ -497,6 +511,11 @@ class ComponentApp extends React.Component {
                         <CallChain chain={this.state.callChain} displayFirst={true}
                                    onDependencySelected={(child, parent) => this.selectCallDependency(child, parent)} />
                         <Dependencies dependencies={this.state.chainSelectedCall} />
+
+                        <h3>Events</h3>
+                        <Container>
+                            <Events events={this.state.events || []} errors={[]} />
+                        </Container>
 
                     </Container>
                 </PrimarySecondaryLayout>

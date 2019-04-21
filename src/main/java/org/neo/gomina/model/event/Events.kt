@@ -8,6 +8,7 @@ data class Event (
         val type: String?,
         val message: String?,
         // Optional metadata
+        val global: Boolean = false,
         val envId: String? = null,
         val instanceId: String? = null,
         val componentId: String? = null,
@@ -25,6 +26,6 @@ interface EventsProviderConfig
 
 interface EventsProvider {
     fun name(): String
-    fun events(since: LocalDateTime): List<Event>
+    fun reload(since: LocalDateTime)
 }
 

@@ -9,6 +9,7 @@ import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.neo.gomina.model.event.Event
+import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.event.EventsProvider
 import org.neo.gomina.model.event.EventsProviderConfig
 import java.time.LocalDateTime
@@ -29,6 +30,7 @@ data class ElasticEventsProviderConfig(
 
 class ElasticEventsProvider : EventsProvider {
 
+    @Inject private lateinit var events: Events
     private val config: ElasticEventsProviderConfig
     private val client: RestHighLevelClient
 
@@ -40,14 +42,14 @@ class ElasticEventsProvider : EventsProvider {
 
     override fun name(): String = config.id
 
-    override fun events(since: LocalDateTime): List<Event> {
-        try {
+    override fun reload(since: LocalDateTime) {
+        val eventsToSave = try {
             val query = SearchRequest().source(SearchSourceBuilder()
                     .query(QueryBuilders.rangeQuery("timestamp").gte(since)))
 
             //val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             val pattern = DateTimeFormatter.ISO_DATE_TIME
-            return client.search(query).hits.hits.mapNotNull {
+            client.search(query).hits.hits.mapNotNull {
                 val map = it.sourceAsMap
                 try {
                     Event(
@@ -59,15 +61,18 @@ class ElasticEventsProvider : EventsProvider {
                             instanceId = map[config.instanceId] as String?,
                             version = map[config.version] as String?
                     )
-                } catch (e: Exception) {
+                }
+                catch (e: Exception) {
                     null
                 }
             }
-        } catch (e: Exception) {
+        }
+        catch (e: Exception) {
             val msg = "Cannot retrieve events from elastic search '${config.id}' '${config.host}:${config.port}'"
             logger.error(msg, e)
             throw Exception(msg)
         }
+        events.save(eventsToSave, name())
     }
 
     companion object {

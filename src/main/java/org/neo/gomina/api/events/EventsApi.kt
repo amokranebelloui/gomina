@@ -35,6 +35,7 @@ data class EventDetail(
 
         val envId: String? = null,
         val instanceId: String? = null,
+        val componentId: String? = null,
         val version: String? = null
 )
 
@@ -57,17 +58,18 @@ class EventsApi {
         this.vertx = vertx
         this.router = Router.router(vertx)
 
-        router.get("/:envId").handler(this::eventsForEnv)
+        router.get("/:envId").handler(this::events)
+        router.get("/env/:envId").handler(this::eventsForEnv)
+        router.get("/component/:componentId").handler(this::eventsForComponent)
+        router.post("/reload-events").handler(this::reload)
     }
 
-    private fun eventsForEnv(ctx: RoutingContext) {
+    private fun events(ctx: RoutingContext) {
         try {
             vertx.executeBlocking({future: Future<Pair<List<EventDetail>, List<String>>> ->
                 val envId = ctx.request().getParam("envId")
                 logger.info("Events for $envId")
                 val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
-
-                eventsService.reload()
 
                 val errors = mutableListOf<String>()
                 /*
@@ -100,7 +102,69 @@ class EventsApi {
             ctx.fail(500)
         }
     }
-    
+
+    private fun eventsForEnv(ctx: RoutingContext) {
+        try {
+            vertx.executeBlocking({future: Future<Pair<List<EventDetail>, List<String>>> ->
+                val envId = ctx.request().getParam("envId")
+                logger.info("Events for env $envId")
+                val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
+
+                val errors = mutableListOf<String>()
+                val events = events.forEnv(envId)
+                        .filter { it.timestamp > since }
+                        .sortedByDescending { it.timestamp }
+                        .map { it.toEventDetail() }
+                future.complete(events to errors)
+            }, false)
+            {res: AsyncResult<Pair<List<EventDetail>, List<String>>> ->
+                ctx.response()
+                        .putHeader("content-type", "text/javascript")
+                        .end(mapper.writeValueAsString(EventList(res.result().first, res.result().second)))
+            }
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun eventsForComponent(ctx: RoutingContext) {
+        try {
+            vertx.executeBlocking({future: Future<Pair<List<EventDetail>, List<String>>> ->
+                val componentId = ctx.request().getParam("componentId")
+                logger.info("Events for component $componentId")
+                val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
+
+                val errors = mutableListOf<String>()
+                val events = events.forComponent(componentId)
+                        .filter { it.timestamp > since }
+                        .sortedByDescending { it.timestamp }
+                        .map { it.toEventDetail() }
+                future.complete(events to errors)
+            }, false)
+            {res: AsyncResult<Pair<List<EventDetail>, List<String>>> ->
+                ctx.response()
+                        .putHeader("content-type", "text/javascript")
+                        .end(mapper.writeValueAsString(EventList(res.result().first, res.result().second)))
+            }
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get instances", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun reload(ctx: RoutingContext) {
+        try {
+            eventsService.reload()
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot reload Jenkins", e)
+            ctx.fail(500)
+        }
+    }
 }
 
 interface EventsProviderFactory {
@@ -117,5 +181,6 @@ fun Event.toEventDetail() = EventDetail(
         message = this.message,
         envId =  this.envId,
         instanceId = this.instanceId,
+        componentId = this.componentId,
         version = this.version
 )

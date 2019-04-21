@@ -138,7 +138,7 @@ class EnvApp extends React.Component {
     retrieveEvents(env) {
         console.log("Retr events... " + env);
         const thisComponent = this;
-        axios.get('/data/events/' + env)
+        axios.get('/data/events/env/' + env)
             .then(response => {
                 console.log("envApp data events", response.data);
                 thisComponent.setState({events: response.data.events});
@@ -182,6 +182,12 @@ class EnvApp extends React.Component {
             .catch(function (error) {
                 console.log("reload error", error.response);
             });
+    }
+    reloadEvents() {
+        const thisComponent = this;
+        axios.post('/data/events/' + this.state.env + '/reload')
+            .then(() => this.retrieveEvents(thisComponent.state.env))
+            .catch((error) => console.log("reload error", error.response))
     }
     
     deleteEnv(env) {
@@ -344,6 +350,7 @@ class EnvApp extends React.Component {
                                 <button onClick={() => this.reloadInventory()}>RELOAD INV</button>
                                 <button onClick={() => this.reloadScm()}>RELOAD SCM</button>
                                 <button onClick={() => this.reloadSsh()}>RELOAD SSH</button>
+                                <button onClick={() => this.reloadEvents()}>RELOAD Events</button>
                                 <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
                                 <br/>
                                 <Secure permission="env.add">
