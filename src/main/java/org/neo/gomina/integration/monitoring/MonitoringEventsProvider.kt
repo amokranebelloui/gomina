@@ -32,19 +32,22 @@ class MonitoringEventsProvider : EventsProvider {
             oldValues?.let {
                 val newS = newValues.process.status
                 val oldS = oldValues.process.status
-                val message = when {
-                    newS == ServerStatus.LIVE && oldS != ServerStatus.LIVE -> "$instanceId started"
-                    newS == ServerStatus.DOWN && oldS == ServerStatus.LIVE -> "$instanceId stopped"
-                    newS != ServerStatus.LIVE && oldS == ServerStatus.LIVE -> "$instanceId status changed to $newS"
+                val change = when {
+                    newS == ServerStatus.LIVE && oldS == ServerStatus.OFFLINE -> "online" to "$instanceId back online"
+                    newS == ServerStatus.LIVE && oldS != ServerStatus.LIVE -> "started" to "$instanceId started"
+                    newS == ServerStatus.DOWN && oldS == ServerStatus.LIVE -> "stopped" to "$instanceId stopped"
+                    newS == ServerStatus.LOADING && oldS != ServerStatus.LOADING -> "loading" to "$instanceId loading"
+                    newS == ServerStatus.OFFLINE && oldS != ServerStatus.OFFLINE -> "offline" to "$instanceId offline"
+                    newS != ServerStatus.LIVE && oldS == ServerStatus.LIVE -> "runtime" to "$instanceId status changed to $newS"
                     else -> null
                 }
-                message?.let {
+                change?.let { (type, message) ->
                     val timestamp = LocalDateTime.now(Clock.systemUTC())
                     val id = "$timestamp-$env-$instanceId"
                     val componentId = inventory.getEnvironment(env)
                             ?.services?.find { it.svc == service }
                             ?.componentId
-                    events.save(listOf(Event(id, timestamp, type = "runtime", message = message,
+                    events.save(listOf(Event(id, timestamp, type = type, message = message,
                             envId = env, instanceId = instanceId, componentId = componentId)), name())
                 }
             }

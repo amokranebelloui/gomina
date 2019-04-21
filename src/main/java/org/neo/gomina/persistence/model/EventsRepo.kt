@@ -95,7 +95,7 @@ class RedisEvents : Events {
                 event.envId?.let { pipe.zadd("events:env:$it", time, idWithSource) }
                 event.instanceId?.let { pipe.zadd("events:instance:$it", time, idWithSource) }
                 event.componentId?.let { pipe.zadd("events:component:$it", time, idWithSource) }
-                event.global.let { pipe.zadd("events:global", time, idWithSource) }
+                if (event.global) { pipe.zadd("events:global", time, idWithSource) }
             }
             pipe.sync()
         }
