@@ -20,7 +20,6 @@ import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
-import java.util.*
 
 class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
     companion object {
@@ -122,7 +121,7 @@ class RedisComponentRepo : ComponentRepo {
             commits.map { it.get() }.map {
                 Commit(
                         revision = it["revision"] ?: "",
-                        date = it["date"]?.let { Date.from(LocalDateTime.parse(it, ISO_DATE_TIME).atZone(ZoneOffset.UTC).toInstant()) },
+                        date = it["date"]?.let { LocalDateTime.parse(it, ISO_DATE_TIME) },
                         author = it["author"],
                         message = it["message"],
                         release = it["release"],
@@ -375,11 +374,12 @@ class RedisComponentRepo : ComponentRepo {
         pool.resource.use { jedis ->
             jedis.pipelined().let { pipe ->
                 commits.forEach { commit ->
-                    val time = commit.date?.time?.toDouble()
+                    val time = commit.date?.atZone(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()?.toDouble()
+                    //val time = commit.date?.time?.toDouble()
                     pipe.zadd("commits:$componentId", time ?: 0.0, commit.revision)
                     pipe.hmset("commit:$componentId:${commit.revision}", listOfNotNull(
                             "revision" to commit.revision,
-                            commit.date?.let { "date" to LocalDateTime.ofInstant(it.toInstant(), ZoneOffset.UTC).format(ISO_DATE_TIME) },
+                            commit.date?.let { "date" to it.format(ISO_DATE_TIME) },
                             commit.author?.let { "author" to it },
                             commit.message?.let { "message" to it },
                             commit.release?.let { "release" to it },

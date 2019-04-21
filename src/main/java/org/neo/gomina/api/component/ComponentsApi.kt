@@ -12,6 +12,7 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.common.UserRef
+import org.neo.gomina.api.common.toDateUtc
 import org.neo.gomina.api.instances.VersionDetail
 import org.neo.gomina.api.instances.toVersionDetail
 import org.neo.gomina.api.work.IssueRef
@@ -699,7 +700,7 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     this.latest = component.latest?.version
     this.released = component.released?.version
     this.commitToRelease = component.commitToRelease
-    this.lastCommit = component.commitLog?.firstOrNull()?.date
+    this.lastCommit = component.commitLog?.firstOrNull()?.date?.toDateUtc
     try {
         val reference = LocalDateTime.now(Clock.systemUTC())
         this.commitActivity = component.commitLog.activity(reference)

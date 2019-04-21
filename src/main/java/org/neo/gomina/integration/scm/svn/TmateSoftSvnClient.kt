@@ -14,6 +14,7 @@ import org.tmatesoft.svn.core.io.SVNRepository
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory
 import org.tmatesoft.svn.core.wc.SVNWCUtil
 import java.io.ByteArrayOutputStream
+import java.time.ZoneOffset
 import java.util.*
 
 class TmateSoftSvnClient : ScmClient {
@@ -95,7 +96,7 @@ class TmateSoftSvnClient : ScmClient {
             */
             Commit(
                     revision = revAsString(it.revision) ?: "",
-                    date = it.date,
+                    date = it.date.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime(),
                     author = it.author,
                     message = StringUtils.replaceChars(it.message, "\n", " ")
                     //extra = it.changedPaths.toString() + it.isNonInheritable + it.isSubtractiveMerge

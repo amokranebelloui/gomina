@@ -12,6 +12,8 @@ import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 class DummyScmClient : ScmClient {
@@ -94,7 +96,7 @@ class DummyScmClient : ScmClient {
     private fun buildFrom(map: Map<String, Any>): Commit {
         return Commit(
                 revision = map["revision"] as String,
-                date = map["date"] as Date?,
+                date = LocalDateTime.parse(map["date"] as String, DateTimeFormatter.ISO_DATE_TIME),
                 author = map["author"] as String?,
                 message = map["message"] as String?,
                 release = map["version"] as String?

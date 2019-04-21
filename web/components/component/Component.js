@@ -221,6 +221,7 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                             <button onClick={() => this.startEditScm()}>Edit</button>
                         </Secure>
                         <button onClick={() => this.props.onReloadScm(component.id)}>ReloadSCM</button>
+                        <br/>
                         Last commit: <DateTime date={component.lastCommit} />&nbsp;
                         {(component.commitActivity != undefined && component.commitActivity != 0) &&
                         <Badge backgroundColor='#EAA910' color='white'>{component.commitActivity}</Badge>

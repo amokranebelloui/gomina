@@ -7,7 +7,7 @@ import java.util.*
 
 data class Commit (
     val revision: String = "",
-    val date: Date? = null, // FIXME Refactor Commit date to LocalDateTime
+    val date: LocalDateTime? = null,
     val author: String? = null,
     val message: String? = null,
 
@@ -38,7 +38,6 @@ private fun LocalDateTime.score(reference: LocalDateTime): Int {
 
 fun List<Commit>.activity(reference: LocalDateTime): Int {
     return this.mapNotNull { it.date }
-            .mapNotNull { LocalDateTime.from(it.toInstant()?.atZone(ZoneId.systemDefault())?.toLocalDateTime()) }
             .filter { it.isAfter(reference.minusMonths(6)) }
             .map { it.score(reference) }
             .sumBy { it }

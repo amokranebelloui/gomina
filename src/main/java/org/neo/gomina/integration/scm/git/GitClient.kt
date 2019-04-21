@@ -11,6 +11,8 @@ import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
 import java.io.File
+import java.time.Instant
+import java.time.ZoneOffset
 import java.util.*
 
 
@@ -66,7 +68,7 @@ class GitClient : ScmClient {
         return commits.map {
             Commit(
                     revision = it.name,
-                    date = Date(it.commitTime.toLong() * 1000L),
+                    date = Instant.ofEpochMilli(it.commitTime.toLong() * 1000L).atZone(ZoneOffset.UTC).toLocalDateTime(),
                     author = it.authorIdent.name,
                     //author = it.committerIdent.name,
                     message = "${StringUtils.replaceChars(it.fullMessage, "\n", " ")}"
