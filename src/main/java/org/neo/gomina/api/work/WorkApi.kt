@@ -17,6 +17,8 @@ import org.neo.gomina.api.component.ComponentRef
 import org.neo.gomina.api.component.toComponentRef
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.model.component.ComponentRepo
+import org.neo.gomina.model.event.Events
+import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.work.Work
@@ -75,8 +77,10 @@ class WorkApi {
     @Inject private lateinit var componentRepo: ComponentRepo
     @Inject private lateinit var scmService: ScmService
     @Inject private lateinit var commitLogEnricher: CommitLogEnricher
+    @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var topology: Topology
     @Inject private lateinit var users: Users
+    @Inject private lateinit var events: Events
 
     private val mapper = ObjectMapper().registerKotlinModule()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -187,7 +191,12 @@ class WorkApi {
                         val commits = try {
                             component.scm?.let {scm ->
                                 scmService.getTrunk(scm)
-                                        .let { log -> commitLogEnricher.enrichLog(log, topology.buildExtInstances(component.id)).log }
+                                        .let { log ->
+                                            val instances = topology.buildExtInstances(component.id)
+                                            val prodEnvs = inventory.getProdEnvironments().map { it.id }
+                                            val releases = events.forComponent(component.id).filter { it.type == "release" && prodEnvs.contains(it.envId) }
+                                            commitLogEnricher.enrichLog(log, instances, releases).log
+                                        }
                                         .takeWhile { commit ->
                                             !commit.instances.map { it.env }.contains(workReferenceEnv) &&
                                             !commit.deployments.map { it.env }.contains(workReferenceEnv)

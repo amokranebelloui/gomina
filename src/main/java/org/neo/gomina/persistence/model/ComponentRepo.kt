@@ -74,6 +74,7 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
     override fun updateBranches(componentId: String, branches: List<Branch>) { TODO("not implemented") }
     override fun updateDocFiles(componentId: String, branches: List<String>) { TODO("not implemented") }
     override fun updateCommitLog(componentId: String, commite: List<Commit>) { TODO("not implemented") }
+    override fun updateCommitToRelease(componentId: String, commitToRelease: Int?) { TODO("not implemented") }
 }
 
 class RedisComponentRepo : ComponentRepo {
@@ -158,6 +159,7 @@ class RedisComponentRepo : ComponentRepo {
 
                 branches = map["branches"].toList().map { Branch(it) },
                 docFiles = map["doc_files"].toList(),
+                commitToRelease = map["commit_to_release"]?.toInt(),
                 commitLog = commits,
 
                 loc = map["loc"]?.toDouble(),
@@ -388,4 +390,14 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
+    override fun updateCommitToRelease(componentId: String, commitToRelease: Int?) {
+        pool.resource.use { jedis ->
+            if (commitToRelease != null) {
+                jedis.hset("component:$componentId", "commit_to_release", commitToRelease.toString())
+            }
+            else {
+                jedis.hdel("component:$componentId", "commit_to_release")
+            }
+        }
+    }
 }

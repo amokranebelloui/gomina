@@ -44,6 +44,7 @@ data class Instance(
 
 interface Inventory {
     fun getEnvironments(): Collection<Environment>
+    fun getProdEnvironments(): Collection<Environment>
     fun getEnvironment(env: String): Environment?
 
     fun addEnvironment(id: String, type: String, description: String?, monitoringUrl: String?)

@@ -7,7 +7,7 @@ import java.util.*
 
 data class Commit (
     val revision: String = "",
-    val date: Date? = null,
+    val date: Date? = null, // FIXME Refactor Commit date to LocalDateTime
     val author: String? = null,
     val message: String? = null,
 

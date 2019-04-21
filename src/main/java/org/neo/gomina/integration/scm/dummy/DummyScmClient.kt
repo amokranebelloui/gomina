@@ -73,7 +73,8 @@ class DummyScmClient : ScmClient {
         if (projectData != null) {
             val log = projectData["log"] as List<Map<String, Any>>?
             val commit = if (rev == "-1") (if (log?.isNotEmpty() == true) log[0] else null) else findRevision(log, rev)
-            return if (commit != null) sampleFile(commit["version"] as String) else null
+            return if (commit != null && url == "pom.xml") sampleFile(commit["version"] as String)
+                else null
         }
         return null
     }

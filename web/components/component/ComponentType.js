@@ -38,6 +38,7 @@ type ComponentType = {
     coverage?: ?number,
     lastCommit?: ?number, // date
     commitActivity?: ?number,
+    commitToRelease?: ?number,
     disabled: boolean
 }
 

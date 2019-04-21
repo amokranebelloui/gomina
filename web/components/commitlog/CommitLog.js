@@ -19,6 +19,7 @@ type CommitType = {
     version?: ?string,
     revision?: ?number,
     issues?: Array<IssueRefType>,
+    prodReleaseDate?: ?number,
     instances?: Array<InstanceRefType>,
     deployments?: Array<InstanceRefType>
 }
@@ -103,6 +104,9 @@ class CommitLog extends React.Component<Props> {
                                         <Badge><i style={{opacity: .4}}>{commit.version}</i></Badge>
                                     </span>
                                     }
+                                </td>
+                                <td style={{verticalAlign: 'middle', width: '80px'}}>
+                                    <DateTime date={commit.prodReleaseDate} />
                                 </td>
                             </tr>
                         )}

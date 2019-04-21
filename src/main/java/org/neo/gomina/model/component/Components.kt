@@ -25,6 +25,7 @@ data class Component(
         var changes: Int? = null,
         var branches: List<Branch> = emptyList(),
         var docFiles: List<String> = emptyList(),
+        var commitToRelease: Int?,
         var commitLog: List<Commit> = emptyList(), // FIXME Doesn't need to be here
 
         var loc: Double? = null,
@@ -95,6 +96,7 @@ interface ComponentRepo {
     fun updateBranches(componentId: String, branches: List<Branch>)
     fun updateDocFiles(componentId: String, docFiles: List<String>)
     fun updateCommitLog(componentId: String, commits: List<Commit>)
+    fun updateCommitToRelease(componentId: String, commitToRelease: Int?)
 }
 
 

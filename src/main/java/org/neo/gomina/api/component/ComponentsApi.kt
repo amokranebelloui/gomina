@@ -22,6 +22,8 @@ import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.component.NewComponent
 import org.neo.gomina.model.component.Scm
+import org.neo.gomina.model.event.Events
+import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.scm.activity
@@ -67,6 +69,7 @@ data class ComponentDetail(
         var released: String? = null,
         var loc: Double? = null,
         var coverage: Double? = null,
+        var commitToRelease: Int? = null,
         var lastCommit: Date? = null,
         var commitActivity: Int? = null,
         var disabled: Boolean = false
@@ -91,6 +94,7 @@ data class CommitDetail(
         var version: String? = null,
         var issues: List<IssueRef> = emptyList(),
 
+        val prodReleaseDate: Date?,
         val instances: List<InstanceRefDetail> = emptyList(),
         val deployments: List<InstanceRefDetail> = emptyList())
 
@@ -133,6 +137,8 @@ class ComponentsApi {
     @Inject private lateinit var systems: Systems
     @Inject private lateinit var users: Users
     @Inject private lateinit var workList: WorkList
+    @Inject private lateinit var inventory: Inventory
+    @Inject private lateinit var events: Events
 
     @Inject private lateinit var scmService: ScmService
     @Inject private lateinit var commitLogEnricher: CommitLogEnricher
@@ -261,7 +267,10 @@ class ComponentsApi {
 
             var log = componentRepo.get(componentId)?.scm?.let {
                 val log = if (branch?.isNotBlank() == true) scmService.getBranch(it, branch) else scmService.getTrunk(it)
-                commitLogEnricher.enrichLog(log, topology.buildExtInstances(componentId))
+                val instances = topology.buildExtInstances(componentId)
+                val prodEnvs = inventory.getProdEnvironments().map { it.id }
+                val releases = events.forComponent(componentId).filter { it.type == "release" && prodEnvs.contains(it.envId) }
+                commitLogEnricher.enrichLog(log, instances, releases)
             }
             if (log != null) {
                 ctx.response().putHeader("content-type", "text/html")
@@ -689,6 +698,7 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     this.changes = component.changes
     this.latest = component.latest?.version
     this.released = component.released?.version
+    this.commitToRelease = component.commitToRelease
     this.lastCommit = component.commitLog?.firstOrNull()?.date
     try {
         val reference = LocalDateTime.now(Clock.systemUTC())

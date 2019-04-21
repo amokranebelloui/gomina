@@ -2,8 +2,11 @@ package org.neo.gomina.api.component
 
 import com.google.inject.name.Named
 import org.neo.gomina.api.common.UserRef
+import org.neo.gomina.api.common.toDateUtc
 import org.neo.gomina.api.common.toRef
 import org.neo.gomina.api.work.toIssueRef
+import org.neo.gomina.model.event.Event
+import org.neo.gomina.model.release.ReleaseService
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.user.Users
@@ -15,7 +18,7 @@ class CommitLogEnricher {
 
     @Inject private lateinit var users: Users
 
-    fun enrichLog(log: List<Commit>, instances: List<ExtInstance>): CommitLogDetail {
+    fun enrichLog(log: List<Commit>, instances: List<ExtInstance>, releaseEvents: List<Event>): CommitLogDetail {
         val tmp = log.map { Triple(it, mutableListOf<ExtInstance>(), mutableListOf<ExtInstance>()) }
         val unresolved = mutableListOf<ExtInstance>()
         instances.forEach { instance ->
@@ -32,6 +35,7 @@ class CommitLogEnricher {
                 else commitD?.third?.add(instance)
             }
         }
+        val commitReleaseDates = ReleaseService.releaseDates(log, releaseEvents).mapKeys { (k, v) ->  k.revision}
         return CommitLogDetail(
                 log = tmp.map { (commit, running, deployed) ->
                     CommitDetail(
@@ -41,6 +45,7 @@ class CommitLogEnricher {
                             message = commit.message,
                             version = commit.release ?: commit.newVersion,
                             issues = commit.issues.map { it.toIssueRef(issueTrackerUrl) },
+                            prodReleaseDate = commitReleaseDates[commit.revision]?.toDateUtc,
                             instances = running.map { it.toRef() },
                             deployments = deployed.map { it.toRef() }
                     )

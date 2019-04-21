@@ -4,6 +4,9 @@ import com.github.rjeschke.txtmark.Processor
 import org.neo.gomina.integration.scm.impl.ScmReposImpl
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.component.Scm
+import org.neo.gomina.model.event.Events
+import org.neo.gomina.model.inventory.Inventory
+import org.neo.gomina.model.release.ReleaseService
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmDetails
 import org.neo.gomina.model.scm.ScmRepos
@@ -14,6 +17,8 @@ class ScmService : ScmRepos {
 
     @Inject lateinit var scmRepos: ScmReposImpl
     @Inject lateinit var componentRepo: ComponentRepo
+    @Inject lateinit var inventory: Inventory
+    @Inject lateinit var events: Events
 
     override fun getScmDetails(scm: Scm): ScmDetails? {
         return scmRepos.getScmDetails(scm)
@@ -31,6 +36,10 @@ class ScmService : ScmRepos {
 
             componentRepo.updateBranches(componentId, branches)
             componentRepo.updateDocFiles(componentId, docFiles)
+            val prodEnvs = inventory.getProdEnvironments().map { it.id }
+            val releases = events.forComponent(componentId).filter { it.type == "release" && prodEnvs.contains(it.envId) }
+            val commitToRelease = ReleaseService.commitToRelease(commitLog, releases)
+            componentRepo.updateCommitToRelease(componentId, commitToRelease)
             componentRepo.updateCommitLog(componentId, commitLog)
         }
     }

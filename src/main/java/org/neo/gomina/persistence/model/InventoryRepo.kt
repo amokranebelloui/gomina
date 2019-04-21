@@ -59,6 +59,7 @@ class InventoryFile : Inventory, AbstractFileRepo {
     }
 
     override fun getEnvironments(): Collection<Environment> = getAllEnvironments().values
+    override fun getProdEnvironments(): Collection<Environment> = getAllEnvironments().values
     override fun getEnvironment(env: String): Environment? = getAllEnvironments()[env]
 
     override fun addEnvironment(id: String, type: String, description: String?, monitoringUrl: String?) { TODO("not implemented") }
@@ -93,10 +94,16 @@ class RedisInventoryRepo : Inventory {
         logger.info("Inventory Database connected $host $port")
     }
 
-
     override fun getEnvironments(): Collection<Environment> {
         pool.resource.use { jedis ->
             return jedis.keys("env:*").mapNotNull { getEnvironment(it.substring(it.lastIndexOf(':') + 1)) }
+        }
+    }
+
+    override fun getProdEnvironments(): Collection<Environment> {
+        pool.resource.use { jedis ->
+            return jedis.keys("env:*").mapNotNull { getEnvironment(it.substring(it.lastIndexOf(':') + 1)) }
+                    .filter { it.type == "PROD" }
         }
     }
 

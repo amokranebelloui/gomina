@@ -519,8 +519,8 @@ class ComponentApp extends React.Component {
                         <Dependencies dependencies={this.state.chainSelectedCall} />
 
                         <h3>Events</h3>
+                        <button onClick={e => this.reloadEvents()}>Reload Events</button>
                         <Container>
-                            <button onClick={e => this.reloadEvents()}>Reload Events</button>
                             <Events events={this.state.events || []} errors={[]} />
                         </Container>
 
