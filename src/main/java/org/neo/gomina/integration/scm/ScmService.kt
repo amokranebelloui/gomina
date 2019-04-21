@@ -37,7 +37,7 @@ class ScmService : ScmRepos {
             componentRepo.updateBranches(componentId, branches)
             componentRepo.updateDocFiles(componentId, docFiles)
             val prodEnvs = inventory.getProdEnvironments().map { it.id }
-            val releases = events.forComponent(componentId).filter { it.type == "release" && prodEnvs.contains(it.envId) }
+            val releases = events.releases(componentId, prodEnvs)
             val commitToRelease = ReleaseService.commitToRelease(commitLog, releases)
             componentRepo.updateCommitToRelease(componentId, commitToRelease)
             componentRepo.updateCommitLog(componentId, commitLog)

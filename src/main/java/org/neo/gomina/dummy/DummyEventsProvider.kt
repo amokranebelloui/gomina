@@ -45,6 +45,8 @@ class DummyEventsProvider : EventsProvider {
 
     override fun name() = config.id
 
+    override fun group(): String = "release"
+
     override fun reload(since: LocalDateTime) {
         val map = components.getAll().associateBy { it.maven }
         val eventsToSave = mapper.readValue<List<DummyEvent>>(file).map {
@@ -60,7 +62,7 @@ class DummyEventsProvider : EventsProvider {
                     )
                 }
                 .filter { it.timestamp > since }
-        events.save(eventsToSave, name())
+        events.save(eventsToSave, group())
     }
 
 }

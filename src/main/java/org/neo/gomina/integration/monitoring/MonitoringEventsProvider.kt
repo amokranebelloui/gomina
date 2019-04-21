@@ -27,7 +27,7 @@ class MonitoringEventsProvider : EventsProvider {
     fun init() {
         val now = LocalDateTime.now(Clock.systemUTC())
         val id = "$now-server-start"
-        events.save(listOf(Event(id, now, type = "info", message = "Server Started", global = true)), name())
+        events.save(listOf(Event(id, now, type = "info", message = "Server Started", global = true)), group())
         monitoring.onMessage { env, service, instanceId, oldValues, newValues ->
             oldValues?.let {
                 val newS = newValues.process.status
@@ -48,13 +48,15 @@ class MonitoringEventsProvider : EventsProvider {
                             ?.services?.find { it.svc == service }
                             ?.componentId
                     events.save(listOf(Event(id, timestamp, type = type, message = message,
-                            envId = env, instanceId = instanceId, componentId = componentId)), name())
+                            envId = env, instanceId = instanceId, componentId = componentId)), group())
                 }
             }
         }
     }
 
     override fun name(): String = "internal"
+
+    override fun group(): String = "runtime"
 
     override fun reload(since: LocalDateTime) {
 

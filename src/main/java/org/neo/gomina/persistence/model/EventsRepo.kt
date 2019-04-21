@@ -62,6 +62,10 @@ class RedisEvents : Events {
         }
     }
 
+    override fun releases(componentId: String, prodEnvs: List<String>): List<Event> {
+        return this.forComponent(componentId).filter { it.type == "release" && prodEnvs.contains(it.envId) }
+    }
+
     private fun Map<String, String>.toEvent(id: String): Event {
         return Event(
                 id = id,
@@ -75,12 +79,12 @@ class RedisEvents : Events {
         )
     }
 
-    override fun save(events: List<Event>, source: String) {
+    override fun save(events: List<Event>, group: String) {
         pool.resource.use { jedis ->
             val pipe = jedis.pipelined()
             events.forEach { event ->
                 val eventId = event.id.replace(':', '-')
-                pipe.hmset("event:$source:$eventId", listOfNotNull(
+                pipe.hmset("event:$group:$eventId", listOfNotNull(
                         "timestamp" to event.timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
                         event.type?.let { "type" to it },
                         event.message?.let { "message" to it },
@@ -91,7 +95,7 @@ class RedisEvents : Events {
                 ).toMap())
 
                 val time = Date.from(event.timestamp.atZone(ZoneOffset.UTC).toInstant()).time.toDouble()
-                val idWithSource = source + ":" + eventId
+                val idWithSource = group + ":" + eventId
                 event.envId?.let { pipe.zadd("events:env:$it", time, idWithSource) }
                 event.instanceId?.let { pipe.zadd("events:instance:$it", time, idWithSource) }
                 event.componentId?.let { pipe.zadd("events:component:$it", time, idWithSource) }

@@ -270,7 +270,7 @@ class ComponentsApi {
                 val log = if (branch?.isNotBlank() == true) scmService.getBranch(it, branch) else scmService.getTrunk(it)
                 val instances = topology.buildExtInstances(componentId)
                 val prodEnvs = inventory.getProdEnvironments().map { it.id }
-                val releases = events.forComponent(componentId).filter { it.type == "release" && prodEnvs.contains(it.envId) }
+                val releases = events.releases(componentId, prodEnvs)
                 commitLogEnricher.enrichLog(log, instances, releases)
             }
             if (log != null) {

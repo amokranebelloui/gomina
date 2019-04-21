@@ -42,6 +42,8 @@ class ElasticEventsProvider : EventsProvider {
 
     override fun name(): String = config.id
 
+    override fun group(): String = "release"
+
     override fun reload(since: LocalDateTime) {
         val eventsToSave = try {
             val query = SearchRequest().source(SearchSourceBuilder()
@@ -72,7 +74,7 @@ class ElasticEventsProvider : EventsProvider {
             logger.error(msg, e)
             throw Exception(msg)
         }
-        events.save(eventsToSave, name())
+        events.save(eventsToSave, group())
     }
 
     companion object {

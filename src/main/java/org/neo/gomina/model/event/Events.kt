@@ -19,13 +19,15 @@ interface Events {
     fun all(): List<Event>
     fun forEnv(envId: String): List<Event>
     fun forComponent(componentId: String): List<Event>
-    fun save(events: List<Event>, source: String)
+    fun releases(componentId: String, prodEnvs: List<String>): List<Event>
+    fun save(events: List<Event>, group: String)
 }
 
 interface EventsProviderConfig
 
 interface EventsProvider {
     fun name(): String
+    fun group(): String
     fun reload(since: LocalDateTime)
 }
 

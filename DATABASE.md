@@ -51,7 +51,7 @@ Contexts, entities, schemas
 - `hmset work:refacto label "refacto 1" type "Dev" people "amokrane.belloui, john.doe" components "libbus" status COMPLETED`
 
 ### Events (6)
-- event:<source>:<eventId> (hash) timestamp type message \[env instance component version\]
+- event:<group>:<eventId> (hash) timestamp type message \[env instance component version\]
 
  
 
