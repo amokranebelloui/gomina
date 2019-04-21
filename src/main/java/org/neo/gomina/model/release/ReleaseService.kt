@@ -26,8 +26,9 @@ object ReleaseService {
     }
 
     fun commitToRelease(log: List<Commit>, releaseEvents: List<Event>): Int? {
-        val releaseDates = releaseDates(log, releaseEvents).mapKeys { (commit, releaseDate) -> commit.revision }
-        return log
+        return if (releaseEvents.isNotEmpty()) {
+            val releaseDates = releaseDates(log, releaseEvents).mapKeys { (commit, releaseDate) -> commit.revision }
+            log
                 .fold(0 to 0) { (sum, count), commit ->
                     val releaseDate = releaseDates[commit.revision] ?: LocalDateTime.now(ZoneOffset.UTC)
                     if (commit.date != null) {
@@ -40,6 +41,8 @@ object ReleaseService {
                 .let { (sum, count) ->
                     if (count > 0) sum / count else null
                 }
+        }
+        else null
     }
 
 }
