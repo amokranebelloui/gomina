@@ -9,7 +9,7 @@
   folder: '/home/svc/uat-order'
   VERSION: '2.1.1'
   REVISION: 35489
-  STATUS: 'LIVE'
+  STATUS: 'DOWN'
   LEADER: true
 
 - id: uat2

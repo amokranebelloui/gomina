@@ -85,12 +85,15 @@ class DummyMonitorThread : Thread {
                 var count = 1
                 for ((instanceId, indicators) in data.getFor(env)) {
                     val i = random.nextInt(15)
+                    /*
                     val status = when {
                         i in 0..11 -> "LIVE"
                         i == 12 -> "LOADING"
                         i == 13 -> "DOWN"
                         else -> null
                     }
+                    */
+                    val status = indicators["STATUS"]
                     if (status != null) {
                         //indicators.put("timestamp", LocalDateTime(DateTimeZone.UTC)) // FIXME Too long
                         indicators.put("STATUS", status)
