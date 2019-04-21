@@ -185,7 +185,7 @@ class EnvApp extends React.Component {
     }
     reloadEvents() {
         const thisComponent = this;
-        axios.post('/data/events/' + this.state.env + '/reload')
+        axios.post('/data/events/reload-events')
             .then(() => this.retrieveEvents(thisComponent.state.env))
             .catch((error) => console.log("reload error", error.response))
     }

@@ -108,6 +108,12 @@ class ComponentApp extends React.Component {
                 console.log("sonar reload error", error.response);
             });
     }
+    reloadEvents() {
+        const thisComponent = this;
+        axios.post('/data/events/reload-events')
+            .then(() => this.retrieveEvents(thisComponent.state.env))
+            .catch((error) => console.log("reload error", error.response))
+    }
     editLabel(componentId, label) {
         axios.put('/data/components/' + componentId + '/label?label=' + label)
             .then(() => this.retrieveComponent(componentId))
@@ -514,6 +520,7 @@ class ComponentApp extends React.Component {
 
                         <h3>Events</h3>
                         <Container>
+                            <button onClick={e => this.reloadEvents()}>Reload Events</button>
                             <Events events={this.state.events || []} errors={[]} />
                         </Container>
 

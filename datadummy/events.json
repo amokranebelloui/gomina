@@ -9,6 +9,16 @@
     "instanceId": "order1",
     "component": "x.oms.vac:voms-ordermanager",
     "version": "2.1.1"
+  },
+  {
+    "id": "dummy2",
+    "timestamp": "2019-04-21T09:46:50.526Z",
+    "type": "release",
+    "message": "Release basket to UAT",
+    "envId": "UAT",
+    "instanceId": "basket1",
+    "component": "x.oms.vac:voms-basketmanager",
+    "version": "5.1.3"
   }
 ]
 // @formatter:on
