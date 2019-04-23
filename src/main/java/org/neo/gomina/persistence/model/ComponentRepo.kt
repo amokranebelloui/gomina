@@ -71,6 +71,8 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
     override fun updateBranches(componentId: String, branches: List<Branch>) { TODO("not implemented") }
     override fun updateDocFiles(componentId: String, branches: List<String>) { TODO("not implemented") }
     override fun updateCommitLog(componentId: String, commite: List<Commit>) { TODO("not implemented") }
+    override fun updateLastCommit(componentId: String, lastCommit: LocalDateTime?) { TODO("not implemented") }
+    override fun updateCommitActivity(componentId: String, activity: Int) { TODO("not implemented") }
     override fun updateCommitToRelease(componentId: String, commitToRelease: Int?) { TODO("not implemented") }
 }
 
@@ -163,8 +165,9 @@ class RedisComponentRepo : ComponentRepo {
 
                 branches = map["branches"].toList().map { Branch(it) },
                 docFiles = map["doc_files"].toList(),
+                lastCommit = map["last_commit"]?.let { LocalDateTime.parse(it, ISO_DATE_TIME) },
+                commitActivity = map["commit_activity"]?.toInt() ?: 0,
                 commitToRelease = map["commit_to_release"]?.toInt(),
-                commitLog = commits,
 
                 loc = map["loc"]?.toDouble(),
                 coverage = map["coverage"]?.toDouble(),
@@ -392,6 +395,22 @@ class RedisComponentRepo : ComponentRepo {
                             commit.issues.let { "issues" to it.toStr() }
                     ).toMap())
                 }
+            }
+        }
+    }
+
+    override fun updateLastCommit(componentId: String, lastCommit: LocalDateTime?) {
+        pool.resource.use { jedis ->
+            if (lastCommit != null) {
+                jedis.hset("component:$componentId", "last_commit", lastCommit.format(ISO_DATE_TIME))
+            }
+        }
+    }
+
+    override fun updateCommitActivity(componentId: String, activity: Int) {
+        pool.resource.use { jedis ->
+            if (activity != null) {
+                jedis.hset("component:$componentId", "commit_activity", activity.toString())
             }
         }
     }

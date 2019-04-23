@@ -4,6 +4,7 @@ import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.system.System
 import org.neo.gomina.model.version.Version
+import java.time.LocalDateTime
 
 data class Component(
         var id: String,
@@ -25,8 +26,9 @@ data class Component(
         var changes: Int? = null,
         var branches: List<Branch> = emptyList(),
         var docFiles: List<String> = emptyList(),
+        var lastCommit: LocalDateTime?,
+        var commitActivity: Int,
         var commitToRelease: Int?,
-        var commitLog: List<Commit> = emptyList(), // FIXME Doesn't need to be here
 
         var loc: Double? = null,
         var coverage: Double? = null,
@@ -97,6 +99,8 @@ interface ComponentRepo {
     fun updateBranches(componentId: String, branches: List<Branch>)
     fun updateDocFiles(componentId: String, docFiles: List<String>)
     fun updateCommitLog(componentId: String, commits: List<Commit>)
+    fun updateLastCommit(componentId: String, lastCommit: LocalDateTime?)
+    fun updateCommitActivity(componentId: String, activity: Int)
     fun updateCommitToRelease(componentId: String, commitToRelease: Int?)
 }
 

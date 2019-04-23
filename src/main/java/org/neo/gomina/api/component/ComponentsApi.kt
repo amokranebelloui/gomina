@@ -27,12 +27,9 @@ import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
-import org.neo.gomina.model.scm.activity
 import org.neo.gomina.model.system.Systems
 import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.work.WorkList
-import java.time.Clock
-import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
 
@@ -302,10 +299,9 @@ class ComponentsApi {
                         .mapNotNull { componentRepo.get(it) }
                         .map { ComponentRef(it.id, it.label) }
 
-                val now = LocalDateTime.now(Clock.systemUTC())
                 val mostActive = componentRepo.getAll()
                         .filter { it.shareSystem(component) }
-                        .map { it to it.commitLog.activity(now) }
+                        .map { it to it.commitActivity }
                         .filter { (_, activity) -> activity > 0 }
                         .sortedBy { (_, activity) -> activity }
                         .take(7 - associated.size)
@@ -700,15 +696,9 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     this.changes = component.changes
     this.latest = component.latest?.version
     this.released = component.released?.version
+    this.lastCommit = component.lastCommit?.toDateUtc
+    this.commitActivity = component.commitActivity
     this.commitToRelease = component.commitToRelease
-    this.lastCommit = component.commitLog?.firstOrNull()?.date?.toDateUtc
-    try {
-        val reference = LocalDateTime.now(Clock.systemUTC())
-        this.commitActivity = component.commitLog.activity(reference)
-    } catch (e: Exception) {
-        e.printStackTrace() // FIXME Logger
-    }
-
 
     this.loc = component.loc
     this.coverage = component.coverage

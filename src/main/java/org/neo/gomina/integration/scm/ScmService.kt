@@ -8,7 +8,10 @@ import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.release.ReleaseService
 import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.activity
 import org.neo.gomina.model.version.Version
+import java.time.Clock
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class ScmService {
@@ -33,6 +36,13 @@ class ScmService {
             val prodEnvs = inventory.getProdEnvironments().map { it.id }
             val releases = events.releases(componentId, prodEnvs)
             val commitToRelease = ReleaseService.commitToRelease(commitLog, releases)
+
+            val reference = LocalDateTime.now(Clock.systemUTC())
+            val activity = commitLog.activity(reference)
+            val lastCommit = commitLog.firstOrNull()?.date
+
+            componentRepo.updateLastCommit(componentId, lastCommit)
+            componentRepo.updateCommitActivity(componentId, activity)
             componentRepo.updateCommitToRelease(componentId, commitToRelease)
             componentRepo.updateCommitLog(componentId, commitLog)
         }
