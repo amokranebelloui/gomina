@@ -82,6 +82,7 @@ class ComponentApp extends React.Component {
             .then(response => {
                 console.log("component reloaded", response.data);
                 this.retrieveComponent(componentId)
+                this.retrieveBranch(this.state.componentId, this.state.branchId);
             })
             .catch(function (error) {
                 console.log("component reload error", error.response);
