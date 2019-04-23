@@ -186,34 +186,20 @@ class WorkApi {
 
             val work = workId?.let { workList.get(it) }
             val components = work?.components?.mapNotNull { componentRepo.get(it) } ?: componentRepo.getAll()
+            val prodEnvs = inventory.getProdEnvironments().map { it.id }
             val detail = components
                     .map { component ->
                         val commits = try {
-                            component.scm?.let {scm ->
-                                scmService.getTrunk(scm)
-                                        .let { log ->
-                                            val instances = topology.buildExtInstances(component.id)
-                                            val prodEnvs = inventory.getProdEnvironments().map { it.id }
-                                            val releases = events.releases(component.id, prodEnvs)
-                                            commitLogEnricher.enrichLog(log, instances, releases).log
-                                        }
-                                        .takeWhile { commit ->
-                                            !commit.instances.map { it.env }.contains(workReferenceEnv) &&
+                            componentRepo.getCommitLog(component.id)
+                                .let { log ->
+                                    val instances = topology.buildExtInstances(component.id)
+                                    val releases = events.releases(component.id, prodEnvs)
+                                    commitLogEnricher.enrichLog(log, instances, releases).log
+                                }
+                                .takeWhile { commit ->
+                                    !commit.instances.map { it.env }.contains(workReferenceEnv) &&
                                             !commit.deployments.map { it.env }.contains(workReferenceEnv)
-                                        }
-                                /*
-                                .map { commit ->
-                                    CommitDetail(
-                                        revision = commit.revision,
-                                        date = commit.date,
-                                        author = commit.author?.let { users.findForAccount(it) }?.toRef()
-                                                ?: commit.author?.let { UserRef(shortName = commit.author) },
-                                        message = commit.message,
-                                        version = commit.release ?: commit.newVersion
-                                    )
-
-                                }*/
-                            }
+                                }
                         }
                         catch (e: Exception) {
                             logger.error("", e)

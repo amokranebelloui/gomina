@@ -12,7 +12,6 @@ import org.neo.gomina.model.component.Scm
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
 import org.neo.gomina.model.scm.ScmDetails
-import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.model.security.Passwords
 import java.util.*
 import javax.inject.Inject
@@ -21,7 +20,7 @@ import javax.inject.Inject
 
 private val noOpScmClient = NoneScmClient()
 
-class ScmReposImpl : ScmRepos {
+class ScmReposImpl {
 
     companion object {
         private val logger = LogManager.getLogger(ScmReposImpl::class.java)
@@ -46,7 +45,7 @@ class ScmReposImpl : ScmRepos {
         }
     }
 
-    override fun getScmDetails(scm: Scm): ScmDetails {
+    fun getScmDetails(scm: Scm): ScmDetails {
         return if (scm.url.isNotBlank()) {
             val scmClient = this.getClient(scm)
             val trunk = scmClient.getTrunk()
@@ -63,7 +62,6 @@ class ScmReposImpl : ScmRepos {
                     .filter { StringUtils.isNotBlank(it.newVersion) }
                     .firstOrNull()?.revision
             
-            // FIXME there shouldn't be trunk in here
             val metadataFile = scmClient.getFile("project.yaml", "-1")
             val metadata = metadataFile?.let { metadataMapper.map(metadataFile) }
 
@@ -105,21 +103,14 @@ class ScmReposImpl : ScmRepos {
         return null
     }
 
-    override fun getTrunk(scm: Scm): List<Commit> {
-        val scmClient = this.getClient(scm)
-        return scmClient.getLog(scmClient.getTrunk(), "0", -1)
-                .map { commitDecorator.flag(it, scmClient) }
-    }
-
-    override fun getBranch(scm: Scm, branchId: String): List<Commit> {
+    fun getBranch(scm: Scm, branchId: String): List<Commit> {
         val scmClient = this.getClient(scm)
         return scmClient.getLog(branchId, "0", -1)
                 .map { commitDecorator.flag(it, scmClient) }
     }
 
-    override fun getDocument(scm: Scm, docId: String): String? {
+    fun getDocument(scm: Scm, docId: String): String? {
         val scmClient = this.getClient(scm)
-        // FIXME no TRUNK
         return scmClient.getFile("$docId", "-1")
     }
 

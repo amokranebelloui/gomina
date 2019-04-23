@@ -38,12 +38,10 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
     }
 
     override fun getAll(): List<Component> = read(file)
-
     override fun get(componentId: String): Component? = read(file).find { it.id == componentId }
+    override fun getCommitLog(componentId: String): List<Commit> { TODO("not implemented") }
 
-    override fun add(component: NewComponent) {
-        TODO("not implemented")
-    }
+    override fun add(component: NewComponent) { TODO("not implemented") }
 
     override fun editLabel(componentId: String, label: String) { TODO("not implemented") }
     override fun editType(componentId: String, type: String) { TODO("not implemented") }
@@ -111,6 +109,12 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
+    override fun getCommitLog(componentId: String): List<Commit> {
+        pool.resource.use { jedis ->
+            return getCommits(jedis, componentId)
+        }
+    }
+
     private fun getCommits(jedis: Jedis, componentId: String): List<Commit> {
         return jedis.pipelined().let { pipe ->
             //jsonMapper.readValue<Commit>(it)
@@ -125,7 +129,8 @@ class RedisComponentRepo : ComponentRepo {
                         author = it["author"],
                         message = it["message"],
                         release = it["release"],
-                        newVersion = it["newVersion"])
+                        newVersion = it["newVersion"],
+                        issues = it["issues"].toList())
             }
         }
     }
@@ -383,7 +388,8 @@ class RedisComponentRepo : ComponentRepo {
                             commit.author?.let { "author" to it },
                             commit.message?.let { "message" to it },
                             commit.release?.let { "release" to it },
-                            commit.newVersion?.let { "newVersion" to it }
+                            commit.newVersion?.let { "newVersion" to it },
+                            commit.issues.let { "issues" to it.toStr() }
                     ).toMap())
                 }
             }

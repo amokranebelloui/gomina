@@ -267,7 +267,8 @@ class ComponentsApi {
             logger.info("Get SCM log for component:$componentId branch:$branch")
 
             var log = componentRepo.get(componentId)?.scm?.let {
-                val log = if (branch?.isNotBlank() == true) scmService.getBranch(it, branch) else scmService.getTrunk(it)
+                val log = if (branch?.isNotBlank() == true) scmService.getBranch(it, branch)
+                          else componentRepo.getCommitLog(componentId)
                 val instances = topology.buildExtInstances(componentId)
                 val prodEnvs = inventory.getProdEnvironments().map { it.id }
                 val releases = events.releases(componentId, prodEnvs)

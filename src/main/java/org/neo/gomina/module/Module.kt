@@ -47,7 +47,6 @@ import org.neo.gomina.model.host.Hosts
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.runtime.Topology
-import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.model.system.InferredSystems
 import org.neo.gomina.model.system.Systems
@@ -113,7 +112,6 @@ class GominaModule : AbstractModule() {
         bind(CommitDecorator::class.java).`in`(Scopes.SINGLETON)
         bind(ScmReposImpl::class.java).`in`(Scopes.SINGLETON)
         bind(ScmService::class.java).`in`(Scopes.SINGLETON)
-        bind(ScmRepos::class.java).to(ScmService::class.java).`in`(Scopes.SINGLETON)
 
         // Jenkins
         bind(JenkinsConfig::class.java).toInstance(config.jenkins)

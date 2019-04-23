@@ -8,21 +8,15 @@ import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.release.ReleaseService
 import org.neo.gomina.model.scm.Commit
-import org.neo.gomina.model.scm.ScmDetails
-import org.neo.gomina.model.scm.ScmRepos
 import org.neo.gomina.model.version.Version
 import javax.inject.Inject
 
-class ScmService : ScmRepos {
+class ScmService {
 
     @Inject lateinit var scmRepos: ScmReposImpl
     @Inject lateinit var componentRepo: ComponentRepo
     @Inject lateinit var inventory: Inventory
     @Inject lateinit var events: Events
-
-    override fun getScmDetails(scm: Scm): ScmDetails? {
-        return scmRepos.getScmDetails(scm)
-    }
 
     fun reloadScmDetails(componentId: String, scm: Scm) {
         scmRepos.getScmDetails(scm).apply {
@@ -44,15 +38,13 @@ class ScmService : ScmRepos {
         }
     }
 
-    override fun getTrunk(scm: Scm): List<Commit> {
-        return scmRepos.getTrunk(scm)
-    }
-
-    override fun getBranch(scm: Scm, branchId: String): List<Commit> {
+    @Deprecated("Get from local database", ReplaceWith("componentRepo.getBranch(componentId, branchId)"))
+    fun getBranch(scm: Scm, branchId: String): List<Commit> {
         return scmRepos.getBranch(scm, branchId)
     }
 
-    override fun getDocument(scm: Scm, docId: String): String? {
+    // TODO Cache documents, for quicker serving
+    fun getDocument(scm: Scm, docId: String): String? {
         return scmRepos.getDocument(scm, docId)?.let { Processor.process(it) }
     }
 }
