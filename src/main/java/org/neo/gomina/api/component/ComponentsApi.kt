@@ -35,7 +35,8 @@ import javax.inject.Inject
 
 data class ComponentRef(
         var id: String,
-        var label: String? = null
+        var label: String? = null,
+        var systems: List<String> = emptyList()
 )
 
 data class ComponentDetail(
@@ -717,4 +718,4 @@ fun ExtInstance.toRef() = InstanceRefDetail(
         deployed = this.instance?.let { it.deployedVersion?.toVersionDetail() }
 )
 
-fun Component.toComponentRef() = ComponentRef(this.id, this.label)
+fun Component.toComponentRef() = ComponentRef(this.id, this.label, this.systems)

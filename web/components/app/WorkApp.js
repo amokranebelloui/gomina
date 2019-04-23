@@ -4,12 +4,12 @@ import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import React, {Fragment} from "react";
 import {Well} from "../common/Well";
 import Link from "react-router-dom/es/Link";
+import type {CommitType} from "../commitlog/CommitLog";
 import {CommitLog} from "../commitlog/CommitLog";
 import {InlineAdd} from "../common/InlineAdd";
 import {Secure} from "../permission/Secure";
 import Route from "react-router-dom/es/Route";
 import {WorkEditor} from "../work/WorkEditor";
-import {Autocomplete} from "../common/AutoComplete";
 import {DateTime} from "../common/DateTime";
 import {sortWorkBy, WorkSort} from "../work/WorkSort";
 import ls from "local-storage";
@@ -19,7 +19,6 @@ import type {UserRefType} from "../misc/UserType";
 import type {WorkDataType, WorkManifestType, WorkType} from "../work/WorkType";
 import {Issue} from "../misc/Issue";
 import type {EnvType} from "../environment/Environment";
-import type {CommitType} from "../commitlog/CommitLog";
 
 type Props = {
     match: any
@@ -31,7 +30,10 @@ type State = {
     commitLimit: number,
     components: Array<ComponentRefType>,
     users: Array<UserRefType>,
+    systems: Array<string>,
+
     search: string,
+    selectedSystems: Array<string>,
     sortBy: string,
     workList: Array<WorkType>,
     workDetail?: ?WorkManifestType,
@@ -53,7 +55,9 @@ class WorkApp extends React.Component<Props, State> {
             commitLimit: ls.get('work.list.commit.limit') || 100,
             components: [],
             users: [],
+            systems: [],
             search: ls.get('work.list.search') || '',
+            selectedSystems: this.split(ls.get('components.systems')) || [],
             sortBy: ls.get('work.list.sort') || 'due-date',
             workList: [],
             workDetail: null,
@@ -65,6 +69,16 @@ class WorkApp extends React.Component<Props, State> {
         //this.retrieveWorkList = this.retrieveWorkList.bind(this);
         //this.retrieveWorkDetail = this.retrieveWorkDetail.bind(this);
         console.info("workApp !constructor ");
+    }
+
+    split(tags: ?string) {
+        try {
+            return tags && tags.split(',') || [];
+        }
+        catch (e) {
+            console.error("Error splitting", tags, typeof tags);
+            return []
+        }
     }
 
     retrieveComponentRefs() {
@@ -80,10 +94,17 @@ class WorkApp extends React.Component<Props, State> {
             .then(response => thisComponent.setState({users: response.data}))
             .catch(error => thisComponent.setState({users: []}));
     }
+    retrieveSystems() {
+        const thisComponent = this;
+        axios.get('/data/components/systems')
+            .then(response => thisComponent.setState({systems: response.data}))
+            .catch(error => thisComponent.setState({systems: []}));
+    }
 
-    setFilter(search: string) {
-        this.setState({search: search});
-        ls.set('work.list.search', search)
+    setFilter(search: string, selectedSystems: Array<string>) {
+        this.setState({search: search, selectedSystems: selectedSystems});
+        ls.set('work.list.search', search);
+        ls.set('components.systems', selectedSystems.join(','))
     }
     sortChanged(sortBy: string) {
         this.setState({sortBy: sortBy});
@@ -102,30 +123,16 @@ class WorkApp extends React.Component<Props, State> {
     }
     
     retrieveWorkList() {
-        console.log("workApp Retr Hosts ... ");
         const thisComponent = this;
         axios.get('/data/work/list')
-            .then(response => {
-                console.log("workApp data workList", response.data);
-                thisComponent.setState({workList: response.data});
-            })
-            .catch(function (error) {
-                console.log("workApp error", error);
-                thisComponent.setState({workList: []});
-            });
+            .then(response => thisComponent.setState({workList: response.data}))
+            .catch(() => thisComponent.setState({workList: []}));
     }
     retrieveWorkDetail(workId: string) {
-        console.log("workApp Retr Hosts ... ");
         const thisComponent = this;
         axios.get('/data/work/detail' + (workId ? '/' + workId : ''))
-            .then(response => {
-                console.log("workApp data workDetail", response.data);
-                thisComponent.setState({workDetail: response.data});
-            })
-            .catch(function (error) {
-                console.log("workApp error workDetail", error);
-                thisComponent.setState({workDetail: null});
-            });
+            .then(response => thisComponent.setState({workDetail: response.data}))
+            .catch(() => thisComponent.setState({workDetail: null}));
     }
 
     componentDidMount() {
@@ -135,6 +142,7 @@ class WorkApp extends React.Component<Props, State> {
         this.retrieveWorkDetail(this.props.match.params.id);
         this.retrieveComponentRefs();
         this.retrieveUserRefs();
+        this.retrieveSystems();
     }
 
     componentWillReceiveProps(nextProps: Props) {
@@ -227,7 +235,7 @@ class WorkApp extends React.Component<Props, State> {
     }
 
     render()  {
-        const workList = filterWork(this.state.workList || [], this.state.search);
+        const workList = filterWork(this.state.workList || [], this.state.search, this.state.selectedSystems);
         const workDetail = this.state.workDetail;
         //console.info("workDetail", workDetail);
         let highlightedIssues = [this.state.commitHighlight];
@@ -307,7 +315,7 @@ class WorkApp extends React.Component<Props, State> {
                                         style={{width: '150px', fontSize: 9}}>
                                     <option value=""></option>
                                     {this.state.envs.map(e =>
-                                        <option value={e.env}>{e.description}</option>
+                                        <option key={e.env} value={e.env}>{e.description}</option>
                                     )}
                                 </select>
                                 <input type="text" value={this.state.commitLimit}
@@ -327,7 +335,9 @@ class WorkApp extends React.Component<Props, State> {
                     </div>
                     <div>
                         <Well block>
-                            <WorkFilter search={this.state.search} onFilterChanged={s => this.setFilter(s)} />
+                            <WorkFilter search={this.state.search} systems={this.state.selectedSystems}
+                                        systemsRefs={this.state.systems}
+                                        onFilterChanged={(s, systems) => this.setFilter(s, systems)} />
                         </Well>
 
                         <Secure permission="work.add">

@@ -24,7 +24,13 @@ class DependenciesApp extends React.Component {
     }
 
     split(tags) {
-        return tags && tags.split(',') || [];
+        try {
+            return tags && tags.split(',') || [];
+        }
+        catch (e) {
+            console.error("Error splitting", tags, typeof tags);
+            return []
+        }
     }
 
     componentDidMount() {

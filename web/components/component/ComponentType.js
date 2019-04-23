@@ -45,6 +45,7 @@ type ComponentType = {
 type ComponentRefType = {
     id: string,
     label?: ?string,
+    systems?: Array<string>,
 }
 
 export type {ComponentType, ComponentRefType, BranchDetailType}
