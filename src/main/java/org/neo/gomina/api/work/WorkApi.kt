@@ -23,6 +23,7 @@ import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.work.Work
 import org.neo.gomina.model.work.WorkList
+import org.neo.gomina.model.work.WorkStatus
 import java.util.*
 import javax.inject.Inject
 
@@ -95,6 +96,7 @@ class WorkApi {
         router.get("/list").handler(this::workList)
         router.post("/add").handler(this::add)
         router.put("/:workId/update").handler(this::update)
+        router.put("/:workId/change-status/:status").handler(this::changeStatus)
         router.put("/:workId/archive").handler(this::archive)
         router.put("/:workId/unarchive").handler(this::unarchive)
 
@@ -146,6 +148,20 @@ class WorkApi {
         }
         catch (e: Exception) {
             logger.error("Cannot update Work", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun changeStatus(ctx: RoutingContext) {
+        val workId = ctx.request().getParam("workId")
+        val status = WorkStatus.valueOf(ctx.request().getParam("status"))
+        try {
+            logger.info("Updating work status $workId $status")
+            workList.changeStatus(workId, status)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(workId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot update Work status", e)
             ctx.fail(500)
         }
     }

@@ -93,6 +93,14 @@ class RedisWorkList : WorkList {
         }
     }
 
+    override fun changeStatus(workId: String, status: WorkStatus) {
+        pool.resource.use { jedis ->
+            jedis.hmset("work:$workId", mapOf(
+                    "status" to status.toString()
+            ))
+        }
+    }
+
     override fun archiveWork(workId: String) {
         pool.resource.use { jedis ->
             jedis.hmset("work:$workId", mapOf("archived" to true.toString()))

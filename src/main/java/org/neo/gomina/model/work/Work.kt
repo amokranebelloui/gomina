@@ -26,6 +26,7 @@ interface WorkList {
     fun updateWork(workId: String, label: String?, type: String?, issues: List<String>,
                    people: List<String>, components: List<String>,
                    dueDate: LocalDate?)
+    fun changeStatus(workId: String, status: WorkStatus)
     fun archiveWork(workId: String)
     fun unarchiveWork(workId: String)
 }

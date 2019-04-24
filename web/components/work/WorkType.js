@@ -8,12 +8,14 @@ type IssueRefType = {
     issueUrl?: ?string
 }
 
+type WorkStatusType = ('OFF'|'SPEC'|'DEV'|'TESTING'|'DONE'|'DEPLOYMENT'|'COMPLETED')
+
 type WorkType = {
     id: string,
     label: string,
     type: ?string,
     issues: Array<IssueRefType>,
-    status: string,
+    status: WorkStatusType,
     people: Array<UserRefType>,
     components: Array<ComponentRefType>,
     creationDate: ?Date,
@@ -41,4 +43,4 @@ type WorkDataType = {
     dueDate?: ?string
 }
 
-export type { WorkType, WorkManifestType, ComponentWorkType, WorkDataType, IssueRefType }
+export type { WorkType, WorkManifestType, ComponentWorkType, WorkDataType, IssueRefType, WorkStatusType }

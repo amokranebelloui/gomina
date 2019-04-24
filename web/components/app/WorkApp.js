@@ -16,9 +16,10 @@ import ls from "local-storage";
 import {filterWork, WorkFilter} from "../work/WorkFilter";
 import type {ComponentRefType} from "../component/ComponentType";
 import type {UserRefType} from "../misc/UserType";
-import type {WorkDataType, WorkManifestType, WorkType} from "../work/WorkType";
+import type {WorkDataType, WorkManifestType, WorkStatusType, WorkType} from "../work/WorkType";
 import {Issue} from "../misc/Issue";
 import type {EnvType} from "../environment/Environment";
+import {WorkStatus} from "../work/WorkStatus";
 
 type Props = {
     match: any
@@ -199,7 +200,16 @@ class WorkApp extends React.Component<Props, State> {
             .catch((error) => console.log("Work update error", error.response));
         this.setState({"workEdition": false}); // FIXME Display Results/Errors
     }
-
+    changeWorkStatus(status: WorkStatusType) {
+        const thisComponent = this;
+        const workId = this.state.workId;
+        workId && axios.put('/data/work/' + workId + '/change-status/' + status)
+            .then(() => {
+                thisComponent.retrieveWorkList();
+                thisComponent.retrieveWorkDetail(workId);
+            })
+            .catch((error) => console.log("Work change status error", error.response));
+    }
     archiveWork() {
         const thisComponent = this;
         const workId = this.state.workId;
@@ -280,7 +290,13 @@ class WorkApp extends React.Component<Props, State> {
                                             </Secure>
                                             }
                                         </div>
-                                        <Work key={workDetail.work.id} work={workDetail.work}></Work>
+                                        <Secure permission="work.status"
+                                                fallback={
+                                                    <Work work={workDetail.work} />
+                                                }>
+                                            <Work work={workDetail.work}
+                                                  onStatusChange={(workId, s) => this.changeWorkStatus(s)} />
+                                        </Secure>
                                     </div>
                                     }
                                     {this.state.workEdition &&
@@ -413,7 +429,7 @@ class WorkApp extends React.Component<Props, State> {
     }
 }
 
-function Work(props) {
+function Work(props: {work: WorkType, onStatusChange?: (string, WorkStatusType) => void}) {
     const work = props.work;
     //border: '1px solid blue'
     return (
@@ -443,6 +459,11 @@ function Work(props) {
             </div>
             <div><b>Created </b><DateTime date={work.creationDate} /></div>
             <div><b>Due </b><DateTime date={work.dueDate} /></div>
+            <div>
+                <b>Status </b>
+                <WorkStatus status={work.status}
+                            onStatusChange={(s) => props.onStatusChange && props.onStatusChange(work.id, s)} />
+            </div>
         </div>
     )
 }

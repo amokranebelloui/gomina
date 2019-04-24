@@ -58,6 +58,7 @@ class AuthApi {
 
                         "work.add",
                         "work.manage",
+                        "work.status",
                         "work.archive"
                 )
 

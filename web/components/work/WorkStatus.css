@@ -1,0 +1,15 @@
+
+.work-status span {
+    padding: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
+    border-radius: 2px;
+}
+
+.work-status span:first-child {
+    margin-left: 0px;
+}
+
+.work-status span:last-child {
+    margin-right: 0px;
+}
