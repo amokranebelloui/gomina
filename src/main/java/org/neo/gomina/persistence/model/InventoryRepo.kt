@@ -175,12 +175,12 @@ class RedisInventoryRepo : Inventory {
     override fun updateService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?) {
         pool.resource.use { jedis ->
             val serviceKey = "service:$env:$svc"
-            jedis.hmset(serviceKey, listOfNotNull(
-                    type?.let { "type" to it },
-                    mode?.let { "mode" to it.name },
-                    activeCount?.let { "active_count" to it.toString() },
-                    componentId?.let { "component" to it }
-            ).toMap())
+            jedis.persist(serviceKey, mapOf(
+                    "type" to type,
+                    "mode" to mode?.name,
+                    "active_count" to activeCount.toString(),
+                    "component" to componentId
+            ))
         }
     }
 
