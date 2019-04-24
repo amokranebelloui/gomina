@@ -2,7 +2,7 @@
 import * as React from "react";
 import {Link} from "react-router-dom";
 import type {VersionType} from "../common/Version";
-import {Version, VersionLabel} from "../common/Version";
+import {VersionLabel} from "../common/Version";
 import {Badge} from "../common/Badge";
 
 import './CommitLog.css'
@@ -112,10 +112,6 @@ class CommitLog extends React.Component<Props> {
                         )}
                         </tbody>
                     </table>
-                    <div className="items">
-                        <Badge backgroundColor="#AABBAA">Running</Badge>
-                        <Badge backgroundColor="#EEEEAA">Deployed</Badge>
-                    </div>
                 </div>
             )
         }
@@ -144,6 +140,15 @@ function CommitMessage(props: {message: ?string, issues: ?Array<IssueRefType>}) 
         )
     }
     return <span>{props.message}</span>
+}
+
+function CommitLogLegend(props: {}) {
+    return (
+        <div className="items">
+            <Badge backgroundColor="#AABBAA">Running</Badge>
+            <Badge backgroundColor="#EEEEAA">Deployed</Badge>
+        </div>
+    )
 }
 
 function UserRef(props: {user: UserRefType}) {
@@ -230,5 +235,5 @@ function addToDeployments(line: Object, i: Object) { // Deployed but not yet run
     return false
 }
 */
-export {CommitLog};
+export {CommitLog, CommitLogLegend};
 export type {CommitType}

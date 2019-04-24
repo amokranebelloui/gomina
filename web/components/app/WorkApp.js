@@ -5,7 +5,7 @@ import React, {Fragment} from "react";
 import {Well} from "../common/Well";
 import Link from "react-router-dom/es/Link";
 import type {CommitType} from "../commitlog/CommitLog";
-import {CommitLog} from "../commitlog/CommitLog";
+import {CommitLog, CommitLogLegend} from "../commitlog/CommitLog";
 import {InlineAdd} from "../common/InlineAdd";
 import {Secure} from "../permission/Secure";
 import Route from "react-router-dom/es/Route";
@@ -332,6 +332,7 @@ class WorkApp extends React.Component<Props, State> {
                                 </div>
                         )}
                         </div>
+                        <CommitLogLegend />
                     </div>
                     <div>
                         <Well block>

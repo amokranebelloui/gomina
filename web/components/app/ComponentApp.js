@@ -1,10 +1,10 @@
-import React from "react";
+import React, {Fragment} from "react";
 import axios from "axios/index";
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import {ComponentBadge, ComponentMenu} from "../component/Component";
 import "../component/Component.css"
 import "../common/items.css"
-import {CommitLog} from "../commitlog/CommitLog";
+import {CommitLog, CommitLogLegend} from "../commitlog/CommitLog";
 import {Container} from "../common/Container";
 import {Documentation} from "../documentation/Documentation";
 import queryString from 'query-string'
@@ -452,7 +452,10 @@ class ComponentApp extends React.Component {
 
                         {   docId
                             ? <Documentation doc={this.state.doc} />
-                            : <CommitLog type={component.scmType} commits={(this.state.branch||{}).log} unresolved={(this.state.branch||{}).unresolved} />
+                            : <Fragment>
+                                <CommitLog type={component.scmType} commits={(this.state.branch||{}).log} unresolved={(this.state.branch||{}).unresolved} />
+                                <CommitLogLegend />
+                              </Fragment>
                         }
 
                     </Container>
