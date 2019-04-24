@@ -3,29 +3,27 @@ import * as React from "react"
 import {Badge} from "./Badge";
 import {Autocomplete} from "./AutoComplete";
 
-type T = any
-
-type Props = {
+type Props<T> = {
     tags?: ?Array<T>,
     sortAlphabetically?: ?boolean, // true
 
     suggestions?: Array<T>,
-    idProperty?: string,
-    labelProperty?: string,
+    idGetter?: T => ?string,
+    labelGetter?: T => ?string,
 
     onTagAdd?: ?(T => void),
     onTagDelete?: ?(T => void)
 }
-type State = {
+type State<T> = {
     editionMode: boolean,
     additionMode: boolean,
-    selected?: ?string,
+    selected?: ?T,
     timeoutId?: ?TimeoutID,
     newTag?: ?T
 }
 
-class TagEditor extends React.Component<Props, State> {
-    constructor(props: Props) {
+class TagEditor<T> extends React.Component<Props<T>, State<T>> {
+    constructor(props: Props<T>) {
         super(props);
         this.state = {
             editionMode: false,
@@ -36,7 +34,7 @@ class TagEditor extends React.Component<Props, State> {
         //$FlowFixMe
         this.textInput = React.createRef();
     }
-    onSelected(value: string) {
+    onSelected(value: ?T) {
         this.setState({selected: value});
     }
     onLeave() {
@@ -53,14 +51,14 @@ class TagEditor extends React.Component<Props, State> {
         this.setState({editionMode: true});
         this.state.timeoutId && clearTimeout(this.state.timeoutId)
     }
-    isSelected(value: string) {
+    isSelected(value: T) {
         return this.state.selected === value
     }
     onNewTag() {
         //console.info("New tag");
         this.setState({additionMode: true});
     }
-    onNewTagChanged(e: T) {
+    onNewTagChanged(e: ?T) {
         this.setState({newTag: e});
         e && this.onAddTag();
     }
@@ -72,20 +70,22 @@ class TagEditor extends React.Component<Props, State> {
         //console.info("Cancel Add Tag", this.state.newTag);
         this.setState({additionMode: false});
     }
-    onDeleteTag(value: string) {
+    onDeleteTag(value: T) {
         //console.info("Delete tag", value);
         this.props.onTagDelete && this.props.onTagDelete(value)
     }
-    componentDidUpdate(prevProps: Props, prevState: State) {
+    componentDidUpdate(prevProps: Props<T>, prevState: State<T>) {
         //console.info("update");
         //$FlowFixMe
         this.textInput.current && this.textInput.current.focus();
     }
-    id(suggestion: T) {
-        return this.props.idProperty && suggestion ? suggestion[this.props.idProperty] : suggestion;
+    id(suggestion: ?T): string {
+        //$FlowFixMe
+        return (this.props.idGetter && suggestion ? this.props.idGetter(suggestion) : suggestion) || '';
     }
-    label(suggestion: T) {
-        return this.props.labelProperty && suggestion ? suggestion[this.props.labelProperty] : suggestion;
+    label(suggestion: ?T): string {
+        //$FlowFixMe
+        return (this.props.labelGetter && suggestion ? this.props.labelGetter(suggestion) : suggestion) || '';
     }
     render() {
         let tags = this.props.tags || [];
@@ -97,8 +97,8 @@ class TagEditor extends React.Component<Props, State> {
         if (this.props.suggestions) {
             editor = (
                 <Autocomplete suggestions={this.props.suggestions}
-                              idProperty={this.props.idProperty}
-                              labelProperty={this.props.labelProperty}
+                              idGetter={this.props.idGetter}
+                              labelGetter={this.props.labelGetter}
                               onChange={e => this.onNewTagChanged(e)} />
             )
         }

@@ -70,7 +70,7 @@ class AddService extends React.Component<Props, State> {
                                <br/>
                                <Autocomplete value={this.state.component}
                                              suggestions={this.props.components}
-                                             idProperty="id" labelProperty="label"
+                                             idGetter={s => s.id} labelGetter={s => s.label}
                                              onChange={c => this.setState({component: c})} />
                            </div>
                        }

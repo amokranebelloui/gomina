@@ -43,7 +43,7 @@ class ServiceEditor extends React.Component<Props, State> {
         this.setState({mode: mode, activeCount: count});
         this.notifyChange({mode: mode, activeCount: count});
     }
-    changeComponentId(component: ComponentRefType) {
+    changeComponentId(component: ?ComponentRefType) {
         this.setState({component: component});
         this.notifyChange({componentId: component && component.id});
     }
@@ -77,7 +77,7 @@ class ServiceEditor extends React.Component<Props, State> {
                 <br/>
                 <Autocomplete value={this.state.component}
                               suggestions={this.props.components}
-                              idProperty="id" labelProperty="label"
+                              idGetter={s => s.id} labelGetter={s => s.label}
                               onChange={c => this.changeComponentId(c)} />
 
             </div>

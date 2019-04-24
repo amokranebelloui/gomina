@@ -97,7 +97,7 @@ storiesOf('Components', module)
                     {id: 8, name: "css"},
                     {id: 9, name: "python", version: "2"},
                     {id: 10, name: "python", version: "3"},
-                ]} idProperty="id" labelProperty="name" onChange={action('language change {}')} />
+                ]} idGetter={s => s.id} labelGetter={s => s.name} onChange={action('language change {}')} />
             </div>
         )
     })

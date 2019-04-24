@@ -125,16 +125,14 @@ class WorkEditor extends React.Component<Props, State> {
                 <b>People </b>
                 <TagEditor tags={this.state.people}
                            suggestions={this.props.peopleRefs}
-                           idProperty="id"
-                           labelProperty="shortName"
+                           idGetter={s => s.id} labelGetter={s => s.shortName}
                            onTagAdd={p => this.addPeople(p)}
                            onTagDelete={p => this.deletePeople(p)} />
                 <br/>
                 <b>Components </b>
                 <TagEditor tags={this.state.components}
                            suggestions={this.props.componentsRefs}
-                           idProperty="id"
-                           labelProperty="label"
+                           idGetter={s => s.id} labelGetter={s => s.label}
                            onTagAdd={c => this.addComponent(c)}
                            onTagDelete={c => this.deleteComponent(c)} />
                 <br/>

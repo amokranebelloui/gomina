@@ -2,32 +2,30 @@
 import React, {Fragment} from "react";
 import "./AutoComplete.css"
 
-type T = any
-
-type Props = {
-    value?: T;
+type Props<T> = {
+    value?: ?T;
     suggestions: Array<T>,
-    idProperty?: string,
-    labelProperty?: string,
-    onChange?: T => void
+    idGetter?: T => ?string,
+    labelGetter?: T => ?string,
+    onChange?: ?T => void
 }
 
-type State = {
+type State<T> = {
     activeSuggestion: number, // The active selection's index
     filteredSuggestions: Array<any>, // The suggestions that match the user's input
     showSuggestions: boolean, // Whether or not the suggestion list is shown
     userInput: string, // What the user has entered
-    selectedItem: T
+    selectedItem: ?T
 }
 
-class Autocomplete extends React.Component<Props, State> {
-    constructor(props: Props) {
+class Autocomplete<T> extends React.Component<Props<T>, State<T>> {
+    constructor(props: Props<T>) {
         super(props);
         const userInput = this.label(this.props.value) || "";
         const matchingSuggestions = this.props.suggestions.filter(s =>
             this.label(s).toLowerCase() === userInput.toLowerCase()
         );
-        const newlySelected:T = matchingSuggestions.length === 1 ? matchingSuggestions[0] : null;
+        const newlySelected:?T = matchingSuggestions.length === 1 ? matchingSuggestions[0] : null;
         this.state = {
             activeSuggestion: 0,
             filteredSuggestions: [],
@@ -36,11 +34,13 @@ class Autocomplete extends React.Component<Props, State> {
             selectedItem: newlySelected
         };
     }
-    id(suggestion: T) {
-        return this.props.idProperty && suggestion ? suggestion[this.props.idProperty] : suggestion;
+    id(suggestion: ?T): string {
+        //$FlowFixMe
+        return (this.props.idGetter && suggestion ? this.props.idGetter(suggestion) : suggestion) || '';
     }
-    label(suggestion: T) {
-        return this.props.labelProperty && suggestion ? suggestion[this.props.labelProperty] : suggestion;
+    label(suggestion: ?T): string {
+        //$FlowFixMe
+        return (this.props.labelGetter && suggestion ? this.props.labelGetter(suggestion) : suggestion) || '';
     }
     onChange(e: SyntheticKeyboardEvent<any>) {
         const userInput = e.currentTarget.value;
@@ -52,7 +52,7 @@ class Autocomplete extends React.Component<Props, State> {
         const matchingSuggestions = this.props.suggestions.filter(s =>
             this.label(s).toLowerCase() === userInput.toLowerCase()
         );
-        const newlySelected:T = matchingSuggestions.length === 1 ? matchingSuggestions[0] : null;
+        const newlySelected:?T = matchingSuggestions.length === 1 ? matchingSuggestions[0] : null;
 
         if (newlySelected !== this.state.selectedItem) {
             this.props.onChange && this.props.onChange(newlySelected)
