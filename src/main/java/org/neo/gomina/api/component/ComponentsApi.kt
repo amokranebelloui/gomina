@@ -41,6 +41,7 @@ data class ComponentRef(
 
 data class ComponentDetail(
         var id: String,
+        var artifactId: String? = null,
         var label: String? = null,
         var type: String? = null,
         var owner: String? = null,
@@ -52,7 +53,6 @@ data class ComponentDetail(
         var scmUrl: String? = null,
         var scmPath: String? = null,
         var scmLocation: String? = null,
-        var mvn: String? = null,
         var sonarServer: String? = null,
         var sonarUrl: String? = null,
         var jenkinsServer: String? = null,
@@ -667,6 +667,7 @@ class ComponentsApi {
 }
 
 private fun ComponentDetail.apply(component: Component, sonarService: SonarService, jenkinsService: JenkinsService) {
+    this.artifactId = component.artifactId
     this.label = component.label ?: component.id
     this.type = component.type
     this.systems = component.systems
@@ -676,7 +677,6 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     this.scmUrl = component.scm?.url
     this.scmPath = component.scm?.path
     this.scmLocation = component.scm?.fullUrl
-    this.mvn = component.maven
     this.sonarServer = component.sonarServer
     this.sonarUrl = sonarService.url(component)
     this.jenkinsServer = component.jenkinsServer
@@ -685,11 +685,6 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     // SCM
     this.owner = component.owner
     this.critical = component.critical
-    /*
-    if (!scmDetails.mavenId.isNullOrBlank()) {
-        this.mvn = scmDetails.mavenId
-    }
-    */
     this.branches = component.branches.map {
         BranchDetail(name = it.name, origin = it.origin, originRevision = it.originRevision)
     }

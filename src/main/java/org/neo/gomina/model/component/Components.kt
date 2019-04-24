@@ -14,7 +14,7 @@ data class Component(
         var languages: List<String> = emptyList(),
         var tags: List<String> = emptyList(),
         var scm: Scm? = null,
-        var maven: String? = null,
+        var artifactId: String? = null,
         var sonarServer: String = "",
         var jenkinsServer: String = "",
         var jenkinsJob: String? = null,

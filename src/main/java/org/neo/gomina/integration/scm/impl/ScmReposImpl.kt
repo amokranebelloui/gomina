@@ -71,7 +71,7 @@ class ScmReposImpl {
                     owner = metadata?.owner,
                     critical = metadata?.critical,
                     url = scm.url,
-                    mavenId = MavenUtils.extractMavenId(pomFile),
+                    artifactId = MavenUtils.extractArtifactId(pomFile),
                     latest = MavenUtils.extractVersion(pomFile),
                     latestRevision = logEntries.firstOrNull()?.revision,
                     released = logEntries

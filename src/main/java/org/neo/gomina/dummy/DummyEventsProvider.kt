@@ -48,7 +48,7 @@ class DummyEventsProvider : EventsProvider {
     override fun group(): String = "release"
 
     override fun reload(since: LocalDateTime) {
-        val map = components.getAll().associateBy { it.maven }
+        val map = components.getAll().associateBy { it.artifactId }
         val eventsToSave = mapper.readValue<List<DummyEvent>>(file).map {
                     Event(
                             id = "${it.timestamp}-dummy",

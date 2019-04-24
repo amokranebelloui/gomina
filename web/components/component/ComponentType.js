@@ -9,6 +9,7 @@ type BranchDetailType = {
 
 type ComponentType = {
     id: string,
+    artifactId?: ?string,
     label?: ?string,
     type?: ?string,
     owner?: ?string,
@@ -20,7 +21,6 @@ type ComponentType = {
     scmUrl?: ?string,
     scmPath?: ?string,
     scmLocation?: ?string,
-    mvn?: ?string,
     sonarServer?: ?string,
     sonarUrl?: ?string,
     jenkinsServer?: ?string,

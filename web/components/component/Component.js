@@ -72,7 +72,7 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
                         )}
                     </span>
                     <br/>
-                    <span style={{fontSize: 8}}>{component.mvn}</span>
+                    <span style={{fontSize: 8}}>{component.artifactId}</span>
                 </div>
                 <div className='released'><Version version={component.released} /></div>
                 <div className='latest'><Version version={component.latest} /></div>
@@ -205,9 +205,9 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                     <br/>
 
                     <Secure permission="component.edit" fallback={
-                        <span style={{fontSize: 9}}>{component.mvn || 'no artifact id'}</span>
+                        <span style={{fontSize: 9}}>{component.artifactId || 'no artifact id'}</span>
                     }>
-                        <EditableLabel label={component.mvn} altText={'no artifact id'}
+                        <EditableLabel label={component.artifactId} altText={'no artifact id'}
                                        onLabelEdited={artifactId => this.props.onArtifactIdEdited(component.id, artifactId)}/>
                     </Secure>
                     <br/>

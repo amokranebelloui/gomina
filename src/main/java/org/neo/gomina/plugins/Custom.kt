@@ -11,7 +11,7 @@ import com.google.inject.name.Named
 import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.maven.MavenId
+import org.neo.gomina.integration.maven.ArtifactId
 import org.neo.gomina.integration.ssh.SshAnalysis
 import org.neo.gomina.integration.ssh.sudo
 import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
@@ -348,18 +348,18 @@ class CustomInteractionProvider : InteractionsProvider {
         println("-- Dependencies -----------------")
 
         val interactions = componentsRepo.getAll()
-                .mapNotNull { c -> c.maven?.let { c.id to MavenId.from(it) } }
-                .flatMap { (cid, mvnId) -> mvnId?.let { listOf(cid to mvnId) } ?: emptyList() }
-                .mapNotNull { (cId, mvnId) ->
+                .mapNotNull { c -> c.artifactId?.let { c.id to ArtifactId.from(it) } }
+                .flatMap { (cid, artifactId) -> artifactId?.let { listOf(cid to artifactId) } ?: emptyList() }
+                .mapNotNull { (cId, artifactId) ->
                     when (cId) {
-                        "tradex-mis" -> XDepSource.get(cId, mvnId.groupId ?: "", mvnId.artifactId, "1.3.2-SNAPSHOT")
+                        "tradex-mis" -> XDepSource.get(cId, artifactId.groupId ?: "", artifactId.artifactId, "1.3.2-SNAPSHOT")
                                 ?.apply {
                                     this.api?.raised = emptyMap()
                                     this.dependencies?.redis?.forEach {
                                         if (misReadOnly.contains(it.topic)) it.type = "R"
                                     }
                                 }
-                        else -> XDepSource.get(cId, mvnId.groupId ?: "", mvnId.artifactId)
+                        else -> XDepSource.get(cId, artifactId.groupId ?: "", artifactId.artifactId)
                     }
         }
         /*

@@ -17,13 +17,13 @@ class SonarService {
     fun servers() = sonarConfig.servers.map { it.id }
 
     fun url(component: Component) = sonarConfig.serverMap[component.sonarServer]?.url
-            ?.let { "$it/dashboard/index/${component.maven}" }
+            ?.let { "$it/dashboard/index/${component.artifactId}" }
 
     fun reload(sonarServer: String) {
         val metrics = connectors.getConnector(sonarServer)?.getMetrics()
         componentRepo.getAll().forEach { component ->
             try {
-                component.maven
+                component.artifactId
                         ?.let { metrics?.get(it) }
                         ?.let { metrics -> componentRepo.updateCodeMetrics(component.id, metrics.loc, metrics.coverage) }
             }

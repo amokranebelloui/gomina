@@ -3,15 +3,15 @@ package org.neo.gomina.integration.maven
 import org.fest.assertions.Assertions.assertThat
 import org.junit.Test
 
-class MavenIdTest {
+class ArtifactIdTest {
 
     @Test
     fun extractVersion() {
-        assertThat(MavenId.from("com.neo.gomina:maven-plugin")).isEqualTo(MavenId("com.neo.gomina", "maven-plugin"))
-        assertThat(MavenId.from("com.neo.gomina:maven-plugin:2.0.0")).isEqualTo(MavenId("com.neo.gomina", "maven-plugin", "2.0.0"))
-        assertThat(MavenId.from("maven-plugin")).isEqualTo(MavenId(artifactId = "maven-plugin"))
-        assertThat(MavenId.from(" ")).isNull()
-        assertThat(MavenId.from("")).isNull()
+        assertThat(ArtifactId.from("com.neo.gomina:maven-plugin")).isEqualTo(ArtifactId("com.neo.gomina", "maven-plugin"))
+        assertThat(ArtifactId.from("com.neo.gomina:maven-plugin:2.0.0")).isEqualTo(ArtifactId("com.neo.gomina", "maven-plugin", "2.0.0"))
+        assertThat(ArtifactId.from("maven-plugin")).isEqualTo(ArtifactId(artifactId = "maven-plugin"))
+        assertThat(ArtifactId.from(" ")).isNull()
+        assertThat(ArtifactId.from("")).isNull()
     }
 }
 

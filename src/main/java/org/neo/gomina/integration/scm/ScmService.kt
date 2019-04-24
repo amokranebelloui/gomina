@@ -25,7 +25,7 @@ class ScmService {
         scmRepos.getScmDetails(scm).apply {
             componentRepo.editOwner(componentId, owner)
             componentRepo.editCriticality(componentId, critical)
-            componentRepo.editArtifactId(componentId, mavenId)
+            componentRepo.editArtifactId(componentId, artifactId)
 
             componentRepo.updateVersions(componentId,
                     latest?.let { Version(it, latestRevision) },

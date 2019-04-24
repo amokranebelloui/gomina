@@ -15,7 +15,6 @@ type NewComponentType = {
     scmType?: ?string,
     scmUrl?: ?string,
     scmPath?: ?string,
-    maven?: ?string,
     sonarServer?: ?string,
     jenkinsServer?: ?string,
     jenkinsJob?: ?string

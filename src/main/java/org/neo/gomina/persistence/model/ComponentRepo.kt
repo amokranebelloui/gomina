@@ -154,7 +154,7 @@ class RedisComponentRepo : ComponentRepo {
                 ) ,
                 owner = map["owner"],
                 critical = map["critical"]?.toInt(),
-                maven = map["maven"],
+                artifactId = map["artifact_id"],
                 sonarServer = map["sonar_server"] ?: "",
                 jenkinsServer = map["jenkins_server"] ?: "",
                 jenkinsJob = map["jenkins_job"],
@@ -185,8 +185,8 @@ class RedisComponentRepo : ComponentRepo {
                 throw Exception("${component.id} already exists")
             }
             jedis.hmset("component:${component.id}", listOfNotNull(
+                    "artifact_id" to component.artifactId,
                     "label" to component.label,
-                    "maven" to component.artifactId,
                     "type" to component.type,
                     "systems" to component.systems.toStr(),
                     "languages" to component.languages.toStr(),
@@ -235,7 +235,7 @@ class RedisComponentRepo : ComponentRepo {
     override fun editArtifactId(componentId: String, artifactId: String?) {
         artifactId?.let {
             pool.resource.use { jedis ->
-                jedis.hset("component:$componentId", "maven", artifactId)
+                jedis.hset("component:$componentId", "artifact_id", artifactId)
             }
         }
     }

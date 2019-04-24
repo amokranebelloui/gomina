@@ -435,7 +435,7 @@ class ComponentApp extends React.Component {
                             <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
                         </span>
                         <br/>
-                        <span style={{fontSize: 9}}>{component.mvn}</span>
+                        <span style={{fontSize: 9}}>{component.artifactId}</span>
                         <br/>
 
                         <ScmLink type={component.scmType} />&nbsp;

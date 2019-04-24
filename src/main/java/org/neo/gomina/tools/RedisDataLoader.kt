@@ -31,7 +31,13 @@ fun main(args: Array<String>) {
     //loadUsers()
     //defaultPasswordsIfEmpty()
     //loadComponents()
-    loadInteractions()
+    //loadInteractions()
+
+    jedis.select(1)
+    jedis.keys("component:*").forEach {
+        val maven = jedis.hget(it, "maven")
+        if (maven != null) jedis.hset(it, "artifact_id", maven)
+    }
 }
 
 private fun loadUsers() {
@@ -72,7 +78,7 @@ private fun loadComponents() {
                         "scm_path" to (it.scm?.path ?: ""),
                         "scm_username" to (it.scm?.username ?: ""),
                         "scm_password_alias" to (it.scm?.passwordAlias ?: ""),
-                        "maven" to (it.maven ?: ""),
+                        "artifact_id" to (it.artifactId ?: ""),
                         "sonar_server" to (it.sonarServer),
                         "jenkins_server" to (it.jenkinsServer),
                         "jenkins_job" to (it.jenkinsJob ?: "")

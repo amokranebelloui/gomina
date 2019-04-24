@@ -7,15 +7,15 @@ import java.nio.charset.StandardCharsets
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathFactory
 
-data class MavenId(val groupId: String? = null, val artifactId: String, val version: String? = null) {
+data class ArtifactId(val groupId: String? = null, val artifactId: String, val version: String? = null) {
     companion object {
-        fun from(str: String): MavenId? {
+        fun from(str: String): ArtifactId? {
             return str?.let {
                 val split = str.split(":")
                 when {
-                    split.size > 2 -> MavenId(groupId = split[0], artifactId = split[1], version = split[2])
-                    split.size == 2 -> MavenId(groupId = split[0], artifactId = split[1])
-                    split.size == 1 && split[0].isNotBlank() -> MavenId(artifactId = split[0])
+                    split.size > 2 -> ArtifactId(groupId = split[0], artifactId = split[1], version = split[2])
+                    split.size == 2 -> ArtifactId(groupId = split[0], artifactId = split[1])
+                    split.size == 1 && split[0].isNotBlank() -> ArtifactId(artifactId = split[0])
                     else -> null
                 }
             }
@@ -41,7 +41,7 @@ object MavenUtils {
         else null
     }
 
-    fun extractMavenId(pom: String?): String? {
+    fun extractArtifactId(pom: String?): String? {
         if (pom != null) {
             try {
                 val doc = buildDoc(pom)
