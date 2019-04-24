@@ -26,12 +26,13 @@ import {EnvDetail} from "../environment/EnvDetail";
 import {EnvEditor} from "../environment/EnvEditor";
 import {ServiceDetail} from "../environment/ServiceDetail";
 import {ServiceEditor} from "../environment/ServiceEditor";
+import ls from "local-storage";
 
 class EnvApp extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            env: props.match.params.id,
+            env: props.match.params.id || ls.get('env.selected'),
             envs: [],
             realtime: false,
             group: "SERVICES",
@@ -223,6 +224,7 @@ class EnvApp extends React.Component {
     }
     selectEnv(env) {
         this.setState({env: env});
+        ls.set('env.selected', env);
     }
     changeSelected(filterId, highlightFunction) {
         console.log('this is:', filterId, highlightFunction);
@@ -323,6 +325,7 @@ class EnvApp extends React.Component {
                 <div className='main-content'>
                     <div className='principal-content'>
                         <Container>
+                            <b>{this.state.env}</b>
                             {
                                 this.state.group === "INSTANCES" ? <EnvInstances services={selectedServices} highlight={this.state.highlight} /> :
                                 <EnvironmentLogical env={this.state.env} services={selectedServices} highlight={this.state.highlight} />
