@@ -66,8 +66,8 @@ class SshOnDemandConnector {
             try {
                 val sudo = config.sudo
                 val password = passwords.getRealPassword(config.passwordAlias!!)
-                val session = if (config.proxyHost != null) {
-                    val username = config.username + (config.proxyUser?.let { "@$it" } ?: "") + "@$host"
+                val session = if (config.proxyHost?.isNotBlank() == true) {
+                    val username = config.username + (config.proxyUser.takeIf { !it.isNullOrBlank() }?.let { "@$it" } ?: "") + "@$host"
                     logger.info("Analyze '$host' using $username/***${StringUtils.length(password)} $sudo")
                     sshClient.getSession(config.proxyHost, SshAuth(username, password, sudo))
                 }

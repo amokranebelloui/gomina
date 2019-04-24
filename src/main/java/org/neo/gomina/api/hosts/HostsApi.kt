@@ -35,7 +35,7 @@ data class HostDetail(
 data class HostData(
         val dataCenter: String?,
         val group: String?, // several servers forming a group
-        val type: String, // PROD, TEST, etc
+        val type: String?, // PROD, TEST, etc
         val tags: List<String> = emptyList()
 )
 
@@ -88,13 +88,15 @@ class HostsApi {
                     .flatMap { it.services }
                     .flatMap { it.instances }
                     .mapNotNull { it.host } // FIXME Add Running host, after refactoring monitoring data to be on the instance object
+                    .toSet()
                     .filter { !it.isBlank() }
                     .filter { !hostMap.containsKey(it) }
                     .map { HostDetail(host = it, managed = false) }
 
+            val hosts = (hostMap.values + unmanaged).sortedBy { it.host }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(hostMap.values + unmanaged))
+                    .end(mapper.writeValueAsString(hosts))
         }
         catch (e: Exception) {
             logger.error("Cannot get hosts", e)
@@ -136,7 +138,7 @@ class HostsApi {
         try {
             val data = mapper.readValue<HostData>(ctx.body.toString())
             logger.info("Update host $hostId $data")
-            hosts.updateHost(hostId, data.dataCenter, data.group, data.type, data.tags)
+            hosts.updateHost(hostId, data.dataCenter, data.group, data.type ?: "UNKNOWN", data.tags)
             ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(hostId))
         }
         catch (e: Exception) {
