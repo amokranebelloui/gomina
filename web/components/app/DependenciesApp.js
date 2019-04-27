@@ -13,9 +13,11 @@ class DependenciesApp extends React.Component {
         super(props);
         this.state = {
             systems: [],
+            workRefs: [],
             components: [],
             dependencies: [],
             selectedSystems: this.split(ls.get('components.systems')),
+            selectedWork: this.split(ls.get('components.selected.work')),
             selectedFunctionTypes: this.split(ls.get('components.function.types')),
             selectedDependencies: [],
 
@@ -35,20 +37,24 @@ class DependenciesApp extends React.Component {
 
     componentDidMount() {
         this.retrieveSystems();
+        this.retrieveWorkRefs();
         this.retrieveDependencies();
     }
     retrieveSystems() {
         axios.get('/data/components/systems')
-            .then(response => {
-                console.log("systems data", response.data);
-                this.setState({systems: response.data});
-            })
-            .catch(function (error) {
-                console.log("systems data error", error);
-            });
+            .then(response => this.setState({systems: response.data}))
+            .catch((error) => console.log("systems data error", error));
     }
-    retrieveDependencies(systems, functionTypes) {
-        axios.get('/data/dependencies?systems=' + (systems || this.state.selectedSystems) + '&functionTypes=' + (functionTypes || this.state.selectedFunctionTypes) )
+    retrieveWorkRefs() {
+        axios.get('/data/work/refs')
+            .then(response => this.setState({workRefs: response.data}))
+            .catch((error) => console.log("work refs data error", error));
+    }
+    retrieveDependencies() {
+        this.retrieveDependenciesFor(this.state.selectedSystems, this.state.selectedWork, this.state.selectedFunctionTypes);
+    }
+    retrieveDependenciesFor(systems, workIds, functionTypes) {
+        axios.get('/data/dependencies?systems=' + systems + '&workIds=' + workIds + '&functionTypes=' + functionTypes)
             .then(response => {
                 console.log("dependencies data", response.data);
                 this.setState({deps: response.data});
@@ -66,13 +72,19 @@ class DependenciesApp extends React.Component {
     selectedSystemsChanged(systems) {
         console.info("selected systems", systems);
         this.setState({selectedSystems: systems});
-        this.retrieveDependencies(systems, this.state.selectedFunctionTypes)
+        this.retrieveDependenciesFor(systems, this.state.selectedWork, this.state.selectedFunctionTypes);
         ls.set('components.systems', systems.join(','));
+    }
+    selectedWorkChanged(work) {
+        console.info("selected work", work);
+        this.setState({selectedWork: work});
+        this.retrieveDependenciesFor(this.state.selectedSystems, work, this.state.selectedFunctionTypes);
+        ls.set('components.selected.work', work);
     }
     selectedFunctionTypesChanged(functionTypes) {
         console.info("selected functionTypes", functionTypes);
         this.setState({selectedFunctionTypes: functionTypes});
-        this.retrieveDependencies(this.state.selectedSystems, functionTypes)
+        this.retrieveDependenciesFor(this.state.selectedSystems, this.state.selectedWork, functionTypes);
         ls.set('components.function.types', functionTypes.join(','));
     }
 
@@ -93,6 +105,16 @@ class DependenciesApp extends React.Component {
                         <b>Systems:</b>
                         <TagCloud tags={this.state.systems} selected={this.state.selectedSystems}
                                   selectionChanged={e => this.selectedSystemsChanged(e)} />
+                        <br/>
+                        <b>Work: </b>
+                        <select name="type" value={this.state.selectedWork}
+                                onChange={e => this.selectedWorkChanged(e.target.value)}
+                                style={{width: '150px', fontSize: 9}}>
+                            <option value=""></option>
+                            {this.state.workRefs.map(w =>
+                                <option key={w.id} value={w.id}>{w.label} ({w.components.length})</option>
+                            )}
+                        </select>
                         <br/>
                         <b>Function Types:</b>
                         <TagCloud tags={this.state.deps.functionTypes} selected={this.state.selectedFunctionTypes}

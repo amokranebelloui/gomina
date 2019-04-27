@@ -37,6 +37,10 @@ data class WorkDetail(val id: String, val label: String, val type: String?,
                       val archived: Boolean
 )
 
+data class WorkRef(val id: String, val label: String,
+                   val components: List<ComponentRef> = emptyList()
+)
+
 data class IssueRef(val issue: String, val issueUrl: String?)
 
 data class WorkManifestDetail(val work: WorkDetail?,
@@ -94,6 +98,7 @@ class WorkApi {
         this.router = Router.router(vertx)
 
         router.get("/list").handler(this::workList)
+        router.get("/refs").handler(this::workRefs)
         router.post("/add").handler(this::add)
         router.put("/:workId/update").handler(this::update)
         router.put("/:workId/change-status/:status").handler(this::changeStatus)
@@ -121,6 +126,24 @@ class WorkApi {
         }
         catch (e: Exception) {
             logger.error("Cannot get Work List", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun workRefs(ctx: RoutingContext) {
+        try {
+            logger.info("Get Work Refs")
+            val componentMap = componentRepo.getAll().map { it.toComponentRef() }.associateBy { it.id }
+            val workList = workList.getAll()
+                    .filter { !it.archived }
+                    .sortedByDescending { it.creationDate }
+                    .map { it.toWorkRef(it.components.mapNotNull { componentMap[it] }) }
+            ctx.response()
+                    .putHeader("content-type", "text/javascript")
+                    .end(mapper.writeValueAsString(workList))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get Work Refs", e)
             ctx.fail(500)
         }
     }
@@ -252,6 +275,14 @@ private fun Work.toWorkDetail(issueTrackerUrl: String, people: List<UserRef>, co
             creationDate = creationDate?.toDateUtc,
             dueDate = dueDate?.toString,
             archived = archived
+    )
+}
+
+private fun Work.toWorkRef(components: List<ComponentRef>): WorkRef {
+    return WorkRef(
+            id = id,
+            label = label,
+            components = components
     )
 }
 

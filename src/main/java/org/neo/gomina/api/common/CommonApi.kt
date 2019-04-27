@@ -35,3 +35,5 @@ fun Date?.toLocalDate(): LocalDate? {
 fun String?.toLocalDate(): LocalDate? {
     return LocalDate.parse(this, DateTimeFormatter.ISO_DATE)
 }
+
+fun String?.splitParams() = this?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() } ?: emptyList()

@@ -11,9 +11,11 @@ import io.vertx.core.json.Json
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.api.common.splitParams
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
+import org.neo.gomina.model.work.WorkList
 
 
 data class FunctionDetail(val name: String, val type: String, val usage: String? = null, var sources:List<String>)
@@ -47,6 +49,7 @@ class DependenciesApi {
             .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
             .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
 
+    @Inject lateinit var workList: WorkList
     @Inject lateinit var componentRepo: ComponentRepo
     @Inject lateinit var interactionsRepository: InteractionsRepository
     @Inject lateinit var interactionProviders: InteractionProviders
@@ -74,23 +77,19 @@ class DependenciesApi {
 
     fun get(ctx: RoutingContext) {
         try {
-            val systems = ctx.request().getParam("systems")
-                    ?.split(",")
-                    ?.map { it.trim() }
-                    ?.filter { it.isNotBlank() }
-                    ?: emptyList()
-            val functionTypes = ctx.request().getParam("functionTypes")
-                    ?.split(",")
-                    ?.map { it.trim() }
-                    ?.filter { it.isNotBlank() }
-                    ?: emptyList()
-            logger.info("Get Dependencies $systems $functionTypes")
+            val systems = ctx.request().getParam("systems").splitParams()
+            val workIds = ctx.request().getParam("workIds").splitParams()
+            val functionTypes = ctx.request().getParam("functionTypes").splitParams()
+            logger.info("Get Dependencies systems=$systems works=$workIds functions=$functionTypes")
 
             val allServices =
                     componentRepo.getAll().map {
                         Thing(id = it.id, type = "unknown", systems = it.systems)
                     }
-            val servicesInScope = allServices.filter { it.belongsToOneOf(systems) }.map { it.id }
+            val selectedWorks = workIds.mapNotNull { workList.get(it) }.flatMap { it.components }.toSet()
+            val servicesInScope = allServices
+                    .filter { it.belongsToOneOf(systems) && workIds.isEmpty() || selectedWorks.contains(it.id) }
+                    .map { it.id }
 
             val allInteractions = interactionsRepository.getAll().associateBy { p -> p.serviceId }
 
