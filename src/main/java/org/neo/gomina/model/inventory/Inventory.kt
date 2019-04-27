@@ -49,6 +49,8 @@ interface Inventory {
 
     fun addEnvironment(id: String, type: String, description: String?, monitoringUrl: String?)
     fun updateEnvironment(id: String, type: String, description: String?, monitoringUrl: String?)
+    fun enableEnvironment(envId: String)
+    fun disableEnvironment(envId: String)
     fun deleteEnvironment(id: String)
 
     fun addService(env: String, svc: String,

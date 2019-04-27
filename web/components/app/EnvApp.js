@@ -190,12 +190,23 @@ class EnvApp extends React.Component {
             .then(() => this.retrieveEvents(thisComponent.state.env))
             .catch((error) => console.log("reload error", error.response))
     }
-    
+
+    enableEnv(env) {
+        axios.put('/data/envs/' + env + '/enable')
+            .then(() => this.retrieveEnvs())
+            .catch((error) => console.log("env enable error", error.response));
+    }
+    disableEnv(env) {
+        axios.put('/data/envs/' + env + '/disable')
+            .then(() => this.retrieveEnvs())
+            .catch((error) => console.log("env disable error", error.response));
+    }
     deleteEnv(env) {
         axios.delete('/data/envs/' + env + '/delete')
             .then(() => this.retrieveEnvs())
             .catch((error) => console.log("env delete error", error.response));
     }
+
     deleteService(env, svc) {
         axios.delete('/data/instances/' + this.state.env + '/service/' + svc + '/delete')
             .then(() => this.retrieveInstances(env))
@@ -288,6 +299,7 @@ class EnvApp extends React.Component {
         const instances = flatMap(services, svc => svc.instances);
 
         const selectedEnv = this.state.envs.find ((e: EnvType) => e.env === this.state.env);
+        const manageable = selectedEnv && selectedEnv.active;
         const selectedInstances = instances.filter (i => i.id === this.props.match.params.instanceId);
         const svcId = this.props.match.params.svcId;
         const selectedServiceDetail: ServiceDetailType = services.find (s => s.service.svc === this.props.match.params.svcId);
@@ -376,23 +388,39 @@ class EnvApp extends React.Component {
                                 <Well block>
                                     <b>Env: {selectedEnv.env} </b>
                                     <div style={{float: 'right'}}>
-                                        <Secure permission="env.manage">
-                                            <button onClick={() => this.editEnv()}>Edit</button>
-                                        </Secure>
-                                        <Secure permission="env.delete">
-                                            <button onClick={() => this.deleteEnv(selectedEnv.env)}>Delete</button>
-                                        </Secure>
+                                        {manageable &&
+                                            <Secure permission="env.manage">
+                                                <button onClick={() => this.editEnv()}>Edit</button>
+                                            </Secure>
+                                        }
+                                        {!selectedEnv.active &&
+                                            <Secure permission="env.manage">
+                                                <button onClick={() => this.enableEnv(selectedEnv.env)}>Enable</button>
+                                            </Secure>
+                                        }
+                                        {selectedEnv.active &&
+                                            <Secure permission="env.manage">
+                                                <button onClick={() => this.disableEnv(selectedEnv.env)}>Disable</button>
+                                            </Secure>
+                                        }
                                     </div>
                                     <br/>
                                     {!this.state.envEdition &&
                                         <div>
                                             <EnvDetail env={selectedEnv} />
+                                            {!selectedEnv.active &&
+                                                <Secure permission="env.delete">
+                                                    <button onClick={() => this.deleteEnv(selectedEnv.env)}>Delete</button>
+                                                </Secure>
+                                            }
                                             <br/>
+                                            {manageable &&
                                             <Secure permission="env.manage">
                                                 <AddService env={selectedEnv.env}
                                                             components={this.state.components}
-                                                            onServiceAdded={s => this.serviceAdded(s)} />
+                                                            onServiceAdded={s => this.serviceAdded(s)}/>
                                             </Secure>
+                                            }
                                         </div>
                                     }
                                     {this.state.envEdition &&
@@ -409,6 +437,7 @@ class EnvApp extends React.Component {
                                 {svcId && selectedService &&
                                 <Well block>
                                     <b>Service: {svcId} </b>
+                                    {manageable &&
                                     <div style={{float: 'right'}}>
                                         <Secure permission="env.manage">
                                             <button onClick={() => this.editService()}>Edit</button>
@@ -417,14 +446,18 @@ class EnvApp extends React.Component {
                                             <button onClick={() => this.deleteService(this.state.env, svcId)}>Delete</button>
                                         </Secure>
                                     </div>
+                                    }
                                     <br/>
                                     {!this.state.serviceEdition &&
                                     <div>
                                         <ServiceDetail service={selectedService} />
                                         <br/>
+                                        {manageable &&
                                         <Secure permission="env.manage">
-                                            <AddInstance env={this.state.env} svc={svcId} onInstanceAdded={i => this.instanceAdded(i)} />
+                                            <AddInstance env={this.state.env} svc={svcId}
+                                                         onInstanceAdded={i => this.instanceAdded(i)}/>
                                         </Secure>
+                                        }
                                     </div>
                                     }
                                     {this.state.serviceEdition &&

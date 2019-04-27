@@ -77,6 +77,9 @@ class InventoryFile : Inventory, AbstractFileRepo {
 
     override fun updateDeployedRevision(env: String, svc: String, instanceId: String, version: Version?) { TODO("not implemented") }
     override fun updateConfigStatus(env: String, svc: String, instanceId: String, confRevision: String?, confCommitted: Boolean?, confUpToDate: Boolean?) { TODO("not implemented") }
+
+    override fun enableEnvironment(envId: String) { TODO("not implemented") }
+    override fun disableEnvironment(envId: String) { TODO("not implemented") }
 }
 
 class RedisInventoryRepo : Inventory {
@@ -145,6 +148,18 @@ class RedisInventoryRepo : Inventory {
                     description?.let { "description" to it },
                     monitoringUrl?.let { "monitoring_url" to it }
             ).toMap())
+        }
+    }
+
+    override fun enableEnvironment(envId: String) {
+        pool.resource.use { jedis ->
+            jedis.hset("env:$envId", "disabled", false.toString())
+        }
+    }
+
+    override fun disableEnvironment(envId: String) {
+        pool.resource.use { jedis ->
+            jedis.hset("env:$envId", "disabled", true.toString())
         }
     }
 

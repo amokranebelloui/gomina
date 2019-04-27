@@ -51,6 +51,8 @@ class EnvsApi {
         router.get("/").handler(this::data)
         router.post("/add").handler(this::addEnv)
         router.put("/:envId/update").handler(this::updateEnv)
+        router.put("/:envId/enable").handler(this::enableEnv)
+        router.put("/:envId/disable").handler(this::disableEnv)
         router.delete("/:envId/delete").handler(this::deleteEnv)
     }
 
@@ -89,7 +91,33 @@ class EnvsApi {
             ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(envId))
         }
         catch (e: Exception) {
-            logger.error("Cannot add Env", e)
+            logger.error("Cannot update Env", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun enableEnv(ctx: RoutingContext) {
+        val envId = ctx.request().getParam("envId")
+        try {
+            logger.info("Enabling env $envId")
+            inventory.enableEnvironment(envId)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(envId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot enable Env", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun disableEnv(ctx: RoutingContext) {
+        val envId = ctx.request().getParam("envId")
+        try {
+            logger.info("Disabling env $envId")
+            inventory.disableEnvironment(envId)
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(envId))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot disable Env", e)
             ctx.fail(500)
         }
     }
