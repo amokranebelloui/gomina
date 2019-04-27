@@ -1,7 +1,7 @@
 // @flow
 import * as React from "react";
 import './Environment.css'
-import type {ServiceDetailType} from "./Service";
+import type {ServiceDetailType, ServiceType} from "./Service";
 import {computeStatus, Service} from "./Service";
 import type {InstanceType} from "./Instance";
 import {Instance} from "./Instance";
@@ -26,7 +26,7 @@ type EnvDataType = {
 type Props = {
     env: string,
     services: Array<ServiceDetailType>,
-    highlight?: ?(InstanceType => boolean),
+    highlight?: ?((?InstanceType, ?ServiceType) => boolean),
 }
 
 type State = {
@@ -77,12 +77,12 @@ class EnvironmentLogical extends React.Component<Props, State> {
                 {services.map( svc => {
                     const status = computeStatus(svc.service, svc.instances);
 
-                    const highlightFunction = this.props.highlight || (instance => true);
-                    let serviceHighlighted;
+                    const highlightFunction = this.props.highlight || ((instance, svc) => true);
+                    let serviceHighlighted = highlightFunction(null, svc.service);
                     if (svc.instances && svc.instances.length > 0) {
-                        serviceHighlighted = false;
+                        //serviceHighlighted = false;
                         {svc.instances.map(instance =>
-                            serviceHighlighted = serviceHighlighted || highlightFunction(instance)
+                            serviceHighlighted = serviceHighlighted || highlightFunction(instance, svc.service)
                         )}
                     }
                     else if (!this.props.highlight) {
@@ -103,8 +103,8 @@ class EnvironmentLogical extends React.Component<Props, State> {
                     let instances = [];
                     if (this.isOpen(svc.service.svc)) {
                         instances = sortInstances(svc.instances || []).map(instance => {
-                            const highlightFunction = this.props.highlight || (instance => true);
-                            const highlighted = highlightFunction(instance);
+                            const highlightFunction = this.props.highlight || ((instance, svc) => true);
+                            const highlighted = highlightFunction(instance, svc.service);
                             return (
                                 <tr key={instance.id} className='env-row instance' style={{opacity: (highlighted) ? 1 : 0.1}}>
                                     <td key={'space' + instance.id} style={{display: 'table-cell', minWidth: '30px'}}></td>
