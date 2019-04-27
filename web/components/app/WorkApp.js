@@ -44,7 +44,10 @@ type State = {
 
     workEdition: boolean,
     workEdited?: ?WorkDataType,
+    selectedNewStatus?: ?WorkStatusType
 }
+
+let timeoutId;
 
 class WorkApp extends React.Component<Props, State> {
 
@@ -200,6 +203,12 @@ class WorkApp extends React.Component<Props, State> {
             .catch((error) => console.log("Work update error", error.response));
         this.setState({"workEdition": false}); // FIXME Display Results/Errors
     }
+    selectNewWorkStatus(status: WorkStatusType, current?: ?WorkStatusType) {
+        this.setState({"selectedNewStatus": status});
+        const thisComponent = this;
+        timeoutId && clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => thisComponent.setState({"selectedNewStatus": current}), 4000);
+    }
     changeWorkStatus(status: WorkStatusType) {
         const thisComponent = this;
         const workId = this.state.workId;
@@ -276,6 +285,13 @@ class WorkApp extends React.Component<Props, State> {
                                     {!this.state.workEdition &&
                                     <div>
                                         <div style={{float: 'right'}}>
+                                            <Secure permission="work.status">
+                                                <button onClick={() => this.state.selectedNewStatus && this.changeWorkStatus(this.state.selectedNewStatus)}>
+                                                    {this.state.selectedNewStatus && this.state.selectedNewStatus !== workDetail.work.status &&
+                                                    <span>Status to {this.state.selectedNewStatus}</span>
+                                                    }
+                                                </button>
+                                            </Secure>
                                             {!workDetail.work.archived && [
                                                 <Secure key="Edit" permission="work.manage">
                                                     <button onClick={() => this.editWork()}>Edit</button>
@@ -292,10 +308,10 @@ class WorkApp extends React.Component<Props, State> {
                                         </div>
                                         <Secure permission="work.status"
                                                 fallback={
-                                                    <Work work={workDetail.work} />
+                                                    <Work work={workDetail.work}/>
                                                 }>
                                             <Work work={workDetail.work}
-                                                  onStatusChange={(workId, s) => this.changeWorkStatus(s)} />
+                                                  onStatusChange={(workId, s) => this.selectNewWorkStatus(s, workDetail.work && workDetail.work.status)}/>
                                         </Secure>
                                     </div>
                                     }
