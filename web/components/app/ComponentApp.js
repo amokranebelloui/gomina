@@ -361,27 +361,32 @@ class ComponentApp extends React.Component {
             .catch(() => thisComponent.setState({sonarServers: []}));
 
         if (this.state.componentId) {
-            this.retrieveComponent(this.state.componentId);
-            this.retrieveAssociated(this.state.componentId);
-            this.retrieveApi(this.state.componentId);
-            this.retrieveUsage(this.state.componentId);
-            this.retrieveDependencies(this.state.componentId);
-            this.retrieveImpacted(this.state.componentId);
-            this.retrieveInvocationChain(this.state.componentId);
-            this.retrieveCallChain(this.state.componentId);
-            this.selectChainDependency();
-            if (this.state.docId) {
-                this.retrieveDoc(this.state.componentId, this.state.docId);
-            }
-            if (this.state.branchId) {
-                this.retrieveBranch(this.state.componentId, this.state.branchId);
-            }
-            else {
-                this.retrieveBranch(this.state.componentId, null);
-            }
-            this.retrieveEvents()
+            this.reloadAll();
         }
     }
+
+    reloadAll() {
+        this.retrieveComponent(this.state.componentId);
+        this.retrieveAssociated(this.state.componentId);
+        this.retrieveApi(this.state.componentId);
+        this.retrieveUsage(this.state.componentId);
+        this.retrieveDependencies(this.state.componentId);
+        this.retrieveImpacted(this.state.componentId);
+        this.retrieveInvocationChain(this.state.componentId);
+        this.retrieveCallChain(this.state.componentId);
+        this.selectChainDependency();
+        if (this.state.docId) {
+            this.retrieveDoc(this.state.componentId, this.state.docId);
+        }
+        if (this.state.branchId) {
+            this.retrieveBranch(this.state.componentId, this.state.branchId);
+        }
+        else {
+            this.retrieveBranch(this.state.componentId, null);
+        }
+        this.retrieveEvents()
+    }
+
     componentWillReceiveProps(nextProps) {
         const queryParams = queryString.parse(this.props.location.search);
         const nextQueryParams = queryString.parse(nextProps.location.search);
@@ -463,7 +468,7 @@ class ComponentApp extends React.Component {
                         <ComponentBadge buildServers={this.state.buildServers}
                                         sonarServers={this.state.sonarServers}
                                         component={component}
-                                        onReload={id => this.retrieveComponent(id)}
+                                        onReload={id => this.reloadAll(id)}
                                         onReloadScm={id => this.reloadScm(id)}
                                         onReloadBuild={id => this.reloadBuild(id)}
                                         onReloadSonar={id => this.reloadSonar(id)}
