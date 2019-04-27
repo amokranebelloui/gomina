@@ -27,6 +27,7 @@ type Props = {
     env: string,
     services: Array<ServiceDetailType>,
     highlight?: ?((?InstanceType, ?ServiceType) => boolean),
+    onOrderChange?: (service: string, targetService: string) => void
 }
 
 type State = {
@@ -94,8 +95,11 @@ class EnvironmentLogical extends React.Component<Props, State> {
                         <tr key={'service' + svc.service.svc} className='env-row' style={{opacity: opacity}}>
                             <Route render={({ history}) => (
                             <ServiceStatus key={'status' + svc.service.svc}
+                                           service={svc.service.svc}
                                            status={status.status} reason={status.reason} text={status.text}
-                                           onClick={e => this.toggleService(svc.service.svc, history)} />
+                                           onClick={e => this.toggleService(svc.service.svc, history)}
+                                           onOrderChange={(s, t) => this.props.onOrderChange && this.props.onOrderChange(s, t)}
+                            />
                             )} />
                             <Service service={svc.service} instances={svc.instances || []} />
                         </tr>

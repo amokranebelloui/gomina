@@ -128,6 +128,7 @@ class InstancesApi {
 
         router.post("/:envId/service/add").handler(this::addService)
         router.put("/:envId/service/:svcId/update").handler(this::updateService)
+        router.put("/:envId/service/:svcId/reorder").handler(this::reorderService)
         router.delete("/:envId/service/:svcId/delete").handler(this::deleteService)
 
         router.post("/:envId/service/:svcId/instance/add").handler(this::addInstance)
@@ -177,6 +178,21 @@ class InstancesApi {
             }
             inventory.updateService(env, svc, data.type, data.mode, data.activeCount, data.componentId)
 
+            ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(svc))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot Update Service", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun reorderService(ctx: RoutingContext) {
+        val env = ctx.request().getParam("envId")
+        val svc = ctx.request().getParam("svcId")
+        val target = ctx.request().getParam("target")
+        try {
+            logger.info("Reordering svc $svc -> $target")
+            inventory.reorderService(env, svc, target)
             ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(svc))
         }
         catch (e: Exception) {

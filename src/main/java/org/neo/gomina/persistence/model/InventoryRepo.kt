@@ -69,6 +69,7 @@ class InventoryFile : Inventory, AbstractFileRepo {
     override fun addService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?) { TODO("not implemented") }
     override fun updateService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?) { TODO("not implemented") }
     override fun renameService(env: String, svc: String, newSvc: String) { TODO("not implemented") }
+    override fun reorderService(env: String, svc: String, target: String) { TODO("not implemented") }
     override fun deleteService(env: String, svc: String) { TODO("not implemented") }
 
     override fun addInstance(env: String, svc: String, instanceId: String, host: String?, folder: String?) { TODO("not implemented") }
@@ -194,6 +195,27 @@ class RedisInventoryRepo : Inventory {
             jedis.keys("instance:$env:$svc:*").forEach {
                 jedis.rename(it, it.replace("instance:$env:$svc:", "instance:$env:$newSvc:"))
             }
+        }
+    }
+
+    override fun reorderService(env: String, svc: String, target: String) {
+        pool.resource.use { jedis ->
+            val servicesKey = "services:$env"
+            val from = jedis.zscore(servicesKey, svc)
+            val to = jedis.zscore(servicesKey, target)
+            if (from > to) {
+                jedis.zrangeByScoreWithScores(servicesKey, "$to", "($from").forEach {
+                    jedis.zadd(servicesKey, it.score + 1.0, it.element)
+                }
+                jedis.zadd(servicesKey, to, svc)
+            }
+            else if (from < to) {
+                jedis.zrangeByScoreWithScores(servicesKey, "($from", "$to").forEach {
+                    jedis.zadd(servicesKey, it.score - 1.0, it.element)
+                }
+                jedis.zadd(servicesKey, to, svc)
+            }
+            true
         }
     }
 

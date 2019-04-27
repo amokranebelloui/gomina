@@ -256,6 +256,12 @@ class EnvApp extends React.Component {
         console.info("Service Changed", service);
         this.setState({"serviceEdited": service});
     }
+    changeServiceOrder(service, target) {
+        console.info('Reordering ' + service + ' to ' + target);
+        axios.put('/data/instances/' + this.state.env + '/service/' + service + '/reorder?target=' + target)
+            .then(() => this.retrieveInstances(this.state.env))
+            .catch((error) => console.log("service update error", error.response));
+    }
     cancelServiceEdition() {
         this.setState({"serviceEdition": false});
     }
@@ -328,7 +334,11 @@ class EnvApp extends React.Component {
                             <b>{this.state.env}</b>
                             {
                                 this.state.group === "INSTANCES" ? <EnvInstances services={selectedServices} highlight={this.state.highlight} /> :
-                                <EnvironmentLogical env={this.state.env} services={selectedServices} highlight={this.state.highlight} />
+                                <EnvironmentLogical env={this.state.env}
+                                                    services={selectedServices}
+                                                    highlight={this.state.highlight}
+                                                    onOrderChange={(s, t) => this.changeServiceOrder(s, t)}
+                                />
                             }
                         </Container>
                     </div>

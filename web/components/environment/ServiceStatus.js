@@ -2,14 +2,27 @@
 import * as React from "react";
 
 type Props = {
+    service: string,
     status?: ?string,
     reason?: ?string,
     text?: ?string,
     style?: ?any,
-    onClick?: (e: SyntheticEvent<>) => void
+    onClick?: (e: SyntheticEvent<>) => void,
+    onOrderChange?: (service: string, targetService: string) => void
 }
 
 class ServiceStatus extends React.Component<Props> {
+    onDrag(e: SyntheticDragEvent<>) {
+        e.dataTransfer.setData("svc", this.props.service);
+    }
+    allowDrop(e: SyntheticDragEvent<>) {
+        e.preventDefault();
+    }
+    onDrop(e: SyntheticDragEvent<>) {
+        e.preventDefault();
+        var svc = e.dataTransfer.getData("svc");
+        this.props.onOrderChange && this.props.onOrderChange(svc, this.props.service)
+    }
     render() {
         const status = this.props.status;
         const reason = this.props.reason;
@@ -29,7 +42,12 @@ class ServiceStatus extends React.Component<Props> {
         });
         return (
             <td colSpan="2" className='status' style={style} onClick={e => this.props.onClick && this.props.onClick(e)}>
-                <div style={{display: 'table', width: '100%', boxSizing: 'border-box', padding: '0px 2px'}}>
+                <div style={{display: 'table', width: '100%', boxSizing: 'border-box', padding: '0px 2px'}}
+                     draggable={true}
+                     onDragStart={e => this.onDrag(e)}
+                     onDragOver={e => this. allowDrop(e)}
+                     onDrop={e => this.onDrop(e)}
+                >
 
                     <div style={{display: 'table-row'}}>
                         <div style={{display: 'table-cell', textAlign: 'left', fontSize: '12px'}}><b>{status}</b></div>
