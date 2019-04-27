@@ -255,6 +255,8 @@ class EnvApp extends React.Component {
     updateEnv() {
         this.setState({"envEdition": false});
         axios.put('/data/envs/' + this.state.env + '/update', this.state.envEdited)
+            .then(() => this.retrieveEnvs())
+            .catch((error) => console.log("env update error", error.response));
     }
 
     serviceAdded(s) {
@@ -380,7 +382,7 @@ class EnvApp extends React.Component {
                                 <br/>
                                 <Secure permission="env.add">
                                     <Well block>
-                                        <AddEnvironment />
+                                        <AddEnvironment onEnvironmentAdded={e => this.retrieveEnvs()} />
                                     </Well>
                                 </Secure>
 
