@@ -100,7 +100,7 @@ class WorkApp extends React.Component<Props, State> {
     }
     retrieveSystems() {
         const thisComponent = this;
-        axios.get('/data/components/systems')
+        axios.get('/data/systems/refs')
             .then(response => thisComponent.setState({systems: response.data}))
             .catch(error => thisComponent.setState({systems: []}));
     }

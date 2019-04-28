@@ -27,8 +27,6 @@ import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
-import org.neo.gomina.model.system.Systems
-import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.work.WorkList
 import java.util.*
 import javax.inject.Inject
@@ -133,8 +131,6 @@ class ComponentsApi {
     val router: Router
 
     @Inject private lateinit var componentRepo: ComponentRepo
-    @Inject private lateinit var systems: Systems
-    @Inject private lateinit var users: Users
     @Inject private lateinit var workList: WorkList
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var events: Events
@@ -159,7 +155,6 @@ class ComponentsApi {
         router.get("/").handler(this::components)
         router.get("/refs").handler(this::componentsRefs)
 
-        router.get("/systems").handler(this::systems)
         router.get("/build/servers").handler(this::buildServers)
         router.get("/sonar/servers").handler(this::sonarServers)
 
@@ -207,16 +202,6 @@ class ComponentsApi {
                     .end(mapper.writeValueAsString(components))
         } catch (e: Exception) {
             logger.error("Cannot get components", e)
-            ctx.fail(500)
-        }
-    }
-
-    fun systems(ctx: RoutingContext) {
-        try {
-            ctx.response().putHeader("content-type", "text/javascript")
-                    .end(mapper.writeValueAsString(systems.getSystems()))
-        } catch (e: Exception) {
-            logger.error("Cannot get Systems", e)
             ctx.fail(500)
         }
     }

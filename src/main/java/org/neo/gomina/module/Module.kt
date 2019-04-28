@@ -17,6 +17,7 @@ import org.neo.gomina.api.events.EventsProviderFactory
 import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
 import org.neo.gomina.api.realtime.NotificationsApi
+import org.neo.gomina.api.system.SystemsApi
 import org.neo.gomina.api.users.UsersApi
 import org.neo.gomina.api.work.WorkApi
 import org.neo.gomina.integration.events.EventsService
@@ -160,6 +161,7 @@ class GominaModule : AbstractModule() {
 
         bind(AuthApi::class.java).`in`(Scopes.SINGLETON)
         bind(UsersApi::class.java).`in`(Scopes.SINGLETON)
+        bind(SystemsApi::class.java).`in`(Scopes.SINGLETON)
         bind(ComponentsApi::class.java).`in`(Scopes.SINGLETON)
         bind(WorkApi::class.java).`in`(Scopes.SINGLETON)
         bind(EnvsApi::class.java).`in`(Scopes.SINGLETON)

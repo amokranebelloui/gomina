@@ -46,7 +46,7 @@ class ComponentsApp extends React.Component {
 
     /*
     retrieveSystems() {
-        axios.get('/data/components/systems')
+        axios.get('/data/systems/refs')
             .then(response => {
                 console.log("systems data", response.data);
                 this.setState({systems: response.data});
