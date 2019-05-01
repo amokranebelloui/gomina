@@ -1,0 +1,19 @@
+id: gomina
+label: Gomina!
+
+inceptionDate: 2017-10-01
+owner: amokrane.belloui@gmail.com
+criticity: 4
+
+type: server
+systems: [governance]
+languages: [kotlin, java, javascript, react]
+tags: [governance, server]
+
+api:
+  - {name: reload-data, type: command}
+
+dependencies:
+  - {name: jenkins, type: api, usage: interaction}
+  - {name: sonar, type: api}
+

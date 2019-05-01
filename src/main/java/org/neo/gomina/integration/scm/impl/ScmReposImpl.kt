@@ -5,7 +5,6 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.MavenUtils
 import org.neo.gomina.integration.scm.dummy.DummyScmClient
 import org.neo.gomina.integration.scm.git.GitClient
-import org.neo.gomina.integration.scm.metadata.ProjectMetadataMapper
 import org.neo.gomina.integration.scm.none.NoneScmClient
 import org.neo.gomina.integration.scm.svn.TmateSoftSvnClient
 import org.neo.gomina.model.component.Scm
@@ -30,8 +29,6 @@ class ScmReposImpl {
 
     private val clients = HashMap<String, ScmClient>()
 
-    private val metadataMapper = ProjectMetadataMapper()
-
     private val passwords: Passwords
 
     @Inject
@@ -39,37 +36,21 @@ class ScmReposImpl {
         this.passwords = passwords
     }
 
-    private fun getClient(scm: Scm): ScmClient {
+    fun getClient(scm: Scm): ScmClient {
         return clients.getOrPut("${scm.id}") {
             buildScmClient(scm, passwords) ?: noOpScmClient
         }
     }
 
-    fun getScmDetails(scm: Scm): ScmDetails {
-        return if (scm.url.isNotBlank()) {
-            val scmClient = this.getClient(scm)
-            val trunk = scmClient.getTrunk()
-            val log = scmClient.getLog(trunk, "0", 100).map { commitDecorator.flag(it, scmClient) }
-            computeScmDetails(scm, log, scmClient)
-        }
-        else ScmDetails()
-    }
-
-    private fun computeScmDetails(scm: Scm, logEntries: List<Commit>, scmClient: ScmClient): ScmDetails {
+    fun computeScmDetails(scm: Scm, logEntries: List<Commit>, scmClient: ScmClient): ScmDetails {
         logger.info("Svn Details for " + scm)
         return try {
-            val lastReleasedRev = logEntries
-                    .filter { StringUtils.isNotBlank(it.newVersion) }
-                    .firstOrNull()?.revision
+            val lastReleasedRev = logEntries.firstOrNull { StringUtils.isNotBlank(it.newVersion) }?.revision
             
-            val metadataFile = scmClient.getFile("project.yaml", "-1")
-            val metadata = metadataFile?.let { metadataMapper.map(metadataFile) }
 
             val pomFile = scmClient.getFile("pom.xml", "-1")
 
             val scmDetails = ScmDetails(
-                    owner = metadata?.owner,
-                    critical = metadata?.critical,
                     url = scm.url,
                     artifactId = MavenUtils.extractArtifactId(pomFile),
                     latest = MavenUtils.extractVersion(pomFile),

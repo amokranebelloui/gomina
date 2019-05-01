@@ -1,9 +1,13 @@
 package org.neo.gomina.integration.scm
 
 import com.github.rjeschke.txtmark.Processor
+import org.neo.gomina.integration.scm.impl.CommitDecorator
 import org.neo.gomina.integration.scm.impl.ScmReposImpl
+import org.neo.gomina.integration.scm.metadata.ProjectMetadataMapper
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.component.Scm
+import org.neo.gomina.model.dependency.*
+import org.neo.gomina.model.dependency.Function
 import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.release.ReleaseService
@@ -18,13 +22,35 @@ class ScmService {
 
     @Inject lateinit var scmRepos: ScmReposImpl
     @Inject lateinit var componentRepo: ComponentRepo
+    @Inject lateinit var interactionsRepo: InteractionsRepository
     @Inject lateinit var inventory: Inventory
     @Inject lateinit var events: Events
 
+    @Inject lateinit var commitDecorator: CommitDecorator
+
+    private val metadataMapper = ProjectMetadataMapper()
+
     fun reloadScmDetails(componentId: String, scm: Scm) {
-        scmRepos.getScmDetails(scm).apply {
-            componentRepo.editOwner(componentId, owner)
-            componentRepo.editCriticality(componentId, critical)
+        val scmClient = scmRepos.getClient(scm)
+        val trunk = scmClient.getTrunk()
+        val log = scmClient.getLog(trunk, "0", 100).map { commitDecorator.flag(it, scmClient) }
+
+        val scmDetails = scmRepos.computeScmDetails(scm, log, scmClient) // if (scm.url.isNotBlank())
+
+        val metadata = scmClient.getFile("project.yaml", "-1")?.let { metadataMapper.map(it) }
+
+        componentRepo.editInceptionDate(componentId, metadata?.inceptionDate)
+        componentRepo.editOwner(componentId, metadata?.owner)
+        componentRepo.editCriticality(componentId, metadata?.criticity)
+
+        interactionsRepo.update("metadata", listOf(
+                Interactions(componentId,
+                        metadata?.api?.map { Function(it.name, it.type) } ?: emptyList(),
+                        metadata?.dependencies?.map { FunctionUsage(it.name, it.type, it.usage?.let { Usage(it) }) } ?: emptyList()
+                )
+        ))
+
+        scmDetails.apply {
             componentRepo.editArtifactId(componentId, artifactId)
 
             componentRepo.updateVersions(componentId,

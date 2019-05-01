@@ -42,6 +42,7 @@ data class ComponentDetail(
         var artifactId: String? = null,
         var label: String? = null,
         var type: String? = null,
+        var inceptionDate: Date? = null,
         var owner: String? = null,
         var critical: Int? = null,
         var systems: List<String> = emptyList(),
@@ -668,6 +669,7 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     this.jenkinsJob = component.jenkinsJob
 
     // SCM
+    this.inceptionDate = component.inceptionDate?.toDateUtc
     this.owner = component.owner
     this.critical = component.critical
     this.branches = component.branches.map {

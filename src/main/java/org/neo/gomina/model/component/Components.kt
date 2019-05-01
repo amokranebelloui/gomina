@@ -4,6 +4,7 @@ import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.system.System
 import org.neo.gomina.model.version.Version
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class Component(
@@ -19,6 +20,7 @@ data class Component(
         var jenkinsServer: String = "",
         var jenkinsJob: String? = null,
 
+        var inceptionDate: LocalDate? = null,
         var owner: String? = null,
         var critical: Int? = null,
         var latest: Version? = null,
@@ -79,6 +81,7 @@ interface ComponentRepo {
     fun add(component: NewComponent)
     fun editLabel(componentId: String, label: String)
     fun editType(componentId: String, type: String)
+    fun editInceptionDate(componentId: String, inceptionDate: LocalDate?)
     fun editOwner(componentId: String, owner: String?) // TODO Overridable
     fun editCriticality(componentId: String, critical: Int?) // TODO Overridable
     fun editArtifactId(componentId: String, artifactId: String?) // TODO Overridable

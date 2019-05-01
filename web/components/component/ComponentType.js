@@ -12,6 +12,7 @@ type ComponentType = {
     artifactId?: ?string,
     label?: ?string,
     type?: ?string,
+    inceptionDate?: ?number,
     owner?: ?string,
     critical?: ?number,
     systems?: ?Array<string>,

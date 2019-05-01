@@ -16,9 +16,11 @@ import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool
 import java.io.File
 import java.time.Clock
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter.ISO_DATE
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
 
 class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
@@ -45,6 +47,7 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
 
     override fun editLabel(componentId: String, label: String) { TODO("not implemented") }
     override fun editType(componentId: String, type: String) { TODO("not implemented") }
+    override fun editInceptionDate(componentId: String, inceptionDate: LocalDate?) { TODO("not implemented") }
     override fun editOwner(componentId: String, owner: String?) { TODO("not implemented") }
     override fun editCriticality(componentId: String, critical: Int?) { TODO("not implemented") }
     override fun editArtifactId(componentId: String, artifactId: String?) { TODO("not implemented") }
@@ -152,8 +155,9 @@ class RedisComponentRepo : ComponentRepo {
                         username = map["scm_username"] ?: "",
                         passwordAlias = map["scm_password_alias"] ?: ""
                 ) ,
+                inceptionDate = map["inception_date"]?.let { LocalDate.parse(it, ISO_DATE) },
                 owner = map["owner"],
-                critical = map["critical"]?.toInt(),
+                critical = map["criticity"]?.toInt(),
                 artifactId = map["artifact_id"],
                 sonarServer = map["sonar_server"] ?: "",
                 jenkinsServer = map["jenkins_server"] ?: "",
@@ -216,6 +220,12 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
+    override fun editInceptionDate(componentId: String, inceptionDate: LocalDate?) {
+        pool.resource.use { jedis ->
+            jedis.persist("component:$componentId", mapOf("inception_date" to inceptionDate?.format(ISO_DATE)))
+        }
+    }
+
     override fun editOwner(componentId: String, owner: String?) {
         owner?.let {
             pool.resource.use { jedis ->
@@ -224,10 +234,10 @@ class RedisComponentRepo : ComponentRepo {
         } 
     }
 
-    override fun editCriticality(componentId: String, critical: Int?) {
-        critical?.let {
+    override fun editCriticality(componentId: String, criticity: Int?) {
+        criticity?.let {
             pool.resource.use { jedis ->
-                jedis.hset("component:$componentId", "critical", critical.toString())
+                jedis.hset("component:$componentId", "criticity", criticity.toString())
             }
         }
     }

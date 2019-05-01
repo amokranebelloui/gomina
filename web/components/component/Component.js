@@ -246,6 +246,7 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                     </Secure>
                     <br/></span>
 
+                    <span key="inception">Inception: <DateTime date={component.inceptionDate} />&nbsp;</span><br/>
                     <span key="owner">Owner {component.owner || <span style={{opacity: "0.5"}}>Unknown</span>}</span><br/>
                     <span key="criticality">Criticality {component.critical || <span style={{opacity: "0.5"}}>"?"</span>}</span><br/>
 
