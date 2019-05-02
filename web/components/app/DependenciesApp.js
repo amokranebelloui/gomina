@@ -7,6 +7,7 @@ import {TagCloud} from "../common/TagCloud";
 import {Container} from "../common/Container";
 import ls from "local-storage"
 import {Well} from "../common/Well";
+import {joinTags, splitTags} from "../common/utils";
 
 class DependenciesApp extends React.Component {
     constructor(props) {
@@ -16,23 +17,13 @@ class DependenciesApp extends React.Component {
             workRefs: [],
             components: [],
             dependencies: [],
-            selectedSystems: this.split(ls.get('components.systems')),
-            selectedWork: this.split(ls.get('components.selected.work')),
-            selectedFunctionTypes: this.split(ls.get('components.function.types')),
+            selectedSystems: splitTags(ls.get('components.systems')),
+            selectedWork: ls.get('components.selected.work'),
+            selectedFunctionTypes: splitTags(ls.get('components.function.types')),
             selectedDependencies: [],
 
             deps: {services: [], functionTypes: [], dependencies: []}
         };
-    }
-
-    split(tags) {
-        try {
-            return tags && tags.split(',') || [];
-        }
-        catch (e) {
-            console.error("Error splitting", tags, typeof tags);
-            return []
-        }
     }
 
     componentDidMount() {
@@ -73,7 +64,7 @@ class DependenciesApp extends React.Component {
         console.info("selected systems", systems);
         this.setState({selectedSystems: systems});
         this.retrieveDependenciesFor(systems, this.state.selectedWork, this.state.selectedFunctionTypes);
-        ls.set('components.systems', systems.join(','));
+        ls.set('components.systems', joinTags(systems));
     }
     selectedWorkChanged(work) {
         console.info("selected work", work);
@@ -85,7 +76,7 @@ class DependenciesApp extends React.Component {
         console.info("selected functionTypes", functionTypes);
         this.setState({selectedFunctionTypes: functionTypes});
         this.retrieveDependenciesFor(this.state.selectedSystems, this.state.selectedWork, functionTypes);
-        ls.set('components.function.types', functionTypes.join(','));
+        ls.set('components.function.types', joinTags(functionTypes));
     }
 
     onSelectedDependenciesChanged(selectedDeps) {

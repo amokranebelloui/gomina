@@ -5,11 +5,11 @@ function extendSystems(systems) {
     if (systems) {
         return flatMap(systems, s => extendSystem(s))
     }
-    return []
+    return null
 }
 
 function extendSystem(system) {
-    if (system) {
+    if (system !== null) {
         var ext = "";
         var separator = "";
         return flatMap(system.split('.'), s => {
@@ -18,7 +18,7 @@ function extendSystem(system) {
             return ext
         })
     }
-    return []
+    return null
 }
 
 export { extendSystem, extendSystems }

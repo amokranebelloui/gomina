@@ -1,7 +1,7 @@
 import React from "react";
 import SockJS from "sockjs-client";
 import axios from "axios/index";
-import {flatMap, groupBy} from "../common/utils";
+import {flatMap, groupBy, matchesList} from "../common/utils";
 import type {EnvType} from "../environment/Environment";
 import {EnvironmentLogical} from "../environment/Environment";
 import {AppLayout} from "./common/layout";
@@ -308,7 +308,7 @@ class EnvApp extends React.Component {
         const selectedService: ServiceType = selectedServiceDetail && selectedServiceDetail.service;
         console.info("envApp !render", svcId, selectedService);
 
-        const systems = extendSystems(flatMap(services, p => p.service.systems));
+        const systems = extendSystems(flatMap(services, p => p.service.systems && p.service.systems.length > 0 ? p.service.systems : [""]));
 
         const selectedServices = services.filter(s => matchesList(extendSystems(s.service.systems), this.state.selectedSystems));
 
@@ -505,15 +505,6 @@ class EnvApp extends React.Component {
             </AppLayout>
         );
     }
-}
-
-// FIXME Duplicated
-function matchesList(componentValues, selectedValues) {
-    if (selectedValues && selectedValues.length > 0) {
-        const values = (componentValues||[]);
-        return (selectedValues||[]).find(value => values.indexOf(value) !== -1);
-    }
-    return true
 }
 
 export { EnvApp }

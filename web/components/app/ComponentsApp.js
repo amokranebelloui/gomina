@@ -6,7 +6,7 @@ import {ComponentHeader, ComponentSummary} from "../component/Component";
 import axios from "axios/index";
 import {Container} from "../common/Container";
 import {Well} from "../common/Well";
-import {flatMap} from "../common/utils";
+import {flatMap, joinTags, splitTags} from "../common/utils";
 import {ComponentSort, sortComponentsBy} from "../component/ComponentSort";
 import {extendSystems} from "../system/system-utils";
 import {AddComponent} from "../component/AddComponent";
@@ -18,10 +18,10 @@ class ComponentsApp extends React.Component {
         super(props);
         const filter = {
             search: ls.get('components.search'),
-            types: this.split(ls.get('components.types')),
-            systems: this.split(ls.get('components.systems')),
-            languages: this.split(ls.get('components.languages')),
-            tags: this.split(ls.get('components.tags'))
+            types: splitTags(ls.get('components.types')),
+            systems: splitTags(ls.get('components.systems')),
+            languages: splitTags(ls.get('components.languages')),
+            tags: splitTags(ls.get('components.tags'))
         };
         this.state = {
             components: [],
@@ -32,16 +32,6 @@ class ComponentsApp extends React.Component {
         //this.retrieveSystems = this.retrieveSystems.bind(this);
         this.retrieveComponents = this.retrieveComponents.bind(this);
         console.info("componentsApp !constructor ");
-    }
-
-    split(tags) {
-        try {
-            return tags && tags.split(',') || [];
-        }
-        catch (e) {
-            console.error("Error splitting", tags, typeof tags);
-            return []
-        }
     }
 
     /*
@@ -120,18 +110,18 @@ class ComponentsApp extends React.Component {
     setFilter(filter) {
         this.setState({filter: filter});
         ls.set('components.search', filter.search);
-        ls.set('components.types', filter.types.join(','));
-        ls.set('components.systems', filter.systems.join(','));
-        ls.set('components.languages', filter.languages.join(','));
-        ls.set('components.tags', filter.tags.join(','));
+        ls.set('components.types', joinTags(filter.types));
+        ls.set('components.systems', joinTags(filter.systems));
+        ls.set('components.languages', joinTags(filter.languages));
+        ls.set('components.tags', joinTags(filter.tags));
     }
     render() {
         const components = sortComponentsBy(this.state.components, this.state.sortBy);
-        const types = flatMap(this.state.components, p => [p.type]);
-        const systems = extendSystems(flatMap(this.state.components, p => p.systems));
+        const types = flatMap(this.state.components, p => p.type ? [p.type] : [""]);
+        const systems = extendSystems(flatMap(this.state.components, p => p.systems && p.systems.length > 0 ? p.systems : [""]));
         //const systems = this.state.systems;
-        const languages = flatMap(this.state.components, p => p.languages);
-        const tags = flatMap(this.state.components, p => p.tags);
+        const languages = flatMap(this.state.components, p => p.languages && p.languages.length > 0 ? p.languages : [""]);
+        const tags = flatMap(this.state.components, p => p.tags && p.tags.length > 0 ? p.tags : [""]);
         return (
             <AppLayout title="Components">
                 <PrimarySecondaryLayout>

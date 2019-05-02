@@ -20,6 +20,7 @@ import type {WorkDataType, WorkManifestType, WorkStatusType, WorkType} from "../
 import {Issue} from "../misc/Issue";
 import type {EnvType} from "../environment/Environment";
 import {WorkStatus} from "../work/WorkStatus";
+import {joinTags, splitTags} from "../common/utils";
 
 type Props = {
     match: any
@@ -61,7 +62,7 @@ class WorkApp extends React.Component<Props, State> {
             users: [],
             systems: [],
             search: ls.get('work.list.search') || '',
-            selectedSystems: this.split(ls.get('components.systems')) || [],
+            selectedSystems: splitTags(ls.get('components.systems')) || [],
             sortBy: ls.get('work.list.sort') || 'due-date',
             workList: [],
             workDetail: null,
@@ -73,16 +74,6 @@ class WorkApp extends React.Component<Props, State> {
         //this.retrieveWorkList = this.retrieveWorkList.bind(this);
         //this.retrieveWorkDetail = this.retrieveWorkDetail.bind(this);
         console.info("workApp !constructor ");
-    }
-
-    split(tags: ?string) {
-        try {
-            return tags && tags.split(',') || [];
-        }
-        catch (e) {
-            console.error("Error splitting", tags, typeof tags);
-            return []
-        }
     }
 
     retrieveComponentRefs() {
@@ -101,14 +92,14 @@ class WorkApp extends React.Component<Props, State> {
     retrieveSystems() {
         const thisComponent = this;
         axios.get('/data/systems/refs')
-            .then(response => thisComponent.setState({systems: response.data}))
+            .then(response => thisComponent.setState({systems: [...response.data, ""]}))
             .catch(error => thisComponent.setState({systems: []}));
     }
 
     setFilter(search: string, selectedSystems: Array<string>) {
         this.setState({search: search, selectedSystems: selectedSystems});
         ls.set('work.list.search', search);
-        ls.set('components.systems', selectedSystems.join(','))
+        ls.set('components.systems', joinTags(selectedSystems))
     }
     sortChanged(sortBy: string) {
         this.setState({sortBy: sortBy});

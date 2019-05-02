@@ -3,6 +3,7 @@ import * as React from "react"
 import {extendSystems} from "../system/system-utils";
 import type {ComponentType} from "./ComponentType";
 import {TagCloud} from "../common/TagCloud";
+import {matchesList} from "../common/utils";
 
 type ComponentFilterType = {
     search: string,
@@ -122,13 +123,6 @@ function matchesSearch(component: ComponentType, search: string,
     //(languages.filter(item => item.match(regExp))||[]).length > 0 ||
     //(tags.filter(item => item.match(regExp))||[]).length > 0;
     //return component.label && component.label.indexOf(this.state.search) !== -1;
-}
-function matchesList(componentValues, selectedValues) {
-    if (selectedValues && selectedValues.length > 0) {
-        const values = (componentValues||[]);
-        return (selectedValues||[]).find(value => values.indexOf(value) !== -1);
-    }
-    return true
 }
 
 export { ComponentFilter, filterComponents }

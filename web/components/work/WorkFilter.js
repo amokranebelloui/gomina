@@ -2,7 +2,7 @@
 import * as React from "react"
 import type {WorkType} from "./WorkType";
 import {TagCloud} from "../common/TagCloud";
-import {flatMap} from "../common/utils";
+import {flatMap, matchesList} from "../common/utils";
 import {extendSystems} from "../system/system-utils";
 
 type Props = {
@@ -60,14 +60,6 @@ function matchesSearch(work: WorkType, search: string) {
     let matchesLabel = work.label && work.label.match(regExp);
     let matchesIssues = work.issues && work.issues.find(value => value && value.issue.match(regExp));
     return matchesLabel || matchesIssues
-}
-
-function matchesList(componentValues, selectedValues) {
-    if (selectedValues && selectedValues.length > 0) {
-        const values = (componentValues||[]);
-        return (selectedValues||[]).find(value => values.indexOf(value) !== -1);
-    }
-    return true
 }
 
 export { WorkFilter, filterWork }

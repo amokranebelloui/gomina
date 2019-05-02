@@ -73,7 +73,7 @@ class TagCloud extends React.Component<Props, State> {
                 <Badge key={t.value} value={t.value}
                        backgroundColor={this.isSelected(t.value) ? 'yellow' : null}
                        onSelected={(v, multi) => this.onSelected(v, multi)}>
-                    {t.value}{(this.props.displayCount || false) && "(" + t.count + ")"}
+                    {t.value || 'none'}{(this.props.displayCount || false) && "(" + t.count + ")"}
                 </Badge>
             )
         )
