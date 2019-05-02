@@ -49,7 +49,7 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
     override fun editType(componentId: String, type: String) { TODO("not implemented") }
     override fun editInceptionDate(componentId: String, inceptionDate: LocalDate?) { TODO("not implemented") }
     override fun editOwner(componentId: String, owner: String?) { TODO("not implemented") }
-    override fun editCriticality(componentId: String, critical: Int?) { TODO("not implemented") }
+    override fun editCriticity(componentId: String, criticity: Int?) { TODO("not implemented") }
     override fun editArtifactId(componentId: String, artifactId: String?) { TODO("not implemented") }
     override fun editScm(componentId: String, type: String, url: String, path: String?) { TODO("not implemented") }
     override fun editSonar(componentId: String, server: String?) { TODO("not implemented") }
@@ -157,7 +157,7 @@ class RedisComponentRepo : ComponentRepo {
                 ) ,
                 inceptionDate = map["inception_date"]?.let { LocalDate.parse(it, ISO_DATE) },
                 owner = map["owner"],
-                critical = map["criticity"]?.toInt(),
+                criticity = map["criticity"]?.toInt(),
                 artifactId = map["artifact_id"],
                 sonarServer = map["sonar_server"] ?: "",
                 jenkinsServer = map["jenkins_server"] ?: "",
@@ -234,7 +234,7 @@ class RedisComponentRepo : ComponentRepo {
         } 
     }
 
-    override fun editCriticality(componentId: String, criticity: Int?) {
+    override fun editCriticity(componentId: String, criticity: Int?) {
         criticity?.let {
             pool.resource.use { jedis ->
                 jedis.hset("component:$componentId", "criticity", criticity.toString())

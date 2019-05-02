@@ -22,7 +22,7 @@ data class Component(
 
         var inceptionDate: LocalDate? = null,
         var owner: String? = null,
-        var critical: Int? = null,
+        var criticity: Int? = null,
         var latest: Version? = null,
         var released: Version? = null,
         var changes: Int? = null,
@@ -53,7 +53,7 @@ data class NewComponent(
         var artifactId: String? = null,
         var type: String? = null,
         //var owner: String? = null,
-        //var critical: Int? = null,
+        //var criticity: Int? = null,
         var systems: List<String> = emptyList(),
         var languages: List<String> = emptyList(),
         var tags: List<String> = emptyList(),
@@ -83,7 +83,7 @@ interface ComponentRepo {
     fun editType(componentId: String, type: String)
     fun editInceptionDate(componentId: String, inceptionDate: LocalDate?)
     fun editOwner(componentId: String, owner: String?) // TODO Overridable
-    fun editCriticality(componentId: String, critical: Int?) // TODO Overridable
+    fun editCriticity(componentId: String, criticity: Int?) // TODO Overridable
     fun editArtifactId(componentId: String, artifactId: String?) // TODO Overridable
     fun editScm(componentId: String, type: String, url: String, path: String?)
     fun editSonar(componentId: String, server: String?)

@@ -13,6 +13,7 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.common.UserRef
 import org.neo.gomina.api.common.toDateUtc
+import org.neo.gomina.api.common.toLocalDate
 import org.neo.gomina.api.instances.VersionDetail
 import org.neo.gomina.api.instances.toVersionDetail
 import org.neo.gomina.api.work.IssueRef
@@ -44,7 +45,7 @@ data class ComponentDetail(
         var type: String? = null,
         var inceptionDate: Date? = null,
         var owner: String? = null,
-        var critical: Int? = null,
+        var criticity: Int? = null,
         var systems: List<String> = emptyList(),
         var languages: List<String> = emptyList(),
         var tags: List<String> = emptyList(),
@@ -109,7 +110,7 @@ data class NewComponentDetail(
         var artifactId: String? = null,
         var type: String? = null,
         //var owner: String? = null,
-        //var critical: Int? = null,
+        //var criticity: Int? = null,
         var systems: List<String> = emptyList(),
         var languages: List<String> = emptyList(),
         var tags: List<String> = emptyList(),
@@ -171,6 +172,9 @@ class ComponentsApi {
         router.put("/:componentId/label").handler(this::editLabel)
         router.put("/:componentId/type").handler(this::editType)
         router.put("/:componentId/artifactId").handler(this::editArtifactId)
+        router.put("/:componentId/inceptionDate").handler(this::editInceptionDate)
+        router.put("/:componentId/owner").handler(this::editOwner)
+        router.put("/:componentId/criticity").handler(this::editCriticity)
         router.put("/:componentId/scm").handler(this::editScm)
         router.put("/:componentId/sonar").handler(this::editSonar)
         router.put("/:componentId/build").handler(this::editBuild)
@@ -470,6 +474,48 @@ class ComponentsApi {
         }
     }
 
+    private fun editInceptionDate(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val inceptionDate = ctx.request().getParam("inceptionDate")
+            logger.info("Edit InceptionDate $componentId $inceptionDate ...")
+            componentRepo.editInceptionDate(componentId, inceptionDate?.toLocalDate())
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot edit artifactId", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun editOwner(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val owner = ctx.request().getParam("owner")
+            logger.info("Edit Owner $componentId $owner ...")
+            componentRepo.editOwner(componentId, owner)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot edit artifactId", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun editCriticity(ctx: RoutingContext) {
+        try {
+            val componentId = ctx.request().getParam("componentId")
+            val criticity = ctx.request().getParam("criticity")
+            logger.info("Edit Criticity $componentId $criticity ...")
+            componentRepo.editCriticity(componentId, criticity?.toInt())
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot edit artifactId", e)
+            ctx.fail(500)
+        }
+    }
+
     private fun editScm(ctx: RoutingContext) {
         try {
             val componentId = ctx.request().getParam("componentId")
@@ -671,7 +717,7 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     // SCM
     this.inceptionDate = component.inceptionDate?.toDateUtc
     this.owner = component.owner
-    this.critical = component.critical
+    this.criticity = component.criticity
     this.branches = component.branches.map {
         BranchDetail(name = it.name, origin = it.origin, originRevision = it.originRevision)
     }

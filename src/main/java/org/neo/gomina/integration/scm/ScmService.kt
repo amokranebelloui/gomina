@@ -41,7 +41,7 @@ class ScmService {
 
         componentRepo.editInceptionDate(componentId, metadata?.inceptionDate)
         componentRepo.editOwner(componentId, metadata?.owner)
-        componentRepo.editCriticality(componentId, metadata?.criticity)
+        componentRepo.editCriticity(componentId, metadata?.criticity)
 
         interactionsRepo.update("metadata", listOf(
                 Interactions(componentId,

@@ -4,7 +4,7 @@ package org.neo.gomina.model.scm
 
 data class ScmDetails (
         var owner: String? = null,
-        var critical: Int? = null,
+        var criticity: Int? = null,
         var url: String? = null,
         var artifactId: String? = null,
         var latest: String? = null,

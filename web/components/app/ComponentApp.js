@@ -138,6 +138,22 @@ class ComponentApp extends React.Component {
             })
             .catch((error) => console.error("cannot edit scm", error.response));
     }
+    editInceptionDate(componentId, date) {
+        axios.put('/data/components/' + componentId + '/inceptionDate?inceptionDate=' + date)
+            .then(() => this.retrieveComponent(componentId))
+            .catch((error) => console.error("cannot edit inception date", error.response));
+    }
+    editOwner(componentId, owner) {
+        axios.put('/data/components/' + componentId + '/owner?owner=' + owner)
+            .then(() => this.retrieveComponent(componentId))
+            .catch((error) => console.error("cannot edit owner", error.response));
+    }
+    editCriticity(componentId, date) {
+        axios.put('/data/components/' + componentId + '/criticity?criticity=' + date)
+            .then(() => this.retrieveComponent(componentId))
+            .catch((error) => console.error("cannot edit criticity", error.response));
+    }
+
     editSonar(componentId, server) {
         axios.put('/data/components/' + componentId + '/sonar?server=' + server)
             .then(() => this.retrieveComponent(componentId))
@@ -476,6 +492,9 @@ class ComponentApp extends React.Component {
                                         onTypeEdited={(id, t) => this.editType(id, t)}
                                         onArtifactIdEdited={(id, artifactId) => this.editArtifactId(id, artifactId)}
                                         onScmEdited={(id, t, u, p) => this.editScm(id, t, u, p)}
+                                        onInceptionDateEdited={(id, d) => this.editInceptionDate(id, d)}
+                                        onOwnerEdited={(id, o) => this.editOwner(id, o)}
+                                        onCriticityEdited={(id, c) => this.editCriticity(id, c)}
                                         onSonarEdited={(id, s) => this.editSonar(id, s)}
                                         onBuildEdited={(id, s, j) => this.editBuild(id, s, j)}
                                         onSystemAdd={(id, s) => this.addSystem(id, s)}

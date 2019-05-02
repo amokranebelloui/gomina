@@ -21,6 +21,8 @@ import {EditableLabel} from "../common/EditableLabel";
 import {ScmEditor} from "./ScmEditor";
 import {BuildEditor} from "./BuildEditor";
 import {SonarEditor} from "./SonarEditor";
+import {Label} from "../common/Label";
+import {EditableDate} from "../common/EditableDate";
 
 function ComponentHeader(props: {}) {
     return (
@@ -111,6 +113,9 @@ type ComponentBadgeProps = {
     onTypeEdited: (componentId: string, type: string) => void,
     onArtifactIdEdited: (componentId: string, artifactId: string) => void,
     onScmEdited: (componentId: string, type: string, url: string, path: ?string) => void,
+    onInceptionDateEdited: (componentId: string, date: ?string) => void,
+    onOwnerEdited: (componentId: string, owner: ?string) => void,
+    onCriticityEdited: (componentId: string, criticity: ?string) => void,
     onSonarEdited: (componentId: string, server: ?string) => void,
     onBuildEdited: (componentId: string, server: ?string, job: ?string) => void,
     onSystemAdd: (componentId: string, system: string) => void,
@@ -205,15 +210,15 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                     <br/>
 
                     <Secure permission="component.edit" fallback={
-                        <span style={{fontSize: 9}}>{component.artifactId || 'no artifact id'}</span>
+                        <Label label={component.artifactId} altText={'no artifact id'} />
                     }>
                         <EditableLabel label={component.artifactId} altText={'no artifact id'}
-                                       onLabelEdited={artifactId => this.props.onArtifactIdEdited(component.id, artifactId)}/>
+                                       onLabelEdited={artifactId => this.props.onArtifactIdEdited(component.id, artifactId)} />
                     </Secure>
                     <br/>
 
                     {!this.state.scmEdition &&
-                    <div>
+                    <span>
                         <ScmLink type={component.scmType} />&nbsp;
                         <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
                         &nbsp;
@@ -221,14 +226,7 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                             <button onClick={() => this.startEditScm()}>Edit</button>
                         </Secure>
                         <button onClick={() => this.props.onReloadScm(component.id)}>ReloadSCM</button>
-                        <br/>
-                        Last commit: <DateTime date={component.lastCommit} />&nbsp;
-                        {(component.commitActivity != undefined && component.commitActivity != 0) &&
-                        <Badge backgroundColor='#EAA910' color='white'>{component.commitActivity}</Badge>
-                        }
-                        <br/>
-                        Commit to Release: {component.commitToRelease || '?'} days
-                    </div>
+                    </span>
                     }
                     {this.state.scmEdition &&
                     <ScmEditor type={component.scmType} url={component.scmUrl} path={component.scmPath}
@@ -236,19 +234,50 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                                onEditionCancelled={() => this.cancelEditScm()} />
                     }
                     <br/>
+                    
+                    Last commit: <DateTime date={component.lastCommit} />&nbsp;
+                    {(component.commitActivity != undefined && component.commitActivity != 0) &&
+                    <Badge backgroundColor='#EAA910' color='white'>{component.commitActivity}</Badge>
+                    }
+                    <br/>
+                    Commit to Release: {component.commitToRelease || '?'} days
+                    <br/>
 
-                    <span key="type">Type &nbsp;
+                    <b>Type</b>&nbsp;
                     <Secure permission="component.edit" fallback={
                         <span>{component.type}</span>
                     }>
                         <EditableLabel label={component.type}
                                        onLabelEdited={t => this.props.onTypeEdited(component.id, t)}/>
                     </Secure>
-                    <br/></span>
+                    <br/>
 
-                    <span key="inception">Inception: {component.inceptionDate ? <DateTime date={component.inceptionDate} /> : <span style={{opacity: "0.5"}}>?</span>}&nbsp;</span><br/>
-                    <span key="owner">Owner {component.owner || <span style={{opacity: "0.5"}}>Unknown</span>}</span><br/>
-                    <span key="criticality">Criticality {component.critical || <span style={{opacity: "0.5"}}>?</span>}</span><br/>
+                    <b>Inception</b>&nbsp;
+                    <Secure permission="component.edit" fallback={
+                        <DateTime date={component.inceptionDate}  />
+                    }>
+                        <EditableDate date={component.inceptionDate}
+                                      onDateEdited={inceptionDate => this.props.onInceptionDateEdited && this.props.onInceptionDateEdited(component.id, inceptionDate)} />
+                    </Secure>
+                    <br/>
+
+                    <b>Owner</b>&nbsp;
+                    <Secure permission="component.edit" fallback={
+                        <Label label={component.owner}  />
+                    }>
+                        <EditableLabel label={component.owner}
+                                       onLabelEdited={o => this.props.onOwnerEdited && this.props.onOwnerEdited(component.id, o)} />
+                    </Secure>
+                    <br/>
+
+                    <b>Criticity</b>&nbsp;
+                    <Secure permission="component.edit" fallback={
+                        <Label label={component.criticity}  />
+                    }>
+                        <EditableLabel label={component.criticity}
+                                       onLabelEdited={inceptionDate => this.props.onCriticityEdited && this.props.onCriticityEdited(component.id, inceptionDate)} />
+                    </Secure>
+                    <br/>
 
                     <hr/>
 

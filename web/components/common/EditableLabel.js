@@ -58,7 +58,7 @@ class EditableLabel extends React.Component<Props, State> {
                 <span onDoubleClick={() => this.editLabel()} {...this.props}>
                     {this.props.label
                         ? this.props.label
-                        : <span style={{opacity: .5, textDecoration: 'italic'}}>{this.props.altText}</span>
+                        : <span style={{opacity: .5, textDecoration: 'italic'}}>{this.props.altText || '?'}</span>
                     }
                 </span>
 
