@@ -379,7 +379,7 @@ class ComponentsApi {
                 componentRepo.get(it)?.let { component ->
                     try {
                         logger.info("Reload SCM data for $it ...")
-                        component.scm?.let { scmService.reloadScmDetails(component.id, it) }
+                        component.scm?.let { scmService.reloadScmDetails(component, it) }
                     }
                     catch (e: Exception) {
                         logger.error("Error Reloading SCM for ${component.id}", e)
@@ -530,7 +530,7 @@ class ComponentsApi {
             componentRepo.editScm(componentId, type, url, path, hasMetadata?.toBoolean() ?: false)
             componentRepo.get(componentId)?.let { component ->
                 logger.info("Reload SCM data for $componentId ...")
-                component.scm?.let { scmService.reloadScmDetails(componentId, it) }
+                component.scm?.let { scmService.reloadScmDetails(component, it) }
             }
             ctx.response().putHeader("content-type", "text/javascript").end()
         }

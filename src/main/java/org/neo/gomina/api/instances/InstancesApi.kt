@@ -319,7 +319,7 @@ class InstancesApi {
                 val envId = ctx.request().getParam("envId")
                 logger.info("Reloading SCM data $envId ...")
                 componentRepo.getAll().forEach { component ->
-                    component.scm?.let { scmService.reloadScmDetails(component.id, it) }
+                    component.scm?.let { scmService.reloadScmDetails(component, it) }
                 }
                 future.complete()
             }, false)
