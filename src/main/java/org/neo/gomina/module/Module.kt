@@ -16,6 +16,7 @@ import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.events.EventsProviderFactory
 import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
+import org.neo.gomina.api.knowledge.KnowledgeApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.api.system.SystemsApi
 import org.neo.gomina.api.users.UsersApi
@@ -37,6 +38,7 @@ import org.neo.gomina.integration.ssh.SshOnDemandConnector
 import org.neo.gomina.integration.ssh.SshService
 import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
+import org.neo.gomina.model.component.ComponentKnowledge
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.EnrichDependencies
 import org.neo.gomina.model.dependency.InteractionProviders
@@ -91,6 +93,7 @@ class GominaModule : AbstractModule() {
         bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
 
         bind(ComponentRepo::class.java).to(RedisComponentRepo::class.java).`in`(Scopes.SINGLETON)
+        bind(ComponentKnowledge::class.java).to(RedisComponentKnowledge::class.java).`in`(Scopes.SINGLETON)
         bind(Systems::class.java).to(InferredSystems::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionProviders::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsRepository::class.java).to(RedisInteractionsRepository::class.java).`in`(Scopes.SINGLETON)
@@ -163,6 +166,7 @@ class GominaModule : AbstractModule() {
         bind(UsersApi::class.java).`in`(Scopes.SINGLETON)
         bind(SystemsApi::class.java).`in`(Scopes.SINGLETON)
         bind(ComponentsApi::class.java).`in`(Scopes.SINGLETON)
+        bind(KnowledgeApi::class.java).`in`(Scopes.SINGLETON)
         bind(WorkApi::class.java).`in`(Scopes.SINGLETON)
         bind(EnvsApi::class.java).`in`(Scopes.SINGLETON)
         bind(HostsApi::class.java).`in`(Scopes.SINGLETON)

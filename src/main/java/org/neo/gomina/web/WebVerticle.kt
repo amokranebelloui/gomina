@@ -19,6 +19,7 @@ import org.neo.gomina.api.envs.EnvsApi
 import org.neo.gomina.api.events.EventsApi
 import org.neo.gomina.api.hosts.HostsApi
 import org.neo.gomina.api.instances.InstancesApi
+import org.neo.gomina.api.knowledge.KnowledgeApi
 import org.neo.gomina.api.realtime.NotificationsApi
 import org.neo.gomina.api.system.SystemsApi
 import org.neo.gomina.api.users.UsersApi
@@ -59,6 +60,7 @@ class WebVerticle : AbstractVerticle() {
                 .mountSubRouter("/data/envs", injector.getInstance(EnvsApi::class.java).router)
                 .mountSubRouter("/data/systems", injector.getInstance(SystemsApi::class.java).router)
                 .mountSubRouter("/data/components", injector.getInstance(ComponentsApi::class.java).router)
+                .mountSubRouter("/data/knowledge", injector.getInstance(KnowledgeApi::class.java).router)
                 .mountSubRouter("/data/work", injector.getInstance(WorkApi::class.java).router)
                 .mountSubRouter("/data/instances", injector.getInstance(InstancesApi::class.java).router)
                 .mountSubRouter("/data/hosts", injector.getInstance(HostsApi::class.java).router)

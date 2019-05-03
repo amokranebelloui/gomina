@@ -28,6 +28,10 @@ class SandboxApp extends React.Component {
                 <b>Month: </b>{JSON.stringify(this.state.startDate && this.state.startDate.getMonth())}<br/>
                 <b>Day: </b>{JSON.stringify(this.state.startDate && this.state.startDate.getDay())}<br/>
 
+                <button onClick={e => axios.put('/data/knowledge/gomina/user/ab6743?knowledge=5')}>Knowledge Amokrane / Gomina</button>
+                <button onClick={e => axios.put('/data/knowledge/basket/user/jd4436?knowledge=3')}>Knowledge John Doe / Basket</button>
+                <button onClick={e => axios.put('/data/knowledge/gomina/user/jd4436?knowledge=2')}>Knowledge John Doe / Gomina</button>
+
             </AppLayout>
         );
     }

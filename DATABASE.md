@@ -53,5 +53,9 @@ Contexts, entities, schemas
 ### Events (6)
 - event:<group>:<eventId> (hash) timestamp type message \[env instance component version\]
 
+### Knowledge (7)
+- knowledge:component:<componentId> (zset) user{knowledge}
+- knowledge:user:<userId> (zset) component{knowledge}
+
  
 
