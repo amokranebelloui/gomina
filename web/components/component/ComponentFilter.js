@@ -11,6 +11,7 @@ type ComponentFilterType = {
     systems: Array<string>,
     languages: Array<string>,
     tags: Array<string>,
+    hasMetadata: Array<string>,
 }
 
 type Props = {
@@ -28,6 +29,7 @@ type State = {
     systems: Array<string>,
     languages: Array<string>,
     tags: Array<string>,
+    hasMetadata: Array<string>,
 }
 
 class ComponentFilter extends React.Component<Props, State> {
@@ -38,7 +40,8 @@ class ComponentFilter extends React.Component<Props, State> {
             types: this.props.filter.types,
             systems: this.props.filter.systems,
             languages: this.props.filter.languages,
-            tags: this.props.filter.tags
+            tags: this.props.filter.tags,
+            hasMetadata: this.props.filter.hasMetadata
         }
     }
     setFilter(search: string) {
@@ -61,6 +64,10 @@ class ComponentFilter extends React.Component<Props, State> {
         this.setState({tags: values});
         this.notifyChange({tags: values});
     }
+    selectHasMetadata(values: Array<string>) {
+        this.setState({hasMetadata: values});
+        this.notifyChange({hasMetadata: values});
+    }
 
     notifyChange(delta: any) {
         const fromState = {
@@ -68,7 +75,8 @@ class ComponentFilter extends React.Component<Props, State> {
             types: this.state.types,
             systems: this.state.systems,
             languages: this.state.languages,
-            tags: this.state.tags
+            tags: this.state.tags,
+            hasMetadata: this.state.hasMetadata
         };
         const filter = Object.assign({}, fromState, delta);
         this.props.onFilterChanged && this.props.onFilterChanged(filter)
@@ -97,20 +105,23 @@ class ComponentFilter extends React.Component<Props, State> {
                 <TagCloud tags={this.props.tags} selected={this.state.tags} displayCount={true}
                           selectionChanged={values => this.selectTags(values||[])} />
                 <br/>
+                <b>HasMetadata:</b>
+                <TagCloud tags={["has metadata", "no metadata"]} selected={this.state.hasMetadata} displayCount={true}
+                          selectionChanged={values => this.selectHasMetadata(values||[])} />
             </div>
         );
     }
 }
 function filterComponents(components: Array<ComponentType>, filter: ComponentFilterType): Array<ComponentType>  {
     return components.filter(component =>
-        matchesSearch(component, filter.search, filter.types, filter.systems, filter.languages, filter.tags)
+        matchesSearch(component, filter.search, filter.types, filter.systems, filter.languages, filter.tags, filter.hasMetadata)
     );
 }
 
 
 function matchesSearch(component: ComponentType, search: string,
                        types: Array<string>, systems: Array<string>,
-                       languages: Array<string>, tags: Array<string>) {
+                       languages: Array<string>, tags: Array<string>, hasMetadata: Array<string>) {
     let label = (component.label || "");
     let regExp = new RegExp(search, "i");
     let matchesLabel = label.match(regExp);
@@ -118,8 +129,11 @@ function matchesSearch(component: ComponentType, search: string,
     let matchesSystems = matchesList(extendSystems(component.systems), systems);
     let matchesLanguages = matchesList(component.languages, languages);
     let matchesTags = matchesList(component.tags, tags);
+
+
+    let matchesHasMetadata = !hasMetadata || hasMetadata.length === 0 || hasMetadata.includes(component.hasMetadata ? 'has metadata' : 'no metadata');
     //console.info("MATCH", component.id, matchesLabel, matchesSystems, matchesLanguages, matchesTags);
-    return matchesLabel && matchesTypes && matchesSystems && matchesLanguages && matchesTags
+    return matchesLabel && matchesTypes && matchesSystems && matchesLanguages && matchesTags && matchesHasMetadata
     //(languages.filter(item => item.match(regExp))||[]).length > 0 ||
     //(tags.filter(item => item.match(regExp))||[]).length > 0;
     //return component.label && component.label.indexOf(this.state.search) !== -1;
