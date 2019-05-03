@@ -51,7 +51,7 @@ class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
     override fun editOwner(componentId: String, owner: String?) { TODO("not implemented") }
     override fun editCriticity(componentId: String, criticity: Int?) { TODO("not implemented") }
     override fun editArtifactId(componentId: String, artifactId: String?) { TODO("not implemented") }
-    override fun editScm(componentId: String, type: String, url: String, path: String?) { TODO("not implemented") }
+    override fun editScm(componentId: String, type: String, url: String, path: String?, hasMetadata: Boolean) { TODO("not implemented") }
     override fun editSonar(componentId: String, server: String?) { TODO("not implemented") }
     override fun editBuild(componentId: String, server: String?, job: String?) { TODO("not implemented") }
 
@@ -154,7 +154,8 @@ class RedisComponentRepo : ComponentRepo {
                         path = map["scm_path"] ?: "",
                         username = map["scm_username"] ?: "",
                         passwordAlias = map["scm_password_alias"] ?: ""
-                ) ,
+                ),
+                hasMetadata = map["has_metadata"]?.toBoolean() ?: false,
                 inceptionDate = map["inception_date"]?.let { LocalDate.parse(it, ISO_DATE) },
                 owner = map["owner"],
                 criticity = map["criticity"]?.toInt(),
@@ -198,6 +199,7 @@ class RedisComponentRepo : ComponentRepo {
                     "scm_type" to (component.scm?.type ?: ""),
                     "scm_url" to (component.scm?.url ?: ""),
                     "scm_path" to (component.scm?.path ?: ""),
+                    "has_metadata" to (component.hasMetadata.toString()),
                     component.sonarServer?.let { "sonar_server" to it },
                     component.jenkinsServer?.let { "jenkins_server" to it },
                     component.jenkinsJob?. let { "jenkins_job" to it }
@@ -250,13 +252,14 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
-    override fun editScm(componentId: String, type: String, url: String, path: String?) {
+    override fun editScm(componentId: String, type: String, url: String, path: String?, hasMetadata: Boolean) {
         pool.resource.use { jedis ->
-            jedis.hmset("component:$componentId", listOfNotNull(
+            jedis.persist("component:$componentId", mapOf(
                     "scm_type" to type,
                     "scm_url" to url,
-                    path?. let { "scm_path" to it }
-            ).toMap())
+                    "scm_path" to path,
+                    "has_metadata" to hasMetadata.toString()
+            ))
         }
     }
 

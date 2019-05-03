@@ -6,15 +6,17 @@ type Props = {
     type?: ?string,
     url?: ?string,
     path?: ?string,
-    onChanged?: (type: ?string, url: ?string, path: ?string) => void,
-    onEdited?: (type: string, url: string, path: ?string) => void,
+    hasMetadata?: ?boolean,
+    onChanged?: (type: ?string, url: ?string, path: ?string, hasMetadata?: ?boolean) => void,
+    onEdited?: (type: string, url: string, path: ?string, hasMetadata?: ?boolean) => void,
     onEditionCancelled?: () => void
 }
 
 type State = {
     type?: ?string,
     url?: ?string,
-    path?: ?string
+    path?: ?string,
+    hasMetadata?: ?boolean
 }
 
 class ScmEditor extends React.Component<Props, State> {
@@ -23,26 +25,31 @@ class ScmEditor extends React.Component<Props, State> {
         this.state = {
             type: this.props.type,
             url: this.props.url,
-            path: this.props.path
+            path: this.props.path,
+            hasMetadata: this.props.hasMetadata
         };
         //$FlowFixMe
         this.textInput = React.createRef();
     }
     changeType(type?: ?string) {
         this.setState({type: type});
-        this.props.onChanged && this.props.onChanged(type, this.state.url, this.state.path)
+        this.props.onChanged && this.props.onChanged(type, this.state.url, this.state.path, this.state.hasMetadata)
     }
     changeUrl(url?: ?string) {
         this.setState({url: url});
-        this.props.onChanged && this.props.onChanged(this.state.type, url, this.state.path)
+        this.props.onChanged && this.props.onChanged(this.state.type, url, this.state.path, this.state.hasMetadata)
     }
     changePath(path?: ?string) {
         this.setState({path: path});
-        this.props.onChanged && this.props.onChanged(this.state.type, this.state.url, path)
+        this.props.onChanged && this.props.onChanged(this.state.type, this.state.url, path, this.state.hasMetadata)
+    }
+    changeHasMetadata(hasMetadata?: ?boolean) {
+        this.setState({hasMetadata: hasMetadata});
+        this.props.onChanged && this.props.onChanged(this.state.type, this.state.url, this.state.path, hasMetadata)
     }
     update() {
         console.info("edited", this.state.url);
-        this.props.onEdited && this.state.type && this.state.url && this.props.onEdited(this.state.type, this.state.url, this.state.path)
+        this.props.onEdited && this.state.type && this.state.url && this.props.onEdited(this.state.type, this.state.url, this.state.path, this.state.hasMetadata)
     }
     cancelEdition() {
         console.info("cancel edition");
@@ -81,6 +88,14 @@ class ScmEditor extends React.Component<Props, State> {
                        onKeyPress={e => e.key === 'Enter' && this.update()}
                        onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
                        style={{width: '80px', fontSize: 9}}
+                />&nbsp;
+                <br/>
+                Has Metadata &nbsp;
+                <input type="checkbox" name="hasMetadata"
+                       checked={this.state.hasMetadata}
+                       onChange={e => this.changeHasMetadata(e.target.checked)}
+                       onKeyPress={e => e.key === 'Enter' && this.update()}
+                       onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
                 />
                 <br/>
                 {/*

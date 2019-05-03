@@ -112,7 +112,7 @@ type ComponentBadgeProps = {
     onLabelEdited: (componentId: string, label: string) => void,
     onTypeEdited: (componentId: string, type: string) => void,
     onArtifactIdEdited: (componentId: string, artifactId: string) => void,
-    onScmEdited: (componentId: string, type: string, url: string, path: ?string) => void,
+    onScmEdited: (componentId: string, type: string, url: string, path: ?string, hasMetadata: ?boolean) => void,
     onInceptionDateEdited: (componentId: string, date: ?string) => void,
     onOwnerEdited: (componentId: string, owner: ?string) => void,
     onCriticityEdited: (componentId: string, criticity: ?string) => void,
@@ -152,9 +152,9 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
     cancelEditScm() {
         this.setState({scmEdition: false});
     }
-    editScm(componentId: string, type: string, url: string, path: ?string) {
+    editScm(componentId: string, type: string, url: string, path: ?string, hasMetadata: ?boolean) {
         this.setState({scmEdition: false});
-        this.props.onScmEdited(componentId, type, url, path)
+        this.props.onScmEdited(componentId, type, url, path, hasMetadata)
     }
 
     startEditSonar() {
@@ -226,11 +226,13 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                             <button onClick={() => this.startEditScm()}>Edit</button>
                         </Secure>
                         <button onClick={() => this.props.onReloadScm(component.id)}>ReloadSCM</button>
+                        <br/>
+                        {component.hasMetadata ? <span><b>Has metadata</b></span> : <span>No Metadata</span>}
                     </span>
                     }
                     {this.state.scmEdition &&
-                    <ScmEditor type={component.scmType} url={component.scmUrl} path={component.scmPath}
-                               onEdited={(type, url, path) => this.editScm(component.id, type, url, path)}
+                    <ScmEditor type={component.scmType} url={component.scmUrl} path={component.scmPath} hasMetadata={component.hasMetadata}
+                               onEdited={(type, url, path, md) => this.editScm(component.id, type, url, path, md)}
                                onEditionCancelled={() => this.cancelEditScm()} />
                     }
                     <br/>

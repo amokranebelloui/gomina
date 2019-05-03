@@ -130,8 +130,8 @@ class ComponentApp extends React.Component {
             .then(() => this.retrieveComponent(componentId))
             .catch((error) => console.error("cannot edit artifactId", error.response));
     }
-    editScm(componentId, type, url, path) {
-        axios.put('/data/components/' + componentId + '/scm?type=' + type + '&url=' + url + '&path=' + path)
+    editScm(componentId, type, url, path, hasMetadata) {
+        axios.put('/data/components/' + componentId + '/scm?type=' + type + '&url=' + url + '&path=' + path + '&hasMetadata=' + hasMetadata)
             .then(() => {
                 this.retrieveComponent(componentId);
                 this.retrieveBranch(componentId, this.state.branchId);
@@ -491,7 +491,7 @@ class ComponentApp extends React.Component {
                                         onLabelEdited={(id, l) => this.editLabel(id, l)}
                                         onTypeEdited={(id, t) => this.editType(id, t)}
                                         onArtifactIdEdited={(id, artifactId) => this.editArtifactId(id, artifactId)}
-                                        onScmEdited={(id, t, u, p) => this.editScm(id, t, u, p)}
+                                        onScmEdited={(id, t, u, p, md) => this.editScm(id, t, u, p, md)}
                                         onInceptionDateEdited={(id, d) => this.editInceptionDate(id, d)}
                                         onOwnerEdited={(id, o) => this.editOwner(id, o)}
                                         onCriticityEdited={(id, c) => this.editCriticity(id, c)}

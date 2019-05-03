@@ -22,6 +22,7 @@ type ComponentType = {
     scmUrl?: ?string,
     scmPath?: ?string,
     scmLocation?: ?string,
+    hasMetadata?: ?boolean,
     sonarServer?: ?string,
     sonarUrl?: ?string,
     jenkinsServer?: ?string,
