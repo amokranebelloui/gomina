@@ -21,7 +21,9 @@ class ComponentsApp extends React.Component {
             types: splitTags(ls.get('components.types')),
             systems: splitTags(ls.get('components.systems')),
             languages: splitTags(ls.get('components.languages')),
-            tags: splitTags(ls.get('components.tags'))
+            tags: splitTags(ls.get('components.tags')),
+            hasSCM: splitTags(ls.get('components.has.scm')),
+            hasMetadata: splitTags(ls.get('components.has.metadata'))
         };
         this.state = {
             components: [],
@@ -114,6 +116,8 @@ class ComponentsApp extends React.Component {
         ls.set('components.systems', joinTags(filter.systems));
         ls.set('components.languages', joinTags(filter.languages));
         ls.set('components.tags', joinTags(filter.tags));
+        ls.set('components.has.scm', joinTags(filter.hasSCM));
+        ls.set('components.has.metadata', joinTags(filter.hasMetadata));
     }
     render() {
         const components = sortComponentsBy(this.state.components, this.state.sortBy);

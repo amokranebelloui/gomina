@@ -11,6 +11,7 @@ type ComponentFilterType = {
     systems: Array<string>,
     languages: Array<string>,
     tags: Array<string>,
+    hasSCM: Array<string>,
     hasMetadata: Array<string>,
 }
 
@@ -29,6 +30,7 @@ type State = {
     systems: Array<string>,
     languages: Array<string>,
     tags: Array<string>,
+    hasSCM: Array<string>,
     hasMetadata: Array<string>,
 }
 
@@ -41,6 +43,7 @@ class ComponentFilter extends React.Component<Props, State> {
             systems: this.props.filter.systems,
             languages: this.props.filter.languages,
             tags: this.props.filter.tags,
+            hasSCM: this.props.filter.hasSCM,
             hasMetadata: this.props.filter.hasMetadata
         }
     }
@@ -64,6 +67,10 @@ class ComponentFilter extends React.Component<Props, State> {
         this.setState({tags: values});
         this.notifyChange({tags: values});
     }
+    selectHasSCM(values: Array<string>) {
+        this.setState({hasSCM: values});
+        this.notifyChange({hasSCM: values});
+    }
     selectHasMetadata(values: Array<string>) {
         this.setState({hasMetadata: values});
         this.notifyChange({hasMetadata: values});
@@ -76,6 +83,7 @@ class ComponentFilter extends React.Component<Props, State> {
             systems: this.state.systems,
             languages: this.state.languages,
             tags: this.state.tags,
+            hasSCM: this.state.hasSCM,
             hasMetadata: this.state.hasMetadata
         };
         const filter = Object.assign({}, fromState, delta);
@@ -105,7 +113,11 @@ class ComponentFilter extends React.Component<Props, State> {
                 <TagCloud tags={this.props.tags} selected={this.state.tags} displayCount={true}
                           selectionChanged={values => this.selectTags(values||[])} />
                 <br/>
-                <b>HasMetadata:</b>
+                <b>Has SCM:</b>
+                <TagCloud tags={["has scm", "no scm"]} selected={this.state.hasSCM} displayCount={true}
+                          selectionChanged={values => this.selectHasSCM(values||[])} />
+                <br/>
+                <b>Has Metadata:</b>
                 <TagCloud tags={["has metadata", "no metadata"]} selected={this.state.hasMetadata} displayCount={true}
                           selectionChanged={values => this.selectHasMetadata(values||[])} />
             </div>
@@ -114,14 +126,14 @@ class ComponentFilter extends React.Component<Props, State> {
 }
 function filterComponents(components: Array<ComponentType>, filter: ComponentFilterType): Array<ComponentType>  {
     return components.filter(component =>
-        matchesSearch(component, filter.search, filter.types, filter.systems, filter.languages, filter.tags, filter.hasMetadata)
+        matchesSearch(component, filter.search, filter.types, filter.systems, filter.languages, filter.tags, filter.hasSCM, filter.hasMetadata)
     );
 }
 
 
 function matchesSearch(component: ComponentType, search: string,
                        types: Array<string>, systems: Array<string>,
-                       languages: Array<string>, tags: Array<string>, hasMetadata: Array<string>) {
+                       languages: Array<string>, tags: Array<string>, hasSCM: Array<string>, hasMetadata: Array<string>) {
     let label = (component.label || "");
     let regExp = new RegExp(search, "i");
     let matchesLabel = label.match(regExp);
@@ -131,9 +143,10 @@ function matchesSearch(component: ComponentType, search: string,
     let matchesTags = matchesList(component.tags, tags);
 
 
+    let matchesHasSCM = !hasSCM || hasSCM.length === 0 || hasSCM.includes(component.scmType && component.scmLocation ? 'has scm' : 'no scm');
     let matchesHasMetadata = !hasMetadata || hasMetadata.length === 0 || hasMetadata.includes(component.hasMetadata ? 'has metadata' : 'no metadata');
     //console.info("MATCH", component.id, matchesLabel, matchesSystems, matchesLanguages, matchesTags);
-    return matchesLabel && matchesTypes && matchesSystems && matchesLanguages && matchesTags && matchesHasMetadata
+    return matchesLabel && matchesTypes && matchesSystems && matchesLanguages && matchesTags && matchesHasSCM && matchesHasMetadata
     //(languages.filter(item => item.match(regExp))||[]).length > 0 ||
     //(tags.filter(item => item.match(regExp))||[]).length > 0;
     //return component.label && component.label.indexOf(this.state.search) !== -1;
