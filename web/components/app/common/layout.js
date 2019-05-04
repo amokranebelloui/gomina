@@ -56,7 +56,8 @@ class AppLayout extends React.Component {
                     'userId': response.data.userId,
                     'login': login,
                     'permissions': response.data.permissions
-                })
+                });
+                this.props.onUserLoggedIn && this.props.onUserLoggedIn(response.data.userId)
             })
             .catch(function (error) {
                 console.log("Login error", error.response);

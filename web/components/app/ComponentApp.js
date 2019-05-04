@@ -18,7 +18,7 @@ import {ApiUsage} from "../component/ApiUsage";
 import {ApiDefinitionEditor} from "../component/ApiDefinitionEditor";
 import {LoggedUserContext, Secure} from "../permission/Secure";
 import {Events} from "../environment/Events";
-import {componentKnowledge, Knowledge} from "../knowledge/Knowledge";
+import {Knowledge} from "../knowledge/Knowledge";
 
 class ComponentApp extends React.Component {
     
@@ -377,6 +377,10 @@ class ComponentApp extends React.Component {
             .then(response => thisComponent.setState({knowledge: response.data}))
             .catch(() => thisComponent.setState({knowledge: []}))
     }
+    componentKnowledge(userId: string) {
+        const knowledge = this.state.knowledge && this.state.knowledge.find(k => k.user.id === userId);
+        return knowledge && knowledge.knowledge
+    }
     componentDidMount() {
         console.info("componentApp !mount ", this.props.match.params.id);
 
@@ -500,7 +504,7 @@ class ComponentApp extends React.Component {
                                 <ComponentBadge buildServers={this.state.buildServers}
                                                 sonarServers={this.state.sonarServers}
                                                 component={component}
-                                                knowledge={componentKnowledge(this.state.knowledge, component.id, loggedUser.userId)}
+                                                knowledge={this.componentKnowledge(loggedUser.userId)}
                                                 onReload={id => this.reloadAll(id)}
                                                 onReloadScm={id => this.reloadScm(id)}
                                                 onReloadBuild={id => this.reloadBuild(id)}

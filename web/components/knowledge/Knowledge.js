@@ -43,10 +43,5 @@ class Knowledge extends React.Component<Props> {
     }
 }
 
-function componentKnowledge(knowledgeList: ?Array<KnowledgeType>, componentId: string, userId: string) {
-    const knowledge = knowledgeList && knowledgeList.find(k => k.component.id === componentId && k.user.id === userId);
-    return knowledge && knowledge.knowledge
-}
-
-export { Knowledge, componentKnowledge }
+export { Knowledge }
 export type {KnowledgeType}

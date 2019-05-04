@@ -11,6 +11,7 @@ import {ComponentSort, sortComponentsBy} from "../component/ComponentSort";
 import {extendSystems} from "../system/system-utils";
 import {AddComponent} from "../component/AddComponent";
 import {ComponentFilter, filterComponents} from "../component/ComponentFilter";
+import Cookies from "js-cookie";
 
 class ComponentsApp extends React.Component {
 
@@ -61,6 +62,13 @@ class ComponentsApp extends React.Component {
                 thisComponent.setState({components: []});
             });
     }
+    retrieveKnowledge() {
+        const userId = Cookies.get('gomina-userId');
+        const thisComponent = this;
+        axios.get('/data/knowledge/user/' + userId)
+            .then(response => thisComponent.setState({knowledge: response.data}))
+            .catch(() => thisComponent.setState({knowledge: []}))
+    }
     reloadScm() {
         const componentIds = this.selectedComponents(this.state.components).map(c => c.id).join(',');
         console.info("Reloading", componentIds);
@@ -96,11 +104,14 @@ class ComponentsApp extends React.Component {
                 console.log("sonar reload error", error.response);
             });
     }
-
     componentDidMount() {
         console.info("componentsApp !mount ", this.props.match.params.id);
         //this.retrieveSystems();
+        this.reloadAll()
+    }
+    reloadAll() {
         this.retrieveComponents();
+        this.retrieveKnowledge();
     }
     sortChanged(sortBy) {
         this.setState({sortBy: sortBy});
@@ -119,6 +130,10 @@ class ComponentsApp extends React.Component {
         ls.set('components.has.scm', joinTags(filter.hasSCM));
         ls.set('components.has.metadata', joinTags(filter.hasMetadata));
     }
+    componentKnowledge(componentId: string) {
+        const knowledge = this.state.knowledge && this.state.knowledge.find(k => k.component.id === componentId);
+        return knowledge && knowledge.knowledge
+    }
     render() {
         const components = sortComponentsBy(this.state.components, this.state.sortBy);
         const types = flatMap(this.state.components, p => p.type ? [p.type] : [""]);
@@ -127,7 +142,7 @@ class ComponentsApp extends React.Component {
         const languages = flatMap(this.state.components, p => p.languages && p.languages.length > 0 ? p.languages : [""]);
         const tags = flatMap(this.state.components, p => p.tags && p.tags.length > 0 ? p.tags : [""]);
         return (
-            <AppLayout title="Components">
+            <AppLayout title="Components" onUserLoggedIn={() => this.retrieveKnowledge()}>
                 <PrimarySecondaryLayout>
                     <Container>
                         <ComponentSort sortBy={this.state.sortBy} onSortChanged={sortBy => this.sortChanged(sortBy)} />
@@ -135,7 +150,8 @@ class ComponentsApp extends React.Component {
                         <div className='component-list'>
                             <ComponentHeader />
                             {this.selectedComponents(components).map(component =>
-                                <ComponentSummary key={component.id} component={component}/>
+                                <ComponentSummary key={component.id} component={component}
+                                                  knowledge={this.componentKnowledge(component.id)} />
                             )}
                         </div>
                     </Container>
@@ -147,7 +163,7 @@ class ComponentsApp extends React.Component {
                              />
                         </Well>
                         <Well block>
-                            <button onClick={e => this.retrieveComponents()}>RELOAD</button>
+                            <button onClick={e => this.reloadAll()}>RELOAD</button>
                             <button onClick={e => this.reloadScm()}>SCM</button>
                             <button onClick={e => this.reloadBuild()}>BUILD</button>
                             <button onClick={e => this.reloadSonar()}>SONAR</button>
