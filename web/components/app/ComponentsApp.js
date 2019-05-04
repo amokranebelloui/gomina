@@ -135,7 +135,7 @@ class ComponentsApp extends React.Component {
         return knowledge && knowledge.knowledge
     }
     render() {
-        const components = sortComponentsBy(this.state.components, this.state.sortBy);
+        const components = sortComponentsBy(this.state.components, this.state.knowledge, this.state.sortBy);
         const types = flatMap(this.state.components, p => p.type ? [p.type] : [""]);
         const systems = extendSystems(flatMap(this.state.components, p => p.systems && p.systems.length > 0 ? p.systems : [""]));
         //const systems = this.state.systems;

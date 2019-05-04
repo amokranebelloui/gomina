@@ -62,6 +62,10 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
                         </Link>
                         &nbsp;
                         <UnreleasedChangeCount changes={component.changes} />
+                        &nbsp;
+                        <Secure permission="component.knowledge">
+                            <StarRating value={this.props.knowledge} />
+                        </Secure>
                         <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
                         {systems.map(system =>
                             <span style={{fontSize: 8, marginLeft: 2}}>{system}</span>
@@ -95,9 +99,6 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
                     <br/>
                     <DateTime date={component.buildTimestamp}/>
                 </div>
-                <Secure permission="component.knowledge">
-                    <StarRating value={this.props.knowledge} />
-                </Secure>
             </div>
         )
     }
