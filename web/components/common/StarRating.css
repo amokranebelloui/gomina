@@ -1,0 +1,25 @@
+
+.star-rating {
+    color: lightgray
+}
+
+.star-rating-selected {
+    color: gold
+}
+
+
+.editable-star-rating {
+    color: lightgray
+}
+
+.editable-star-rating:hover {
+    color: gray
+}
+
+.editable-star-rating-selected {
+    color: gold
+}
+
+.editable-star-rating-selected:hover {
+    color: darkgoldenrod;
+}

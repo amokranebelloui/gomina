@@ -33,6 +33,9 @@
     "webpack-bundle-analyzer": "^2.9.0"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^1.2.17",
+    "@fortawesome/free-solid-svg-icons": "^5.8.1",
+    "@fortawesome/react-fontawesome": "^0.1.4",
     "axios": "^0.16.2",
     "d3": "^4.10.2",
     "diff": "^3.5.0",

@@ -32,6 +32,7 @@ import {HostConnectivityEditor} from "../web/components/environment/HostConnecti
 import {WorkEditor} from "../web/components/work/WorkEditor";
 import {ApiDefinitionEditor} from "../web/components/component/ApiDefinitionEditor";
 import {Autocomplete} from "../web/components/common/AutoComplete";
+import {StarRating} from "../web/components/common/StarRating";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -118,7 +119,14 @@ storiesOf('Components', module)
         const suggestions = ["java", ".net", "kotlin", "javascript", "c#", "c++", "rust", "scala", "clojure", "erlang", "haskell"];
         return <TagEditor suggestions={suggestions} tags={tags} displayCount={true} onTagAdd={action("tag add")} onTagDelete={action("tag del")} />
     })
-
+    .add('Star Rating', () => {
+        return <div>
+            <StarRating onRatingChange={action('rating changed')} /><br/>
+            <StarRating value={4} onRatingChange={action('rating changed')} /><br/>
+            <StarRating value={1} onRatingChange={action('rating changed')} /><br/>
+            <StarRating value={1} onRatingChange={action('rating changed')} editable={true} /><br/>
+        </div>
+    })
     .add('ScmEditor', () => {
         return (
             <ScmEditor onEdited={action('scmEdited')} onEditionCancelled={action('editionCancelled')} />
