@@ -16,8 +16,9 @@ import {UnreleasedChangeCount} from "../component/UnreleasedChangeCount";
 import {ApiDefinition} from "../component/ApiDefinition";
 import {ApiUsage} from "../component/ApiUsage";
 import {ApiDefinitionEditor} from "../component/ApiDefinitionEditor";
-import {Secure} from "../permission/Secure";
+import {LoggedUserContext, Secure} from "../permission/Secure";
 import {Events} from "../environment/Events";
+import {componentKnowledge, Knowledge} from "../knowledge/Knowledge";
 
 class ComponentApp extends React.Component {
     
@@ -195,6 +196,11 @@ class ComponentApp extends React.Component {
             .then(() => this.retrieveComponent(componentId))
             .catch(error => console.error("cannot delete tag", error.response));
     }
+    changeKnowledge(componentId, userId, knowledge) {
+        axios.put('/data/knowledge/' + componentId + '/user/' + userId + '?knowledge=' + knowledge)
+            .then(() => this.retrieveKnowledge(componentId))
+            .catch(error => console.error("cannot change knowledge for " + componentId + " " + userId, error.response));
+    }
     enable(componentId) {
         console.info("enable ", componentId);
         axios.put('/data/components/' + componentId + '/enable')
@@ -365,6 +371,12 @@ class ComponentApp extends React.Component {
             })
             .catch(() => thisComponent.setState({events: []}))
     }
+    retrieveKnowledge() {
+        const thisComponent = this;
+        axios.get('/data/knowledge/component/' + this.state.componentId)
+            .then(response => thisComponent.setState({knowledge: response.data}))
+            .catch(() => thisComponent.setState({knowledge: []}))
+    }
     componentDidMount() {
         console.info("componentApp !mount ", this.props.match.params.id);
 
@@ -400,7 +412,8 @@ class ComponentApp extends React.Component {
         else {
             this.retrieveBranch(this.state.componentId, null);
         }
-        this.retrieveEvents()
+        this.retrieveEvents();
+        this.retrieveKnowledge()
     }
 
     componentWillReceiveProps(nextProps) {
@@ -423,7 +436,8 @@ class ComponentApp extends React.Component {
             this.retrieveInvocationChain(newComponent);
             this.retrieveCallChain(newComponent);
             this.selectChainDependency();
-            this.retrieveEvents()
+            this.retrieveEvents();
+            this.retrieveKnowledge()
         }
         if (newComponent && newDoc &&
             (this.props.match.params.id !== newComponent || this.props.match.params.docId !== newDoc)) {
@@ -481,32 +495,38 @@ class ComponentApp extends React.Component {
 
                     </Container>
                     <div>
-                        <ComponentBadge buildServers={this.state.buildServers}
-                                        sonarServers={this.state.sonarServers}
-                                        component={component}
-                                        onReload={id => this.reloadAll(id)}
-                                        onReloadScm={id => this.reloadScm(id)}
-                                        onReloadBuild={id => this.reloadBuild(id)}
-                                        onReloadSonar={id => this.reloadSonar(id)}
-                                        onLabelEdited={(id, l) => this.editLabel(id, l)}
-                                        onTypeEdited={(id, t) => this.editType(id, t)}
-                                        onArtifactIdEdited={(id, artifactId) => this.editArtifactId(id, artifactId)}
-                                        onScmEdited={(id, t, u, p, md) => this.editScm(id, t, u, p, md)}
-                                        onInceptionDateEdited={(id, d) => this.editInceptionDate(id, d)}
-                                        onOwnerEdited={(id, o) => this.editOwner(id, o)}
-                                        onCriticityEdited={(id, c) => this.editCriticity(id, c)}
-                                        onSonarEdited={(id, s) => this.editSonar(id, s)}
-                                        onBuildEdited={(id, s, j) => this.editBuild(id, s, j)}
-                                        onSystemAdd={(id, s) => this.addSystem(id, s)}
-                                        onSystemDelete={(id, s) => this.deleteSystem(id, s)}
-                                        onLanguageAdd={(id, l) => this.addLanguage(id, l)}
-                                        onLanguageDelete={(id, l) => this.deleteLanguage(id, l)}
-                                        onTagAdd={(id, t) => this.addTag(id, t)}
-                                        onTagDelete={(id, t) => this.deleteTag(id, t)}
-                                        onEnable={id => this.enable(id)}
-                                        onDisable={id => this.disable(id)}
-                                        onDelete={id => this.delete(id)}
-                        />
+                        <LoggedUserContext.Consumer>
+                            {loggedUser =>
+                                <ComponentBadge buildServers={this.state.buildServers}
+                                                sonarServers={this.state.sonarServers}
+                                                component={component}
+                                                knowledge={componentKnowledge(this.state.knowledge, component.id, loggedUser.userId)}
+                                                onReload={id => this.reloadAll(id)}
+                                                onReloadScm={id => this.reloadScm(id)}
+                                                onReloadBuild={id => this.reloadBuild(id)}
+                                                onReloadSonar={id => this.reloadSonar(id)}
+                                                onLabelEdited={(id, l) => this.editLabel(id, l)}
+                                                onTypeEdited={(id, t) => this.editType(id, t)}
+                                                onArtifactIdEdited={(id, artifactId) => this.editArtifactId(id, artifactId)}
+                                                onScmEdited={(id, t, u, p, md) => this.editScm(id, t, u, p, md)}
+                                                onInceptionDateEdited={(id, d) => this.editInceptionDate(id, d)}
+                                                onOwnerEdited={(id, o) => this.editOwner(id, o)}
+                                                onCriticityEdited={(id, c) => this.editCriticity(id, c)}
+                                                onSonarEdited={(id, s) => this.editSonar(id, s)}
+                                                onBuildEdited={(id, s, j) => this.editBuild(id, s, j)}
+                                                onSystemAdd={(id, s) => this.addSystem(id, s)}
+                                                onSystemDelete={(id, s) => this.deleteSystem(id, s)}
+                                                onLanguageAdd={(id, l) => this.addLanguage(id, l)}
+                                                onLanguageDelete={(id, l) => this.deleteLanguage(id, l)}
+                                                onTagAdd={(id, t) => this.addTag(id, t)}
+                                                onTagDelete={(id, t) => this.deleteTag(id, t)}
+                                                onKnowledgeChange={(id, k) => this.changeKnowledge(id, loggedUser.userId, k)}
+                                                onEnable={id => this.enable(id)}
+                                                onDisable={id => this.disable(id)}
+                                                onDelete={id => this.delete(id)}
+                                />
+                            }
+                        </LoggedUserContext.Consumer>
                         <br/>
                         <h3>Other Components</h3>
                         <div className="items">
@@ -514,6 +534,9 @@ class ComponentApp extends React.Component {
                                 <Link to={"/component/" + componentRef.id}>{componentRef.label || componentRef.id}</Link>
                             )}
                         </div>
+                        <br/>
+                        <h3>Knowledge</h3>
+                        <Knowledge knowledge={this.state.knowledge} hideComponent={true} />
                         <br/>
                     </div>
                     <Container>

@@ -2,7 +2,13 @@
 
 import * as React from 'react'
 
-const LoggedUserContext = React.createContext("");
+type LoggedUserType = {
+    userId?: string,
+    login?: string,
+    permissions?: Array<string>
+}
+
+const LoggedUserContext: React.Context<LoggedUserType> = React.createContext({});
 
 type Props = {
     permission?: string,

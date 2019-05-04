@@ -1,3 +1,4 @@
+import React from "react";
 
 declare module "react-router-dom" {
     declare module.exports: any;
@@ -24,5 +25,25 @@ declare module 'react-datepicker' {
     declare module.exports: any;
 }
 declare module 'react-datepicker/dist/react-datepicker.css' {
+    declare module.exports: any;
+}
+
+declare module '@fortawesome/fontawesome-svg-core' {
+    declare module.exports: any;
+    //declare var library: any;
+    /*
+    declare module.exports: {
+        library: any;
+    };*/
+}
+declare module "@fortawesome/react-fontawesome/index.es" {
+    //declare module.exports: any;
+    /**/
+    declare module.exports: {
+        FontAwesomeIcon: React.Component
+    };
+    /**/
+}
+declare module '@fortawesome/free-solid-svg-icons' {
     declare module.exports: any;
 }

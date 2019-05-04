@@ -18,7 +18,7 @@ import org.neo.gomina.model.component.Knowledge
 import org.neo.gomina.model.user.Users
 import javax.inject.Inject
 
-data class KnowledgeDetail(val component: ComponentRef, val useRef: UserRef, val knowledge: Int)
+data class KnowledgeDetail(val component: ComponentRef, val user: UserRef, val knowledge: Int)
 
 class KnowledgeApi {
 

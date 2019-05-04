@@ -5,12 +5,15 @@ import {LoggedUserContext, Secure} from "../permission/Secure"
 import {Container} from "../common/Container";
 import axios from "axios/index";
 import Link from "react-router-dom/es/Link";
+import {Knowledge} from "../knowledge/Knowledge";
+import type {KnowledgeType} from "../knowledge/Knowledge";
 
 type Props = {
     match: Object // FIXME Type react match object
 };
 type State = {
     user: ?Object,
+    knowledge: Array<KnowledgeType>,
     users: Array<Object>
 };
 
@@ -19,6 +22,7 @@ class UserApp extends React.Component<Props, State> {
         super(props);
         this.state = {
             user: null,
+            knowledge: [],
             users: []
         }
     }
@@ -48,18 +52,31 @@ class UserApp extends React.Component<Props, State> {
                 thisComponent.setState({user: null});
             });
     }
+    retrieveKnowledge(userId: string) {
+        const thisComponent = this;
+        axios.get('/data/knowledge/user/' + userId)
+            .then(response => thisComponent.setState({knowledge: response.data}))
+            .catch(() => thisComponent.setState({knowledge: []}))
+    }
 
     componentDidMount() {
         console.info("userApp !did mount ");
         this.retrieveUsers();
-        this.props.match.params.id && this.retrieveUser(this.props.match.params.id)
+        this.props.match.params.id && this.retrieveUser(this.props.match.params.id);
+        this.props.match.params.id && this.retrieveKnowledge(this.props.match.params.id)
     }
     componentWillReceiveProps(nextProps: Props) {
         const newUserId = nextProps.match.params.id;
         console.info("userApp !did willRecProps ", newUserId, nextProps);
         this.retrieveUsers();
         if (this.props.match.params.id != newUserId) {
-            newUserId ? this.retrieveUser(newUserId) : this.setState({user: null});
+            if (newUserId) {
+                this.retrieveUser(newUserId);
+                this.retrieveKnowledge(newUserId);
+            }
+            else {
+                this.setState({user: null});
+            }
         }
     }
 
@@ -88,6 +105,9 @@ class UserApp extends React.Component<Props, State> {
                                 User: {this.props.match.params.id}<br/>
                                 <br/>
                                 {this.state.user.firstName} {this.state.user.lastName}
+                                <br/>
+                                <b>Knowledge</b>
+                                <Knowledge knowledge={this.state.knowledge} hideUser={true} />
                                 <br/>
                                 <Secure condition={(user) => user === this.props.match.params.id}>
                                     <input type="button" value="Manage my profile [TODO]" />

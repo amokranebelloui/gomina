@@ -23,6 +23,7 @@ import {BuildEditor} from "./BuildEditor";
 import {SonarEditor} from "./SonarEditor";
 import {Label} from "../common/Label";
 import {EditableDate} from "../common/EditableDate";
+import {StarRating} from "../common/StarRating";
 
 function ComponentHeader(props: {}) {
     return (
@@ -40,7 +41,8 @@ function ComponentHeader(props: {}) {
 }
 
 type ComponentSummaryProps = {
-    component: ComponentType
+    component: ComponentType,
+    knowledge: ?number,
 }
 class ComponentSummary extends React.Component<ComponentSummaryProps> {
     render() {
@@ -94,7 +96,7 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
                     <DateTime date={component.buildTimestamp}/>
                 </div>
                 <Secure permission="component.knowledge">
-                    <div><span>(Level)</span></div>
+                    <StarRating value={this.props.knowledge} />
                 </Secure>
             </div>
         )
@@ -105,6 +107,7 @@ type ComponentBadgeProps = {
     buildServers: Array<string>,
     sonarServers: Array<string>,
     component: ComponentType,
+    knowledge: ?number,
     onReload: (componentId: string) => void,
     onReloadScm: (componentId: string) => void,
     onReloadBuild: (componentId: string) => void,
@@ -124,6 +127,7 @@ type ComponentBadgeProps = {
     onLanguageDelete: (componentId: string, language: string) => void,
     onTagAdd: (componentId: string, tags: string) => void,
     onTagDelete: (componentId: string, tags: string) => void,
+    onKnowledgeChange: (componentId: string, knowledge: number) => void,
     onEnable: (componentId: string) => void,
     onDisable: (componentId: string) => void,
     onDelete: (componentId: string) => void
@@ -196,6 +200,9 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
                             <EditableLabel label={component.label} style={{fontSize: 16, fontWeight: 'bold'}}  altText={'no label'}
                                            onLabelEdited={l => this.props.onLabelEdited(component.id, l)}/>
                         </Secure>
+                        &nbsp;
+                        <StarRating value={this.props.knowledge} editable={true}
+                                    onRatingChange={k => this.props.onKnowledgeChange && this.props.onKnowledgeChange(component.id, k)} />
                         &nbsp;
                         <button onClick={e => this.props.onReload(component.id)}>RELOAD</button>
                         {component.disabled && <span>&nbsp;<s>DISABLED</s></span>}
