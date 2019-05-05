@@ -21,14 +21,15 @@ data class ProjectMetadata(
         var languages: List<String> = emptyList(),
         var tags: List<String> = emptyList(),
 
+        var libraries: List<String> = emptyList(),
+
         var api: List<ApiMetadata> = emptyList(),
-        var dependencies: List<DepnedencyMetadata> = emptyList()
+        var dependencies: List<DependencyMetadata> = emptyList()
 
 )
 
 data class ApiMetadata(var name: String, var type: String)
-
-data class DepnedencyMetadata(var name: String, var type: String, val usage: String? = null)
+data class DependencyMetadata(var name: String, var type: String, val usage: String? = null)
 
 class ProjectMetadataMapper {
     private val yamlMapper = ObjectMapper(YAMLFactory())

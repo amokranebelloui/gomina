@@ -9,7 +9,7 @@ import javax.xml.xpath.XPathFactory
 
 data class ArtifactId(val groupId: String? = null, val artifactId: String, val version: String? = null) {
     companion object {
-        fun from(str: String): ArtifactId? {
+        fun from(str: String?): ArtifactId? {
             return str?.let {
                 val split = str.split(":")
                 when {
@@ -21,6 +21,7 @@ data class ArtifactId(val groupId: String? = null, val artifactId: String, val v
             }
         }
     }
+    fun toStr() = "${groupId?.let { "$it:" } ?: ""}$artifactId${version?.let { ":$it" } ?: ""}"
 }
 
 object MavenUtils {

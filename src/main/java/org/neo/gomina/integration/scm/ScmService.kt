@@ -3,6 +3,7 @@ package org.neo.gomina.integration.scm
 import com.github.rjeschke.txtmark.Processor
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.integration.maven.ArtifactId
 import org.neo.gomina.integration.maven.MavenUtils
 import org.neo.gomina.integration.scm.impl.ScmReposImpl
 import org.neo.gomina.integration.scm.metadata.ProjectMetadataMapper
@@ -32,6 +33,7 @@ class ScmService {
     @Inject lateinit var scmRepos: ScmReposImpl
     @Inject lateinit var componentRepo: ComponentRepo
     @Inject lateinit var interactionsRepo: InteractionsRepository
+    @Inject lateinit var libraries: Libraries
     @Inject lateinit var inventory: Inventory
     @Inject lateinit var events: Events
 
@@ -52,7 +54,20 @@ class ScmService {
         // Information
         componentRepo.editArtifactId(component.id, MavenUtils.extractArtifactId(pomFile))
         componentRepo.updateDocFiles(component.id, scmClient.listFiles("/", "-1").filter { it.endsWith(".md") })
-        
+
+        // Versions
+        val versions = log
+                .mapNotNull { commit -> commit.release?.let { it to commit.date } }
+                .filter { (release, _) -> Version.isStable(release) }
+                .map { (release, date) -> VersionRelease(Version(release), date) }
+
+        val latestVersion = latestVersion(log, pomFile)
+        val releasedVersion = releasedVersion(log)
+        val changes = commitCountTo(log, releasedVersion?.revision)
+
+        componentRepo.updateVersions(component.id, latestVersion, releasedVersion, changes)
+        componentRepo.updateVersions(component.id, versions)
+
         // Metadata
         if (component.hasMetadata) {
             val metadata = scmClient.getFile("project.yaml", "-1")?.let { metadataMapper.map(it) }
@@ -67,20 +82,14 @@ class ScmService {
                             metadata?.dependencies?.map { FunctionUsage(it.name, it.type, it.usage?.let { Usage(it) }) } ?: emptyList()
                     )
             ))
+
+            metadata?.libraries?.mapNotNull { ArtifactId.from(it) }?.let {
+                if (latestVersion != null) {
+                    libraries.add(component.id, latestVersion, it)
+                }
+                // FIXME Previous version static dependencies
+            }
         }
-
-        // Versions
-        val versions = log
-                .mapNotNull { commit -> commit.release?.let { it to commit.date } }
-                .filter { (release, _) -> Version.isStable(release) }
-                .map { (release, date) -> VersionRelease(Version(release), date) }
-
-        val latestVersion = latestVersion(log, pomFile)
-        val releasedVersion = releasedVersion(log)
-        val changes = commitCountTo(log, releasedVersion?.revision)
-
-        componentRepo.updateVersions(component.id, latestVersion, releasedVersion, changes)
-        componentRepo.updateVersions(component.id, versions)
 
         // Activity Analysis
         val prodEnvs = inventory.getProdEnvironments().map { it.id }

@@ -22,7 +22,7 @@ class RedisInteractionsRepository : InteractionsRepository {
         pool = JedisPool(
                 GenericObjectPoolConfig().apply { testOnBorrow = true },
                 host, port, 10000, null, 2)
-        logger.info("Hosts Database connected $host $port")
+        logger.info("Interactions Database connected $host $port")
     }
 
     @Inject lateinit var enrichDependencies: EnrichDependencies // FIXME Get out, to higher level

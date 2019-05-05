@@ -52,6 +52,7 @@ class DependenciesApi {
     @Inject lateinit var workList: WorkList
     @Inject lateinit var componentRepo: ComponentRepo
     @Inject lateinit var interactionsRepository: InteractionsRepository
+    @Inject lateinit var libraries: Libraries
     @Inject lateinit var interactionProviders: InteractionProviders
 
     @Inject
@@ -73,6 +74,8 @@ class DependenciesApi {
         router.get("/usage/:componentId").handler(this::getUsage)
         router.post("/usage/:componentId/add").handler(this::addUsage)
         router.delete("/usage/:componentId/remove").handler(this::removeUsage)
+
+        router.get("/libraries/:componentId").handler(this::libraries)
     }
 
     fun get(ctx: RoutingContext) {
@@ -279,6 +282,19 @@ class DependenciesApi {
         }
         catch (e: Exception) {
             logger.error("Cannot Remove Usage $componentId", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun libraries(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
+        logger.info("Get Libraries $componentId")
+        try {
+            val deps = libraries.dependencies(componentId).map { it.toStr() }
+            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(deps))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get Libraries $componentId", e)
             ctx.fail(500)
         }
     }

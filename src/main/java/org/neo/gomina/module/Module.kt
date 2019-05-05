@@ -43,6 +43,7 @@ import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.EnrichDependencies
 import org.neo.gomina.model.dependency.InteractionProviders
 import org.neo.gomina.model.dependency.InteractionsRepository
+import org.neo.gomina.model.dependency.Libraries
 import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.HostUtils
@@ -93,6 +94,7 @@ class GominaModule : AbstractModule() {
         bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
 
         bind(ComponentRepo::class.java).to(RedisComponentRepo::class.java).`in`(Scopes.SINGLETON)
+        bind(Libraries::class.java).to(RedisLibraries::class.java).`in`(Scopes.SINGLETON)
         bind(ComponentKnowledge::class.java).to(RedisComponentKnowledge::class.java).`in`(Scopes.SINGLETON)
         bind(Systems::class.java).to(InferredSystems::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionProviders::class.java).`in`(Scopes.SINGLETON)
