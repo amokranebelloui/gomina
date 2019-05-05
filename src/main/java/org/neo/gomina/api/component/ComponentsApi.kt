@@ -24,6 +24,7 @@ import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.component.NewComponent
 import org.neo.gomina.model.component.Scm
+import org.neo.gomina.model.dependency.Libraries
 import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.runtime.ExtInstance
@@ -135,6 +136,7 @@ class ComponentsApi {
     val router: Router
 
     @Inject private lateinit var componentRepo: ComponentRepo
+    @Inject private lateinit var libraries: Libraries
     @Inject private lateinit var workList: WorkList
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var events: Events
@@ -468,7 +470,9 @@ class ComponentsApi {
             val componentId = ctx.request().getParam("componentId")
             val artifactId = ctx.request().getParam("id")
             logger.info("Edit ArtifactId $componentId $artifactId ...")
+            val component = componentRepo.get(componentId)
             componentRepo.editArtifactId(componentId, artifactId)
+            libraries.changeArtifactId(artifactId, component?.artifactId, component?.latest)
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {

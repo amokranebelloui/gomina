@@ -48,7 +48,7 @@ data class Component(
     }
 }
 
-data class VersionRelease(val version: Version, val releaseDate: LocalDateTime)
+data class VersionRelease(val artifactId: String?, val version: Version, val releaseDate: LocalDateTime)
 
 data class NewComponent(
         var id: String,

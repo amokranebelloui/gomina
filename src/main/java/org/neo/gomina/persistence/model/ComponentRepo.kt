@@ -184,10 +184,8 @@ class RedisComponentRepo : ComponentRepo {
     }
 
     override fun editArtifactId(componentId: String, artifactId: String?) {
-        artifactId?.let {
-            pool.resource.use { jedis ->
-                jedis.hset("component:$componentId", "artifact_id", artifactId)
-            }
+        pool.resource.use { jedis ->
+            jedis.persist("component:$componentId", mapOf("artifact_id" to artifactId))
         }
     }
 

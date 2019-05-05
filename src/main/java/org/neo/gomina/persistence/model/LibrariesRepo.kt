@@ -42,7 +42,7 @@ class RedisLibraries : Libraries {
             return jedis.keys("library:${artifactId.toStr()}:*")
                     .mapNotNull { key ->
                         val version = ArtifactId.tryWithVersion(key.replace(Regex("^library:"), ""))?.getVersion()
-                        val componentsVersions = jedis.smembers(key).map { it.toComponentVersion() }
+                        val componentsVersions = jedis.smembers(key).mapNotNull { it.toComponentVersion() }
                         version?.let { version to componentsVersions }
                     }
                     .toMap()
@@ -61,7 +61,7 @@ class RedisLibraries : Libraries {
         pool.resource.use { jedis ->
             return jedis.keys("library:${artifactId.toStr()}:*")
                     .flatMap { jedis.smembers(it) }
-                    .map { it.toComponentVersion() }
+                    .mapNotNull { it.toComponentVersion() }
         }
     }
 
@@ -79,14 +79,27 @@ class RedisLibraries : Libraries {
         }
     }
 
+    override fun addArtifactId(artifactId: String?, version: Version) {
+        changeArtifactId(artifactId, null, version)
+    }
+
+    override fun changeArtifactId(artifactId: String?, oldArtifactId: String?, version: Version?) {
+        artifactId?.let {
+            pool.resource.use { jedis ->
+                val v = version?.version ?: "latest"
+                jedis.sadd("library:$artifactId:$v", "")
+            }
+        }
+    }
+
     private fun String.splitVersion(): Pair<String, String> {
         return this.lastIndexOf(':').let {
             idx -> this.substring(0, idx) to this.substring(idx + 1)
         }
     }
 
-    private fun String.toComponentVersion(): ComponentVersion {
-        return this.splitVersion().let { ComponentVersion(it.first, Version(it.second)) }
+    private fun String.toComponentVersion(): ComponentVersion? {
+        return this.takeIf { this.isNotBlank() }?.splitVersion()?.let { ComponentVersion(it.first, Version(it.second)) }
     }
 
 }

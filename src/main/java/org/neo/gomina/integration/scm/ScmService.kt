@@ -52,14 +52,20 @@ class ScmService {
         componentRepo.updateBranches(component.id, scmClient.getBranches())
 
         // Information
-        componentRepo.editArtifactId(component.id, MavenUtils.extractArtifactId(pomFile))
+        val artifactId = MavenUtils.extractArtifactId(pomFile)
+        pomFile?.let { componentRepo.editArtifactId(component.id, artifactId) }
+        libraries.changeArtifactId(artifactId ?: component.artifactId, component.artifactId, component.latest)
         componentRepo.updateDocFiles(component.id, scmClient.listFiles("/", "-1").filter { it.endsWith(".md") })
 
         // Versions
-        val versions = log
-                .mapNotNull { commit -> commit.release?.let { it to commit.date } }
-                .filter { (release, _) -> Version.isStable(release) }
-                .map { (release, date) -> VersionRelease(Version(release), date) }
+        val versions: List<VersionRelease> = log
+                .mapNotNull { commit -> commit.release?.let { Triple(
+                        MavenUtils.extractArtifactId(scmClient.getFile("pom.xml", commit.revision)),
+                        it,
+                        commit.date
+                )}}
+                .filter { (_, release, _) -> Version.isStable(release) }
+                .map { (artifactId, release, date) -> VersionRelease(artifactId, Version(release), date) }
 
         val latestVersion = latestVersion(log, pomFile)
         val releasedVersion = releasedVersion(log)
@@ -67,6 +73,7 @@ class ScmService {
 
         componentRepo.updateVersions(component.id, latestVersion, releasedVersion, changes)
         componentRepo.updateVersions(component.id, versions)
+        versions.forEach { libraries.addArtifactId(it.artifactId, it.version) }
 
         // Metadata
         if (component.hasMetadata) {
@@ -111,7 +118,7 @@ class ScmService {
     private fun latestVersion(log: List<Commit>, pomFile: String?): Version? {
         val latest = MavenUtils.extractVersion(pomFile)
         val latestRevision = log.firstOrNull()?.revision
-        return latest?.let { Version(it, latestRevision) }
+        return latest?.takeIf { latest.isNotBlank() }?.let { Version(it, latestRevision) }
     }
 
     private fun releasedVersion(log: List<Commit>): Version? {

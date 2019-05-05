@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.integration.maven.ArtifactId
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
@@ -91,8 +92,15 @@ class DummyScmClient : ScmClient {
     }
 
     private fun pomXml(commit: Map<String, Any>): String {
-        val version = commit["version"] as String
-        return "<project><version>$version</version></project>"
+        val c = ArtifactId.tryWithGroup(commit["artifactId"] as String?)
+        return """
+            <project>
+                ${c?.groupId?.let { "<groupId>$it</groupId>" }}
+                ${c?.artifactId?.let { "<artifactId>$it</artifactId>" }}
+                ${c?.version?.let { "<version>$it</version>" }}
+            </project>
+
+        """.trimMargin()
     }
 
     private fun projectYaml(url: String, commit: Map<String, Any>): String {

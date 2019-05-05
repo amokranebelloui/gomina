@@ -3,9 +3,9 @@
   {
     "url": "dummy://OMS/Server/tradex-viewkernel",
     "log": [
-      {"revision": "35770", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 0.3.0-SNAPSHOT", "version": "0.3.0-SNAPSHOT", "mesh": "1.1.0", "language" : "java:8"},
-      {"revision": "35766", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 0.2.0", "version": "0.2.0"},
-      {"revision": "35665", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "view kernel commit", "version": "0.1.0-SNAPSHOT"}
+      {"revision": "35770", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 0.3.0-SNAPSHOT", "artifactId": "x.oms.viewkernel:tradex-viewkernel:0.3.0-SNAPSHOT", "mesh": "1.1.0", "language" : "java:8"},
+      {"revision": "35766", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 0.2.0", "artifactId": "x.oms.viewkernel:viewkernel:0.2.0"},
+      {"revision": "35665", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "view kernel commit", "artifactId": "x.oms.viewkernel:viewkernel:0.1.0-SNAPSHOT"}
     ]
   },
   {
@@ -13,19 +13,19 @@
     "log": [
       {"revision": "35816", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "Remove awareness of other components (fixes)", "mesh": "1.1.0", "language" : "java:7"},
       {"revision": "35815", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "Remove awareness of other components"},
-      {"revision": "35770", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 2.3.0-SNAPSHOT", "version": "2.3.0-SNAPSHOT"},
-      {"revision": "35766", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.2.0", "version": "2.2.0"},
-      {"revision": "35665", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "kernel commit", "version": "2.2.0-SNAPSHOT"},
-      {"revision": "35570", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 2.2.0-SNAPSHOT", "version": "2.2.0-SNAPSHOT"},
-      {"revision": "35566", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.1.0", "version": "2.1.0"}
+      {"revision": "35770", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 2.3.0-SNAPSHOT", "artifactId": "x.oms.kernel:tradex-kernel:2.3.0-SNAPSHOT"},
+      {"revision": "35766", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.2.0", "artifactId": "x.oms.kernel:tradex-kernel:2.2.0"},
+      {"revision": "35665", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "kernel commit", "artifactId": "x.oms.kernel:tradex-kernel:2.2.0-SNAPSHOT"},
+      {"revision": "35570", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 2.2.0-SNAPSHOT", "artifactId": "x.oms.kernel:tradex-kernel:2.2.0-SNAPSHOT"},
+      {"revision": "35566", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.1.0", "artifactId": "x.oms.kernel:tradex-kernel:2.1.0"}
     ]
   },
   {
     "url": "dummy://OMS/Server/tradex-basketmanager",
     "log": [
-      {"revision": "35990", "date": "2019-03-21T13:09:40.529Z", "author": "amokrane", "message": "Big refacto", "version": "5.1.4-SNAPSHOT", "mesh": "1.1.2", "language" : "java:7"},
-      {"revision": "35931", "date": "2019-03-14T17:19:08.529Z", "author": "amokrane", "message": "[maven-release-plugin] 5.1.4-SNAPSHOT", "version": "5.1.4-SNAPSHOT"},
-      {"revision": "35930", "date": "2019-03-14T17:19:08.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 5.1.3", "version": "5.1.3"},
+      {"revision": "35990", "date": "2019-03-21T13:09:40.529Z", "author": "amokrane", "message": "Big refacto", "artifactId": "x.oms.vac:voms-basketmanager:5.1.4-SNAPSHOT", "mesh": "1.1.2", "language" : "java:7"},
+      {"revision": "35931", "date": "2019-03-14T17:19:08.529Z", "author": "amokrane", "message": "[maven-release-plugin] 5.1.4-SNAPSHOT", "artifactId": "x.oms.vac:voms-basketmanager:5.1.4-SNAPSHOT"},
+      {"revision": "35930", "date": "2019-03-14T17:19:08.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 5.1.3", "artifactId": "x.oms.vac:voms-basketmanager:5.1.3"},
       {"revision": "35490", "date": "2019-02-09T11:16:55.529Z", "author": "amokrane", "message": "[JIRA-5409] feature 2 (bis)"},
       {"revision": "35488", "date": "2019-02-08T09:16:55.529Z", "author": "amokrane", "message": "[JIRA-5409] feature 2"},
       {"revision": "35487", "date": "2019-02-08T12:16:55.529Z", "author": "johnd", "message": "feature1"},
@@ -33,8 +33,8 @@
       {"revision": "34561", "date": "2019-01-14T16:16:55.529Z", "author": "amokrane", "message": "POC, lkhs sdpfousd sdfhpsmdnf sfspdh dk s kjf s jkhsdkjhdfos sjdfjs d sdkmfdf shjehkjdfksbdf  ukejhdkh sjd ksdhfjk qksjvkdv kbqsdbqk"},
       {"revision": "34560", "date": "2019-01-14T15:16:55.529Z", "author": "amokrane", "message": "structure"},
       {"revision": "33982", "date": "2019-01-11T14:16:55.529Z", "author": "amokrane", "message": "initial commit"},
-      {"revision": "32770", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 5.1.3-SNAPSHOT", "version": "5.1.3-SNAPSHOT"},
-      {"revision": "32766", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 5.1.2", "version": "5.1.2"}
+      {"revision": "32770", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 5.1.3-SNAPSHOT", "artifactId": "x.oms.vac:voms-basketmanager:5.1.3-SNAPSHOT"},
+      {"revision": "32766", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 5.1.2", "artifactId": "x.oms.vac:voms-basketmanager:5.1.2"}
     ],
     "branch_12": {
       "name": "branch12",
@@ -47,8 +47,8 @@
   {
     "url": "dummy://OMS/Server/tradex-ordermanager",
     "log": [
-      {"revision": "35490", "date": "2019-04-12T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 2.1.2-SNAPSHOT", "version": "2.1.2-SNAPSHOT", "mesh": "1.1.3", "language" : "java:7"},
-      {"revision": "35489", "date": "2019-04-12T17:16:55.526Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.1.1", "version": "2.1.1"},
+      {"revision": "35490", "date": "2019-04-12T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 2.1.2-SNAPSHOT", "artifactId": "x.oms.vac:voms-ordermanager:2.1.2-SNAPSHOT", "mesh": "1.1.3", "language" : "java:7"},
+      {"revision": "35489", "date": "2019-04-12T17:16:55.526Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.1.1", "artifactId": "x.oms.vac:voms-ordermanager:2.1.1"},
       {"revision": "35488", "date": "2019-04-01T11:11:34.106Z", "author": "amokrane", "message": "[JIRA-5409] feature 2"},
       {"revision": "35002", "date": "2019-03-18T01:18:04.527Z", "author": "amokrane", "message": "[DEMO-671]Handle Order Lifecycle"}
     ]
@@ -56,10 +56,10 @@
   {
     "url": "dummy://OMS/Server/tradex-fixin",
     "log": [
-      {"revision": "35490", "date": "2019-03-21T17:09:40.529Z", "author": "amokrane", "message": "refactor", "version": "0.9.1-SNAPSHOT", "mesh": "1.3.5", "language" : "java:8"},
-      {"revision": "35014", "date": "2019-03-10T17:19:08.529Z", "author": "amokrane", "message": "Handle Major/Minor translations", "version": "0.9.1-SNAPSHOT"},
-      {"revision": "34430", "date": "2019-02-08T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 0.9.1-SNAPSHOT", "version": "0.9.2-SNAPSHOT"},
-      {"revision": "34429", "date": "2019-02-08T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 0.9.0", "version": "0.9.0"}
+      {"revision": "35490", "date": "2019-03-21T17:09:40.529Z", "author": "amokrane", "message": "refactor", "artifactId": "x.oms.vac:voms-fixin:0.9.1-SNAPSHOT", "mesh": "1.3.5", "language" : "java:8"},
+      {"revision": "35014", "date": "2019-03-10T17:19:08.529Z", "author": "amokrane", "message": "Handle Major/Minor translations", "artifactId": "x.oms.vac:voms-fixin:0.9.1-SNAPSHOT"},
+      {"revision": "34430", "date": "2019-02-08T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 0.9.1-SNAPSHOT", "artifactId": "x.oms.vac:voms-fixin:0.9.2-SNAPSHOT"},
+      {"revision": "34429", "date": "2019-02-08T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 0.9.0", "artifactId": "x.oms.vac:voms-fixin:0.9.0"}
     ]
   }
 ]
