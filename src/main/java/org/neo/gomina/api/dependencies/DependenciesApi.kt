@@ -313,6 +313,7 @@ class DependenciesApi {
         val artifactId = ctx.request().getParam("artifactId")?.let { ArtifactId.tryWithVersion(it) }
         logger.info("Get Library $artifactId")
         try {
+            // FIXME Limit to: Latest, LastReleased, Deployed versions
             val componentsMap = componentRepo.getAll().associateBy { it.id }
             val usageDetail = artifactId?.let { libraries.library(it) }?.map { (v, cvs) ->
                 LibraryUsageDetail(v.version, cvs.mapNotNull { it.toDetail(componentsMap) })

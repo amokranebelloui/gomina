@@ -32,6 +32,7 @@ class ComponentApp extends React.Component {
             associated: [],
 
             versions: [],
+            libraries: [],
 
             api: [],
             usage: [],
@@ -255,6 +256,12 @@ class ComponentApp extends React.Component {
             .then(response => thisComponent.setState({versions: response.data}))
             .catch(() => thisComponent.setState({versions: null}))
     }
+    retrieveLibraries(componentId) {
+        const thisComponent = this;
+        axios.get('/data/dependencies/libraries/' + componentId)
+            .then(response => thisComponent.setState({libraries: response.data}))
+            .catch(() => thisComponent.setState({libraries: null}))
+    }
     retrieveApi(componentId) {
         const thisComponent = this;
         axios.get('/data/dependencies/api/' + componentId)
@@ -410,6 +417,7 @@ class ComponentApp extends React.Component {
         this.retrieveComponent(this.state.componentId);
         this.retrieveAssociated(this.state.componentId);
         this.retrieveVersions(this.state.componentId);
+        this.retrieveLibraries(this.state.componentId);
         this.retrieveApi(this.state.componentId);
         this.retrieveUsage(this.state.componentId);
         this.retrieveDependencies(this.state.componentId);
@@ -443,6 +451,7 @@ class ComponentApp extends React.Component {
             this.retrieveComponent(newComponent);
             this.retrieveAssociated(newComponent);
             this.retrieveVersions(newComponent);
+            this.retrieveLibraries(newComponent);
             //this.retrieveInstances(newComponent);
             this.retrieveApi(newComponent);
             this.retrieveUsage(newComponent);
@@ -561,6 +570,16 @@ class ComponentApp extends React.Component {
                                     <DateTime date={versionRelease.releaseDate} />
                                     <br/>
                                 </span>
+                            )}
+                        </div>
+                        <br/>
+                        <h3>Libraries</h3>
+                        <div className="items">
+                            {this.state.libraries.map(library =>
+                                <Fragment>
+                                    <span>{library}</span>
+                                    <br/>
+                                </Fragment>
                             )}
                         </div>
                         <br/>
