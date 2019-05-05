@@ -14,6 +14,7 @@ import {ComponentsApp} from "./app/ComponentsApp";
 import {WorkApp} from "./app/WorkApp";
 import {DependenciesApp} from "./app/DependenciesApp";
 import {UserApp} from "./app/UserApp";
+import {LibrariesApp} from "./app/LibrariesApp";
 
 const history = createBrowserHistory();
 
@@ -27,8 +28,14 @@ class Blocker extends React.Component {
         return (
             <Switch>
                 <Route exact path="/" component={Index}/>
-                <Route path="/architecture" component={ArchitectureApp}/>
+                <Route path="/components" render={props => <ComponentsApp {...props} />}/>
+                <Route path="/component/:id/doc/:docId" render={props => <ComponentApp {...props} />}/>
+                <Route path="/component/:id/scm" render={props => <ComponentApp {...props} />}/>
+                <Route path="/component/:id" render={props => <ComponentApp {...props} />}/>
+                <Route path="/library/:id" component={LibrariesApp}/>
+                <Route path="/libraries" component={LibrariesApp}/>
                 <Route path="/dependencies" component={DependenciesApp}/>
+                <Route path="/architecture" component={ArchitectureApp}/>
                 <Route path="/hosts" render={props => <HostsApp {...props} />}/>
                 <Route path="/host/:id" render={props => <HostsApp {...props} />}/>
                 <Route path="/envs/:id/svc/:svcId/:instanceId" render={props => <EnvApp {...props} />}/>
@@ -36,10 +43,6 @@ class Blocker extends React.Component {
                 <Route path="/envs/:id" render={props => <EnvApp {...props} />}/>
                 <Route path="/envs" render={props => <EnvApp {...props} />}/>
                 <Route path="/pipeline" render={props => <PipelineApp {...props} />}/>
-                <Route path="/components" render={props => <ComponentsApp {...props} />}/>
-                <Route path="/component/:id/doc/:docId" render={props => <ComponentApp {...props} />}/>
-                <Route path="/component/:id/scm" render={props => <ComponentApp {...props} />}/>
-                <Route path="/component/:id" render={props => <ComponentApp {...props} />}/>
                 <Route path="/work/:id" render={props => <WorkApp {...props} />}/>
                 <Route path="/work" render={props => <WorkApp {...props} />}/>
                 <Route path="/user/:id" render={props => <UserApp {...props} />}/>

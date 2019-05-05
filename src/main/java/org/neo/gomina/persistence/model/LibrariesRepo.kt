@@ -26,20 +26,42 @@ class RedisLibraries : Libraries {
         logger.info("Libraries Database connected $host $port")
     }
 
-    override fun dependencies(componentId: String): List<ArtifactId> {
+    override fun libraries(): Map<ArtifactId, List<Version>> {
         pool.resource.use { jedis ->
-            return jedis.keys("libraries:$componentId:*")
-                    .flatMap { jedis.smembers(it) }
-                    .mapNotNull { ArtifactId.from(it) }
+            return jedis.keys("library:*")
+                    .map { it.replace(Regex("^library:"), "") }
+                    .map { it.splitVersion() }
+                    .map { (artifactId, version) -> ArtifactId.tryWithVersion(artifactId) to Version(version) }
+                    .mapNotNull { (artifactId, version) -> artifactId?.let { artifactId to version } }
+                    .groupBy( { it.first } ) { it.second }
         }
     }
 
-    override fun dependents(artifactId: ArtifactId): List<ComponentVersion> {
+    override fun library(artifactId: ArtifactId): Map<Version, List<ComponentVersion>> {
         pool.resource.use { jedis ->
-            return jedis.keys("library:$artifactId:*")
+            return jedis.keys("library:${artifactId.toStr()}:*")
+                    .mapNotNull { key ->
+                        val version = ArtifactId.tryWithVersion(key.replace(Regex("^library:"), ""))?.getVersion()
+                        val componentsVersions = jedis.smembers(key).map { it.toComponentVersion() }
+                        version?.let { version to componentsVersions }
+                    }
+                    .toMap()
+        }
+    }
+
+    override fun usedByComponent(componentId: String): List<ArtifactId> {
+        pool.resource.use { jedis ->
+            return jedis.keys("libraries:$componentId:*")
                     .flatMap { jedis.smembers(it) }
-                    .map { it.splitVersion() }
-                    .map { ComponentVersion(it.first, Version(it.second)) }
+                    .mapNotNull { ArtifactId.tryWithVersion(it) }
+        }
+    }
+
+    override fun componentsUsing(artifactId: ArtifactId): List<ComponentVersion> {
+        pool.resource.use { jedis ->
+            return jedis.keys("library:${artifactId.toStr()}:*")
+                    .flatMap { jedis.smembers(it) }
+                    .map { it.toComponentVersion() }
         }
     }
 
@@ -61,6 +83,10 @@ class RedisLibraries : Libraries {
         return this.lastIndexOf(':').let {
             idx -> this.substring(0, idx) to this.substring(idx + 1)
         }
+    }
+
+    private fun String.toComponentVersion(): ComponentVersion {
+        return this.splitVersion().let { ComponentVersion(it.first, Version(it.second)) }
     }
 
 }

@@ -64,7 +64,7 @@ class DummyScmClient : ScmClient {
                 return log.map { buildFrom(it) }
             }
         } catch (e: Exception) {
-            logger.error("Error retrieving SVN data for " + url, e)
+            logger.error("Error retrieving SVN data for $url", e)
         }
 
         return ArrayList()
@@ -75,8 +75,13 @@ class DummyScmClient : ScmClient {
         if (projectData != null) {
             val log = projectData["log"] as List<Map<String, Any>>?
             val commit = if (rev == "-1") (if (log?.isNotEmpty() == true) log[0] else null) else findRevision(log, rev)
-            return if (commit != null && url == "pom.xml") sampleFile(commit["version"] as String)
-                else null
+            return commit?.let {
+                when (url) {
+                    "pom.xml" -> pomXml(commit)
+                    "project.yaml" -> projectYaml(url, commit)
+                    else -> null
+                }
+            }
         }
         return null
     }
@@ -85,8 +90,25 @@ class DummyScmClient : ScmClient {
         return listOf("README.md")
     }
 
-    private fun sampleFile(version: String): String {
+    private fun pomXml(commit: Map<String, Any>): String {
+        val version = commit["version"] as String
         return "<project><version>$version</version></project>"
+    }
+
+    private fun projectYaml(url: String, commit: Map<String, Any>): String {
+        val mesh = commit["mesh"] as String
+        val language = commit["language"] as String
+        return """
+            id: $url
+
+            owner: amokrane.belloui@gmail.com
+            criticity: 3
+
+            libraries:
+              - org.demo:service-mesh:$mesh
+              - $language
+
+        """.trimIndent()
     }
 
     private fun findRevision(log: List<Map<String, Any>>?, rev: String): Map<String, Any>? {

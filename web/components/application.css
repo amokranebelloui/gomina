@@ -13,7 +13,15 @@ body {
 
 a {
     /*color: blue;*/
+    color: inherit;
     text-decoration: inherit; /* no underline */
+}
+
+a:hover {
+    color: #881819;
+}
+a:active {
+    color: #ad1819;
 }
 
 #root {

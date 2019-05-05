@@ -8,6 +8,8 @@ component:<componentId> (hash)
 commit:<componentId>:<rev> (hset)
 commits:<componentId> (zset) commit{timestamp}
 versions:<componentId> (zset) version{releaseDate}
+libraries:<componentId> (set) libraries used by a component
+library:<artifactId> (set) components using a library
 
 ### Interaction (2)
 - api:<source>:<componentId>:exposes:<functionName> (hash) name type

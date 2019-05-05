@@ -6,8 +6,10 @@ import org.neo.gomina.model.version.Version
 data class ComponentVersion(val componentId: String, val version: Version)
 
 interface Libraries {
-    fun dependencies(componentId: String): List<ArtifactId>
-    fun dependents(artifactId: ArtifactId): List<ComponentVersion>
+    fun libraries(): Map<ArtifactId, List<Version>>
+    fun library(artifactId: ArtifactId): Map<Version, List<ComponentVersion>>
+    fun usedByComponent(componentId: String): List<ArtifactId>
+    fun componentsUsing(artifactId: ArtifactId): List<ComponentVersion>
     fun add(componentId: String, version: Version, artifacts: List<ArtifactId>)
 
 }

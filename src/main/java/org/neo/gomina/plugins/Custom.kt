@@ -348,7 +348,7 @@ class CustomInteractionProvider : InteractionsProvider {
         println("-- Dependencies -----------------")
 
         val interactions = componentsRepo.getAll()
-                .mapNotNull { c -> c.artifactId?.let { c.id to ArtifactId.from(it) } }
+                .mapNotNull { c -> c.artifactId?.let { c.id to ArtifactId.tryWithGroup(it) } }
                 .flatMap { (cid, artifactId) -> artifactId?.let { listOf(cid to artifactId) } ?: emptyList() }
                 .mapNotNull { (cId, artifactId) ->
                     when (cId) {

@@ -1,6 +1,7 @@
 package org.neo.gomina.integration.maven
 
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.model.version.Version
 import org.w3c.dom.Document
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
@@ -9,19 +10,33 @@ import javax.xml.xpath.XPathFactory
 
 data class ArtifactId(val groupId: String? = null, val artifactId: String, val version: String? = null) {
     companion object {
-        fun from(str: String?): ArtifactId? {
-            return str?.let {
-                val split = str.split(":")
-                when {
-                    split.size > 2 -> ArtifactId(groupId = split[0], artifactId = split[1], version = split[2])
-                    split.size == 2 -> ArtifactId(groupId = split[0], artifactId = split[1])
-                    split.size == 1 && split[0].isNotBlank() -> ArtifactId(artifactId = split[0])
-                    else -> null
-                }
+        fun withVersion(str: String): ArtifactId {
+            val split = str.split(":")
+            return when {
+                split.size > 2 -> ArtifactId(groupId = split[0], artifactId = split[1], version = split[2])
+                split.size == 2 -> ArtifactId(artifactId = split[0], version = split[1])
+                split.size == 1 && split[0].isNotBlank() -> ArtifactId(artifactId = split[0])
+                else -> ArtifactId(artifactId = split[0])
             }
+        }
+        fun withGroup(str: String): ArtifactId {
+            val split = str.split(":")
+            return when {
+                split.size > 2 -> ArtifactId(groupId = split[0], artifactId = split[1], version = split[2])
+                split.size == 2 -> ArtifactId(groupId = split[0], artifactId = split[1])
+                split.size == 1 && split[0].isNotBlank() -> ArtifactId(artifactId = split[0])
+                else -> ArtifactId(artifactId = split[0])
+            }
+        }
+        fun tryWithVersion(str: String?): ArtifactId? {
+            return str?.let { withVersion(it) }
+        }
+        fun tryWithGroup(str: String?): ArtifactId? {
+            return str?.let { withGroup(it) }
         }
     }
     fun toStr() = "${groupId?.let { "$it:" } ?: ""}$artifactId${version?.let { ":$it" } ?: ""}"
+    fun getVersion() = this.version?.let { Version(it) }
 }
 
 object MavenUtils {

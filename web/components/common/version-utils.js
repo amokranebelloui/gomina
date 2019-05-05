@@ -16,6 +16,10 @@ function compareVersions (a: ?string, b: ?string) {
     return res != 0 ? res : (a.includes("-SNAPSHOT") ? 0 : 1) - (b.includes("-SNAPSHOT") ? 0 : 1);
 }
 
+function compareVersionsReverse (a: ?string, b: ?string) {
+    return compareVersions(b, a)
+}
+
 function compareVersions2 (a: string, b: string) {
     var i, diff;
     var regExStrip0 = /(\.0+)+$/;
@@ -33,4 +37,4 @@ function compareVersions2 (a: string, b: string) {
 }
 
 
-export {isSnapshot, compareVersions, compareVersionsRevisions}
+export {isSnapshot, compareVersions, compareVersionsReverse, compareVersionsRevisions}

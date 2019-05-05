@@ -79,15 +79,16 @@ class AppLayout extends React.Component {
                                 {this.props.title}
                             </h3>
                             <span className="items">
-                                <Link to="/">index</Link> -&nbsp;
-                                <Link to="/components">components</Link> -&nbsp;
-                                <Link to="/dependencies">dependencies</Link> -&nbsp;
-                                <Link to="/architecture">architecture</Link> -&nbsp;
-                                <Link to="/envs">envs</Link> -&nbsp;
-                                <Link to="/hosts">hosts</Link> -&nbsp;
-                                <Link to="/work">work</Link> -&nbsp;
-                                <Link to="/user">users</Link> -&nbsp;
-                                <Link to="/pipeline">pipeline</Link> -&nbsp;
+                                <Link to="/">index</Link> &nbsp;
+                                <Link to="/components">components</Link> &nbsp;
+                                <Link to="/libraries">libraries</Link> &nbsp;
+                                <Link to="/dependencies">dependencies</Link> &nbsp;
+                                <Link to="/architecture">architecture</Link> &nbsp;
+                                <Link to="/envs">envs</Link> &nbsp;
+                                <Link to="/hosts">hosts</Link> &nbsp;
+                                <Link to="/work">work</Link> &nbsp;
+                                <Link to="/user">users</Link> &nbsp;
+                                <Link to="/pipeline">pipeline</Link> &nbsp;
                                 <Link to="/sandbox">sandbox</Link>
                                 <br/>
                             </span>

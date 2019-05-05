@@ -7,11 +7,11 @@ class ArtifactIdTest {
 
     @Test
     fun extractVersion() {
-        assertThat(ArtifactId.from("com.neo.gomina:maven-plugin")).isEqualTo(ArtifactId("com.neo.gomina", "maven-plugin"))
-        assertThat(ArtifactId.from("com.neo.gomina:maven-plugin:2.0.0")).isEqualTo(ArtifactId("com.neo.gomina", "maven-plugin", "2.0.0"))
-        assertThat(ArtifactId.from("maven-plugin")).isEqualTo(ArtifactId(artifactId = "maven-plugin"))
-        assertThat(ArtifactId.from(" ")).isNull()
-        assertThat(ArtifactId.from("")).isNull()
+        assertThat(ArtifactId.tryWithGroup("com.neo.gomina:maven-plugin")).isEqualTo(ArtifactId("com.neo.gomina", "maven-plugin"))
+        assertThat(ArtifactId.tryWithGroup("com.neo.gomina:maven-plugin:2.0.0")).isEqualTo(ArtifactId("com.neo.gomina", "maven-plugin", "2.0.0"))
+        assertThat(ArtifactId.tryWithGroup("maven-plugin")).isEqualTo(ArtifactId(artifactId = "maven-plugin"))
+        assertThat(ArtifactId.tryWithGroup(" ")).isNull()
+        assertThat(ArtifactId.tryWithGroup("")).isNull()
     }
 }
 

@@ -83,7 +83,7 @@ class ScmService {
                     )
             ))
 
-            metadata?.libraries?.mapNotNull { ArtifactId.from(it) }?.let {
+            metadata?.libraries?.mapNotNull { ArtifactId.tryWithVersion(it) }?.let {
                 if (latestVersion != null) {
                     libraries.add(component.id, latestVersion, it)
                 }

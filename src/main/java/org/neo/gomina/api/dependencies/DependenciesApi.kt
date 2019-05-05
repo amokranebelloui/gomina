@@ -12,6 +12,10 @@ import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.common.splitParams
+import org.neo.gomina.api.component.ComponentRef
+import org.neo.gomina.api.component.toComponentRef
+import org.neo.gomina.integration.maven.ArtifactId
+import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
@@ -35,6 +39,11 @@ data class CallChainDetail(val serviceId: String,
 
 data class FunctionData(val name: String, val type: String)
 data class FunctionUsageData(val name: String, val type: String, val usage: String? = null)
+
+data class LibraryDetail(val artifactId: String, val versions: List<String>)
+
+data class LibraryUsageDetail(val version: String, val components: List<ComponentVersionDetail>)
+data class ComponentVersionDetail(val component: ComponentRef, val version: String)
 
 class DependenciesApi {
 
@@ -75,7 +84,9 @@ class DependenciesApi {
         router.post("/usage/:componentId/add").handler(this::addUsage)
         router.delete("/usage/:componentId/remove").handler(this::removeUsage)
 
-        router.get("/libraries/:componentId").handler(this::libraries)
+        router.get("/libraries").handler(this::libraries)
+        router.get("/library/:artifactId").handler(this::library)
+        router.get("/libraries/:componentId").handler(this::componentLibraries)
     }
 
     fun get(ctx: RoutingContext) {
@@ -287,10 +298,42 @@ class DependenciesApi {
     }
 
     private fun libraries(ctx: RoutingContext) {
+        logger.info("Get Libraries")
+        try {
+            val deps = libraries.libraries().map { (artifactId, versions) -> LibraryDetail(artifactId.toStr(), versions.map { it.version }) }
+            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(deps))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get Libraries", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun library(ctx: RoutingContext) {
+        val artifactId = ctx.request().getParam("artifactId")?.let { ArtifactId.tryWithVersion(it) }
+        logger.info("Get Library $artifactId")
+        try {
+            val componentsMap = componentRepo.getAll().associateBy { it.id }
+            val usageDetail = artifactId?.let { libraries.library(it) }?.map { (v, cvs) ->
+                LibraryUsageDetail(v.version, cvs.mapNotNull { it.toDetail(componentsMap) })
+            }
+            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(usageDetail))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get Library $artifactId", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun ComponentVersion.toDetail(componentsMap: Map<String, Component>): ComponentVersionDetail? {
+        return componentsMap[this.componentId]?.toComponentRef()?.let { ComponentVersionDetail(it, this.version.version) }
+    }
+
+    private fun componentLibraries(ctx: RoutingContext) {
         val componentId = ctx.request().getParam("componentId")
         logger.info("Get Libraries $componentId")
         try {
-            val deps = libraries.dependencies(componentId).map { it.toStr() }
+            val deps = libraries.usedByComponent(componentId).map { it.toStr() }
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(deps))
         }
         catch (e: Exception) {
