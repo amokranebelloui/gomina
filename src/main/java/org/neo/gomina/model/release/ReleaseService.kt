@@ -31,12 +31,7 @@ object ReleaseService {
             log
                 .fold(0 to 0) { (sum, count), commit ->
                     val releaseDate = releaseDates[commit.revision] ?: LocalDateTime.now(ZoneOffset.UTC)
-                    if (commit.date != null) {
-                        sum + ChronoUnit.DAYS.between(commit.date, releaseDate).toInt() to count + 1
-                    }
-                    else {
-                        sum to count
-                    }
+                    sum + ChronoUnit.DAYS.between(commit.date, releaseDate).toInt() to count + 1
                 }
                 .let { (sum, count) ->
                     if (count > 0) sum / count else null

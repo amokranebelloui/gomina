@@ -71,7 +71,7 @@ class GitClient : ScmClient {
                     date = Instant.ofEpochMilli(it.commitTime.toLong() * 1000L).atZone(ZoneOffset.UTC).toLocalDateTime(),
                     author = it.authorIdent.name,
                     //author = it.committerIdent.name,
-                    message = "${StringUtils.replaceChars(it.fullMessage, "\n", " ")}"
+                    message = StringUtils.replaceChars(it.fullMessage, "\n", " ")
                     //(${it.parents.map { it.tree.type }})
             )
         }

@@ -40,7 +40,7 @@ class CommitLogEnricher {
                 log = tmp.map { (commit, running, deployed) ->
                     CommitDetail(
                             revision = commit.revision,
-                            date = commit.date?.toDateUtc,
+                            date = commit.date.toDateUtc,
                             author = commit.author?.let { users.findForAccount(it) }?.toRef() ?: commit.author?.let { UserRef(shortName = commit.author) },
                             message = commit.message,
                             version = commit.release ?: commit.newVersion,

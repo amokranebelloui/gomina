@@ -134,11 +134,11 @@ class EventsApi {
             vertx.executeBlocking({future: Future<Pair<List<EventDetail>, List<String>>> ->
                 val componentId = ctx.request().getParam("componentId")
                 logger.info("Events for component $componentId")
-                val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
+                //val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
 
                 val errors = mutableListOf<String>()
                 val events = events.forComponent(componentId)
-                        .filter { it.timestamp > since }
+                        //.filter { it.timestamp > since }
                         .sortedByDescending { it.timestamp }
                         .map { it.toEventDetail() }
                 future.complete(events to errors)

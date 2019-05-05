@@ -3,21 +3,21 @@
   {
     "url": "dummy://OMS/Server/tradex-viewkernel",
     "log": [
-      {"revision": "35770", "author": "amokrane", "message": "[maven-release-plugin] 0.3.0-SNAPSHOT", "version": "0.3.0-SNAPSHOT"},
-      {"revision": "35766", "author": "amokrane", "message": "[maven-release-plugin] prepare release 0.2.0", "version": "0.2.0"},
-      {"revision": "35665", "author": "amokrane", "message": "view kernel commit", "version": "0.1.O-SNAPSHOT"}
+      {"revision": "35770", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 0.3.0-SNAPSHOT", "version": "0.3.0-SNAPSHOT"},
+      {"revision": "35766", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 0.2.0", "version": "0.2.0"},
+      {"revision": "35665", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "view kernel commit", "version": "0.1.0-SNAPSHOT"}
     ]
   },
   {
     "url": "dummy://OMS/Server/tradex-kernel",
     "log": [
-      {"revision": "35816", "author": "amokrane", "message": "Remove awareness of other components (fixes)"},
-      {"revision": "35815", "author": "amokrane", "message": "Remove awareness of other components"},
-      {"revision": "35770", "author": "amokrane", "message": "[maven-release-plugin] 2.3.0-SNAPSHOT", "version": "2.3.0-SNAPSHOT"},
-      {"revision": "35766", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.2.0", "version": "2.2.0"},
-      {"revision": "35665", "author": "amokrane", "message": "kernel commit", "version": "2.2.O-SNAPSHOT"},
-      {"revision": "35570", "author": "amokrane", "message": "[maven-release-plugin] 2.2.0-SNAPSHOT", "version": "2.2.0-SNAPSHOT"},
-      {"revision": "35566", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.1.0", "version": "2.1.0"}
+      {"revision": "35816", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "Remove awareness of other components (fixes)"},
+      {"revision": "35815", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "Remove awareness of other components"},
+      {"revision": "35770", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 2.3.0-SNAPSHOT", "version": "2.3.0-SNAPSHOT"},
+      {"revision": "35766", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.2.0", "version": "2.2.0"},
+      {"revision": "35665", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "kernel commit", "version": "2.2.0-SNAPSHOT"},
+      {"revision": "35570", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] 2.2.0-SNAPSHOT", "version": "2.2.0-SNAPSHOT"},
+      {"revision": "35566", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 2.1.0", "version": "2.1.0"}
     ]
   },
   {
@@ -40,7 +40,7 @@
       "name": "branch12",
       "origin": "35930",
       "log": [
-        {"revision": "35991", "author": "amokrane", "message": "Small bugfixes"}
+        {"revision": "35991", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "Small bugfixes"}
       ]
     }
   },

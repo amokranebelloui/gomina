@@ -23,7 +23,8 @@ class Events extends React.Component<Props> {
         super(props)
     }
     color(type: ?string) {
-        return type === "release" ? "#5797ce" :
+        return type === "version" ? "#58738f" :
+               type === "release" ? "#5797ce" :
                type === "started" ? "#4ace51" :
                type === "online" ? "#4ace51" :
                type === "stopped" ? "#ce1b1c" :
@@ -34,7 +35,8 @@ class Events extends React.Component<Props> {
                null
     }
     font(type: ?string) {
-        return type === "release" ? "white" :
+        return type === "version" ? "white" :
+               type === "release" ? "white" :
                type === "started" ? null :
                type === "online" ? null :
                type === "stopped" ? "white" :

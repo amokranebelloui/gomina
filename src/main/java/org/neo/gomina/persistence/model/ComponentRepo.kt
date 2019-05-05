@@ -130,7 +130,7 @@ class RedisComponentRepo : ComponentRepo {
             commits.map { it.get() }.map {
                 Commit(
                         revision = it["revision"] ?: "",
-                        date = it["date"]?.let { LocalDateTime.parse(it, ISO_DATE_TIME) },
+                        date = LocalDateTime.parse(it["date"] ?: "1970-01-01T00:00:00.000Z", ISO_DATE_TIME), // FIXME
                         author = it["author"],
                         message = it["message"],
                         release = it["release"],
@@ -395,12 +395,12 @@ class RedisComponentRepo : ComponentRepo {
         pool.resource.use { jedis ->
             jedis.pipelined().let { pipe ->
                 commits.forEach { commit ->
-                    val time = commit.date?.atZone(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()?.toDouble()
+                    val time = commit.date.atZone(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()?.toDouble()
                     //val time = commit.date?.time?.toDouble()
                     pipe.zadd("commits:$componentId", time ?: 0.0, commit.revision)
                     pipe.hmset("commit:$componentId:${commit.revision}", listOfNotNull(
                             "revision" to commit.revision,
-                            commit.date?.let { "date" to it.format(ISO_DATE_TIME) },
+                            commit.date.let { "date" to it.format(ISO_DATE_TIME) },
                             commit.author?.let { "author" to it },
                             commit.message?.let { "message" to it },
                             commit.release?.let { "release" to it },

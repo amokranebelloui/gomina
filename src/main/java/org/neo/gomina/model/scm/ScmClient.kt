@@ -2,12 +2,10 @@ package org.neo.gomina.model.scm
 
 import org.neo.gomina.model.version.Version
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.util.*
 
 data class Commit (
     val revision: String = "",
-    val date: LocalDateTime? = null,
+    val date: LocalDateTime,
     val author: String? = null,
     val message: String? = null,
 
@@ -37,7 +35,7 @@ private fun LocalDateTime.score(reference: LocalDateTime): Int {
 }
 
 fun List<Commit>.activity(reference: LocalDateTime): Int {
-    return this.mapNotNull { it.date }
+    return this.map { it.date }
             .filter { it.isAfter(reference.minusMonths(6)) }
             .map { it.score(reference) }
             .sumBy { it }
