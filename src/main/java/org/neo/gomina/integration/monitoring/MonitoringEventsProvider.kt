@@ -1,5 +1,6 @@
 package org.neo.gomina.integration.monitoring
 
+import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.event.Event
 import org.neo.gomina.model.event.Events
@@ -17,6 +18,10 @@ data class MonitoringEventsProviderConfig(
 ) : EventsProviderConfig
 
 class MonitoringEventsProvider : EventsProvider {
+
+    companion object {
+        private val logger = LogManager.getLogger(javaClass)
+    }
 
     @Inject private lateinit var monitoring: Monitoring
     @Inject private lateinit var inventory: Inventory
@@ -40,6 +45,9 @@ class MonitoringEventsProvider : EventsProvider {
                     newS == ServerStatus.OFFLINE && oldS != ServerStatus.OFFLINE -> "offline" to "$instanceId offline"
                     newS != ServerStatus.LIVE && oldS == ServerStatus.LIVE -> "runtime" to "$instanceId status changed to $newS"
                     else -> null
+                }
+                if (newS != oldS) {
+                    logger.info("Status Change $oldS->$newS => $change")
                 }
                 change?.let { (type, message) ->
                     val timestamp = LocalDateTime.now(Clock.systemUTC())

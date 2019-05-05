@@ -7,6 +7,8 @@ type HostType = {
     dataCenter?: ?string,
     group?: ?string,
     type?: ?string,
+    osFamily?: ?string,
+    os?: ?string,
     tags?: Array<string>,
 
     username?: ?string,
@@ -22,6 +24,8 @@ type HostDataType = {
     dataCenter?: ?string,
     group?: ?String,
     type?: ?string,
+    osFamily?: ?string,
+    os?: ?string,
     tags?: Array<string>
 }
 

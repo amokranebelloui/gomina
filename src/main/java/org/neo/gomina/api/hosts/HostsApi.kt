@@ -21,6 +21,8 @@ data class HostDetail(
         val dataCenter: String? = null,
         val group: String? = null,
         val type: String? = null,
+        val osFamily: String? = null,
+        val os: String? = null,
         val tags: List<String> = emptyList(),
 
         val username: String? = null,
@@ -36,6 +38,8 @@ data class HostData(
         val dataCenter: String?,
         val group: String?, // several servers forming a group
         val type: String?, // PROD, TEST, etc
+        val osFamily: String?,
+        val os: String?,
         val tags: List<String> = emptyList()
 )
 
@@ -138,7 +142,7 @@ class HostsApi {
         try {
             val data = mapper.readValue<HostData>(ctx.body.toString())
             logger.info("Update host $hostId $data")
-            hosts.updateHost(hostId, data.dataCenter, data.group, data.type ?: "UNKNOWN", data.tags)
+            hosts.updateHost(hostId, data.dataCenter, data.group, data.type ?: "UNKNOWN", data.osFamily, data.os, data.tags)
             ctx.response().putHeader("content-type", "text/javascript").end(mapper.writeValueAsString(hostId))
         }
         catch (e: Exception) {
@@ -184,6 +188,8 @@ private fun Host.map(): HostDetail {
             dataCenter = dataCenter,
             group = group,
             type = type,
+            osFamily = osFamily,
+            os = os,
             tags = tags,
             username = username,
             passwordAlias = passwordAlias,

@@ -22,7 +22,7 @@ class SshOnDemandConnectorTest {
         override fun getHosts(): List<Host> = listOf(host1)
         override fun getHost(host: String): Host? = host1
         override fun addHost(hostId: String) {}
-        override fun updateHost(hostId: String, dataCenter: String?, group: String?, type: String, tags: List<String>) {}
+        override fun updateHost(hostId: String, dataCenter: String?, group: String?, type: String, osFamily: String?, os: String?, tags: List<String>) {}
         override fun updateConnectivity(hostId: String, username: String?, passwordAlias: String?, proxyHost: String?, proxyUser: String?, sudo: String?) {}
         override fun updateUnexpectedFolders(host: String, unexpectedFolders: List<String>) = Unit
     }

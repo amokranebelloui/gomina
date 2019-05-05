@@ -131,7 +131,7 @@ class Autocomplete<T> extends React.Component<Props<T>, State<T>> {
         // <span>{JSON.stringify(this.state.selectedItem)}</span>
         return (
             <Fragment>
-                <div style={{position: 'relative'}}>
+                <div style={{display: 'inline-block', position: 'relative'}}>
                     <input type="text"
                            className={this.state.userInput && !this.state.selectedItem ? "suggestion-unknown-item" : null}
                            onChange={e => this.onChange(e)}

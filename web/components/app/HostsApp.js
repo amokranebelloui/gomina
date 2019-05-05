@@ -9,6 +9,7 @@ import Route from "react-router-dom/es/Route";
 import {HostEditor} from "../environment/HostEditor";
 import {Secure} from "../permission/Secure";
 import {HostConnectivityEditor} from "../environment/HostConnectivityEditor";
+import {OSFamily} from "../misc/OSFamily";
 
 class HostsApp extends React.Component {
 
@@ -209,34 +210,46 @@ function Host(props) {
     const host = props.host;
     //border: '1px solid blue'
     return (
-        <div style={{display: 'inline-bloc', border: '1px solid #DDDDDD', padding: '2px', margin: '2px', width: '120px'}}>
+        <div style={{display: 'inline-bloc', border: '1px solid #DDDDDD', padding: '2px', margin: '2px', width: '200px'}}>
             <div>
-                <Link to={"/host/" + host.host}>
-                    <h3 style={{display: 'inline-block'}}>{host.host}</h3>
-                </Link>
                 <div style={{float: 'right', verticalAlign: 'top'}}>
                     {host.unexpected && host.unexpected.length > 0 &&
-                    <Badge backgroundColor='#EAA910' color='white'>{host.unexpected.length}</Badge>
+                        <Badge backgroundColor='#EAA910' color='white'>{host.unexpected.length}</Badge>
                     }
-                </div>
-                <div style={{float: 'right', verticalAlign: 'top'}}>
                     {!host.managed &&
                         <Badge backgroundColor='#4479ce' color='white'>?</Badge>
                     }
+                    <OSFamily osFamily={host.osFamily} />
+                </div>
+                <Link to={"/host/" + host.host}>
+                    <b style={{display: 'inline'}}>{host.host}</b>
+                </Link>
+                &nbsp;
+                <div style={{display: 'inline-block', verticalAlign: 'top'}}>
+
                 </div>
             </div>
-            <div><i>&lt;{host.dataCenter}&gt;</i></div>
+            <div>
+                <i>&lt;{host.dataCenter}&gt;</i>
+            </div>
             <hr style={{border: '1px solid #DDDDDD'}}/>
             <div>
                 {host.username} / {host.passwordAlias}
                 {host.sudo && <span> [{host.sudo}]</span>}
             </div>
             <div>
-                {host.type} {host.group}
+                <b>Type: </b>{host.type}
             </div>
             <div>
+                <b>Group: </b>{host.group}
+            </div>
+            <div>
+                <b>OS: </b>{host.osFamily} / {host.os}
+            </div>
+            <div>
+                <b>Tags: </b>
                 {host.tags.map(tag =>
-                    <span style={{color: 'blue'}}>{tag} </span>
+                    <span>{tag} </span>
                 )}
             </div>
         </div>

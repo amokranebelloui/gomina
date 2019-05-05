@@ -48,6 +48,8 @@ class RedisHosts : Hosts {
                 dataCenter = this["data_center"],
                 group = this["group"],
                 type = this["type"] ?: "UNKNOWN",
+                osFamily = this["os_family"],
+                os = this["os"],
                 tags = this["tags"].toList(),
                 username = this["username"],
                 passwordAlias = this["password_alias"],
@@ -70,15 +72,17 @@ class RedisHosts : Hosts {
         }
     }
 
-    override fun updateHost(hostId: String, dataCenter: String?, group: String?, type: String, tags: List<String>) {
+    override fun updateHost(hostId: String, dataCenter: String?, group: String?, type: String, osFamily: String?, os: String?, tags: List<String>) {
         pool.resource.use { jedis ->
-            jedis.hmset("host:$hostId", listOfNotNull(
+            jedis.persist("host:$hostId", mapOf(
                     "update_time" to LocalDateTime.now(Clock.systemUTC()).format(DateTimeFormatter.ISO_DATE_TIME),
                     dataCenter.let { "data_center" to it },
-                    group?.let { "group" to it },
-                    type.let { "type" to it },
-                    tags.let { "tags" to it.toStr() }
-            ).toMap())
+                    "group" to group,
+                    "type" to type,
+                    "os_family" to osFamily,
+                    "os" to os,
+                    "tags" to tags.toStr()
+            ))
         }
     }
 
