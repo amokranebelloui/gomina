@@ -1,8 +1,6 @@
 package org.neo.gomina.integration.scm.impl
 
-import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.maven.MavenUtils
 import org.neo.gomina.integration.scm.dummy.DummyScmClient
 import org.neo.gomina.integration.scm.git.GitClient
 import org.neo.gomina.integration.scm.none.NoneScmClient
@@ -10,7 +8,6 @@ import org.neo.gomina.integration.scm.svn.TmateSoftSvnClient
 import org.neo.gomina.model.component.Scm
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
-import org.neo.gomina.model.scm.ScmDetails
 import org.neo.gomina.model.security.Passwords
 import java.util.*
 import javax.inject.Inject
@@ -40,40 +37,6 @@ class ScmReposImpl {
         return clients.getOrPut(scm.id) {
             buildScmClient(scm, passwords) ?: noOpScmClient
         }
-    }
-
-    fun computeScmDetails(scm: Scm, logEntries: List<Commit>, scmClient: ScmClient): ScmDetails {
-        logger.info("Svn Details for $scm")
-        return try {
-            val lastReleasedRev = logEntries.firstOrNull { StringUtils.isNotBlank(it.newVersion) }?.revision
-            val pomFile = scmClient.getFile("pom.xml", "-1")
-            val scmDetails = ScmDetails(
-                    url = scm.url,
-                    artifactId = MavenUtils.extractArtifactId(pomFile),
-                    latest = MavenUtils.extractVersion(pomFile),
-                    latestRevision = logEntries.firstOrNull()?.revision,
-                    released = logEntries.firstOrNull { StringUtils.isNotBlank(it.release) }?.release,
-                    releasedRevision = lastReleasedRev,
-                    branches = scmClient.getBranches(),
-                    docFiles = scmClient.listFiles("/", "-1").filter { it.endsWith(".md") },
-                    changes = commitCountTo(logEntries, lastReleasedRev)
-            )
-            logger.info(scmDetails)
-            scmDetails
-        }
-        catch (e: Exception) {
-            logger.error("Cannot get SCM information for $scm", e)
-            ScmDetails()
-        }
-    }
-
-    private fun commitCountTo(logEntries: List<Commit>, refRev: String?): Int? {
-        logEntries.map { it.revision }.withIndex().forEach { (count, revision) ->
-            if (StringUtils.equals(revision, refRev)) {
-                return count
-            }
-        }
-        return null
     }
 
     // FIXME Number of commits to process ??

@@ -48,6 +48,8 @@ data class Component(
     }
 }
 
+data class VersionRelease(val version: Version, val releaseDate: LocalDateTime)
+
 data class NewComponent(
         var id: String,
         var label: String? = null,
@@ -77,9 +79,11 @@ data class Scm (
 
 
 interface ComponentRepo {
+
     fun getAll(): List<Component>
     fun get(componentId: String): Component?
     fun getCommitLog(componentId: String): List<Commit>
+
     fun add(component: NewComponent)
     fun editLabel(componentId: String, label: String)
     fun editType(componentId: String, type: String)
@@ -96,11 +100,17 @@ interface ComponentRepo {
     fun deleteLanguage(componentId: String, language: String)
     fun addTag(componentId: String, tag: String)
     fun deleteTag(componentId: String, tag: String)
+
     fun disable(componentId: String)
     fun enable(componentId: String)
+
     fun updateCodeMetrics(componentId: String, loc: Double?, coverage: Double?)
+
     fun updateBuildStatus(componentId: String, number: String?, status: String?, building: Boolean?, timestamp: Long?)
+
     fun updateVersions(componentId: String, latest: Version?, released: Version?, changes: Int?)
+    fun updateVersions(componentId: String, versions: List<VersionRelease>)
+
     fun updateBranches(componentId: String, branches: List<Branch>)
     fun updateDocFiles(componentId: String, docFiles: List<String>)
     fun updateCommitLog(componentId: String, commits: List<Commit>)

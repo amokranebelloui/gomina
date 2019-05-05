@@ -1,20 +1,15 @@
 package org.neo.gomina.persistence.model
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.component.Component
-import org.neo.gomina.model.component.ComponentRepo
-import org.neo.gomina.model.component.NewComponent
-import org.neo.gomina.model.component.Scm
+import org.neo.gomina.model.component.*
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.version.Version
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool
-import java.io.File
 import java.time.Clock
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -22,62 +17,6 @@ import java.time.LocalDateTime.now
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter.ISO_DATE
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
-
-class ComponentRepoFile : ComponentRepo, AbstractFileRepo() {
-    companion object {
-        private val logger = LogManager.getLogger(ComponentRepoFile.javaClass)
-    }
-
-    @Inject @Named("components.file")
-    private lateinit var file: File
-
-    fun read(file: File): List<Component> {
-        return when (file.extension) {
-            "yaml" -> yamlMapper.readValue(file)
-            "json" -> jsonMapper.readValue(file)
-            else -> throw IllegalArgumentException("Format not supported for $file, please use .yaml .json")
-        }
-    }
-
-    override fun getAll(): List<Component> = read(file)
-    override fun get(componentId: String): Component? = read(file).find { it.id == componentId }
-    override fun getCommitLog(componentId: String): List<Commit> { TODO("not implemented") }
-
-    override fun add(component: NewComponent) { TODO("not implemented") }
-
-    override fun editLabel(componentId: String, label: String) { TODO("not implemented") }
-    override fun editType(componentId: String, type: String) { TODO("not implemented") }
-    override fun editInceptionDate(componentId: String, inceptionDate: LocalDate?) { TODO("not implemented") }
-    override fun editOwner(componentId: String, owner: String?) { TODO("not implemented") }
-    override fun editCriticity(componentId: String, criticity: Int?) { TODO("not implemented") }
-    override fun editArtifactId(componentId: String, artifactId: String?) { TODO("not implemented") }
-    override fun editScm(componentId: String, type: String, url: String, path: String?, hasMetadata: Boolean) { TODO("not implemented") }
-    override fun editSonar(componentId: String, server: String?) { TODO("not implemented") }
-    override fun editBuild(componentId: String, server: String?, job: String?) { TODO("not implemented") }
-
-    override fun addSystem(componentId: String, system: String) { TODO("not implemented") }
-    override fun deleteSystem(componentId: String, system: String) { TODO("not implemented") }
-
-    override fun addLanguage(componentId: String, language: String) { TODO("not implemented")}
-    override fun deleteLanguage(componentId: String, language: String) { TODO("not implemented")}
-    override fun addTag(componentId: String, tag: String) { TODO("not implemented")}
-    override fun deleteTag(componentId: String, tag: String) { TODO("not implemented")}
-
-
-    override fun disable(componentId: String) { TODO("not implemented") }
-    override fun enable(componentId: String) { TODO("not implemented") }
-
-    override fun updateCodeMetrics(componentId: String, loc: Double?, coverage: Double?) { TODO("not implemented") }
-    override fun updateBuildStatus(componentId: String, number: String?, status: String?, building: Boolean?, timestamp: Long?) { TODO("not implemented") }
-
-    override fun updateVersions(componentId: String, latest: Version?, released: Version?, changes: Int?) { TODO("not implemented") }
-    override fun updateBranches(componentId: String, branches: List<Branch>) { TODO("not implemented") }
-    override fun updateDocFiles(componentId: String, branches: List<String>) { TODO("not implemented") }
-    override fun updateCommitLog(componentId: String, commite: List<Commit>) { TODO("not implemented") }
-    override fun updateLastCommit(componentId: String, lastCommit: LocalDateTime?) { TODO("not implemented") }
-    override fun updateCommitActivity(componentId: String, activity: Int) { TODO("not implemented") }
-    override fun updateCommitToRelease(componentId: String, commitToRelease: Int?) { TODO("not implemented") }
-}
 
 class RedisComponentRepo : ComponentRepo {
     companion object {
@@ -379,6 +318,18 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
+    override fun updateVersions(componentId: String, versions: List<VersionRelease>) {
+        pool.resource.use { jedis ->
+            jedis.pipelined().let { pipe ->
+                versions.forEach { v ->
+                    val time = v.releaseDate.atZone(ZoneOffset.UTC).toInstant().toEpochMilli().toDouble()
+                    pipe.zadd("versions:$componentId", time, v.version.version)
+                }
+                pipe.sync()
+            }
+        }
+    }
+
     override fun updateBranches(componentId: String, branches: List<Branch>) {
         pool.resource.use { jedis ->
             jedis.hset("component:$componentId", "branches", branches.map { it.name }.toStr())
@@ -395,9 +346,9 @@ class RedisComponentRepo : ComponentRepo {
         pool.resource.use { jedis ->
             jedis.pipelined().let { pipe ->
                 commits.forEach { commit ->
-                    val time = commit.date.atZone(ZoneOffset.UTC)?.toInstant()?.toEpochMilli()?.toDouble()
+                    val time = commit.date.atZone(ZoneOffset.UTC).toInstant().toEpochMilli().toDouble()
                     //val time = commit.date?.time?.toDouble()
-                    pipe.zadd("commits:$componentId", time ?: 0.0, commit.revision)
+                    pipe.zadd("commits:$componentId", time, commit.revision)
                     pipe.hmset("commit:$componentId:${commit.revision}", listOfNotNull(
                             "revision" to commit.revision,
                             commit.date.let { "date" to it.format(ISO_DATE_TIME) },
@@ -408,6 +359,7 @@ class RedisComponentRepo : ComponentRepo {
                             commit.issues.let { "issues" to it.toStr() }
                     ).toMap())
                 }
+                pipe.sync()
             }
         }
     }

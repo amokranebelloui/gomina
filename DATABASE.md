@@ -4,7 +4,10 @@ Contexts, entities, schemas
 ### Users (0)
 
 ### Components (1)
-
+component:<componentId> (hash)
+commit:<componentId>:<rev> (hset)
+commits:<componentId> (zset) commit{timestamp}
+versions:<componentId> (zset) version{releaseDate}
 
 ### Interaction (2)
 - api:<source>:<componentId>:exposes:<functionName> (hash) name type
