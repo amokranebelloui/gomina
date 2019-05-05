@@ -125,6 +125,7 @@ data class NewComponentDetail(
         var jenkinsJob: String? = null
 )
 
+data class VersionReleaseDetail(val artifactId: String?, val version: VersionDetail, val releaseDate: Date)
 
 class ComponentsApi {
 
@@ -168,11 +169,13 @@ class ComponentsApi {
         router.get("/:componentId/scm").handler(this::commitLog)
         router.get("/:componentId/associated").handler(this::associated)
         router.get("/:componentId/doc/:docId").handler(this::componentDoc)
+        router.get("/:componentId/versions").handler(this::versions)
 
         router.post("/add").handler(this::addComponent)
         router.put("/reload-scm").handler(this::reloadScm)
         router.put("/reload-build").handler(this::reloadBuild)
         router.put("/reload-sonar").handler(this::reloadSonar)
+
         router.put("/:componentId/label").handler(this::editLabel)
         router.put("/:componentId/type").handler(this::editType)
         router.put("/:componentId/artifactId").handler(this::editArtifactId)
@@ -188,6 +191,7 @@ class ComponentsApi {
         router.put("/:componentId/delete-language/:language").handler(this::deleteLanguage)
         router.put("/:componentId/add-tag/:tag").handler(this::addTag)
         router.put("/:componentId/delete-tag/:tag").handler(this::deleteTag)
+
         router.put("/:componentId/enable").handler(this::enable)
         router.put("/:componentId/disable").handler(this::disable)
         router.delete("/:componentId/delete").handler(this::delete)
@@ -330,6 +334,21 @@ class ComponentsApi {
             }
         } catch (e: Exception) {
             logger.error("Cannot get doc $componentId $docId")
+            ctx.fail(500)
+        }
+    }
+
+    private fun versions(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
+        try {
+            logger.info("Get versions $componentId")
+            val versions = componentRepo.getVersions(componentId).map {
+                VersionReleaseDetail(it.artifactId, it.version.toVersionDetail(), it.releaseDate.toDateUtc)
+            }
+            ctx.response().putHeader("content-type", "text/html").end(mapper.writeValueAsString(versions))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get versions $componentId")
             ctx.fail(500)
         }
     }

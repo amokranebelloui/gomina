@@ -11,11 +11,8 @@ import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.version.Version
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool
-import java.time.Clock
-import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.*
 import java.time.LocalDateTime.now
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter.ISO_DATE
 import java.time.format.DateTimeFormatter.ISO_DATE_TIME
 
@@ -304,6 +301,18 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
+    override fun getVersions(componentId: String): List<VersionRelease> {
+        pool.resource.use { jedis ->
+            return jedis.zrevrangeWithScores("versions:$componentId", 0, -1).mapNotNull {
+                val artifactIdWithVersion = ArtifactId.tryWithVersion(it.element)
+                val artifactId = artifactIdWithVersion?.toStrWithoutVersion()
+                val version = artifactIdWithVersion?.getVersion()
+                val releaseDate = Instant.ofEpochMilli(it.score.toLong()).atZone(ZoneOffset.UTC).toLocalDateTime()
+                if (artifactId != null && version != null) VersionRelease(artifactId, version, releaseDate) else null
+            }
+        }
+    }
+
     override fun updateVersions(componentId: String, latest: Version?, released: Version?, changes: Int?) {
         pool.resource.use { jedis ->
             jedis.hmset("component:$componentId", listOfNotNull(
@@ -324,7 +333,7 @@ class RedisComponentRepo : ComponentRepo {
                     val artifactId = ArtifactId.tryWithGroup(v.artifactId)
                     val versionedArtifactId = ArtifactId(artifactId?.groupId, artifactId?.artifactId ?: "", v.version.version)
                     val time = v.releaseDate.atZone(ZoneOffset.UTC).toInstant().toEpochMilli().toDouble()
-                    pipe.zadd("versions:$componentId", time,  versionedArtifactId.toStr())
+                    pipe.zadd("versions:$componentId", time, versionedArtifactId.toStr())
                 }
                 pipe.sync()
             }

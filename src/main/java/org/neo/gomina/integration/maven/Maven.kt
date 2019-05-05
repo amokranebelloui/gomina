@@ -36,6 +36,7 @@ data class ArtifactId(val groupId: String? = null, val artifactId: String, val v
         }
     }
     fun toStr() = "${groupId?.let { "$it:" } ?: ""}$artifactId${version?.let { ":$it" } ?: ""}"
+    fun toStrWithoutVersion() = "${groupId?.let { "$it:" } ?: ""}$artifactId"
     fun getVersion() = this.version?.let { Version(it) }
 }
 

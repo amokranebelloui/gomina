@@ -108,6 +108,7 @@ interface ComponentRepo {
 
     fun updateBuildStatus(componentId: String, number: String?, status: String?, building: Boolean?, timestamp: Long?)
 
+    fun getVersions(componentId: String): List<VersionRelease>
     fun updateVersions(componentId: String, latest: Version?, released: Version?, changes: Int?)
     fun updateVersions(componentId: String, versions: List<VersionRelease>)
 

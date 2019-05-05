@@ -19,6 +19,7 @@ import {ApiDefinitionEditor} from "../component/ApiDefinitionEditor";
 import {LoggedUserContext, Secure} from "../permission/Secure";
 import {Events} from "../environment/Events";
 import {Knowledge} from "../knowledge/Knowledge";
+import {DateTime} from "../common/DateTime";
 
 class ComponentApp extends React.Component {
     
@@ -29,6 +30,8 @@ class ComponentApp extends React.Component {
             componentId: this.props.match.params.id,
             component: {},
             associated: [],
+
+            versions: [],
 
             api: [],
             usage: [],
@@ -246,6 +249,12 @@ class ComponentApp extends React.Component {
                 thisComponent.setState({branch: null});
             });
     }
+    retrieveVersions(componentId) {
+        const thisComponent = this;
+        axios.get('/data/components/' + componentId + '/versions')
+            .then(response => thisComponent.setState({versions: response.data}))
+            .catch(() => thisComponent.setState({versions: null}))
+    }
     retrieveApi(componentId) {
         const thisComponent = this;
         axios.get('/data/dependencies/api/' + componentId)
@@ -400,6 +409,7 @@ class ComponentApp extends React.Component {
     reloadAll() {
         this.retrieveComponent(this.state.componentId);
         this.retrieveAssociated(this.state.componentId);
+        this.retrieveVersions(this.state.componentId);
         this.retrieveApi(this.state.componentId);
         this.retrieveUsage(this.state.componentId);
         this.retrieveDependencies(this.state.componentId);
@@ -432,6 +442,7 @@ class ComponentApp extends React.Component {
         if (this.props.match.params.id !== newComponent && newComponent) {
             this.retrieveComponent(newComponent);
             this.retrieveAssociated(newComponent);
+            this.retrieveVersions(newComponent);
             //this.retrieveInstances(newComponent);
             this.retrieveApi(newComponent);
             this.retrieveUsage(newComponent);
@@ -532,6 +543,8 @@ class ComponentApp extends React.Component {
                             }
                         </LoggedUserContext.Consumer>
                         <br/>
+                    </div>
+                    <Container>
                         <h3>Other Components</h3>
                         <div className="items">
                             {this.state.associated.map(componentRef =>
@@ -539,11 +552,21 @@ class ComponentApp extends React.Component {
                             )}
                         </div>
                         <br/>
+                        <h3>Versions</h3>
+                        <div className="items">
+                            {this.state.versions.map(versionRelease =>
+                                <span>
+                                    <span>{versionRelease.artifactId}</span>&nbsp;
+                                    <span>{versionRelease.version.version}</span>&nbsp;
+                                    <DateTime date={versionRelease.releaseDate} />
+                                    <br/>
+                                </span>
+                            )}
+                        </div>
+                        <br/>
                         <h3>Knowledge</h3>
                         <Knowledge knowledge={this.state.knowledge} hideComponent={true} />
                         <br/>
-                    </div>
-                    <Container>
                         <h3>API</h3>
                         {(this.state.api || []).map(api =>
                             <ApiDefinition api={api} onManualApiRemove={() => this.removeApi(component.id, api.name, api.type)} />
