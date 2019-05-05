@@ -10,7 +10,7 @@ import defaultIcon from "./os.png"
 function iconForType(type: ?string) {
     switch (type) {
         case "linux" : return linuxIcon;
-        case "mac" : return macIcon;
+        case "macos" : return macIcon;
         case "windows" : return windowsIcon;
         case "dummy" : return dummyIcon;
         default : return defaultIcon;
