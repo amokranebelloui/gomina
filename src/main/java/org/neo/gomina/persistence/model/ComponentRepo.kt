@@ -4,6 +4,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.integration.maven.ArtifactId
 import org.neo.gomina.model.component.*
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
@@ -320,8 +321,10 @@ class RedisComponentRepo : ComponentRepo {
         pool.resource.use { jedis ->
             jedis.pipelined().let { pipe ->
                 versions.forEach { v ->
+                    val artifactId = ArtifactId.tryWithGroup(v.artifactId)
+                    val versionedArtifactId = ArtifactId(artifactId?.groupId, artifactId?.artifactId ?: "", v.version.version)
                     val time = v.releaseDate.atZone(ZoneOffset.UTC).toInstant().toEpochMilli().toDouble()
-                    pipe.zadd("versions:$componentId", time, v.version.version)
+                    pipe.zadd("versions:$componentId", time,  versionedArtifactId.toStr())
                 }
                 pipe.sync()
             }
