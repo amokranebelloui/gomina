@@ -1,0 +1,8 @@
+[
+  {
+    "hostname": "host3",
+    "folders": [
+      {"folder": "/app/basket", "version": "5.1.2", "revision": "32766", "confCommitted": true, "confUpToDate": false, "confRevision": "12432"}
+    ]
+  }
+]

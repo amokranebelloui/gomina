@@ -12,6 +12,7 @@ import com.jcraft.jsch.Session
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.ArtifactId
+import org.neo.gomina.integration.ssh.DummyHostSession
 import org.neo.gomina.integration.ssh.SshAnalysis
 import org.neo.gomina.integration.ssh.sudo
 import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
@@ -82,8 +83,11 @@ class CustomSshAnalysis : SshAnalysis {
         .toMap()
     }
 
-    override fun instancesDummy(host: Host, instances: List<Instance>): Map<String, InstanceSshDetails> {
-        return emptyMap()
+    override fun instancesDummy(host: Host, session: DummyHostSession, instances: List<Instance>): Map<String, InstanceSshDetails> {
+        return session.folders
+                .associateBy { it.folder }
+                .map { (folder, d) -> folder to InstanceSshDetails(true, d.version, d.revision, d.confCommitted, d.confUpToDate, d.confRevision) }
+                .toMap()
     }
 
     override fun hostSSH(host: Host, session: Session): HostSshDetails {
@@ -97,7 +101,7 @@ class CustomSshAnalysis : SshAnalysis {
         }
     }
 
-    override fun hostDummy(host: Host): HostSshDetails {
+    override fun hostDummy(host: Host, session: DummyHostSession): HostSshDetails {
         return HostSshDetails(analyzed = true, unexpectedFolders = listOf("/dummy/folder/name"))
     }
 

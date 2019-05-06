@@ -14,9 +14,9 @@ import javax.inject.Inject
 
 interface SshAnalysis {
     fun instancesSSH(host: Host, session: Session, instances: List<Instance>): Map<String, InstanceSshDetails> = emptyMap()
-    fun instancesDummy(host: Host, instances: List<Instance>): Map<String, InstanceSshDetails> = emptyMap()
+    fun instancesDummy(host: Host, session: DummyHostSession, instances: List<Instance>): Map<String, InstanceSshDetails> = emptyMap()
     fun hostSSH(host: Host, session: Session): HostSshDetails = HostSshDetails(analyzed = true)
-    fun hostDummy(host: Host): HostSshDetails = HostSshDetails(analyzed = true)
+    fun hostDummy(host: Host, session: DummyHostSession): HostSshDetails = HostSshDetails(analyzed = true)
 }
 
 class SshService {
@@ -41,7 +41,7 @@ class SshService {
                         "linux", "unix", "macos" ->
                             sshConnector.process(host) { s -> sshAnalysis.instancesSSH(host, s, instances) }
                         "dummy" ->
-                            dummyHostConnector.process(host) { sshAnalysis.instancesDummy(host, instances) }
+                            dummyHostConnector.process(host) { s -> sshAnalysis.instancesDummy(host, s, instances) }
                         else ->
                             null
                     }
@@ -71,7 +71,7 @@ class SshService {
                 "linux", "unix", "macos" ->
                     sshConnector.process(host) { s -> sshAnalysis.hostSSH(host, s) }
                 "dummy" ->
-                    dummyHostConnector.process(host) { sshAnalysis.hostDummy(host) }
+                    dummyHostConnector.process(host) { s -> sshAnalysis.hostDummy(host, s) }
                 else ->
                     null
             }
