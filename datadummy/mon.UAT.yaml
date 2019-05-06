@@ -60,9 +60,11 @@
   TYPE: 'app'
   SERVICE: 'basket'
   HOST: '10.2.3.58'
+  IP: 'localhost'
+  PID: '1232'
   folder: '/home/svc/uat-basket'
   VERSION: '5.1.3'
-  REVISION: 35490
+  REVISION: 35930
   STATUS: 'LIVE'
 
   BUS: "2.0"
@@ -77,8 +79,8 @@
   HOST: '10.2.3.56'
   folder: '/home/svc/uat-basket'
   VERSION: '5.1.3'
-  REVISION: 35488
-  STATUS: 'DOWN'
+  REVISION: 35930
+  STATUS: 'LIVE'
 
   BUS: "2.0"
   CORE: "1.1"

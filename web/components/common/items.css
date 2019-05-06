@@ -6,3 +6,8 @@
     margin-right: 4px;
     padding: 1px;
 }
+
+.items > *:last-child {
+    margin-right: inherit;
+    padding: 1px;
+}

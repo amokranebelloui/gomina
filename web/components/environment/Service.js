@@ -43,13 +43,11 @@ class Service extends React.Component<Props> {
         //const status = computeStatus(service, instances);
         const d = computeServiceDetails(service, instances);
         return ([
-            <td key={'detail' + service.svc} className="service" valign="middle">
+            <td key={'detail' + service.svc} className="service" valign="middle" colSpan={5}>
                 <span>
                     <b style={{fontSize: '16px'}}>{service.svc}</b>&nbsp;
                     {service.component &&
-                        <Link to={'/component/' + service.component.id}>
-                            <span>&rarr;</span>
-                        </Link>
+                        <Link to={'/component/' + service.component.id}><span>&rarr;</span></Link>
                     }
                     &nbsp;
                     <i>{service.type}</i>
@@ -174,7 +172,7 @@ function computeServiceDetails(service: ServiceType, instances: Array<InstanceTy
         return compVersion && (compVersion.version + "|" + compVersion.revision)
     }));
     const confrevs = new Set(instances.map(instance => instance.confRevision));
-    const confpend = instances.filter(instance => instance.confCommited === false);
+    const confpend = instances.filter(instance => instance.confCommitted === false);
 
     return {
         unexpected: unexpected.length > 0,

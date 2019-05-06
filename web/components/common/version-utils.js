@@ -1,6 +1,23 @@
 // @flow
 
-function isSnapshot(version: string) {
+type VersionType = {
+    version: string,
+    revision?: ?string | ?number
+}
+
+function sameVersions(v1: ?VersionType, v2: ?VersionType): boolean {
+    let c = compareVersions(v1 && v1.version, v2 && v2.version);
+    if (c === 0 && v1 && isSnapshot(v1.version)) {
+        return (v1 && v1.revision) === (v2 && v2.revision)
+    }
+    return c === 0;
+}
+
+function isSnapshotVersion(version: ?VersionType) {
+    return version && isSnapshot(version.version)
+}
+
+function isSnapshot(version: ?string) {
     return version ? version.includes("-SNAPSHOT") : false;
 }
 
@@ -13,7 +30,7 @@ function compareVersions (a: ?string, b: ?string) {
     a = a || '';
     b = b || '';
     var res = compareVersions2(a.replace("-SNAPSHOT", ""), b.replace("-SNAPSHOT", ""));
-    return res != 0 ? res : (a.includes("-SNAPSHOT") ? 0 : 1) - (b.includes("-SNAPSHOT") ? 0 : 1);
+    return res !== 0 ? res : (a.includes("-SNAPSHOT") ? 0 : 1) - (b.includes("-SNAPSHOT") ? 0 : 1);
 }
 
 function compareVersionsReverse (a: ?string, b: ?string) {
@@ -37,4 +54,5 @@ function compareVersions2 (a: string, b: string) {
 }
 
 
-export {isSnapshot, compareVersions, compareVersionsReverse, compareVersionsRevisions}
+export {isSnapshot, isSnapshotVersion, compareVersions, compareVersionsReverse, compareVersionsRevisions, sameVersions}
+export type { VersionType }

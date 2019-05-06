@@ -1,8 +1,20 @@
 [
   {
+    "hostname": "h1",
+    "folders": [
+      {"folder": "/app/basket", "version": "5.1.3", "revision": "35930", "confCommitted": true, "confUpToDate": true, "confRevision": "12432"}
+    ]
+  },
+  {
+    "hostname": "h2",
+    "folders": [
+      {"folder": "/app/basket", "version": "5.1.2", "revision": "32766", "confCommitted": false, "confUpToDate": true, "confRevision": "12432"}
+    ]
+  },
+  {
     "hostname": "host3",
     "folders": [
-      {"folder": "/app/basket", "version": "5.1.2", "revision": "32766", "confCommitted": true, "confUpToDate": false, "confRevision": "12432"}
+      {"folder": "/app/basket", "version": "5.1.3-SNAPSHOT", "revision": "35469", "confCommitted": true, "confUpToDate": false, "confRevision": "12430"}
     ]
   }
 ]

@@ -13,12 +13,12 @@ var service = {
     componentId: "basket"
 };
 
-//status LIVE LOADING, leader, version, unexpected, confCommited, confRevision
-const co1 = {id: "co1", status: "LIVE", leader: true, version: "2.3.6", confCommited: true, confRevision: 12};
-const co2 = {id: "co2", status: "DOWN", leader: false, version: "2.3.6", confCommited: true, confRevision: 12};
-const co3 = {id: "co3", status: "DOWN", leader: false, version: "2.3.5", confCommited: true, confRevision: 11}; // Wrong version/config
-const co4 = {id: "co4", status: "LIVE", leader: true, version: "2.3.6", confCommited: true, confRevision: 11, unexpected: true}; // Unexpected Leader
-const co5 = {id: "co5", status: "LIVE", leader: false, version: "2.3.6", confCommited: true, confRevision: 12}; // Running backup
+//status LIVE LOADING, leader, version, unexpected, confCommitted, confRevision
+const co1 = {id: "co1", status: "LIVE", leader: true, version: "2.3.6", confCommitted: true, confRevision: 12};
+const co2 = {id: "co2", status: "DOWN", leader: false, version: "2.3.6", confCommitted: true, confRevision: 12};
+const co3 = {id: "co3", status: "DOWN", leader: false, version: "2.3.5", confCommitted: true, confRevision: 11}; // Wrong version/config
+const co4 = {id: "co4", status: "LIVE", leader: true, version: "2.3.6", confCommitted: true, confRevision: 11, unexpected: true}; // Unexpected Leader
+const co5 = {id: "co5", status: "LIVE", leader: false, version: "2.3.6", confCommitted: true, confRevision: 12}; // Running backup
 
 storiesOf('Service', module)
     .add('Service Status', () => {
@@ -74,7 +74,7 @@ storiesOf('Instances', module)
                 released: {version: '2.3.6', revision: 12512},
                 latest: {version: '2.3.7-SNAPSHOT', revision: 12521}
             },
-            deployFolder: "/home/cart/services/co1", confRevision: 12360, confCommited: false, unexpected: true,
+            deployFolder: "/home/cart/services/co1", confRevision: 12360, confCommitted: false, unexpected: true,
 
             quickfixPersistence: 'REDIS', busVersion: '5.0.0', coreVersion: "1.4.5", jmx: 7012
         };
@@ -83,7 +83,7 @@ storiesOf('Instances', module)
             status: 'LIVE', leader: true, participating: true, cluster: true,
             pid: '45356', host:"saturn1", deployHost: "saturn1",
             versions: {running: {version: '2.3.4', revision: 12304}, deployed: {version: '2.3.5', revision: 12456}},
-            deployFolder: "/home/cart/data/db1", confRevision: 12360, confCommited: false, unexpected: true,
+            deployFolder: "/home/cart/data/db1", confRevision: 12360, confCommitted: false, unexpected: true,
 
             redisHost: "saturn1", redisPort: 7021, redisOffset: 454,
             redisMaster: false, redisMasterLink: true, redisMasterLinkDownSince: 1,

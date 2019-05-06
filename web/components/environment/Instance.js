@@ -1,7 +1,7 @@
 // @flow
-import * as React from "react";
+import React, {Fragment} from "react";
 import {Badge} from "../common/Badge";
-import {ConfCommited} from "../misc/ConfCommited";
+import {ConfCommitted} from "../misc/ConfCommitted";
 import {Expected} from "../misc/Expected";
 import {BuildLink} from "../build/BuildLink";
 import {Host} from "../misc/Host";
@@ -12,6 +12,7 @@ import './Instance.css'
 import {Versions} from "./Versions";
 import {RedisOffset, RedisPersistence, RedisReadWrite} from "./RedisInstance";
 import Link from "react-router-dom/es/Link";
+import {ConfUpToDate} from "../misc/ConfUpToDate";
 
 type InstanceType = {
     id: string,
@@ -32,8 +33,8 @@ type InstanceType = {
     componentId: ?string,
     deployHost: ?string,
     deployFolder: ?string,
-    confCommited: ?boolean,
-    //confUpToDate: ?boolean,
+    confCommitted: ?boolean,
+    confUpToDate: ?boolean,
     confRevision: ?string,
 
     version: string, // FIXME Deprecated version field
@@ -51,29 +52,46 @@ class Instance extends React.Component<Props> {
     render() {
         const instance = this.props.instance;
         return (
+            <Fragment>
             <td className="instance">
                 <div className="section">
                     <li>
                         <b style={{fontSize: '12px'}}>{instance.name}</b>
                     </li>
-                    <li>
-                        <Badge>
-                            {instance.pid && <span>{instance.pid}@</span>}
-                            <Host host={instance.host} expected={instance.deployHost}/>
-                        </Badge>
-                    </li>
-                    <li><Versions versions={instance.versions} /></li>
-                    <li><Link to={"/component/" + (instance.componentId||'')}>&rarr;</Link></li>
-                    <li><Expected expected={!instance.unexpected} /></li>
+
                 </div>
+            </td>
+            <td className="instance">
+                <div className="section">
+                <li>
+                    <Badge>
+                        {instance.pid && <span>{instance.pid}@</span>}
+                        <Host host={instance.host} expected={instance.deployHost}/>
+                    </Badge>
+                </li>
+                <li><Expected expected={!instance.unexpected} /></li>
+            </div>
+            </td>
+            <td className="instance">
+                <div className="section">
+                <li>
+                    <Versions running={instance.versions.running} deployed={instance.versions.deployed}
+                              released={instance.versions.released} latest={instance.versions.latest} />
+                </li>
+                <li><Link to={"/component/" + (instance.componentId||'')}>&rarr;</Link></li>
+                <li><BuildLink url={instance.componentId}/></li> {/* // TODO Build URL */}
+            </div>
+            </td>
+            <td className="instance">
                 <div className="section">
                     {instance.deployFolder && <li><Badge><span style={{display: 'block', userSelect: 'all', fontSize: 10}}>{instance.deployFolder}</span></Badge></li>}
 
                     <li><Badge title={'Conf SVN revision'} backgroundColor='darkred' color='white'>{instance.confRevision}</Badge></li>
-                    <li><ConfCommited commited={instance.confCommited}/></li>
-                    <li><BuildLink url={instance.componentId}/></li> {/* // TODO Build URL */}
+                    <li><ConfCommitted committed={instance.confCommitted}/></li>
+                    <li><ConfUpToDate upToDate={instance.confUpToDate}/></li>
                 </div>
-
+            </td>
+            <td className="instance">
                 <div className="section">
                     {instance.type == 'app' && [
                         <li><InstanceProp property="jvm.jmx.port" properties={instance.properties}/></li>,
@@ -98,6 +116,7 @@ class Instance extends React.Component<Props> {
                     ]}
                 </div>
             </td>
+            </Fragment>
         )
     }
 }

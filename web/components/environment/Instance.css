@@ -1,6 +1,13 @@
 
 .instance {
+    min-width: 50px;
+    width: 50px;
+    white-space: nowrap
+}
 
+.instance:last-child {
+    min-width: 50px;
+    width: 100%;
 }
 
 .instance > .section {

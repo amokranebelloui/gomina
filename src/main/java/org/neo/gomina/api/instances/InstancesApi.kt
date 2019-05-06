@@ -73,7 +73,7 @@ class InstanceDetail(
         var componentId: String? = null,
         var deployHost: String? = null,
         var deployFolder: String? = null,
-        var confCommited: Boolean? = null,
+        var confCommitted: Boolean? = null,
         var confUpToDate: Boolean? = null,
         var confRevision: String? = null,
 
@@ -400,7 +400,7 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
         }
         instance.deployVersion = it.deployedVersion?.version
         instance.deployRevision = it.deployedVersion?.revision
-        instance.confCommited = it.confCommitted
+        instance.confCommitted = it.confCommitted
         instance.confUpToDate = it.confUpToDate
         instance.confRevision = it.confRevision
     }
