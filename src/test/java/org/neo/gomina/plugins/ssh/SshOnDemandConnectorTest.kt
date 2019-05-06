@@ -13,12 +13,13 @@ import org.neo.gomina.model.security.Passwords
 import org.neo.gomina.persistence.model.InventoryFile
 import java.io.File
 
+val host1 = Host("localhost", "paris", "Test", "test", username = "@test")
+
 class SshOnDemandConnectorTest {
 
     private val logger = LogManager.getLogger(SshOnDemandConnectorTest::class.java)
 
     class DummyHosts : Hosts {
-        val host1 = Host("localhost", "paris", "Test", "test", username = "@test")
         override fun getHosts(): List<Host> = listOf(host1)
         override fun getHost(host: String): Host? = host1
         override fun addHost(hostId: String) {}
@@ -38,7 +39,8 @@ class SshOnDemandConnectorTest {
         sshConnector.sshClient = sshClient
 
         inventory.getEnvironment("UAT") ?. let {
-            sshConnector.analyze(it) { session, sudo, instances ->
+            val instances = it.services.flatMap { svc -> svc.instances }
+            sshConnector.process(host1) { session ->
                 instances.map { instance ->
                     instance.folder!! to InstanceSshDetails(
                             analyzed = true,
@@ -59,7 +61,7 @@ class SshOnDemandConnectorTest {
         sshConnector.passwords = passwords
         sshConnector.sshClient = sshClient
 
-        sshConnector.analyze("localhost") { session, sudo ->
+        sshConnector.process(host1) { session ->
 
             val channel = session.openChannel("exec") as ChannelExec
             channel.setPty(true)

@@ -84,8 +84,7 @@ class HostsApi {
 
     private fun hosts(ctx: RoutingContext) {
         try {
-            val host = ctx.request().getParam("host")
-            logger.info("Host '$host' details")
+            logger.info("Hosts")
             val hostMap = hosts.getHosts().map { it.map() }.associateBy { it.host }
 
             val unmanaged = inventory.getEnvironments()

@@ -32,10 +32,7 @@ import org.neo.gomina.integration.scm.impl.ScmReposImpl
 import org.neo.gomina.integration.sonar.SonarConfig
 import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.integration.sonar.SonarService
-import org.neo.gomina.integration.ssh.SshAnalysis
-import org.neo.gomina.integration.ssh.SshClient
-import org.neo.gomina.integration.ssh.SshOnDemandConnector
-import org.neo.gomina.integration.ssh.SshService
+import org.neo.gomina.integration.ssh.*
 import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.model.component.ComponentKnowledge
@@ -132,6 +129,7 @@ class GominaModule : AbstractModule() {
         // SSH
         bind(SshClient::class.java).`in`(Scopes.SINGLETON)
         bind(SshOnDemandConnector::class.java).`in`(Scopes.SINGLETON)
+        bind(DummyHostConnector::class.java).`in`(Scopes.SINGLETON)
         bind(SshService::class.java).`in`(Scopes.SINGLETON)
 
         // Topology

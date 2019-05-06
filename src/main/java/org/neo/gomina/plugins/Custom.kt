@@ -18,6 +18,7 @@ import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
+import org.neo.gomina.model.host.Host
 import org.neo.gomina.model.host.HostSshDetails
 import org.neo.gomina.model.host.HostUtils
 import org.neo.gomina.model.host.InstanceSshDetails
@@ -30,7 +31,7 @@ import java.time.LocalDateTime
 
 class CustomSshAnalysis : SshAnalysis {
 
-    override fun instances(session: Session, sudo: String?, instances: List<Instance>): Map<String, InstanceSshDetails> {
+    override fun instancesSSH(host: Host, session: Session, instances: List<Instance>): Map<String, InstanceSshDetails> {
         val cmds = instances.flatMap {
             listOf(
                     """
@@ -54,7 +55,7 @@ class CustomSshAnalysis : SshAnalysis {
                     //"echo \"${it.id}.conf.status=$(svn status ${it.folder}/config)\""
             )
         }
-        val result = session.sudo(sudo, cmds)
+        val result = session.sudo(host.sudo, cmds)
                 .lines()
                 .filter { it.contains('=') }
                 .map { it.split('=', limit = 2) }
@@ -81,8 +82,12 @@ class CustomSshAnalysis : SshAnalysis {
         .toMap()
     }
 
-    override fun host(session: Session, sudo: String?): HostSshDetails {
-        val result = session.sudo(sudo, "find /Users/Test/Work -mindepth 1 -maxdepth 1 -type d")
+    override fun instancesDummy(host: Host, instances: List<Instance>): Map<String, InstanceSshDetails> {
+        return emptyMap()
+    }
+
+    override fun hostSSH(host: Host, session: Session): HostSshDetails {
+        val result = session.sudo(host.sudo, "find /Users/Test/Work -mindepth 1 -maxdepth 1 -type d")
         return when {
             result.contains("No such file or directory") -> HostSshDetails(analyzed = true)
             else -> {
@@ -90,6 +95,10 @@ class CustomSshAnalysis : SshAnalysis {
                 HostSshDetails(analyzed = true, unexpectedFolders = unexpected)
             }
         }
+    }
+
+    override fun hostDummy(host: Host): HostSshDetails {
+        return HostSshDetails(analyzed = true, unexpectedFolders = listOf("/dummy/folder/name"))
     }
 
     fun actions(session: Session, user: String?, applicationFolder: String, version: String) {
