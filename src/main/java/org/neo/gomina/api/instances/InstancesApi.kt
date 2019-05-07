@@ -40,7 +40,6 @@ data class ServiceDetail (
 )
 
 data class VersionDetail(val version: String = "", val revision: String?)
-data class VersionsDetail(val running: VersionDetail?, val deployed: VersionDetail?, val released: VersionDetail?, val latest: VersionDetail?)
 
 data class SidecarDetail(val status: String = "", val version: String = "", val revision: String = "")
 
@@ -77,18 +76,11 @@ class InstanceDetail(
         var confUpToDate: Boolean? = null,
         var confRevision: String? = null,
 
-        // FIXME Deprecated Versions
-        /**/
-        @Deprecated("") var version: String? = null,
-        @Deprecated("") var revision: String? = null,
-        @Deprecated("") var deployVersion: String? = null,
-        @Deprecated("") var deployRevision: String? = null,
-        @Deprecated("") var releasedVersion: String? = null,
-        @Deprecated("") var releasedRevision: String? = null,
-        @Deprecated("") var latestVersion: String? = null,
-        @Deprecated("") var latestRevision: String? = null,
-        /**/
-        var versions: VersionsDetail? = null,
+        var runningVersion: VersionDetail? = null,
+        var deployedVersion: VersionDetail? = null,
+        var releasedVersion: VersionDetail? = null,
+        var latestVersion: VersionDetail? = null,
+        var unreleasedChanges: Int? = null,
 
         var sidecar: SidecarDetail? = null,
 
@@ -384,12 +376,11 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
     instance.service = ext.service.svc
     instance.componentId = ext.service.componentId
 
-    instance.versions = VersionsDetail(
-            running = ext.indicators?.version?.let { VersionDetail(it.version, it.revision) },
-            deployed = ext.instance?.let { it.deployedVersion?.toVersionDetail() },
-            released = ext.component?.let { it.released?.toVersionDetail() },
-            latest = ext.component?.let { it.latest?.toVersionDetail() }
-    )
+    instance.runningVersion = ext.indicators?.version?.let { VersionDetail(it.version, it.revision) }
+    instance.deployedVersion = ext.instance?.let { it.deployedVersion?.toVersionDetail() }
+    instance.releasedVersion = ext.component?.let { it.released?.toVersionDetail() }
+    instance.latestVersion = ext.component?.let { it.latest?.toVersionDetail() }
+    instance.unreleasedChanges = ext.component?.let { it.changes }
 
     ext.instance?.let {
         instance.unexpected = false
@@ -398,8 +389,6 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
         if (ext.indicators == null) {
             instance.status = ServerStatus.OFFLINE
         }
-        instance.deployVersion = it.deployedVersion?.version
-        instance.deployRevision = it.deployedVersion?.revision
         instance.confCommitted = it.confCommitted
         instance.confUpToDate = it.confUpToDate
         instance.confRevision = it.confRevision
@@ -407,8 +396,6 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
     ext.indicators?.let {
         instance.pid = it.process.pid
         instance.host = it.process.host
-        instance.version = it.version?.version
-        instance.revision = it.version?.revision
         instance.status = it.process.status
         instance.startTime = it.process.startTime?.toDateUtc
         instance.startDuration = it.process.startDuration
@@ -420,12 +407,6 @@ private fun buildInstanceDetail(envId: String, ext: ExtInstance): InstanceDetail
         instance.leader = it.cluster.leader
 
         instance.unexpectedHost = StringUtils.isNotBlank(instance.deployHost) && instance.deployHost != instance.host
-    }
-    ext.component?.let {
-        instance.latestVersion = it.latest?.version
-        instance.latestRevision = it.latest?.revision
-        instance.releasedVersion = it.released?.version
-        instance.releasedRevision = it.released?.revision
     }
 
     return instance

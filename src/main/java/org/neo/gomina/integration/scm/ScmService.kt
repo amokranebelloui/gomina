@@ -67,9 +67,9 @@ class ScmService {
                 .filter { (_, release, _) -> Version.isStable(release) }
                 .map { (artifactId, release, date) -> VersionRelease(artifactId, Version(release), date) }
 
-        val latestVersion = latestVersion(log, pomFile)
         val releasedVersion = releasedVersion(log)
         val changes = commitCountTo(log, releasedVersion?.revision)
+        val latestVersion = latestVersion(log, pomFile)
 
         componentRepo.updateVersions(component.id, latestVersion, releasedVersion, changes)
         componentRepo.updateVersions(component.id, versions)

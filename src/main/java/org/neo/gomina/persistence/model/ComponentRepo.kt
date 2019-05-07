@@ -315,14 +315,15 @@ class RedisComponentRepo : ComponentRepo {
 
     override fun updateVersions(componentId: String, latest: Version?, released: Version?, changes: Int?) {
         pool.resource.use { jedis ->
-            jedis.hmset("component:$componentId", listOfNotNull(
+            val data = mapOf(
                     "scm_update_time" to now(Clock.systemUTC()).format(ISO_DATE_TIME),
-                    latest?.version?.let { "latest_version" to it },
-                    latest?.revision?.let { "latest_revision" to it },
-                    released?.version?.let { "released_version" to it },
-                    released?.revision?.let { "released_revision" to it },
-                    changes?. let { "changes" to it.toString() }
-            ).toMap())
+                    "latest_version" to latest?.version,
+                    "latest_revision" to latest?.revision,
+                    "released_version" to released?.version,
+                    "released_revision" to released?.revision,
+                    "changes" to changes?.toString()
+            )
+            jedis.persist("component:$componentId", data)
         }
     }
 

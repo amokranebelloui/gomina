@@ -1,7 +1,6 @@
 // @flow
 import * as React from "react";
 import {Link} from "react-router-dom";
-import type {VersionType} from "../common/Version";
 import {VersionLabel} from "../common/Version";
 import {Badge} from "../common/Badge";
 
@@ -11,6 +10,7 @@ import {Revision} from "./Revision";
 import type {UserRefType} from "../misc/UserType";
 import type {IssueRefType} from "../work/WorkType";
 import {Issue} from "../misc/Issue";
+import type {VersionType} from "../common/version-utils";
 
 type CommitType = {
     author?: ?UserRefType,

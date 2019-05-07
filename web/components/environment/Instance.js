@@ -13,6 +13,7 @@ import {Versions} from "./Versions";
 import {RedisOffset, RedisPersistence, RedisReadWrite} from "./RedisInstance";
 import Link from "react-router-dom/es/Link";
 import {ConfUpToDate} from "../misc/ConfUpToDate";
+import type {VersionType} from "../common/version-utils";
 
 type InstanceType = {
     id: string,
@@ -39,8 +40,12 @@ type InstanceType = {
 
     version: string, // FIXME Deprecated version field
 
-    versions: Object, // FIXME Type
-    //sidecar: Object,
+    runningVersion?: ?VersionType,
+    deployedVersion?: ?VersionType,
+    releasedVersion?: ?VersionType,
+    latestVersion?: ?VersionType,
+    unreleasedChanges?: ?number,
+
     properties: {[string]: any}
 }
 
@@ -75,8 +80,9 @@ class Instance extends React.Component<Props> {
             <td className="instance">
                 <div className="section">
                 <li>
-                    <Versions running={instance.versions.running} deployed={instance.versions.deployed}
-                              released={instance.versions.released} latest={instance.versions.latest} />
+                    <Versions running={instance.runningVersion} deployed={instance.deployedVersion}
+                              released={instance.releasedVersion} latest={instance.latestVersion}
+                              unreleasedChanges={instance.unreleasedChanges} />
                 </li>
                 <li><Link to={"/component/" + (instance.componentId||'')}>&rarr;</Link></li>
                 <li><BuildLink url={instance.componentId}/></li> {/* // TODO Build URL */}

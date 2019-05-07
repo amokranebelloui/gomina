@@ -168,8 +168,8 @@ function computeStatusOffline(service: ServiceType, instances: Array<InstanceTyp
 function computeServiceDetails(service: ServiceType, instances: Array<InstanceType>) {
     const unexpected = instances.filter(instance => instance.unexpected === true);
     const versions = new Set(instances.map(instance => {
-        const compVersion = instance.versions.running || instance.versions.deployed;
-        return compVersion && (compVersion.version + "|" + compVersion.revision)
+        const compVersion = instance.runningVersion || instance.deployedVersion;
+        return compVersion && (compVersion.version + "|" + (compVersion.revision || ''))
     }));
     const confrevs = new Set(instances.map(instance => instance.confRevision));
     const confpend = instances.filter(instance => instance.confCommitted === false);
