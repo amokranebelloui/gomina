@@ -94,10 +94,14 @@ class InstanceFilter extends React.Component<InstanceFilterProps> {
                 </div>
                 <br/>
 
-                <div style={{display: 'inline-block'}}>
+                <div style={{display: 'inline-block'}} className='items'>
+                    <Selection key="no_host" id="NO HOST" label="NO HOST" selected={this.props.id}
+                               onSelectionChanged={e => this.changeSelected("NO HOST", i => i && (!i.host && !i.deployHost) || false)}/>
+                    <Selection key="with_host" id="WITH HOST" label="WITH HOST" selected={this.props.id}
+                               onSelectionChanged={e => this.changeSelected("WITH HOST", i => i && (!!i.host || !!i.deployHost) || false)}/>
                     {this.props.hosts.map(host =>
                         <Selection key={host} id={host} label={host} selected={this.props.id}
-                                   onSelectionChanged={e => this.changeSelected(host, i => i && i.host === host || false)}/>
+                                   onSelectionChanged={e => this.changeSelected(host, i => i && (i.host === host || i.deployHost === host) || false)}/>
                     )}
                 </div>
 
