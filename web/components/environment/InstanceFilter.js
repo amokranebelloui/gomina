@@ -1,6 +1,6 @@
 // @flow
 import * as React from "react";
-import {isSnapshot} from "../common/version-utils";
+import {isSnapshot, isSnapshotVersion, isStableVersion, sameVersions} from "../common/version-utils";
 import {Well} from "../common/Well";
 import type {InstanceType} from "./Instance"
 import type {ServiceType} from "./Service";
@@ -20,39 +20,77 @@ class InstanceFilter extends React.Component<InstanceFilterProps> {
         this.props.onFilterChanged && this.props.onFilterChanged(id, highlightFunction);
     }
 
+    hasUnreleasedChanges(i: InstanceType) {
+        return i.latestVersion && (i.unreleasedChanges && i.unreleasedChanges > 0)
+    }
+
     render() {
+        const statusFilters = [
+            {label: "LOADING", f: i =>
+                    i.status === 'LOADING'
+            },
+            {label: "DOWN", f: i =>
+                    i.status === 'DOWN' || i && i.status === 'OFFLINE'
+            },
+            {label: "RUNNING", f: i =>
+                    i.status === 'LIVE'
+            }
+        ];
+
+        const metadataFilters = [
+            {label: "SNAPSHOTS", f: i =>
+                    isSnapshotVersion(i.deployedVersion) || isSnapshotVersion(i.runningVersion)
+            },
+            {label: "RELEASED", f: i =>
+                    isStableVersion(i.deployedVersion) || isStableVersion(i.runningVersion)
+            },
+            {label: "UNKNOWN_VERSION", f: i =>
+                    !i.deployedVersion && !i.runningVersion
+            },
+            {label: "RELEASE_AVAILABLE", f: i =>
+                    i.releasedVersion && i.deployedVersion && !sameVersions(i.deployedVersion, i.releasedVersion) ||
+                    i.releasedVersion && i.runningVersion && !sameVersions(i.runningVersion, i.releasedVersion)
+            },
+            {label: "UNRELEASED_CHANGES", f: i =>
+                    this.hasUnreleasedChanges(i) && !sameVersions(i.deployedVersion, i.latestVersion) ||
+                    this.hasUnreleasedChanges(i) && !sameVersions(i.runningVersion, i.latestVersion)
+            },
+            {label: "UNEXPECTED", f: i =>
+                    i.unexpected
+            },
+            {label: "WRONG HOST", f: i =>
+                    i.unexpectedHost
+            }
+        ];
+        const serviceFilters = [
+            {label: "WITHOUT COMPONENT", f: svc =>
+                    !svc || !svc.component
+            }
+        ];
         return (
             <Well block>
                 <h4>Filters</h4>
-                <Selection id='all' label='ALL' selected={this.props.id}
-                           onSelectionChanged={e => this.changeSelected('all', null)}/>
+                <Selection id='ALL' label='ALL' selected={this.props.id}
+                           onSelectionChanged={e => this.changeSelected('ALL', null)}/>
                 <br/>
 
-                <div style={{display: 'inline-block'}}>
-                    <Selection id='loading' label='LOADING' selected={this.props.id}
-                               onSelectionChanged={e => this.changeSelected('loading', i => i && i.status === 'LOADING' || false)}/>
-                    <Selection id='down' label='DOWN' selected={this.props.id}
-                               onSelectionChanged={e => this.changeSelected('down', i => i && i.status === 'DOWN' || i && i.status === 'OFFLINE' || false)}/>
-                    <Selection id='running' label='RUNNING' selected={this.props.id}
-                               onSelectionChanged={e => this.changeSelected('running', i => i && i.status === 'LIVE' || false)}/>
+                <div style={{display: 'inline-block'}} className='items'>
+                    {statusFilters.map(filter =>
+                        <Selection id={filter.label} label={filter.label} selected={this.props.id}
+                                   onSelectionChanged={e => this.changeSelected(filter.label, i => i && filter.f(i) || false)}/>
+                    )}
                 </div>
                 <br/>
 
-                <div style={{display: 'inline-block'}}>
-                    <Selection id='snapshots' label='SNAPSHOTS' selected={this.props.id}
-                               onSelectionChanged={e => this.changeSelected('snapshots', i => i && isSnapshot(i.version) || false)}/>
-                    <Selection id='released' label='RELEASED' selected={this.props.id}
-                               onSelectionChanged={e => this.changeSelected('released', i => i && !isSnapshot(i.version) || false)}/>
-                    <Selection id='unexpected' label='UNEXPECTED' selected={this.props.id}
-                               onSelectionChanged={e => this.changeSelected('unexpected', i => i && i.unexpected || false)}/>
-                    <Selection id='unexpectedHost' label='WRONG HOST' selected={this.props.id}
-                               onSelectionChanged={e => this.changeSelected('unexpectedHost', i => i && i.unexpectedHost || false)}/>
-                    <Selection id='withoutComponent' label='WITHOUT COMPONENT' selected={this.props.id}
-                               onSelectionChanged={e => this.changeSelected('withoutComponent', (instance, service) => {
-                                   console.info('FILTER ', instance, service, service && service.component);
-                                   return !service || !service.component
-                               })}/>
-
+                <div style={{display: 'inline-block'}} className='items'>
+                    {metadataFilters.map(filter =>
+                        <Selection id={filter.label} label={filter.label} selected={this.props.id}
+                                   onSelectionChanged={e => this.changeSelected(filter.label, i => i && filter.f(i) || false)}/>
+                    )}
+                    {serviceFilters.map(filter =>
+                        <Selection id={filter.label} label={filter.label} selected={this.props.id}
+                                   onSelectionChanged={e => this.changeSelected(filter.label, (i, s) => filter.f(s))}/>
+                    )}
                 </div>
                 <br/>
 

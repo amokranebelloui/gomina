@@ -13,6 +13,10 @@ function sameVersions(v1: ?VersionType, v2: ?VersionType): boolean {
     return c === 0;
 }
 
+function isStableVersion(version: ?VersionType) {
+    return version && !isSnapshot(version.version)
+}
+
 function isSnapshotVersion(version: ?VersionType) {
     return version && isSnapshot(version.version)
 }
@@ -54,5 +58,5 @@ function compareVersions2 (a: string, b: string) {
 }
 
 
-export {isSnapshot, isSnapshotVersion, compareVersions, compareVersionsReverse, compareVersionsRevisions, sameVersions}
+export {isSnapshot, isStableVersion, isSnapshotVersion, compareVersions, compareVersionsReverse, compareVersionsRevisions, sameVersions}
 export type { VersionType }

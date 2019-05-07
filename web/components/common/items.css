@@ -5,6 +5,8 @@
 .items > * {
     margin-right: 2px;
     padding: 1px;
+    margin-top: 1px;
+    margin-bottom: 1px;
 }
 
 .items > *:last-child {

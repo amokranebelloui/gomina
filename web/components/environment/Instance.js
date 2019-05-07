@@ -38,8 +38,6 @@ type InstanceType = {
     confUpToDate: ?boolean,
     confRevision: ?string,
 
-    version: string, // FIXME Deprecated version field
-
     runningVersion?: ?VersionType,
     deployedVersion?: ?VersionType,
     releasedVersion?: ?VersionType,
