@@ -1,5 +1,6 @@
 // @flow
 import * as React from "react"
+import type {VersionType} from "../common/version-utils";
 
 type BranchDetailType = {
     name: string,
@@ -34,8 +35,8 @@ type ComponentType = {
     branches: Array<BranchDetailType>,
     docFiles?: ?Array<string>,
     changes?: ?number,
-    latest?: ?string,
-    released?: ?string,
+    latest?: ?VersionType,
+    released?: ?VersionType,
     loc?: ?number,
     coverage?: ?number,
     lastCommit?: ?number, // date

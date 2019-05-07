@@ -66,8 +66,8 @@ data class ComponentDetail(
         var branches: List<BranchDetail> = emptyList(),
         var docFiles: List<String> = emptyList(),
         var changes: Int? = null,
-        var latest: String? = null,
-        var released: String? = null,
+        var latest: VersionDetail? = null,
+        var released: VersionDetail? = null,
         var loc: Double? = null,
         var coverage: Double? = null,
         var commitToRelease: Int? = null,
@@ -751,8 +751,8 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     }
     this.docFiles = component.docFiles
     this.changes = component.changes
-    this.latest = component.latest?.version
-    this.released = component.released?.version
+    this.latest = component.latest?.toVersionDetail()
+    this.released = component.released?.toVersionDetail()
     this.lastCommit = component.lastCommit?.toDateUtc
     this.commitActivity = component.commitActivity
     this.commitToRelease = component.commitToRelease

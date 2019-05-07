@@ -32,12 +32,10 @@ class Versions extends React.Component<Props> {
         return (
             <span className="items" style={{whiteSpace: 'nowrap'}}>
                 {running &&
-                    <Version context="Running" version={running.version} revision={running.revision}
-                             simplify={false} displaySnapshotRevision={true} {...versionStyle} />
+                    <Version context="Running" version={running} displaySnapshotRevision={true} {...versionStyle} />
                 }
                 {deployed && !sameDeployedRunning &&
-                    <Version context="Deployed" version={deployed.version} revision={deployed.revision}
-                             simplify={false} displaySnapshotRevision={true} {...deployedStyle} />
+                    <Version context="Deployed" version={deployed} displaySnapshotRevision={true} {...deployedStyle} />
                 }
                 {released && dispReleased && <Badge title={'Release ' + released.version} {...releasedStyle}>R</Badge> }
                 {latest && dispLatest && <Badge title={'Latest ' + latest.version} {...latestStyle}>L</Badge>}

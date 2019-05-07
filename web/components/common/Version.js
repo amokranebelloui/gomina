@@ -5,8 +5,7 @@ import {isSnapshot} from "./version-utils";
 import {Badge} from "./Badge";
 
 type Props = {
-    version?: ?string,
-    revision?: ?string | ?number,
+    version?: ?VersionType,
     context?: ?string,
     simplify?: ?boolean,
     displaySnapshotRevision?: ?boolean
@@ -30,32 +29,37 @@ class VersionLabel extends React.PureComponent<{version: VersionType}> {
     }
 }
 
+type State = {
+    displayRevision: boolean
+}
+
 // FIXME Refactor to use VersionLabel, rename?
-class Version extends React.PureComponent<Props> {
+class Version extends React.Component<Props, State> {
     constructor(props: Props) {
-        super(props)
+        super(props);
+        this.state = {
+            displayRevision: false
+        }
+    }
+    switchDisplay() {
+        this.props.displaySnapshotRevision && this.setState({displayRevision: !this.state.displayRevision})
     }
     render() {
         if (this.props.version) {
-            const simplifiedVersion = this.props.simplify && this.props.version.replace("-SNAPSHOT", "-S") || this.props.version;
-            /*
-             const defaultStylingFunction = (version => isSnapshot(version) ? {color: 'white', backgroundColor: '#c30014'} : null);
-             const stylingFunction = props.styling || defaultStylingFunction;
-             const style = stylingFunction(props.version) || {color: 'black', backgroundColor: 'lightgray'}
-             */
+            const {version, revision} = this.props.version;
+            const snapshot = isSnapshot(version);
+            const versionNumber = version.replace("-SNAPSHOT", "");
+            const snapshotQualifier = snapshot ? (this.props.simplify ? "-S" : "-SNAPSHOT") : "";
+
             const style = {color: 'black', backgroundColor: 'lightgray'};
 
-            //const color = isSnapshot(props.version) ? "white" : "black";
-            //const backgroundColor = isSnapshot(props.version) ? "#c30014" : "lightgray";
-            const revision = this.props.revision ? this.props.revision : "*";
-            const displayRevision = this.props.displaySnapshotRevision && isSnapshot(this.props.version);
-            
             return (
                 <Badge color={style.color} backgroundColor={style.backgroundColor} {...this.props}>
-                    <span title={(this.props.context||'') + " rev:" + revision} style={{userSelect: 'all', whiteSpace: 'nowrap'}}>
-                        {simplifiedVersion}
-                        {displayRevision && <span style={{fontSize: "7px"}}>&nbsp;(<b>{revision}</b>)</span>}
+                    <span title={(this.props.context||'') + " rev:" + (revision||'?')} style={{userSelect: 'all', whiteSpace: 'nowrap'}}>
+                        <span>{versionNumber}</span>
+                        {snapshot && <span onDoubleClick={() => this.switchDisplay()}>{snapshotQualifier}</span>}
                     </span>
+                    {snapshot && this.state.displayRevision && <span style={{fontSize: "7px"}}>{revision}</span>}
                 </Badge>
             )
         }

@@ -92,7 +92,7 @@ class Instance extends React.Component<Props> {
                 <div className="section">
                     {instance.deployFolder && <li><Badge><span style={{display: 'block', userSelect: 'all', fontSize: 10}}>{instance.deployFolder}</span></Badge></li>}
 
-                    <li><Badge title={'Conf SVN revision'} backgroundColor='darkred' color='white'>{instance.confRevision}</Badge></li>
+                    <li><Badge title={'Conf SVN revision'} backgroundColor='darkred' color='white'>{instance.confRevision || '?'}</Badge></li>
                     <li><ConfCommitted committed={instance.confCommitted}/></li>
                     <li><ConfUpToDate upToDate={instance.confUpToDate}/></li>
                 </div>

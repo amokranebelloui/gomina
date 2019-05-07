@@ -29,8 +29,6 @@ function ComponentHeader(props: {}) {
     return (
         <div className='component-row'>
             <div className='summary'><b>Component</b></div>
-            <div className='released'><b>Released</b></div>
-            <div className='latest'><b>Latest</b></div>
             <div className='loc'><b>LOC</b></div>
             <div className='coverage'><b>Coverage</b></div>
             <div className='scm'><b>SCM</b></div>
@@ -53,20 +51,24 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
         return (
             <div className='component-row'>
                 <div className='summary'>
-                    <span title={component.id}>
+                    <span className="items">
                         <Link to={"/component/" + component.id}>
                             <span style={{fontSize: 14}}>{component.label}</span>
                             {component.disabled &&
                                 <span>&nbsp;<s>DISABLED</s></span>
                             }
                         </Link>
-                        &nbsp;
-                        <UnreleasedChangeCount changes={component.changes} />
-                        &nbsp;
+                        <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
                         <Secure permission="component.knowledge">
                             <StarRating value={this.props.knowledge} />
                         </Secure>
-                        <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
+                        <Version version={component.released} />
+                        <Version version={component.latest} displaySnapshotRevision={true} />
+                        <UnreleasedChangeCount changes={component.changes} />
+                    </span>
+                    <br/>
+                    <span className="items">
+                        <span style={{fontSize: 8}}>{component.artifactId}</span>
                         {systems.map(system =>
                             <span style={{fontSize: 8, marginLeft: 2}}>{system}</span>
                         )}
@@ -76,14 +78,10 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
                         )}
                         |
                         {tags.map(tag =>
-                                <span style={{fontSize: 8, marginLeft: 2}}>{tag}</span>
+                            <span style={{fontSize: 8, marginLeft: 2}}>{tag}</span>
                         )}
                     </span>
-                    <br/>
-                    <span style={{fontSize: 8}}>{component.artifactId}</span>
                 </div>
-                <div className='released'><Version version={component.released} /></div>
-                <div className='latest'><Version version={component.latest} /></div>
                 <div className='loc'><LinesOfCode loc={component.loc} /></div>
                 <div className='coverage'><Coverage coverage={component.coverage} /></div>
                 <div className='scm'><ScmLink type={component.scmType} url={component.scmLocation} changes={component.changes} /></div>
