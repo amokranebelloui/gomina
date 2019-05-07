@@ -68,7 +68,12 @@ class Instance extends React.Component<Props> {
                 <div className="section">
                 <li>
                     <Badge>
-                        {instance.pid && <span>{instance.pid}@</span>}
+                        {instance.pid &&
+                        <Fragment>
+                            <span style={{userSelect: 'all'}}>{instance.pid}</span>
+                            <span style={{marginLeft: "1px", marginRight: "1px"}}>@</span>
+                        </Fragment>
+                        }
                         <Host host={instance.host} expected={instance.deployHost}/>
                     </Badge>
                 </li>
