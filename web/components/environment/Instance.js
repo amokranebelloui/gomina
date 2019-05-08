@@ -5,15 +5,22 @@ import {ConfCommitted} from "../misc/ConfCommitted";
 import {Expected} from "../misc/Expected";
 import {BuildLink} from "../build/BuildLink";
 import {Host} from "../misc/Host";
-import {Leader} from "../misc/Leader";
-import {RedisLink} from "../misc/RedisLink";
-import {Port} from "../misc/Port";
 import './Instance.css'
 import {Versions} from "./Versions";
-import {RedisOffset, RedisPersistence, RedisReadWrite} from "./RedisInstance";
 import Link from "react-router-dom/es/Link";
 import {ConfUpToDate} from "../misc/ConfUpToDate";
 import type {VersionType} from "../common/version-utils";
+import {instanceProperties, PropertyDisplayComponent} from "../../custom/CustomInstance";
+
+
+const instancePropertiesMap = {};
+instanceProperties.forEach(p =>
+    instancePropertiesMap[p.property] = p.component
+);
+
+function propertiesFor(type: ?string): Array<PropertyDisplayComponent> {
+    return type && instanceProperties.filter(p => p.type.includes(type)) || properties
+}
 
 type InstanceType = {
     id: string,
@@ -102,27 +109,9 @@ class Instance extends React.Component<Props> {
             </td>
             <td className="instance">
                 <div className="section">
-                    {instance.type == 'app' && [
-                        <li><InstanceProp property="jvm.jmx.port" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="xxx.bux.version" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="xxx.core.version" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="quickfix.persistence" properties={instance.properties}/></li>
-                    ]}
-                    {instance.type == 'redis' && [
-                        <li><InstanceProp property="redis.port" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="redis.role" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="redis.slave.count" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="redis.rw" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="redis.persistence.mode" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="redis.offset" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="redis.client.count" properties={instance.properties}/></li>,
-
-                        <li><InstanceProp property="redis.master" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="redis.master.link" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="redis.master.host" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="redis.master.port" properties={instance.properties}/></li>,
-                        <li><InstanceProp property="redis.master.offset.diff" properties={instance.properties}/></li>,
-                    ]}
+                    {propertiesFor(instance.type).map(property =>
+                        <li><InstanceProp property={property.property} comp={property.component} properties={instance.properties}/></li>
+                    )}
                 </div>
             </td>
             </Fragment>
@@ -130,17 +119,6 @@ class Instance extends React.Component<Props> {
     }
 }
 
-const map = {
-    "redis.port": value => <Port port={value} />,
-    "redis.master.host": value => <Host host={value} />,
-    "redis.master.port": value => <Port port={value} />,
-    "redis.master.link": value => value && <RedisLink status={value.status} since={value.downSince} />,
-    "redis.offset": value => <RedisOffset offset={value} />,
-    "redis.master.offset.diff": value => <RedisOffset offset={value} />,
-    "redis.master": value => <Leader cluster={true} participating={true} leader={value} />,
-    "redis.persistence.mode": value => <RedisPersistence redisMode={value} />,
-    "redis.rw": value => <RedisReadWrite redisRW={value} />
-};
 
 function InstanceProperties(props: {properties: Array<[string, any]>}) {
     const properties = props.properties;
@@ -158,7 +136,7 @@ function InstanceProperties(props: {properties: Array<[string, any]>}) {
 function InstanceProperty(props: {property: string, value: any}) {
     const property = props.property;
     const value = props.value;
-    const component = map[property] || (value => <span>{value && value.toString()}</span>);
+    const component = instancePropertiesMap[property] || (value => <span>{value && value.toString()}</span>);
     const p = value ? <b>{property}</b> : <span>{property}</span>;
     const c = component(value);
     return (
@@ -168,10 +146,11 @@ function InstanceProperty(props: {property: string, value: any}) {
     )
 }
 
-function InstanceProp(props: {property: string, properties: {[string]: any}}) {
+function InstanceProp(props: {property: string, comp: any => React.Component<any>, properties: {[string]: any}}) {
     const property = props.property;
     const value = (props.properties ||{})[property];
-    const component = map[property] || (value => <span>{value && value.toString()}</span>);
+    //const component = instancePropertiesMap[property] || (value => <span>{value && value.toString()}</span>);
+    const component = props.comp || (value => <span>{value && value.toString()}</span>);
     const c = component(value);
     return (
         value ?
