@@ -10,16 +10,34 @@ import {Versions} from "./Versions";
 import Link from "react-router-dom/es/Link";
 import {ConfUpToDate} from "../misc/ConfUpToDate";
 import type {VersionType} from "../common/version-utils";
-import {instanceProperties, PropertyDisplayComponent} from "../../custom/CustomInstance";
+import {instanceProperties} from "../../custom/CustomInstance";
 
+type PropertyDisplayComponent = {
+    property: string|RegExp,
+    type: Array<string>,
+    component: (string, any) => React.Component<>
+}
 
-const instancePropertiesMap = {};
-instanceProperties.forEach(p =>
-    instancePropertiesMap[p.property] = p.component
-);
+function componentFor(property: string): ?((string, any) => any) {
+    const p = instanceProperties.filter(p =>
+        typeof p.property === String ? p.property : property.match(p.property)
+    );
+    return p != null && p.length > 0 ? p[0].component : null;
+}
 
-function propertiesFor(type: ?string): Array<PropertyDisplayComponent> {
-    return type && instanceProperties.filter(p => p.type.includes(type)) || properties
+function expand(p: PropertyDisplayComponent, instanceProperties: {[string]: any}) {
+    return Object.keys(instanceProperties)
+        .filter(ip => ip.match(p.property))
+        .map(ip => {
+            return {property: ip, type: p.type, component: p.component};
+        })
+}
+
+function propertiesFor(properties: {[string]: any}, type: ?string): Array<{property: string, component: any => React.Component<>}> {
+    const expandedProperties = instanceProperties
+        .map(p => typeof p.property === String ? [p] : expand(p, properties))
+        .reduce((x,y) => x.concat(y), []);
+    return type && expandedProperties.filter(p => p.type.includes(type)) || expandedProperties
 }
 
 type InstanceType = {
@@ -109,8 +127,8 @@ class Instance extends React.Component<Props> {
             </td>
             <td className="instance">
                 <div className="section">
-                    {propertiesFor(instance.type).map(property =>
-                        <li><InstanceProp property={property.property} comp={property.component} properties={instance.properties}/></li>
+                    {propertiesFor(instance.properties, instance.type).map(property =>
+                        <InstanceProp property={property.property} comp={property.component} properties={instance.properties}/>
                     )}
                 </div>
             </td>
@@ -136,9 +154,9 @@ function InstanceProperties(props: {properties: Array<[string, any]>}) {
 function InstanceProperty(props: {property: string, value: any}) {
     const property = props.property;
     const value = props.value;
-    const component = instancePropertiesMap[property] || (value => <span>{value && value.toString()}</span>);
+    const component = componentFor(property) || ((prop, value) => <span>{value && value.toString()}</span>);
     const p = value ? <b>{property}</b> : <span>{property}</span>;
-    const c = component(value);
+    const c = component(property, value);
     return (
         <span style={{verticalAlign: 'middle'}}>
             <span>{p}</span> -> {c}
@@ -146,20 +164,16 @@ function InstanceProperty(props: {property: string, value: any}) {
     )
 }
 
-function InstanceProp(props: {property: string, comp: any => React.Component<any>, properties: {[string]: any}}) {
+function InstanceProp(props: {property: string, comp: (string, any) => any, properties: {[string]: any}}) {
     const property = props.property;
     const value = (props.properties ||{})[property];
     //const component = instancePropertiesMap[property] || (value => <span>{value && value.toString()}</span>);
     const component = props.comp || (value => <span>{value && value.toString()}</span>);
-    const c = component(value);
+    const c = component(property, value);
     return (
-        value ?
-        <span style={{verticalAlign: 'middle'}}>
-            <span title={property}>{c}</span>
-        </span>
-        : null
+        value ? <li style={{verticalAlign: 'middle'}} title={property}>{c}</li> : null
     )
 }
 
 export { Instance, InstanceProperty, InstanceProperties }
-export type { InstanceType }
+export type {InstanceType, PropertyDisplayComponent}

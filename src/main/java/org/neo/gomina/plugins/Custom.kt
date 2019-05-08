@@ -186,7 +186,7 @@ class CustomMonitoringMapper : MonitoringMapper {
                     "xxx.bux.version" to indicators["BUS"],
                     "xxx.core.version" to indicators["CORE"],
                     "quickfix.persistence" to indicators["QUICKFIX_MODE"]
-            )
+            ) + indicators.filterKeys { it.startsWith("FIX_") }.map { (k, v) -> "fix.session.$k" to v }.toMap()
 
             // FIXME Avoid this technology specific switches 
             val redis = if (type == "redis") {

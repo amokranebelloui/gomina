@@ -4,6 +4,7 @@ import {Service} from "../web/components/environment/Service";
 import {ServiceStatus} from "../web/components/environment/ServiceStatus";
 import {Instance} from "../web/components/environment/Instance";
 import {Status} from "../web/components/environment/Status";
+import {FixStatus} from "../web/components/misc/FixStatus";
 
 var service = {
     svc: "checkout",
@@ -54,6 +55,12 @@ storiesOf('Service', module)
 
 
 storiesOf('Instances', module)
+    .add('FIX Status', () => {
+        return ([
+            <FixStatus session="FIX.4.4:CLIENT:BROKER" connected={true} />,
+            <FixStatus session="FIX.4.4:CLIENT:BROKER" connected={false} />
+        ])
+    })
     .add('Status', () => {
         return ([
             <Status status="LIVE" leader={true} cluster={true} participating={true} />,
