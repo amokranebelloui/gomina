@@ -12,7 +12,7 @@ const instanceProperties: Array<PropertyDisplayComponent> = [
     {property: "xxx.core.version", type: ["app"], component: (p, v) => <span>CORE:{v || '?'}</span>},
     {property: "jvm.jmx.port", type: ["app"], component: (p, v) => <Port port={v} />},
     {property: "quickfix.persistence", type: ["app"]},
-    {property: /fix\.session\..*/, type: ["app"], component: (p, v) => <FixStatus session={p.substring(12)} connected={v} />},
+    {property: /fix\.session\..*/, type: [], component: (p, v) => <FixStatus session={p.substring(12)} connected={v} />},
 
     {property: "redis.port", type: ["redis"], component: (p, v) => <Port port={v} />},
     {property: "redis.rw", type: ["redis"], component: (p, v) => <RedisReadWrite redisRW={v} />},
