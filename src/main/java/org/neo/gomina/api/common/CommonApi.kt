@@ -12,7 +12,7 @@ data class UserRef(
         val shortName: String
 )
 
-fun User.toRef() = UserRef(id = id, shortName = shortName ?: id)
+fun User.toRef() = UserRef(id = id, shortName = shortName)
 
 val LocalDateTime.toDateUtc: Date
     get() = this.let { Date.from(this.atZone(ZoneOffset.UTC).toInstant()) }

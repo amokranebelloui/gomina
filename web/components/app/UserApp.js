@@ -7,14 +7,33 @@ import axios from "axios/index";
 import Link from "react-router-dom/es/Link";
 import {Knowledge} from "../knowledge/Knowledge";
 import type {KnowledgeType} from "../knowledge/Knowledge";
+import {Badge} from "../common/Badge";
+
+type UserType = {
+    id: string,
+    login: string,
+    shortName: string,
+    firstName: ?string,
+    lastName: ?string,
+    accounts: Array<string>,
+    disabled: boolean
+}
+
+type UserDataType = {
+    login: string,
+    shortName: string,
+    firstName: ?string,
+    lastName: ?string,
+    accounts: Array<string>,
+}
 
 type Props = {
     match: Object // FIXME Type react match object
 };
 type State = {
-    user: ?Object,
+    user: ?UserType,
     knowledge: Array<KnowledgeType>,
-    users: Array<Object>
+    users: Array<UserType>
 };
 
 class UserApp extends React.Component<Props, State> {
@@ -102,9 +121,26 @@ class UserApp extends React.Component<Props, State> {
                     <Container>
                         {this.props.match.params.id && this.state.user &&
                             <div>
-                                User: {this.props.match.params.id}<br/>
+                                <b>Id: </b>{this.props.match.params.id}
                                 <br/>
+                                <b>Login: </b>
+                                {this.state.user.login}
+                                {this.state.user.disabled &&
+                                    <span style={{textDecoration: 'line-through', marginLeft: '5px'}}>DISABLED</span>
+                                }
+                                <br/>
+                                <b>Short Name: </b>
+                                {this.state.user.shortName}
+                                <br/>
+                                <b>Full Name: </b>
                                 {this.state.user.firstName} {this.state.user.lastName}
+                                <br/>
+                                <b>Accounts: </b>
+                                <span className="items">
+                                {this.state.user.accounts.map(account =>
+                                    <Badge backgroundColor={'#EEEEEE'}>{account}</Badge>
+                                )}
+                                </span>
                                 <br/>
                                 <b>Knowledge</b>
                                 <Knowledge knowledge={this.state.knowledge} hideUser={true} />
@@ -125,7 +161,7 @@ class UserApp extends React.Component<Props, State> {
                     <div>
                         <div className="items">
                         {(this.state.users||[]).map(user =>
-                            [<Link key={user.id} to={"/user/" + user.id}>{user.firstName} {user.lastName}</Link>,<br key={"b" + user.id}/>]
+                            [<Link key={user.id} to={"/user/" + user.id}>{user.shortName}: {user.firstName} {user.lastName}</Link>,<br key={"b" + user.id}/>]
                         )}
                         </div>
                     </div>

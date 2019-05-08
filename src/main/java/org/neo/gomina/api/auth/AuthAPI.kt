@@ -59,7 +59,10 @@ class AuthApi {
                         "work.add",
                         "work.manage",
                         "work.status",
-                        "work.archive"
+                        "work.archive",
+
+                        "user.add",
+                        "user.manage"
                 )
 
                 var result = mapOf(

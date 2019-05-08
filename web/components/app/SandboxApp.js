@@ -17,20 +17,18 @@ class SandboxApp extends React.Component {
             <AppLayout title={'Sandbox'}>
                 <h3>Sandbox</h3>
 
-                <DatePicker
-                    dateFormat="dd/MM/yyyy"
-                    selected={this.state.startDate}
-                    onChange={date => this.changeDate(date)}
-                />
-                <br/>
-                <b>Date: </b>{JSON.stringify(this.state.startDate)}<br/>
-                <b>Date: </b>{JSON.stringify(this.state.startDate && this.state.startDate.getFullYear())}<br/>
-                <b>Month: </b>{JSON.stringify(this.state.startDate && this.state.startDate.getMonth())}<br/>
-                <b>Day: </b>{JSON.stringify(this.state.startDate && this.state.startDate.getDay())}<br/>
+                <button onClick={e => axios.post('/data/user/add?userId=lc3354',
+                    {login: 'linus_c', shortName: 'Linus', firstName: 'Linus', lastName: 'Crusoé', accounts: []})}
+                >
+                    Create Linus
+                </button><br/>
 
-                <button onClick={e => axios.put('/data/knowledge/gomina/user/ab6743?knowledge=5')}>Knowledge Amokrane / Gomina</button>
-                <button onClick={e => axios.put('/data/knowledge/basket/user/jd4436?knowledge=3')}>Knowledge John Doe / Basket</button>
-                <button onClick={e => axios.put('/data/knowledge/gomina/user/jd4436?knowledge=2')}>Knowledge John Doe / Gomina</button>
+                <button onClick={e => axios.put('/data/user/jd4436/update', {shortName: 'John D', firstName: 'John', lastName: 'Doe', accounts: ['johnd']})}>Update -> John D</button><br/>
+                <button onClick={e => axios.put('/data/user/jd4436/update', {shortName: 'Johnny', firstName: 'Jonathan', lastName: 'Dow', accounts: ['johnd']})}>Update -> Johnny</button><br/>
+                <button onClick={e => axios.put('/data/user/jd4436/reset-password')}>Reset PWD JD</button><br/>
+                <button onClick={e => axios.put('/data/user/jd4436/change-password?password=mypass')}>Change PWD JD -> mypass</button><br/>
+                <button onClick={e => axios.put('/data/user/jd4436/disable')}>Disable JD</button><br/>
+                <button onClick={e => axios.put('/data/user/jd4436/enable')}>Enable JD</button><br/>
 
             </AppLayout>
         );
