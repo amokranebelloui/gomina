@@ -168,7 +168,7 @@ function InstanceProp(props: {property: string, comp: (string, any) => any, prop
     const property = props.property;
     const value = (props.properties ||{})[property];
     //const component = instancePropertiesMap[property] || (value => <span>{value && value.toString()}</span>);
-    const component = props.comp || (value => <span>{value && value.toString()}</span>);
+    const component = props.comp || ((prop, value) => <span>{value && value.toString()}</span>);
     const c = component(property, value);
     return (
         value ? <li style={{verticalAlign: 'middle'}} title={property}>{c}</li> : null

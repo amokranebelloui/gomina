@@ -96,10 +96,31 @@
   VERSION: '0.9.0-SNAPSHOT'
   REVISION: 34433
   STATUS: 'LIVE'
+  QUICKFIX_MODE: FILE
   FIX_CLIENT_US: true
   FIX_US_BROKER: false
   FIX_US_DC: true
   FIX_US_DC2: true
+
+  BUS: "2.0"
+  CORE: "1.1"
+  QUCKIFIX_MODE: 'REDIS'
+
+- id: 12
+  env: 'UAT'
+  name: 'fixin2'
+  TYPE: 'app'
+  SERVICE: 'fixin'
+  HOST: '10.2.3.58'
+  folder: '/home/svc/uat-fixin'
+  VERSION: '0.9.0-SNAPSHOT'
+  REVISION: 34433
+  STATUS: 'DOWN'
+  QUICKFIX_MODE: FILE
+  FIX_CLIENT_US: false
+  FIX_US_BROKER: false
+  FIX_US_DC: false
+  FIX_US_DC2: false
 
   BUS: "2.0"
   CORE: "1.1"
