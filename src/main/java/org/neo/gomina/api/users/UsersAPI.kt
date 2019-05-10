@@ -101,17 +101,17 @@ class UsersApi {
     }
 
     private fun add(ctx: RoutingContext) {
-        val userId = ctx.request().getParam("userId")
+        //val userId = ctx.request().getParam("userId")
         try {
             val data = mapper.readValue<UserData>(ctx.body.toString())
-            logger.info("Add User '$userId' $data")
-            users.addUser(userId, data.login, data.shortName, data.firstName, data.lastName, data.accounts)
+            logger.info("Add User $data")
+            val userId = users.addUser(data.login, data.shortName, data.firstName, data.lastName, data.accounts)
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(userId))
         }
         catch (e: Exception) {
-            logger.error("Cannot add user $userId", e)
+            logger.error("Cannot add user", e)
             ctx.fail(500)
         }
     }

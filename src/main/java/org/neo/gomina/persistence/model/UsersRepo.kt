@@ -61,10 +61,11 @@ class RedisUserRepo : Users {
             disabled = map["disabled"]?.toBoolean() == true
     )
 
-    override fun addUser(userId: String, login: String, shortName: String, firstName: String?, lastName: String?, accounts: List<String>) {
+    override fun addUser(login: String, shortName: String, firstName: String?, lastName: String?, accounts: List<String>): String {
         val passwordHash = md.digest(resetPassword.toByteArray(StandardCharsets.UTF_8)).toString(StandardCharsets.UTF_8)
         pool.resource.use { jedis ->
-            return jedis.persist("user:$userId", mapOf(
+            val id = "u" + jedis.incr("_user:seq").toString()
+            jedis.persist("user:$id", mapOf(
                     "login" to login,
                     "short_name" to shortName,
                     "first_name" to firstName,
@@ -72,6 +73,7 @@ class RedisUserRepo : Users {
                     "accounts" to accounts.toStr(),
                     "password_hash" to passwordHash
             ))
+            return id
         }
     }
 

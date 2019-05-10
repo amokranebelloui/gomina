@@ -4,7 +4,7 @@ import React from "react";
 class Well extends React.Component {
     render() {
         let margin = this.props.margin;
-        let padding = this.props.padding || '2px';
+        let padding = this.props.padding || '4px';
         return (
             <div style={{
                 padding: padding, margin: margin, display: this.props.block ? null : 'inline-block',

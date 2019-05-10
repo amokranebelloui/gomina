@@ -8,7 +8,11 @@ import Link from "react-router-dom/es/Link";
 import type {KnowledgeType} from "../knowledge/Knowledge";
 import {Knowledge} from "../knowledge/Knowledge";
 import {Badge} from "../common/Badge";
-import type {UserType} from "../user/UserType";
+import type {UserDataType, UserType} from "../user/UserType";
+import {Well} from "../common/Well";
+import {InlineAdd} from "../common/InlineAdd";
+import Route from "react-router-dom/es/Route";
+import {UserEditor} from "../user/UserEditor";
 
 
 type Props = {
@@ -20,7 +24,9 @@ type State = {
     users: Array<UserType>,
     passwordEdition: boolean,
     newPassword: ?string,
-    passwordEditionError: ?string
+    passwordEditionError: ?string,
+
+    newUserData: ?UserDataType
 };
 
 class UserApp extends React.Component<Props, State> {
@@ -32,7 +38,9 @@ class UserApp extends React.Component<Props, State> {
             users: [],
             passwordEdition: false,
             newPassword: null,
-            passwordEditionError: null
+            passwordEditionError: null,
+
+            newUserData: {}
         }
     }
     retrieveUsers() {
@@ -67,6 +75,18 @@ class UserApp extends React.Component<Props, State> {
             .then(response => thisComponent.setState({knowledge: response.data}))
             .catch(() => thisComponent.setState({knowledge: []}))
     }
+    clearNewUserState() {
+        this.setState({
+            newUserData: null
+        })
+    }
+    addUser() {
+        return axios.post('/data/user/add', this.state.newUserData);
+    };
+    onUserAdded(userId: string, history: any) {
+        this.retrieveUsers();
+        history.push("/user/" + userId)
+    };
     enable() {
         this.state.user && axios.put('/data/user/' + this.state.user.id + '/enable')
             .then(() => this.state.user && this.retrieveUser(this.state.user.id))
@@ -189,11 +209,33 @@ class UserApp extends React.Component<Props, State> {
                         }
                     </Container>
                     <div>
-                        <div className="items">
-                        {(this.state.users||[]).map(user =>
-                            [<Link key={user.id} to={"/user/" + user.id}>{user.shortName}: {user.firstName} {user.lastName}</Link>,<br key={"b" + user.id}/>]
-                        )}
-                        </div>
+                        <Well block>
+                            <Secure permission="user.add">
+                                <Route render={({ history }) => (
+                                    <InlineAdd type="User"
+                                               action={() => this.addUser()}
+                                               onEnterAdd={() => this.clearNewUserState()}
+                                               onItemAdded={(work) => this.onUserAdded(work, history)}
+                                               editionForm={() =>
+                                                   <UserEditor user={{}}
+                                                               onChange={(id, u) => this.setState({newUserData: u})} />
+                                               }
+                                               successDisplay={(data: any) =>
+                                                   <div>
+                                                       <b>{data ? ("Added " + JSON.stringify(data)) : 'no data returned'}</b>
+                                                   </div>
+                                               }
+                                    />
+                                )} />
+                            </Secure>
+                        </Well>
+                        <Well block>
+                            <div className="items">
+                            {(this.state.users||[]).map(user =>
+                                [<Link key={user.id} to={"/user/" + user.id}>{user.shortName}: {user.firstName} {user.lastName}</Link>,<br key={"b" + user.id}/>]
+                            )}
+                            </div>
+                        </Well>
                     </div>
                 </PrimarySecondaryLayout>
             </AppLayout>

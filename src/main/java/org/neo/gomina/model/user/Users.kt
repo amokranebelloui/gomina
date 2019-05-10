@@ -14,7 +14,7 @@ interface Users {
     fun getUsers(): List<User>
     fun getUser(userId: String): User?
     fun findForAccount(account: String): User?
-    fun addUser(userId: String, login: String, shortName: String, firstName: String?, lastName: String?, accounts: List<String>)
+    fun addUser(login: String, shortName: String, firstName: String?, lastName: String?, accounts: List<String>): String
     fun updateUser(userId: String, shortName: String, firstName: String?, lastName: String?)
     fun changeAccounts(userId: String, accounts: List<String>)
     fun authenticate(username: String, password: String): User?
