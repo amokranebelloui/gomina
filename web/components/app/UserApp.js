@@ -26,7 +26,9 @@ type State = {
     newPassword: ?string,
     passwordEditionError: ?string,
 
-    newUserData: ?UserDataType
+    newUserData: ?UserDataType,
+    userEdition: boolean,
+    userEdited: ?UserDataType
 };
 
 class UserApp extends React.Component<Props, State> {
@@ -40,7 +42,9 @@ class UserApp extends React.Component<Props, State> {
             newPassword: null,
             passwordEditionError: null,
 
-            newUserData: {}
+            newUserData: {},
+            userEdition: false,
+            userEdited: null
         }
     }
     retrieveUsers() {
@@ -87,6 +91,30 @@ class UserApp extends React.Component<Props, State> {
         this.retrieveUsers();
         history.push("/user/" + userId)
     };
+    editUser() {
+        this.setState({"userEdition": true});
+    }
+    changeUser(work: UserDataType) {
+        console.info("User Changed", work);
+        this.setState({"userEdited": work});
+    }
+    cancelUserEdition() {
+        this.setState({"userEdition": false});
+    }
+    updateUser() {
+        if (this.state.user) {
+            const thisComponent = this;
+            const userId = this.state.user.id;
+            userId && axios.put('/data/user/' + userId + '/update', this.state.userEdited)
+                .then(() => {
+                    thisComponent.retrieveUsers();
+                    thisComponent.retrieveUser(userId);
+                })
+                .catch((error) => console.log("User update error", error.response));
+            this.setState({"userEdition": false}); // FIXME Display Results/Errors
+        }
+    }
+
     enable() {
         this.state.user && axios.put('/data/user/' + this.state.user.id + '/enable')
             .then(() => this.state.user && this.retrieveUser(this.state.user.id))
@@ -127,35 +155,26 @@ class UserApp extends React.Component<Props, State> {
     }
 
     render() {
-        /*
 
-                                {this.state.user &&
-                                <div>
-                                    <br/>
-                                    {this.state.user.firstName} {this.state.user.lastName}
-                                </div>
-                                }
-                                <div>
-                                    <Link to="/user/john.doe">John Doe</Link>
-                                    <br/>
-                                    <Link to="/user/amokrane.belloui">Amokrane Belloui</Link>
-                                </div>
-
-         */
         return (
             <AppLayout title="Components">
                 <PrimarySecondaryLayout>
                     <Container>
-                        {this.props.match.params.id && this.state.user &&
+                        {!!this.state.user &&
+                        <div>
+                            {!this.state.userEdition &&
                             <div>
                                 <div style={{float: 'right'}} className='items'>
                                     <Secure permission="user.manage">
+                                        <Secure key="Edit" permission="user.manage">
+                                            <button onClick={() => this.editUser()}>Edit</button>
+                                        </Secure>
                                         {this.state.user.disabled && <button onClick={e => this.enable()}>Enable</button>}
                                         {!this.state.user.disabled && <button onClick={e => this.disable()}>Disable</button>}
                                         <button onClick={e => this.resetPassword()}>Reset Password</button>
                                     </Secure>
                                 </div>
-                                <b>Id: </b>{this.props.match.params.id}
+                                <b>Id: </b>{this.state.user.id}
                                 <br/>
                                 <b>Login: </b>
                                 {this.state.user.login}
@@ -179,33 +198,40 @@ class UserApp extends React.Component<Props, State> {
                                 <b>Knowledge</b>
                                 <Knowledge knowledge={this.state.knowledge} hideUser={true} />
                                 <br/>
-                                <hr/>
-                                <br/>
-                                <Secure condition={(user) => user === this.props.match.params.id}>
-                                    {!this.state.passwordEdition &&
-                                        <button onClick={e => this.setState({passwordEdition: true, newPassword: ''})}>Change Password</button>
-                                    }
-                                    {this.state.passwordEdition &&
-                                        <Fragment>
-                                            <b>Password: </b>
-                                            <input name="password" type="password" value={this.state.newPassword}
-                                                   onChange={e => this.setState({newPassword: e.target.value})}/>
-                                            <button onClick={e => this.changePassword()}>Change</button>
-                                            <button onClick={e => this.setState({passwordEdition: false})}>Cancel</button>
-                                            {this.state.passwordEditionError && <i style={{color: 'red'}}>{this.state.passwordEditionError}</i>}
-                                        </Fragment>
-                                    }
-                                    <br/>
-
-                                </Secure>
                             </div>
-                        }
-                        {!this.props.match.params.id &&
-                            <p>
-                                See the contributors for your project,
-                                their knowledge of the different areas
-                                and the components they're currently working on
-                            </p>
+                            }
+
+                            {this.state.userEdition && 
+                            <div>
+                                <UserEditor user={this.state.user}
+                                            onChange={(id, u) => this.changeUser(u)} />
+                                <hr/>
+                                <button onClick={() => this.updateUser()}>Update</button>
+                                <button onClick={() => this.cancelUserEdition()}>Cancel</button>
+                            </div>
+                            }
+
+                            <hr/>
+
+                            <br/>
+                            <Secure condition={(user) => !!this.state.user && user === this.state.user.id}>
+                                {!this.state.passwordEdition &&
+                                    <button onClick={e => this.setState({passwordEdition: true, newPassword: ''})}>Change Password</button>
+                                }
+                                {this.state.passwordEdition &&
+                                    <Fragment>
+                                        <b>Password: </b>
+                                        <input name="password" type="password" value={this.state.newPassword}
+                                               onChange={e => this.setState({newPassword: e.target.value})}/>
+                                        <button onClick={e => this.changePassword()}>Change</button>
+                                        <button onClick={e => this.setState({passwordEdition: false})}>Cancel</button>
+                                        {this.state.passwordEditionError && <i style={{color: 'red'}}>{this.state.passwordEditionError}</i>}
+                                    </Fragment>
+                                }
+                                <br/>
+
+                            </Secure>
+                        </div>
                         }
                     </Container>
                     <div>
