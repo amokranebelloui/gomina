@@ -33,6 +33,7 @@ import {WorkEditor} from "../web/components/work/WorkEditor";
 import {ApiDefinitionEditor} from "../web/components/component/ApiDefinitionEditor";
 import {Autocomplete} from "../web/components/common/AutoComplete";
 import {StarRating} from "../web/components/common/StarRating";
+import {UserEditor} from "../web/components/user/UserEditor";
 
 storiesOf('Components', module)
     .add('Clock', () => <Clock />)
@@ -233,7 +234,17 @@ description
         )
     });
 
-
+storiesOf('Users', module)
+    .add('User Editor', () => {
+        return (
+            <div>
+                <UserEditor user={{}}
+                            onChange={action('userchange')} />
+                <UserEditor user={{id: 'user1234', login: 'john.doe', shortName: 'Johnny', accounts: ["john_d", "jd@gmail.com"]}}
+                            onChange={action('userchange')} />
+            </div>
+        )
+    });
 
 
 storiesOf('Environment', module)

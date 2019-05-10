@@ -1,31 +1,15 @@
 // @flow
-import * as React from "react"
+import React, {Fragment} from "react"
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout"
-import {LoggedUserContext, Secure} from "../permission/Secure"
+import {Secure} from "../permission/Secure"
 import {Container} from "../common/Container";
 import axios from "axios/index";
 import Link from "react-router-dom/es/Link";
-import {Knowledge} from "../knowledge/Knowledge";
 import type {KnowledgeType} from "../knowledge/Knowledge";
+import {Knowledge} from "../knowledge/Knowledge";
 import {Badge} from "../common/Badge";
+import type {UserType} from "../user/UserType";
 
-type UserType = {
-    id: string,
-    login: string,
-    shortName: string,
-    firstName: ?string,
-    lastName: ?string,
-    accounts: Array<string>,
-    disabled: boolean
-}
-
-type UserDataType = {
-    login: string,
-    shortName: string,
-    firstName: ?string,
-    lastName: ?string,
-    accounts: Array<string>,
-}
 
 type Props = {
     match: Object // FIXME Type react match object
@@ -33,7 +17,10 @@ type Props = {
 type State = {
     user: ?UserType,
     knowledge: Array<KnowledgeType>,
-    users: Array<UserType>
+    users: Array<UserType>,
+    passwordEdition: boolean,
+    newPassword: ?string,
+    passwordEditionError: ?string
 };
 
 class UserApp extends React.Component<Props, State> {
@@ -42,7 +29,10 @@ class UserApp extends React.Component<Props, State> {
         this.state = {
             user: null,
             knowledge: [],
-            users: []
+            users: [],
+            passwordEdition: false,
+            newPassword: null,
+            passwordEditionError: null
         }
     }
     retrieveUsers() {
@@ -77,7 +67,24 @@ class UserApp extends React.Component<Props, State> {
             .then(response => thisComponent.setState({knowledge: response.data}))
             .catch(() => thisComponent.setState({knowledge: []}))
     }
-
+    enable() {
+        this.state.user && axios.put('/data/user/' + this.state.user.id + '/enable')
+            .then(() => this.state.user && this.retrieveUser(this.state.user.id))
+    }
+    disable() {
+        this.state.user && axios.put('/data/user/' + this.state.user.id + '/disable')
+            .then(() => this.state.user && this.retrieveUser(this.state.user.id))
+    }
+    resetPassword() {
+        this.state.user && axios.put('/data/user/' + this.state.user.id + '/reset-password');
+    }
+    changePassword() {
+        const thisComponent = this;
+        this.state.user && this.state.newPassword &&
+            axios.put('/data/user/' + this.state.user.id + '/change-password?password=' + this.state.newPassword)
+                .then(() => thisComponent.setState({passwordEdition: false}))
+                .catch((error) => thisComponent.setState({passwordEditionError: "Cannot change password at the moment"}));
+    }
     componentDidMount() {
         console.info("userApp !did mount ");
         this.retrieveUsers();
@@ -121,6 +128,13 @@ class UserApp extends React.Component<Props, State> {
                     <Container>
                         {this.props.match.params.id && this.state.user &&
                             <div>
+                                <div style={{float: 'right'}} className='items'>
+                                    <Secure permission="user.manage">
+                                        {this.state.user.disabled && <button onClick={e => this.enable()}>Enable</button>}
+                                        {!this.state.user.disabled && <button onClick={e => this.disable()}>Disable</button>}
+                                        <button onClick={e => this.resetPassword()}>Reset Password</button>
+                                    </Secure>
+                                </div>
                                 <b>Id: </b>{this.props.match.params.id}
                                 <br/>
                                 <b>Login: </b>
@@ -145,8 +159,24 @@ class UserApp extends React.Component<Props, State> {
                                 <b>Knowledge</b>
                                 <Knowledge knowledge={this.state.knowledge} hideUser={true} />
                                 <br/>
+                                <hr/>
+                                <br/>
                                 <Secure condition={(user) => user === this.props.match.params.id}>
-                                    <input type="button" value="Manage my profile [TODO]" />
+                                    {!this.state.passwordEdition &&
+                                        <button onClick={e => this.setState({passwordEdition: true, newPassword: ''})}>Change Password</button>
+                                    }
+                                    {this.state.passwordEdition &&
+                                        <Fragment>
+                                            <b>Password: </b>
+                                            <input name="password" type="password" value={this.state.newPassword}
+                                                   onChange={e => this.setState({newPassword: e.target.value})}/>
+                                            <button onClick={e => this.changePassword()}>Change</button>
+                                            <button onClick={e => this.setState({passwordEdition: false})}>Cancel</button>
+                                            {this.state.passwordEditionError && <i style={{color: 'red'}}>{this.state.passwordEditionError}</i>}
+                                        </Fragment>
+                                    }
+                                    <br/>
+
                                 </Secure>
                             </div>
                         }

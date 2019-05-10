@@ -25,10 +25,6 @@ class SandboxApp extends React.Component {
 
                 <button onClick={e => axios.put('/data/user/jd4436/update', {shortName: 'John D', firstName: 'John', lastName: 'Doe', accounts: ['johnd']})}>Update -> John D</button><br/>
                 <button onClick={e => axios.put('/data/user/jd4436/update', {shortName: 'Johnny', firstName: 'Jonathan', lastName: 'Dow', accounts: ['johnd']})}>Update -> Johnny</button><br/>
-                <button onClick={e => axios.put('/data/user/jd4436/reset-password')}>Reset PWD JD</button><br/>
-                <button onClick={e => axios.put('/data/user/jd4436/change-password?password=mypass')}>Change PWD JD -> mypass</button><br/>
-                <button onClick={e => axios.put('/data/user/jd4436/disable')}>Disable JD</button><br/>
-                <button onClick={e => axios.put('/data/user/jd4436/enable')}>Enable JD</button><br/>
 
             </AppLayout>
         );
