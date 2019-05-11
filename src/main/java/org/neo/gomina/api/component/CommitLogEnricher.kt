@@ -5,6 +5,7 @@ import org.neo.gomina.api.common.UserRef
 import org.neo.gomina.api.common.toDateUtc
 import org.neo.gomina.api.common.toRef
 import org.neo.gomina.api.work.toIssueRef
+import org.neo.gomina.model.issues.IssueProjects
 import org.neo.gomina.model.event.Event
 import org.neo.gomina.model.release.ReleaseService
 import org.neo.gomina.model.runtime.ExtInstance
@@ -17,6 +18,8 @@ class CommitLogEnricher {
     @Inject @Named("jira.url") lateinit var issueTrackerUrl: String
 
     @Inject private lateinit var users: Users
+    @Inject lateinit var issues: IssueProjects
+
 
     fun enrichLog(log: List<Commit>, instances: List<ExtInstance>, releaseEvents: List<Event>): CommitLogDetail {
         val tmp = log.map { Triple(it, mutableListOf<ExtInstance>(), mutableListOf<ExtInstance>()) }
@@ -44,7 +47,7 @@ class CommitLogEnricher {
                             author = commit.author?.let { users.findForAccount(it) }?.toRef() ?: commit.author?.let { UserRef(shortName = commit.author) },
                             message = commit.message,
                             version = commit.release ?: commit.newVersion,
-                            issues = commit.issues.map { it.toIssueRef(issueTrackerUrl) },
+                            issues = commit.issues(issues).map { it.toIssueRef(issueTrackerUrl) },
                             prodReleaseDate = commitReleaseDates[commit.revision]?.toDateUtc,
                             instances = running.map { it.toRef() },
                             deployments = deployed.map { it.toRef() }

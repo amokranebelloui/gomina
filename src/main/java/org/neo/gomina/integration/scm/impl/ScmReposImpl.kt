@@ -22,8 +22,6 @@ class ScmReposImpl {
         private val logger = LogManager.getLogger(ScmReposImpl::class.java)
     }
 
-    @Inject lateinit var commitDecorator: CommitDecorator
-
     private val clients = HashMap<String, ScmClient>()
 
     private val passwords: Passwords
@@ -43,11 +41,11 @@ class ScmReposImpl {
 
     fun getBranch(scm: Scm, branchId: String): List<Commit> {
         val scmClient = this.getClient(scm)
-        return scmClient.getLog(branchId, "0", -1).map { commitDecorator.flag(it, scmClient) }
+        return scmClient.getLog(branchId, "0", -1)
     }
 
     fun getLog(scmClient: ScmClient, trunk: String): List<Commit> {
-        return scmClient.getLog(trunk, "0", 100).map { commitDecorator.flag(it, scmClient) }
+        return scmClient.getLog(trunk, "0", 100)
     }
 
     fun getDocument(scm: Scm, docId: String): String? {

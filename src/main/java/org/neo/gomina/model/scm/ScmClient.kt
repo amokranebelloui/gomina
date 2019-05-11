@@ -1,18 +1,24 @@
 package org.neo.gomina.model.scm
 
+import org.neo.gomina.model.issues.IssueProjects
+import org.neo.gomina.model.issues.extractIssues
 import org.neo.gomina.model.version.Version
 import java.time.LocalDateTime
 
 data class Commit (
-    val revision: String = "",
+    val revision: String,
     val date: LocalDateTime,
-    val author: String? = null,
-    val message: String? = null,
+    val author: String?,
+    val message: String?,
 
-    var release: String? = null, // new version: if the commit is a prepare release version change
-    var newVersion: String? = null, // version: if the commit is a release
-    var issues: List<String> = emptyList() // issue tracking system id
+    val release: String? = null, // new version: if the commit is a prepare release version change
+    val newVersion: String? = null // version: if the commit is a release
 ) {
+
+    fun issues(projects: IssueProjects): List<String> {
+        return message?.extractIssues(projects) ?: emptyList()
+    }
+
     fun match(version: Version): Boolean {
         return this.release == version.version && this.revision == version.revision ||
                 this.release?.let { Version.isStable(it) && this.release == version.version } == true

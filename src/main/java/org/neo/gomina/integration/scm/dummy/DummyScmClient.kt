@@ -129,7 +129,8 @@ class DummyScmClient : ScmClient {
                 date = LocalDateTime.parse(map["date"] as String, DateTimeFormatter.ISO_DATE_TIME),
                 author = map["author"] as String?,
                 message = map["message"] as String?,
-                release = map["version"] as String?
+                release = map["version"] as String?,
+                newVersion = map["newVersion"] as String?
         )
     }
 

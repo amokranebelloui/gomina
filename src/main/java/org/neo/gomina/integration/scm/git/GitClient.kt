@@ -7,6 +7,7 @@ import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.treewalk.TreeWalk
+import org.neo.gomina.integration.scm.impl.CommitDecorator
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
@@ -24,8 +25,9 @@ class GitClient : ScmClient {
         private val logger = LogManager.getLogger(GitClient::class.java)
     }
 
-    val repository: Repository
-    val git:Git
+    internal val repository: Repository
+    internal val git:Git
+    private val commitDecorator = CommitDecorator()
 
     constructor(url: String) {
         this.repository = FileRepositoryBuilder().setGitDir(File(url)).build()
@@ -66,12 +68,17 @@ class GitClient : ScmClient {
         //println("$folder -> $master")
         val commits = git.log().add(repository.resolve(branch)).setMaxCount(100).call()
         return commits.map {
+            val revision = it.name
+            val message = StringUtils.replaceChars(it.fullMessage, "\n", " ")
+            val (release, newVersion) = commitDecorator.flag(revision, message, this)
             Commit(
-                    revision = it.name,
+                    revision = revision,
                     date = Instant.ofEpochMilli(it.commitTime.toLong() * 1000L).atZone(ZoneOffset.UTC).toLocalDateTime(),
                     author = it.authorIdent.name,
                     //author = it.committerIdent.name,
-                    message = StringUtils.replaceChars(it.fullMessage, "\n", " ")
+                    message = message,
+                    release = release,
+                    newVersion = newVersion
                     //(${it.parents.map { it.tree.type }})
             )
         }

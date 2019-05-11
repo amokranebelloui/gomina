@@ -2,6 +2,7 @@ package org.neo.gomina.integration.scm.svn
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.integration.scm.impl.CommitDecorator
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
@@ -26,6 +27,8 @@ class TmateSoftSvnClient : ScmClient {
     private val baseUrl: String
     private val projectUrl: String
     internal val repository: SVNRepository
+
+    private val commitDecorator = CommitDecorator()
 
     constructor(baseUrl: String, projectUrl: String, username: String? = null, password: String? = null) {
         this.baseUrl = baseUrl
@@ -94,11 +97,16 @@ class TmateSoftSvnClient : ScmClient {
                 println("-->" + k + " " +  p.kind + " " + p.type + " " + p.path + " " + p.copyPath + " " + p.copyRevision)
             }
             */
+            val revision = revAsString(it.revision) ?: ""
+            val message = StringUtils.replaceChars(it.message, "\n", " ")
+            val (release, newVersion) = commitDecorator.flag(revision, message, this)
             Commit(
-                    revision = revAsString(it.revision) ?: "",
+                    revision = revision,
                     date = it.date.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime(),
                     author = it.author,
-                    message = StringUtils.replaceChars(it.message, "\n", " ")
+                    message = message,
+                    release = release,
+                    newVersion = newVersion
                     //extra = it.changedPaths.toString() + it.isNonInheritable + it.isSubtractiveMerge
             )
         }

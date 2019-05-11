@@ -8,7 +8,7 @@ class CommitTest {
 
     @Test
     fun test_match() {
-        val commit = Commit("56582", LocalDateTime.now(), release = "0.9.4")
+        val commit = Commit("56582", LocalDateTime.now(), author = "amokrane", message = "commit msg", release = "0.9.4")
         println(commit.match(Version("0.9.4", "56582")))
         println(commit.match(Version("0.9.4", null)))
         println(commit.match(Version("0.9.4", "null")))

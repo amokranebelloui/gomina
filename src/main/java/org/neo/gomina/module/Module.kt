@@ -22,6 +22,7 @@ import org.neo.gomina.api.system.SystemsApi
 import org.neo.gomina.api.users.UsersApi
 import org.neo.gomina.api.work.WorkApi
 import org.neo.gomina.integration.events.EventsService
+import org.neo.gomina.model.issues.IssueProjects
 import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.JenkinsService
@@ -105,6 +106,7 @@ class GominaModule : AbstractModule() {
         // JIRA
         bind(String::class.java).annotatedWith(named("jira.url")).toInstance(config.jiraUrl)
         bind(typeLiteral<List<@JvmSuppressWildcards String>>()).annotatedWith(named("jira.projects")).toInstance(config.jiraProjects)
+        bind(IssueProjects::class.java).`in`(Scopes.SINGLETON)
 
         // Monitoring
         bind(Int::class.java).annotatedWith(named("monitoring.timeout")).toInstance(config.monitoring.timeout)

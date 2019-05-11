@@ -71,8 +71,7 @@ class RedisComponentRepo : ComponentRepo {
                         author = it["author"],
                         message = it["message"],
                         release = it["release"],
-                        newVersion = it["newVersion"],
-                        issues = it["issues"].toList())
+                        newVersion = it["newVersion"])
             }
         }
     }
@@ -366,8 +365,7 @@ class RedisComponentRepo : ComponentRepo {
                             commit.author?.let { "author" to it },
                             commit.message?.let { "message" to it },
                             commit.release?.let { "release" to it },
-                            commit.newVersion?.let { "newVersion" to it },
-                            commit.issues.let { "issues" to it.toStr() }
+                            commit.newVersion?.let { "newVersion" to it }
                     ).toMap())
                 }
                 pipe.sync()
