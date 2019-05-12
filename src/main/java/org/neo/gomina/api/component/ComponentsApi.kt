@@ -84,6 +84,7 @@ data class BranchDetail (
 )
 
 data class CommitLogDetail(
+        val branch: String,
         val log: List<CommitDetail>,
         val unresolved: List<InstanceRefDetail>)
 
@@ -273,7 +274,7 @@ class ComponentsApi {
                 val instances = topology.buildExtInstances(componentId)
                 val prodEnvs = inventory.getProdEnvironments().map { it.id }
                 val releases = events.releases(componentId, prodEnvs)
-                commitLogEnricher.enrichLog(log, instances, releases)
+                commitLogEnricher.enrichLog(branch, log, instances, releases)
             }
             if (log != null) {
                 ctx.response().putHeader("content-type", "text/html")

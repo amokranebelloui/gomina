@@ -21,7 +21,7 @@ class CommitLogEnricher {
     @Inject lateinit var issues: IssueProjects
 
 
-    fun enrichLog(log: List<Commit>, instances: List<ExtInstance>, releaseEvents: List<Event>): CommitLogDetail {
+    fun enrichLog(branch: String, log: List<Commit>, instances: List<ExtInstance>, releaseEvents: List<Event>): CommitLogDetail {
         val tmp = log.map { Triple(it, mutableListOf<ExtInstance>(), mutableListOf<ExtInstance>()) }
         val unresolved = mutableListOf<ExtInstance>()
         instances.forEach { instance ->
@@ -40,6 +40,7 @@ class CommitLogEnricher {
         }
         val commitReleaseDates = ReleaseService.releaseDates(log, releaseEvents).mapKeys { (k, v) ->  k.revision}
         return CommitLogDetail(
+                branch = branch,
                 log = tmp.map { (commit, running, deployed) ->
                     CommitDetail(
                             revision = commit.revision,

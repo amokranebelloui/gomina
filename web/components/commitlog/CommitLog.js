@@ -11,6 +11,8 @@ import type {UserRefType} from "../misc/UserType";
 import type {IssueRefType} from "../work/WorkType";
 import {Issue} from "../misc/Issue";
 import type {VersionType} from "../common/version-utils";
+import {flatMap} from "../common/utils";
+import {BranchColor} from "./Branch";
 
 type CommitType = {
     author?: ?UserRefType,
@@ -34,6 +36,7 @@ type InstanceRefType = {
 
 type Props = {
     commits: Array<CommitType>,
+    branch: string,
     unresolved?: Array<InstanceRefType>,
     //instances: Array<Instance>,
     type?: ?string,
@@ -68,6 +71,9 @@ class CommitLog extends React.Component<Props> {
             */
 
             const log: Array<CommitType> = this.props.commits || [];
+
+            const branches = this.props.branch && [...new Set(flatMap(log, c => c.branches))].filter(b => b !== this.props.branch) || [];
+
             const unresolved: Array<InstanceRefType> = this.props.unresolved || [];
             return (
                 <div className="commit-log">
@@ -109,13 +115,14 @@ class CommitLog extends React.Component<Props> {
                                 <td style={{verticalAlign: 'middle', width: '80px'}}>
                                     <DateTime date={commit.prodReleaseDate} />
                                 </td>
-                                <td style={{verticalAlign: 'middle', width: '80px'}}>
-                                    <span style={{whiteSpace: 'no-wrap'}}>
-                                        {commit.branches && commit.branches.map(b =>
-                                            <Fragment>{/*b*/}&nbsp;</Fragment>
-                                        )}
-                                    </span>
-                                </td>
+                                {branches.map(b =>
+                                    <td title={b}
+                                        style={{verticalAlign: 'middle', width: '10px', paddingLeft: '1px', paddingRight: '1px'}}>
+                                        {commit.branches && commit.branches.includes(b) &&
+                                            <BranchColor branch={b} />
+                                        }
+                                    </td>
+                                )}
                             </tr>
                         )}
                         </tbody>

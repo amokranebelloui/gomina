@@ -20,6 +20,7 @@ import {LoggedUserContext, Secure} from "../permission/Secure";
 import {Events} from "../environment/Events";
 import {Knowledge} from "../knowledge/Knowledge";
 import {DateTime} from "../common/DateTime";
+import {Well} from "../common/Well";
 
 class ComponentApp extends React.Component {
     
@@ -446,7 +447,7 @@ class ComponentApp extends React.Component {
         const newBranch = nextQueryParams.branchId;
         console.info("componentApp !props-chg ", this.props.match.params.id, newComponent);
         console.info("branch", queryParams.branchId, newBranch);
-        this.setState({componentId: newComponent});
+        this.setState({componentId: newComponent, branchId: newBranch, docId: newDoc});
         if (this.props.match.params.id !== newComponent && newComponent) {
             this.retrieveComponent(newComponent);
             this.retrieveAssociated(newComponent);
@@ -486,34 +487,43 @@ class ComponentApp extends React.Component {
             <AppLayout title={"Component: " + component.label}>
                 <PrimarySecondaryLayout>
                     <Container>
-                        <span title={component.id}>
-                            <span style={{fontSize: 14}}><b>{component.label}</b></span>
-                            {component.disabled &&
-                                <span>&nbsp;<s>DISABLED</s></span>
-                            }
-                            <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
-                        </span>
-                        <br/>
-                        <span style={{fontSize: 9}}>{component.artifactId}</span>
-                        <br/>
+                        <Well block>
+                            <span title={component.id}>
+                                <span style={{fontSize: 14}}><b>{component.label}</b></span>
+                                {component.disabled &&
+                                    <span>&nbsp;<s>DISABLED</s></span>
+                                }
+                                <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
+                            </span>
+                            <br/>
+                            <span style={{fontSize: 9}}>{component.artifactId}</span>
+                            <br/>
 
-                        <ScmLink type={component.scmType} />&nbsp;
-                        <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
-                        <br/>
-                        <UnreleasedChangeCount changes={component.changes} />
-
-                        <ComponentMenu component={component} />
-
-                        {   branchId ? <b>Branch</b> :
-                            docId ? <b>Doc</b> :
-                            <b>Main</b>
-                        }
+                            <ScmLink type={component.scmType} />&nbsp;
+                            <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
+                            <br/>
+                            <UnreleasedChangeCount changes={component.changes} />
+                            
+                            <ComponentMenu
+                                selectedDoc={this.state.docId}
+                                selectedBranch={this.state.branch && this.state.branch.branch || ""}
+                                component={component} />
+                        </Well>
 
                         {   docId
-                            ? <Documentation doc={this.state.doc} />
+                            ? <Fragment>
+                                <Documentation doc={this.state.doc} />
+                              </Fragment>
                             : <Fragment>
-                                <CommitLog type={component.scmType} commits={(this.state.branch||{}).log} unresolved={(this.state.branch||{}).unresolved} />
-                                <CommitLogLegend />
+                                {this.state.branch &&
+                                    <Fragment>
+                                        <CommitLog type={component.scmType}
+                                                   commits={this.state.branch.log}
+                                                   branch={this.state.branch.branch}
+                                                   unresolved={(this.state.branch || {}).unresolved}/>
+                                        <CommitLogLegend />
+                                    </Fragment>
+                                }
                               </Fragment>
                         }
 
@@ -594,7 +604,7 @@ class ComponentApp extends React.Component {
                             <ApiDefinitionEditor type="definition" api={{name: "", type: ""}} onAdd={(f) => this.addApi(component.id, f.name, f.type)} />
                         </Secure>
                         <br/>
-                        
+
                         <h3>Usage</h3>
                         {(this.state.usage || []).map(usage =>
                             <ApiUsage usage={usage} onManualUsageRemove={() => this.removeUsage(component.id, usage.name, usage.type)} />
@@ -603,13 +613,13 @@ class ComponentApp extends React.Component {
                             <ApiDefinitionEditor type="usage" api={{name: "", type: ""}} onAdd={(f) => this.addUsage(component.id, f.name, f.type, f.usage)} />
                         </Secure>
                         <br/>
-                        
+
                         <h3>Invocation Chain</h3>
                         <CallChain chain={this.state.invocationChain} displayFirst={true}
                                    onDependencySelected={(child, parent) => this.selectInvocationDependency(child, parent)}/>
                         <Dependencies dependencies={this.state.chainSelectedInvocation} />
                         <br/>
-                        
+
                         <h3>Call Chain</h3>
                         <CallChain chain={this.state.callChain} displayFirst={true}
                                    onDependencySelected={(child, parent) => this.selectCallDependency(child, parent)} />

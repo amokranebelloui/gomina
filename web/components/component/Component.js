@@ -1,5 +1,5 @@
 // @flow
-import * as React from "react";
+import React from "react";
 import Link from "react-router-dom/es/Link";
 import {Version} from "../common/Version";
 import {LinesOfCode} from "./LinesOfCode";
@@ -24,6 +24,7 @@ import {SonarEditor} from "./SonarEditor";
 import {Label} from "../common/Label";
 import {EditableDate} from "../common/EditableDate";
 import {StarRating} from "../common/StarRating";
+import {Branch, sortBranchesDetails} from "../commitlog/Branch";
 
 function ComponentHeader(props: {}) {
     return (
@@ -384,29 +385,37 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
 }
 
 type ComponentMenuProps = {
-    component: ComponentType
+    component: ComponentType,
+    selectedDoc: string,
+    selectedBranch: ComponentType
 }
 function ComponentMenu(props: ComponentMenuProps) {
     const component = props.component;
+    /*
+    <Link to={'/component/' + component.id}>Main</Link><span>|</span>
+    */
     return (
         component &&
-        <div className="items">
-            <Link to={'/component/' + component.id}>Main</Link>
-            <span>|</span>
-            {component.branches && component.branches
-                .map(branch =>
-                    <span key={branch.name} title={"from: " + (branch.origin || "") + " rev:" + (branch.originRevision || "")}>
-                        <Link to={'/component/' + props.component.id + '/scm?branchId=' + branch.name}>
-                            {branch.name}
+            <div style={{marginTop: '4px'}}>
+                <div className="items" style={{display: 'inline-block'}}>
+                    {component.docFiles && component.docFiles.map(doc =>
+                        <Link key={doc} to={'/component/' + props.component.id + '/doc/' + doc}>
+                            <Badge backgroundColor={doc === props.selectedDoc ? 'lightgray' : null}>{doc}</Badge>
                         </Link>
-                    </span>
-                )
-            }
-            <span>|</span>
-            {component.docFiles && component.docFiles
-                .map(doc => <Link key={doc} to={'/component/' + props.component.id + '/doc/' + doc}>{doc}</Link>)
-            }
-        </div>
+                    )}
+                </div>
+                <div className="items" style={{display: 'inline-block', float: 'right'}}>
+                    {component.branches && sortBranchesDetails(component.branches)
+                        .map(branch =>
+                            <span key={branch.name} title={"from: " + (branch.origin || "") + " rev:" + (branch.originRevision || "")}>
+                                <Link to={'/component/' + props.component.id + '/scm?branchId=' + branch.name}>
+                                    <Branch branch={branch} selected={branch.name === props.selectedBranch} />
+                                </Link>
+                            </span>
+                        )
+                    }
+                </div>
+            </div>
         || null
     )
 }
