@@ -70,8 +70,8 @@ class RedisComponentRepo : ComponentRepo {
                 author = this["author"],
                 message = this["message"],
                 branches = branches.toList(),
-                release = this["release"],
-                newVersion = this["newVersion"])
+                version = this["version"]
+        )
     }
 
     private fun toComponent(id: String, map: Map<String, String>): Component {
@@ -368,8 +368,7 @@ class RedisComponentRepo : ComponentRepo {
                             commit.date.let { "date" to it.format(ISO_DATE_TIME) },
                             commit.author?.let { "author" to it },
                             commit.message?.let { "message" to it },
-                            commit.release?.let { "release" to it },
-                            commit.newVersion?.let { "newVersion" to it }
+                            commit.version?.let { "version" to it }
                     ).toMap())
                 }
                 pipe.sync()

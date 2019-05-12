@@ -95,22 +95,22 @@ class CommitLog extends React.Component<Props> {
                                     <DateTime date={commit.date}/>
                                 </td>
                                 <td style={{verticalAlign: 'middle'}}>
-                                    <span style={{verticalAlign: 'middle'}}>
+                                    <span style={{display: 'inline-block', verticalAlign: 'middle'}}>
                                         <CommitMessage message={commit.message} issues={commit.issues} />
                                     </span>
-                                    <span className="items" style={{float: 'right'}}>
-                                        {(commit.instances||[]).map(instance =>
-                                            <Badge key={instance.id} backgroundColor="#AABBAA">{instance.env} {instance.name} <VersionLabel version={instance.running} /></Badge>
-                                        )}
-                                        {(commit.deployments||[]).map(instance =>
-                                            <Badge key={instance.id} backgroundColor="#EEEEAA">{instance.env} {instance.name} <VersionLabel version={instance.deployed} /></Badge>
-                                        )}
-                                    </span>
                                     {commit.version &&
-                                    <span className="items" style={{float: 'right'}}>
+                                    <span className="items" style={{display: 'inline-block', float: 'right'}}>
                                         <Badge><i style={{opacity: .4}}>{commit.version}</i></Badge>
                                     </span>
                                     }
+                                    <span className="items" style={{display: 'inline-block', float: 'right'}}>
+                                        {(commit.instances||[]).map(instance =>
+                                            <Badge key={instance.id} title={instance.running} backgroundColor="#AABBAA">{instance.env} {instance.name}</Badge>
+                                        )}
+                                        {(commit.deployments||[]).map(instance =>
+                                            <Badge key={instance.id} title={instance.deployed} backgroundColor="#EEEEAA">{instance.env} {instance.name}</Badge>
+                                        )}
+                                    </span>
                                 </td>
                                 <td style={{verticalAlign: 'middle', width: '80px'}}>
                                     <DateTime date={commit.prodReleaseDate} />

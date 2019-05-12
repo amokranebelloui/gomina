@@ -38,6 +38,8 @@ data class Version(val version: String = "", val revision: String?) : Comparable
     override fun toString() = version + "@" + revision
 }
 
+fun String.isStableVersion() = Version.isStable(this)
+
 // FIXME Function to order snapshots
 
 private fun versionCompare(str1: String?, str2: String?): Int {

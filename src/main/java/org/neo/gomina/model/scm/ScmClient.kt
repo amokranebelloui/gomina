@@ -3,6 +3,7 @@ package org.neo.gomina.model.scm
 import org.neo.gomina.model.issues.IssueProjects
 import org.neo.gomina.model.issues.extractIssues
 import org.neo.gomina.model.version.Version
+import org.neo.gomina.model.version.isStableVersion
 import java.time.LocalDateTime
 
 data class Commit (
@@ -13,9 +14,10 @@ data class Commit (
 
     val branches: List<String> = emptyList(),
 
-    val release: String? = null, // new version: if the commit is a prepare release version change
-    val newVersion: String? = null // version: if the commit is a release
+    val version: String? = null
 ) {
+
+    val revNum: Int get() = this.revision.toInt()
 
     fun issues(projects: IssueProjects): List<String> {
         return message?.extractIssues(projects) ?: emptyList()
@@ -23,9 +25,9 @@ data class Commit (
 
     fun match(version: Version, numberedRevisions: Boolean): Boolean {
         // FIXME Revision as Int
-        return numberedRevisions && version.revision?.isNotBlank() == true && version.revision.toInt() > this.revision.toInt() ||
-                this.revision == version.revision ||
-                this.release?.let { Version.isStable(it) && this.release == version.version } == true
+        return this.revision == version.revision ||
+                this.version?.isStableVersion() == true && this.version == version.version ||
+                numberedRevisions && version.revision?.isNotBlank() == true && version.revision.toInt() > this.revNum
     }
 }
 

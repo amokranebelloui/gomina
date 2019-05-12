@@ -136,8 +136,7 @@ class DummyScmClient : ScmClient {
                 author = commitData["author"] as String?,
                 branches = listOf(branch),
                 message = commitData["message"] as String?,
-                release = c?.version?.takeIf { Version.isStable(it) },
-                newVersion = c?.version?.takeUnless { Version.isStable(it) }
+                version = c?.version
         )
     }
 

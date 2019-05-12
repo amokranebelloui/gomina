@@ -70,7 +70,7 @@ class GitClient : ScmClient {
         return commits.map {
             val revision = it.name
             val message = StringUtils.replaceChars(it.fullMessage, "\n", " ")
-            val (release, newVersion) = commitDecorator.flag(revision, message, this)
+            val version = commitDecorator.flag(revision, message, this)
             Commit(
                     revision = revision,
                     date = Instant.ofEpochMilli(it.commitTime.toLong() * 1000L).atZone(ZoneOffset.UTC).toLocalDateTime(),
@@ -78,8 +78,7 @@ class GitClient : ScmClient {
                     //author = it.committerIdent.name,
                     message = message,
                     branches = listOf(branch),
-                    release = release,
-                    newVersion = newVersion
+                    version = version
                     //(${it.parents.map { it.tree.type }})
             )
         }

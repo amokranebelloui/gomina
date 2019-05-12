@@ -69,12 +69,13 @@ class ScmService {
 
         // Versions
         val versions: List<VersionRelease> = log
-                .mapNotNull { commit -> commit.release?.let { Triple(
+                .filter { c -> c.version != null && Version.isStable(c.version) }
+                .mapNotNull { commit -> commit.version?.let { Triple(
                         MavenUtils.extractArtifactId(scmClient.getFile("pom.xml", commit.revision)),
                         it,
                         commit.date
                 )}}
-                .filter { (_, release, _) -> Version.isStable(release) }
+                //.filter { (_, release, _) -> Version.isStable(release) }
                 .map { (artifactId, release, date) -> VersionRelease(artifactId, Version(release), date) }
 
         val releasedVersion = releasedVersion(log)
@@ -132,9 +133,12 @@ class ScmService {
     }
 
     private fun releasedVersion(log: List<Commit>): Version? {
-        val released = log.firstOrNull { StringUtils.isNotBlank(it.release) }?.release
-        val releasedRevision = log.firstOrNull { StringUtils.isNotBlank(it.newVersion) }?.revision
-        return released?.let { Version(it, releasedRevision) }
+        val firstReleaseCommit = log.firstOrNull { it.version != null && Version.isStable(it.version) }
+        //val releasedRevision = log.firstOrNull { StringUtils.isNotBlank(it.newVersion) }?.revision
+        return if (firstReleaseCommit?.version != null) {
+            Version(firstReleaseCommit.version, firstReleaseCommit.revision)
+        }
+        else null
     }
 
     private fun commitCountTo(logEntries: List<Commit>, to: String?): Int? {

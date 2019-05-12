@@ -200,8 +200,8 @@
   SERVICE: 'order'
   HOST: '10.143.3.58'
   folder: '/home/svc/prod-order'
-  VERSION: '5.1.3'
-  REVISION: 35002
+  VERSION: '2.1.1'
+  REVISION: 35489
   STATUS: 'LIVE'
 
   BUS: "2.0"
@@ -216,8 +216,8 @@
   PID: '18000'
   HOST: '10.143.3.56'
   folder: '/home/svc/prod-order'
-  VERSION: '5.1.3-SNAPSHOT'
-  REVISION: 35002
+  VERSION: '2.1.1'
+  REVISION: 35489
   STATUS: 'DOWN'
 
   JMX: 7700
@@ -234,8 +234,8 @@
   PID: '33070'
   HOST: '10.0.0.99'
   folder: '/home/svc/prod-order'
-  VERSION: '5.1.3-SNAPSHOT'
-  REVISION: 35002
+  VERSION: '2.1.1'
+  REVISION: 35489
   STATUS: 'DOWN'
 
   JMX: 7700

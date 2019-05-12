@@ -99,15 +99,14 @@ class TmateSoftSvnClient : ScmClient {
             */
             val revision = revAsString(it.revision) ?: ""
             val message = StringUtils.replaceChars(it.message, "\n", " ")
-            val (release, newVersion) = commitDecorator.flag(revision, message, this)
+            val version = commitDecorator.flag(revision, message, this)
             Commit(
                     revision = revision,
                     date = it.date.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime(),
                     author = it.author,
                     message = message,
                     branches = listOf(branch),
-                    release = release,
-                    newVersion = newVersion
+                    version = version
                     //extra = it.changedPaths.toString() + it.isNonInheritable + it.isSubtractiveMerge
             )
         }

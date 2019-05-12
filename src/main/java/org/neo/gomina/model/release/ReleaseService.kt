@@ -15,7 +15,7 @@ object ReleaseService {
         sortedReleases.forEach { release ->
             var foundVersion = false
             log.forEach { commit ->
-                if (commit.release != null && Version.isStable(commit.release) && commit.release == release.version) {
+                if (commit.version != null && Version.isStable(commit.version) && commit.version == release.version) {
                     foundVersion = true
                 }
                 if (foundVersion) {
