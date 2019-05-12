@@ -36,7 +36,8 @@ data class ServiceDetail (
         val activeCount: Int? = 1,
         @Deprecated("") val componentId: String? = null,
         val component: ComponentRef? = null,
-        val systems: List<String>
+        val systems: List<String>,
+        val undefined: Boolean
 )
 
 data class VersionDetail(val version: String = "", val revision: String?)
@@ -282,8 +283,8 @@ class InstancesApi {
                     res.getOrPut(service) { mutableListOf() }
                 }
                 topology.buildExtInstances(it)
-                        .forEach {
-                            res.getOrPut(it.service) { mutableListOf() }.add(it)
+                        .forEach { i ->
+                            res.getOrPut(i.service) { mutableListOf() }.add(i)
                         }
                         /*
                         .groupBy { it.service }
@@ -291,7 +292,7 @@ class InstancesApi {
                 res.map { (service, extInstances) ->
                     mapOf(
                             "service" to service.toServiceDetail(components[service.componentId]),
-                            "instances" to extInstances.map { buildInstanceDetail(envId, it) }
+                            "instances" to extInstances.map { i -> buildInstanceDetail(envId, i) }
                     )
                 }
             }
@@ -420,7 +421,9 @@ fun Service.toServiceDetail(component: Component?): ServiceDetail {
             activeCount = this.activeCount,
             componentId = this.componentId,
             component = component?.let { ComponentRef(component.id, component.label) },
-            systems = component?.systems ?: emptyList())
+            systems = component?.systems ?: emptyList(),
+            undefined = this.undefined
+    )
 }
 
 fun Version.toVersionDetail() = VersionDetail(version = this.version, revision = this.revision)

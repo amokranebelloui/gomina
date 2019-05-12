@@ -7,6 +7,7 @@ import Link from "react-router-dom/es/Link";
 import {InstanceBadge} from "./InstanceBadge";
 import {sortInstances} from "./instances-utils";
 import type {ComponentRefType} from "../component/ComponentType";
+import "../common/common.css"
 
 type ServiceType = {
     svc: string,
@@ -15,7 +16,8 @@ type ServiceType = {
     activeCount?: ?number,
     componentId?: ?string,
     component?: ?ComponentRefType,
-    systems?: ?Array<string>
+    systems?: ?Array<string>,
+    undefined: boolean
 }
 
 type ServiceDataType = {
@@ -43,29 +45,38 @@ class Service extends React.Component<Props> {
         //const status = computeStatus(service, instances);
         const d = computeServiceDetails(service, instances);
         return ([
-            <td key={'detail' + service.svc} className="service" valign="middle" colSpan={5}>
-                <span>
-                    <b style={{fontSize: '16px'}}>{service.svc}</b>&nbsp;
-                    {service.component &&
-                        <Link to={'/component/' + service.component.id}><span>&rarr;</span></Link>
-                    }
-                    &nbsp;
-                    <i>{service.type}</i>
-                </span>&nbsp;
-                <Badge backgroundColor="">{instances.length}</Badge>
-                <span>{service.mode}</span>
-                <span>|{service.systems}|</span>
-                {service.component &&
-                    <BuildLink key={service.component.id} url={'navigate2/' + (service.component.id)}/>
-                }
-                {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge>}
-                {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
-                {d.configs && <Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge>}
+            <td key={'detail' + service.svc} className="service" style={{width: '100%'}} valign="middle" colSpan={5}>
+                <div style={{position: 'relative', display: 'table', width: '100%'}}>
+                    <div className="items" style={{display: 'table-cell', verticalAlign: 'middle', height: '100%'}}>
+                        <span>
+                            <b style={{fontSize: '10px'}}>{service.svc}</b>&nbsp;
+                            {service.undefined && <Badge title="Undefined Service" backgroundColor="orange">undefined?</Badge>}
+                            {service.component &&
+                                <Link to={'/component/' + service.component.id}><span>&rarr;</span></Link>
+                            }
+                            &nbsp;
+                            <i>{service.type}</i>
+                        </span>&nbsp;
+                        <Badge backgroundColor="">{instances.length}</Badge>
+                        <span>{service.mode}</span>
+                        <span>|{service.systems}|</span>
+                        {service.component &&
+                            <BuildLink key={service.component.id} url={'navigate2/' + (service.component.id)}/>
+                        }
+                        {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge>}
+                        {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
+                        {d.configs && <Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge>}
+                    </div>
 
-                <div className="items" style={{display: 'table-cell', float: "right", height: 'auto'}}>
-                    {instances.map( i =>
-                        <InstanceBadge instance={i} />
-                    )}
+                    <div style={{
+                        position: 'absolute', display: 'table', float: "right", height: '100%', top: '0px', bottom: '0px', right: '0px'
+                    }}>
+                        <div className="items" style={{display: 'table-cell', verticalAlign: 'middle'}}>
+                        {instances.map( i =>
+                            <InstanceBadge instance={i} />
+                        )}
+                        </div>
+                    </div>
                 </div>
             </td>
         ])

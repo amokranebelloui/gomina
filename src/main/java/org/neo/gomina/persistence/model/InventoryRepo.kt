@@ -191,12 +191,17 @@ class RedisInventoryRepo : Inventory {
     override fun updateService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?) {
         pool.resource.use { jedis ->
             val serviceKey = "service:$env:$svc"
-            jedis.persist(serviceKey, mapOf(
-                    "type" to type,
-                    "mode" to mode?.name,
-                    "active_count" to activeCount.toString(),
-                    "component" to componentId
-            ))
+            if (!jedis.exists(serviceKey)) {
+                addService(env, svc, type, mode, activeCount, componentId)
+            }
+            else {
+                jedis.persist(serviceKey, mapOf(
+                        "type" to type,
+                        "mode" to mode?.name,
+                        "active_count" to activeCount.toString(),
+                        "component" to componentId
+                ))
+            }
         }
     }
 
@@ -300,7 +305,8 @@ private fun Map<String, String>.asService(id: String, instances: List<Instance>)
                 this["mode"]?.let { ServiceMode.valueOf(it) },
                 this["active_count"].asInt,
                 this["component"],
-                instances
+                instances,
+                undefined = false
         )
 
 private fun Map<String, String>.asInstance(id: String) =

@@ -10,6 +10,10 @@ import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.RuntimeInfo
 import javax.inject.Inject
 
+private data class EnvInstance(val envId: String, val service: Service, val instance: Instance)
+private data class EnvService(val envId: String, val service: Service)
+private data class EnvIndicators(val envId: String, val indicators: RuntimeInfo)
+
 data class ExtInstance(
         val id: Pair<String, String>,
         val component: Component?,
@@ -42,7 +46,7 @@ class Topology {
         return merge(inventory, monitoring)
                 .map { (id, instance, indicators) ->
                     val svc = instance?.first?.svc ?: indicators?.service ?: "x"
-                    val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
+                    val service = services[svc] ?: Service(svc = svc, type = indicators?.type, undefined = true)
                     val component = service.componentId?.let { componentRepo.get(it) }
 
                     ExtInstance(id, component, service, instance?.second, indicators)
@@ -50,31 +54,35 @@ class Topology {
     }
 
     fun buildExtInstances(componentId: String): List<ExtInstance> {
-        val inv = inventory.getEnvironments()
+        val environments = inventory.getEnvironments()
+
+        val services = environments
                 .flatMap { env -> env.services.map { env to it } }
-                .flatMap { (env, svc) -> svc.instances.map { instance -> Triple(env, svc, instance) } }
-                .filter { (env, svc, instance) -> svc.componentId == componentId }
+                .map { (env, service) -> EnvService(env.id, service) }.associateBy { it.envId to it.service.svc }
 
-        val services = inv.map { (env, svc, instance) -> svc }.associateBy { it.svc }
+        val inventory = environments
+                .flatMap { env -> env.services.map { env to it } }
+                .flatMap { (env, svc) -> svc.instances.map { instance -> EnvInstance(env.id, svc, instance) } }
+                .associateBy { envInstance -> envInstance.envId to envInstance.instance.id }
 
-        val definition = inv
-                .associateBy { (env, svc, instance) -> env.id to instance.id }
-                .mapValues { (_, triple) -> triple.second to triple.third }
-        val monitoredInstances = inventory.getEnvironments()
-                .flatMap { env -> monitoring.instancesFor(env.id).map { env to it } }
-        val monitoring = monitoredInstances
-                .filter { (env, mon) -> mon.service?.let { services[it] }?.componentId == componentId }
-                .associateBy { (env, mon) -> env.id to mon.instanceId }
-                .mapValues { (_, pair) -> pair.second }
+        val runtime = environments
+                .flatMap { env -> monitoring.instancesFor(env.id).map { env.id to it } }
+                .map { (envId, mon) -> EnvIndicators(envId, mon) }
+                .associateBy { envIndicators -> envIndicators.envId to envIndicators.indicators.instanceId }
 
-        return merge(definition, monitoring)
-                .map { (id, instance, indicators) ->
-                    val svc = Service.safe(instance?.first?.svc ?: indicators?.service)
-                    val service = services[svc] ?: Service(svc = svc, type = indicators?.type)
-                    val component = service.componentId?.let { componentRepo.get(it) }
+        val merge = merge(inventory, runtime)
 
-                    ExtInstance(id, component, service, instance?.second, indicators)
+        return merge
+                .map { (id, eInstance, eRuntime) ->
+                    val svc = Service.safe(eInstance?.service?.svc ?: eRuntime?.indicators?.service)
+                    val envService = eInstance?.let { services[it.envId to it.service.svc] }
+                            ?: eRuntime?.let { services[it.envId to it.indicators.service] }
+                            ?: EnvService(id.first, Service(svc = svc, type = eRuntime?.indicators?.type, undefined = true))
+                    val component = envService.service.componentId?.let { componentRepo.get(it) }
+
+                    ExtInstance(id.first to id.second, component, envService.service, eInstance?.instance, eRuntime?.indicators)
                 }
+                .filter { it.service.componentId == componentId }
     }
 
 }

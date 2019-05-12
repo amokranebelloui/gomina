@@ -24,7 +24,8 @@ data class Service(
         val mode: ServiceMode? = ServiceMode.ONE_ONLY,
         val activeCount: Int? = 1,
         val componentId: String? = null,
-        val instances: List<Instance> = emptyList()
+        val instances: List<Instance> = emptyList(),
+        val undefined: Boolean
 ) {
     companion object {
         fun safe(service: String?) = service ?: "x"

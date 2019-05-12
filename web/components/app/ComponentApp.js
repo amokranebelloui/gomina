@@ -573,7 +573,7 @@ class ComponentApp extends React.Component {
                         <br/>
                         <h3>Versions</h3>
                         <div className="items">
-                            {this.state.versions.map(versionRelease =>
+                            {this.state.versions && this.state.versions.map(versionRelease =>
                                 <span>
                                     <span>{versionRelease.artifactId}</span>&nbsp;
                                     <span>{versionRelease.version.version}</span>&nbsp;

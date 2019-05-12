@@ -28,7 +28,12 @@ private fun map(old: DEnvironment): Environment {
             .groupBy { i -> i.svc }
             .map { (svc, instances) -> Triple(svc, instances.first(), instances) }
             .map { (svc, i, instances) ->
-                Service(svc = svc, type = i.type, componentId = i.project, instances = instances.map { Instance(it.id, it.host, it.folder) })
+                Service(svc = svc,
+                        type = i.type,
+                        componentId = i.project,
+                        instances = instances.map { Instance(it.id, it.host, it.folder) },
+                        undefined = false
+                )
             }
 
     return Environment(old.code, old.name, old.type, old.monitoringUrl, old.active, services)

@@ -43,7 +43,7 @@ class EventsService {
 
     fun reload() {
         logger.info("Reloading events into database")
-        val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
+        val since = LocalDate.now().minusDays(30).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
         eventProviders.forEach {
             try {
                 logger.error("Reload events for '${it.name()}'")
