@@ -75,6 +75,7 @@ data class Scm (
 
     val id: String get() = "$type-$url-$path"
     val fullUrl: String get() = "$url" + if (path.isNotBlank()) "/$path" else "$path"
+    val numberedRevisions: Boolean get() = type == "svn" || type == "dummy" // FIXME Somewhere else ? ScmClient ?
 }
 
 

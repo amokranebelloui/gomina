@@ -16,5 +16,11 @@
     "folders": [
       {"folder": "/app/basket", "version": "5.1.3-SNAPSHOT", "revision": "35469", "confCommitted": true, "confUpToDate": false, "confRevision": "12430"}
     ]
+  },
+  {
+    "hostname": "host4",
+    "folders": [
+      {"folder": "/app/basket", "version": "5.1.3-SNAPSHOT", "revision": "35488", "confCommitted": true, "confUpToDate": false, "confRevision": "12430"}
+    ]
   }
 ]

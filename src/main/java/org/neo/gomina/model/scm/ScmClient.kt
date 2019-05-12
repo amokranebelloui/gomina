@@ -21,8 +21,10 @@ data class Commit (
         return message?.extractIssues(projects) ?: emptyList()
     }
 
-    fun match(version: Version): Boolean {
-        return this.release == version.version && this.revision == version.revision ||
+    fun match(version: Version, numberedRevisions: Boolean): Boolean {
+        // FIXME Revision as Int
+        return numberedRevisions && version.revision?.isNotBlank() == true && version.revision.toInt() > this.revision.toInt() ||
+                this.revision == version.revision ||
                 this.release?.let { Version.isStable(it) && this.release == version.version } == true
     }
 }

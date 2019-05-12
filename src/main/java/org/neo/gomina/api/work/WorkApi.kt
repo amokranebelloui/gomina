@@ -235,7 +235,7 @@ class WorkApi {
                                         .let { log ->
                                             val instances = topology.buildExtInstances(component.id)
                                             val releases = events.releases(component.id, prodEnvs)
-                                            commitLogEnricher.enrichLog(trunk, log, instances, releases).log
+                                            commitLogEnricher.enrichLog(trunk, log, scm, instances, releases).log
                                         }
                                         .takeWhile { commit ->
                                             !commit.instances.map { it.env }.contains(workReferenceEnv) &&

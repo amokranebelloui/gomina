@@ -5,6 +5,7 @@ import org.neo.gomina.api.common.UserRef
 import org.neo.gomina.api.common.toDateUtc
 import org.neo.gomina.api.common.toRef
 import org.neo.gomina.api.work.toIssueRef
+import org.neo.gomina.model.component.Scm
 import org.neo.gomina.model.issues.IssueProjects
 import org.neo.gomina.model.event.Event
 import org.neo.gomina.model.release.ReleaseService
@@ -21,14 +22,14 @@ class CommitLogEnricher {
     @Inject lateinit var issues: IssueProjects
 
 
-    fun enrichLog(branch: String, log: List<Commit>, instances: List<ExtInstance>, releaseEvents: List<Event>): CommitLogDetail {
+    fun enrichLog(branch: String, log: List<Commit>, scm: Scm, instances: List<ExtInstance>, releaseEvents: List<Event>): CommitLogDetail {
         val tmp = log.map { Triple(it, mutableListOf<ExtInstance>(), mutableListOf<ExtInstance>()) }
         val unresolved = mutableListOf<ExtInstance>()
         instances.forEach { instance ->
             val runningVersion = instance.indicators?.version
             val deployedVersion = instance.instance?.deployedVersion
-            val commitR = tmp.find { item -> runningVersion?.let { item.first.match(it) } == true }
-            val commitD = tmp.find { item -> deployedVersion?.let { item.first.match(it) } == true }
+            val commitR = tmp.find { item -> runningVersion?.let { item.first.match(it, scm.numberedRevisions) } == true }
+            val commitD = tmp.find { item -> deployedVersion?.let { item.first.match(it, scm.numberedRevisions) } == true }
 
             if (commitR == null && commitD == null) {
                 unresolved.add(instance)

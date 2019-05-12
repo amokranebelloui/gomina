@@ -266,15 +266,15 @@ class ComponentsApi {
         val branchId = ctx.request().getParam("branchId")
         try {
             logger.info("Get SCM log for component:$componentId branch:$branchId")
-            var log = componentRepo.get(componentId)?.scm?.let {
-                val client = scmClients.getClient(it)
+            var log = componentRepo.get(componentId)?.scm?.let { scm ->
+                val client = scmClients.getClient(scm)
                 val branch = branchId?.takeIf { it.isNotBlank() } ?: client.getTrunk()
 
                 val log = componentRepo.getCommitLog(componentId, branch)
                 val instances = topology.buildExtInstances(componentId)
                 val prodEnvs = inventory.getProdEnvironments().map { it.id }
                 val releases = events.releases(componentId, prodEnvs)
-                commitLogEnricher.enrichLog(branch, log, instances, releases)
+                commitLogEnricher.enrichLog(branch, log, scm, instances, releases)
             }
             if (log != null) {
                 ctx.response().putHeader("content-type", "text/html")
@@ -285,7 +285,7 @@ class ComponentsApi {
                 ctx.fail(404)
             }
         } catch (e: Exception) {
-            logger.error("Cannot get SCM log component:$componentId branch:$branchId")
+            logger.error("Cannot get SCM log component:$componentId branch:$branchId", e)
             ctx.fail(500)
         }
     }

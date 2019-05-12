@@ -2,6 +2,7 @@ package org.neo.gomina.model.release
 
 import org.neo.gomina.model.event.Event
 import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.version.Version
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.temporal.ChronoUnit
@@ -14,11 +15,11 @@ object ReleaseService {
         sortedReleases.forEach { release ->
             var foundVersion = false
             log.forEach { commit ->
-                if (commit.release == release.version) {
+                if (commit.release != null && Version.isStable(commit.release) && commit.release == release.version) {
                     foundVersion = true
                 }
                 if (foundVersion) {
-                    commitReleaseDates.put(commit, release.timestamp)
+                    commitReleaseDates[commit] = release.timestamp
                 }
             }
         }
