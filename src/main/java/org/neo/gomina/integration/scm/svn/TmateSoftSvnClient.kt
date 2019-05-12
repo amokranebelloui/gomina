@@ -105,6 +105,7 @@ class TmateSoftSvnClient : ScmClient {
                     date = it.date.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime(),
                     author = it.author,
                     message = message,
+                    branches = listOf(branch),
                     release = release,
                     newVersion = newVersion
                     //extra = it.changedPaths.toString() + it.isNonInheritable + it.isSubtractiveMerge

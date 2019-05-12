@@ -11,6 +11,8 @@ data class Commit (
     val author: String?,
     val message: String?,
 
+    val branches: List<String> = emptyList(),
+
     val release: String? = null, // new version: if the commit is a prepare release version change
     val newVersion: String? = null // version: if the commit is a release
 ) {

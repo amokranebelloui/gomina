@@ -7,6 +7,7 @@ Contexts, entities, schemas
 component:<componentId> (hash)
 commit:<componentId>:<rev> (hset)
 commits:<componentId> (zset) commit{timestamp}
+branch_commits:<componentId>:<branchId> (zset) commit{timestamp}
 versions:<componentId> (zset) version{releaseDate}
 libraries:<componentId> (set) libraries used by a component
 library:<artifactId> (set) components using a library

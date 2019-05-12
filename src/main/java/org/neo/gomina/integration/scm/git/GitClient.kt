@@ -66,7 +66,7 @@ class GitClient : ScmClient {
         //git.branchList().call().forEach { println("branch ${it.name}") }
         //val master = repository.getRef(folder)
         //println("$folder -> $master")
-        val commits = git.log().add(repository.resolve(branch)).setMaxCount(100).call()
+        val commits = git.log().add(repository.resolve(branch)).setMaxCount(count).call()
         return commits.map {
             val revision = it.name
             val message = StringUtils.replaceChars(it.fullMessage, "\n", " ")
@@ -77,6 +77,7 @@ class GitClient : ScmClient {
                     author = it.authorIdent.name,
                     //author = it.committerIdent.name,
                     message = message,
+                    branches = listOf(branch),
                     release = release,
                     newVersion = newVersion
                     //(${it.parents.map { it.tree.type }})

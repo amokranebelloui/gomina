@@ -6,7 +6,6 @@ import org.neo.gomina.integration.scm.git.GitClient
 import org.neo.gomina.integration.scm.none.NoneScmClient
 import org.neo.gomina.integration.scm.svn.TmateSoftSvnClient
 import org.neo.gomina.model.component.Scm
-import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
 import org.neo.gomina.model.security.Passwords
 import java.util.*
@@ -16,10 +15,10 @@ import javax.inject.Inject
 
 private val noOpScmClient = NoneScmClient()
 
-class ScmReposImpl {
+class ScmClients {
 
     companion object {
-        private val logger = LogManager.getLogger(ScmReposImpl::class.java)
+        private val logger = LogManager.getLogger(ScmClients::class.java)
     }
 
     private val clients = HashMap<String, ScmClient>()
@@ -35,22 +34,6 @@ class ScmReposImpl {
         return clients.getOrPut(scm.id) {
             buildScmClient(scm, passwords) ?: noOpScmClient
         }
-    }
-
-    // FIXME Number of commits to process ??
-
-    fun getBranch(scm: Scm, branchId: String): List<Commit> {
-        val scmClient = this.getClient(scm)
-        return scmClient.getLog(branchId, "0", -1)
-    }
-
-    fun getLog(scmClient: ScmClient, trunk: String): List<Commit> {
-        return scmClient.getLog(trunk, "0", 100)
-    }
-
-    fun getDocument(scm: Scm, docId: String): String? {
-        val scmClient = this.getClient(scm)
-        return scmClient.getFile(docId, "-1")
     }
 
     private fun buildScmClient(scm: Scm, passwords: Passwords): ScmClient? {

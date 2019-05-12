@@ -11,14 +11,19 @@ class GitClientTest {
         val client = GitClient("/Users/Amokrane/Work/Code/Idea/rxjava-test/.git")
         val repo = client.repository
         client.git.log()
+                //.add(repo.resolve("refs/heads/feature1"))
+                //.add(repo.resolve("refs/heads/feature2"))
+                /**/
                 .addRange(
-                        //repo.resolve("1260af0"),
-                        repo.resolve("refs/heads/master"),
-                        repo.resolve("refs/heads/feature1")
+                        repo.resolve("dd38ce1580b0ca5a41b83534fac6716d77acafc4"),
+                        repo.resolve("eda25629ba51062bc7e58b2316808778f75a81a2")
+                        //repo.resolve("refs/heads/master"),
+                        //repo.resolve("refs/heads/feature2")
                 )
+                /**/
                 .call()
                 .forEach {
-                    println("-> ${it.parentCount} ${it.footerLines} ${it.fullMessage}")
+                    println("-> ${it.parentCount} ${it.footerLines} ${it.fullMessage} ${it.tree.name}")
                 }
     }
 

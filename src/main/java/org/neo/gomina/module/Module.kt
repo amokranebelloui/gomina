@@ -29,7 +29,7 @@ import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.scm.impl.CommitDecorator
-import org.neo.gomina.integration.scm.impl.ScmReposImpl
+import org.neo.gomina.integration.scm.impl.ScmClients
 import org.neo.gomina.integration.sonar.SonarConfig
 import org.neo.gomina.integration.sonar.SonarConnectors
 import org.neo.gomina.integration.sonar.SonarService
@@ -115,7 +115,7 @@ class GominaModule : AbstractModule() {
 
         // SCM
         bind(CommitDecorator::class.java).`in`(Scopes.SINGLETON)
-        bind(ScmReposImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(ScmClients::class.java).`in`(Scopes.SINGLETON)
         bind(ScmService::class.java).`in`(Scopes.SINGLETON)
 
         // Jenkins

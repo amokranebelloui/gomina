@@ -1,5 +1,5 @@
 // @flow
-import * as React from "react";
+import React, {Fragment} from "react";
 import {Link} from "react-router-dom";
 import {VersionLabel} from "../common/Version";
 import {Badge} from "../common/Badge";
@@ -16,6 +16,7 @@ type CommitType = {
     author?: ?UserRefType,
     date?: ?number,
     message?: ?string,
+    branches?: Array<string>,
     version?: ?string,
     revision?: ?number,
     issues?: Array<IssueRefType>,
@@ -107,6 +108,13 @@ class CommitLog extends React.Component<Props> {
                                 </td>
                                 <td style={{verticalAlign: 'middle', width: '80px'}}>
                                     <DateTime date={commit.prodReleaseDate} />
+                                </td>
+                                <td style={{verticalAlign: 'middle', width: '80px'}}>
+                                    <span style={{whiteSpace: 'no-wrap'}}>
+                                        {commit.branches && commit.branches.map(b =>
+                                            <Fragment>{/*b*/}&nbsp;</Fragment>
+                                        )}
+                                    </span>
                                 </td>
                             </tr>
                         )}

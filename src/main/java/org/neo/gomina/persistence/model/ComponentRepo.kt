@@ -9,7 +9,6 @@ import org.neo.gomina.model.component.*
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.version.Version
-import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool
 import java.time.*
 import java.time.LocalDateTime.now
@@ -37,46 +36,45 @@ class RedisComponentRepo : ComponentRepo {
             val data = jedis.keys("component:*").map { it.substring(10) to pipe.hgetAll(it) }
             pipe.sync()
             return data.map { (id, data) ->
-                val commits = getCommits(jedis, id)
-                toComponent(id, data.get(), commits)
+                toComponent(id, data.get())
             }
         }
     }
 
     override fun get(componentId: String): Component? {
         pool.resource.use { jedis ->
-            val commits = getCommits(jedis, componentId)
             return jedis.hgetAll("component:$componentId")
-                    ?.let { toComponent(componentId, it, commits) }
+                    ?.let { toComponent(componentId, it) }
         }
     }
 
-    override fun getCommitLog(componentId: String): List<Commit> {
+    override fun getCommitLog(componentId: String, branch: String): List<Commit> {
         pool.resource.use { jedis ->
-            return getCommits(jedis, componentId)
-        }
-    }
-
-    private fun getCommits(jedis: Jedis, componentId: String): List<Commit> {
-        return jedis.pipelined().let { pipe ->
-            //jsonMapper.readValue<Commit>(it)
-            val commits = jedis.zrevrange("commits:$componentId", 0, 100).map { rev ->
-                pipe.hgetAll("commit:$componentId:$rev")
-            }
-            pipe.sync()
-            commits.map { it.get() }.map {
-                Commit(
-                        revision = it["revision"] ?: "",
-                        date = LocalDateTime.parse(it["date"] ?: "1970-01-01T00:00:00.000Z", ISO_DATE_TIME), // FIXME
-                        author = it["author"],
-                        message = it["message"],
-                        release = it["release"],
-                        newVersion = it["newVersion"])
+            return jedis.pipelined().let { pipe ->
+                val commits = jedis.zrevrange("branch_commits:$componentId:$branch", 0, 100).map { rev ->
+                    val data = pipe.hgetAll("commit:$componentId:$rev")
+                    val branches = pipe.smembers("commit_branches:$componentId:$rev")
+                    data to branches
+                }
+                pipe.sync()
+                commits.map { (data, branches) -> data.get() to branches.get() }
+                        .map { (data, branches) -> data.toCommit(branches) }
             }
         }
     }
 
-    private fun toComponent(id: String, map: Map<String, String>, commits: List<Commit>): Component {
+    private fun Map<String, String>.toCommit(branches: Collection<String>): Commit {
+        return Commit(
+                revision = this["revision"] ?: "",
+                date = LocalDateTime.parse(this["date"] ?: "1970-01-01T00:00:00.000Z", ISO_DATE_TIME), // FIXME
+                author = this["author"],
+                message = this["message"],
+                branches = branches.toList(),
+                release = this["release"],
+                newVersion = this["newVersion"])
+    }
+
+    private fun toComponent(id: String, map: Map<String, String>): Component {
         return Component(
                 id = id,
                 label = map["label"],
@@ -359,6 +357,12 @@ class RedisComponentRepo : ComponentRepo {
                     val time = commit.date.atZone(ZoneOffset.UTC).toInstant().toEpochMilli().toDouble()
                     //val time = commit.date?.time?.toDouble()
                     pipe.zadd("commits:$componentId", time, commit.revision)
+                    commit.branches.forEach {
+                        pipe.zadd("branch_commits:$componentId:$it", time, commit.revision)
+                        commit.branches.forEach { branch ->
+                            pipe.sadd("commit_branches:$componentId:${commit.revision}", branch)
+                        } 
+                    }
                     pipe.hmset("commit:$componentId:${commit.revision}", listOfNotNull(
                             "revision" to commit.revision,
                             commit.date.let { "date" to it.format(ISO_DATE_TIME) },

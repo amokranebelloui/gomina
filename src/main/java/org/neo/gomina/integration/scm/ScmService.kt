@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.ArtifactId
 import org.neo.gomina.integration.maven.MavenUtils
-import org.neo.gomina.integration.scm.impl.ScmReposImpl
+import org.neo.gomina.integration.scm.impl.ScmClients
 import org.neo.gomina.integration.scm.metadata.ProjectMetadataMapper
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
@@ -30,7 +30,7 @@ class ScmService {
         private val logger = LogManager.getLogger(ScmService::class.java)
     }
 
-    @Inject lateinit var scmRepos: ScmReposImpl
+    @Inject lateinit var scmClients: ScmClients
     @Inject lateinit var componentRepo: ComponentRepo
     @Inject lateinit var interactionsRepo: InteractionsRepository
     @Inject lateinit var libraries: Libraries
@@ -39,23 +39,33 @@ class ScmService {
 
     private val metadataMapper = ProjectMetadataMapper()
 
+    // FIXME Number of commits to process ?? save last processed revision by branch ?
+
     fun reloadScmDetails(component: Component, scm: Scm) {
         logger.info("Reload SCM Details for ${component.id} $scm")
 
-        val scmClient = scmRepos.getClient(scm)
-        val trunk = scmClient.getTrunk() // FIXME Handle Branches
-        val log = scmRepos.getLog(scmClient, trunk)
+        //val lastRevision = componentRepo.getCommitLog(component.id).firstOrNull()?.revision
+        //logger.info("Last processed ${component.id} -> $lastRevision")
+
+        val scmClient = scmClients.getClient(scm)
         val pomFile: String? = scmClient.getFile("pom.xml", "-1")
 
         // Commit Log
-        componentRepo.updateCommitLog(component.id, log)
-        componentRepo.updateBranches(component.id, scmClient.getBranches())
+        val branches = scmClient.getBranches()
+        branches.forEach { branch ->
+            componentRepo.updateCommitLog(component.id, scmClient.getLog(branch.name, "0", 100))
+        }
+        componentRepo.updateBranches(component.id, branches)
 
         // Information
         val artifactId = MavenUtils.extractArtifactId(pomFile)
         pomFile?.let { componentRepo.editArtifactId(component.id, artifactId) }
         libraries.changeArtifactId(artifactId ?: component.artifactId, component.artifactId, component.latest)
         componentRepo.updateDocFiles(component.id, scmClient.listFiles("/", "-1").filter { it.endsWith(".md") })
+
+        // Trunk
+        val trunk = scmClient.getTrunk() // FIXME Handle Branches
+        val log = scmClient.getLog(trunk, "0", 100)
 
         // Versions
         val versions: List<VersionRelease> = log
@@ -136,11 +146,14 @@ class ScmService {
 
     @Deprecated("Get from local database", ReplaceWith("componentRepo.getBranch(componentId, branchId)"))
     fun getBranch(scm: Scm, branchId: String): List<Commit> {
-        return scmRepos.getBranch(scm, branchId)
+        val scmClient = scmClients.getClient(scm)
+        // FIXME Number of commits to process ??
+        return scmClient.getLog(branchId, "0", 100)
     }
 
-    // TODO Cache documents, for quicker serving
+    // TODO Cache documents, for quicker serving + from branches ??
     fun getDocument(scm: Scm, docId: String): String? {
-        return scmRepos.getDocument(scm, docId)?.let { Processor.process(it) }
+        val scmClient = scmClients.getClient(scm)
+        return scmClient.getFile(docId, "-1")?.let { Processor.process(it) }
     }
 }

@@ -82,7 +82,7 @@ interface ComponentRepo {
 
     fun getAll(): List<Component>
     fun get(componentId: String): Component?
-    fun getCommitLog(componentId: String): List<Commit>
+    fun getCommitLog(componentId: String, branch: String): List<Commit>
 
     fun add(component: NewComponent)
     fun editLabel(componentId: String, label: String)

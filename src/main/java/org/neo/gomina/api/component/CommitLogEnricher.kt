@@ -46,6 +46,7 @@ class CommitLogEnricher {
                             date = commit.date.toDateUtc,
                             author = commit.author?.let { users.findForAccount(it) }?.toRef() ?: commit.author?.let { UserRef(shortName = commit.author) },
                             message = commit.message,
+                            branches = commit.branches,
                             version = commit.release ?: commit.newVersion,
                             issues = commit.issues(issues).map { it.toIssueRef(issueTrackerUrl) },
                             prodReleaseDate = commitReleaseDates[commit.revision]?.toDateUtc,

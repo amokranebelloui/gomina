@@ -19,6 +19,7 @@ import org.neo.gomina.api.instances.toVersionDetail
 import org.neo.gomina.api.work.IssueRef
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.scm.ScmService
+import org.neo.gomina.integration.scm.impl.ScmClients
 import org.neo.gomina.integration.sonar.SonarService
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
@@ -92,6 +93,8 @@ data class CommitDetail(
         var author: UserRef? = null,
         var message: String? = null,
 
+        var branches: List<String>,
+
         var version: String? = null,
         var issues: List<IssueRef> = emptyList(),
 
@@ -143,6 +146,7 @@ class ComponentsApi {
     @Inject private lateinit var events: Events
 
     @Inject private lateinit var scmService: ScmService
+    @Inject private lateinit var scmClients: ScmClients
     @Inject private lateinit var commitLogEnricher: CommitLogEnricher
     @Inject private lateinit var sonarService: SonarService
     @Inject private lateinit var jenkinsService: JenkinsService
@@ -258,13 +262,14 @@ class ComponentsApi {
 
     private fun commitLog(ctx: RoutingContext) {
         val componentId = ctx.request().getParam("componentId")
-        val branch = ctx.request().getParam("branchId")
+        val branchId = ctx.request().getParam("branchId")
         try {
-            logger.info("Get SCM log for component:$componentId branch:$branch")
-
+            logger.info("Get SCM log for component:$componentId branch:$branchId")
             var log = componentRepo.get(componentId)?.scm?.let {
-                val log = if (branch?.isNotBlank() == true) scmService.getBranch(it, branch)
-                          else componentRepo.getCommitLog(componentId)
+                val client = scmClients.getClient(it)
+                val branch = branchId?.takeIf { it.isNotBlank() } ?: client.getTrunk()
+
+                val log = componentRepo.getCommitLog(componentId, branch)
                 val instances = topology.buildExtInstances(componentId)
                 val prodEnvs = inventory.getProdEnvironments().map { it.id }
                 val releases = events.releases(componentId, prodEnvs)
@@ -275,11 +280,11 @@ class ComponentsApi {
                         .end(mapper.writeValueAsString(log))
             }
             else {
-                logger.info("Cannot get SCM log component:$componentId branch:$branch")
+                logger.info("Cannot get SCM log component:$componentId branch:$branchId")
                 ctx.fail(404)
             }
         } catch (e: Exception) {
-            logger.error("Cannot get SCM log component:$componentId branch:$branch")
+            logger.error("Cannot get SCM log component:$componentId branch:$branchId")
             ctx.fail(500)
         }
     }

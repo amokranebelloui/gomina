@@ -15,7 +15,7 @@ import org.neo.gomina.api.component.CommitDetail
 import org.neo.gomina.api.component.CommitLogEnricher
 import org.neo.gomina.api.component.ComponentRef
 import org.neo.gomina.api.component.toComponentRef
-import org.neo.gomina.integration.scm.ScmService
+import org.neo.gomina.integration.scm.impl.ScmClients
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.inventory.Inventory
@@ -80,7 +80,7 @@ class WorkApi {
     @Inject @Named("work.reference.env") lateinit var workReferenceEnv: String
 
     @Inject private lateinit var componentRepo: ComponentRepo
-    @Inject private lateinit var scmService: ScmService
+    @Inject private lateinit var scmClients: ScmClients
     @Inject private lateinit var commitLogEnricher: CommitLogEnricher
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var topology: Topology
@@ -228,21 +228,24 @@ class WorkApi {
             val prodEnvs = inventory.getProdEnvironments().map { it.id }
             val detail = components
                     .map { component ->
-                        val commits = try {
-                            componentRepo.getCommitLog(component.id)
-                                .let { log ->
-                                    val instances = topology.buildExtInstances(component.id)
-                                    val releases = events.releases(component.id, prodEnvs)
-                                    commitLogEnricher.enrichLog(log, instances, releases).log
-                                }
-                                .takeWhile { commit ->
-                                    !commit.instances.map { it.env }.contains(workReferenceEnv) &&
-                                            !commit.deployments.map { it.env }.contains(workReferenceEnv)
-                                }
-                        }
-                        catch (e: Exception) {
-                            logger.error("", e)
-                            null
+                        val commits = component.scm?.let {scm ->
+                            try {
+                                val trunk = scmClients.getClient(scm).getTrunk()
+                                componentRepo.getCommitLog(component.id, trunk)
+                                        .let { log ->
+                                            val instances = topology.buildExtInstances(component.id)
+                                            val releases = events.releases(component.id, prodEnvs)
+                                            commitLogEnricher.enrichLog(log, instances, releases).log
+                                        }
+                                        .takeWhile { commit ->
+                                            !commit.instances.map { it.env }.contains(workReferenceEnv) &&
+                                                    !commit.deployments.map { it.env }.contains(workReferenceEnv)
+                                        }
+                            }
+                            catch (e: Exception) {
+                                logger.error("", e)
+                                null
+                            }
                         }
                         ComponentWorkDetail(component.id, component.scm?.type, commits ?: emptyList())
                     }

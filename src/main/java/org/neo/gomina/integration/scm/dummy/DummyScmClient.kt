@@ -12,6 +12,7 @@ import org.neo.gomina.integration.maven.ArtifactId
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
+import org.neo.gomina.model.version.Version
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -34,6 +35,10 @@ class DummyScmClient : ScmClient {
     
     constructor(url: String) {
         this.url = url
+    }
+
+    override fun getTrunk(): String {
+        return "trunk"
     }
 
     override fun getBranches(): List<Branch> {
@@ -62,7 +67,7 @@ class DummyScmClient : ScmClient {
                         break
                     }
                 }
-                return log.map { buildFrom(it) }
+                return log.map { buildFrom(it, branch) }
             }
         } catch (e: Exception) {
             logger.error("Error retrieving SVN data for $url", e)
@@ -123,14 +128,16 @@ class DummyScmClient : ScmClient {
         return log?.firstOrNull { StringUtils.equals(it["revision"] as String, rev) }
     }
 
-    private fun buildFrom(map: Map<String, Any>): Commit {
+    private fun buildFrom(commitData: Map<String, Any>, branch: String): Commit {
+        val c = ArtifactId.tryWithGroup(commitData["artifactId"] as String?)
         return Commit(
-                revision = map["revision"] as String,
-                date = LocalDateTime.parse(map["date"] as String, DateTimeFormatter.ISO_DATE_TIME),
-                author = map["author"] as String?,
-                message = map["message"] as String?,
-                release = map["version"] as String?,
-                newVersion = map["newVersion"] as String?
+                revision = commitData["revision"] as String,
+                date = LocalDateTime.parse(commitData["date"] as String, DateTimeFormatter.ISO_DATE_TIME),
+                author = commitData["author"] as String?,
+                branches = listOf(branch),
+                message = commitData["message"] as String?,
+                release = c?.version?.takeIf { Version.isStable(it) },
+                newVersion = c?.version?.takeUnless { Version.isStable(it) }
         )
     }
 
