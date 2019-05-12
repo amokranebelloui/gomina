@@ -3,7 +3,7 @@
 }
 
 .items > * {
-    margin-right: 2px;
+    margin-right: 1px;
     padding: 1px;
     margin-top: 1px;
     margin-bottom: 1px;
@@ -11,5 +11,14 @@
 
 .items > *:last-child {
     margin-right: inherit;
-    padding: 1px;
+}
+
+.item-container {
+    display: table;
+    height: 100%;
+}
+
+.item-container > * {
+    display: table-cell;
+    vertical-align: middle;
 }

@@ -1,8 +1,17 @@
+// @flow
 import React from "react";
 import jenkinsIcon from "./build-jenkins.png";
-import PropTypes from 'prop-types'
 
-class BuildLink extends React.Component {
+type Props = {
+    server?: ?string,
+    url: string,
+    job?: ?string
+}
+
+class BuildLink extends React.Component<Props> {
+    constructor(props: Props) {
+        super(props)
+    }
     render() {
         const icon = jenkinsIcon;
         const opacity = this.props.server || this.props.job  ? null : .2;
@@ -10,32 +19,29 @@ class BuildLink extends React.Component {
             ' job:' + (this.props.job||'?') +
             ' url:' + (this.props.url||'?');
         return (
+            <div style={{display: 'inline-block'}}>
             <a href={this.props.url} target="_blank"
                title={title}
                style={{
+                   display: 'table', 
                    opacity: opacity,
-                   backgroundColor: '#E8BD30',
-                   color: 'white',
-                   //padding: 2,
+                   padding: '1px',
                    borderRadius: '3px',
-                   fontSize: 10}}>
-                <img style={{opacity: opacity}}
-                     src={icon} width="16" height="16"/>
-                <span style={{padding: 2}}>
+                   color: 'white',
+                   backgroundColor: '#E8BD30'
+               }}>
+                <img style={{opacity: opacity, marginRight: '3px', display: 'table-cell', verticalAlign: 'middle'}}
+                     src={icon} width="12" height="12"/>
+                <span style={{display: 'table-cell', verticalAlign: 'middle'}}>
                     {this.props.server ? this.props.server : ""}
                     {this.props.job &&
                         (this.props.server ? ":" : "?:") + this.props.job
                     }
                 </span>
             </a>
+            </div>
         )
     }
 }
-
-BuildLink.propTypes = {
-    "server": PropTypes.string,
-    "url": PropTypes.string,
-    "job": PropTypes.string
-};
 
 export {BuildLink}

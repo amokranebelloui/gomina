@@ -65,7 +65,7 @@
 
 .env-row .service {
     display: table-cell;
-    padding: 1px 3px;
+    /*padding: 1px 1px;*/
     vertical-align: middle;
     border-bottom: 1px solid gray;
 }

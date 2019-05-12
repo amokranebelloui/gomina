@@ -4,6 +4,7 @@ import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios/index"
 import "../common/common.css"
+import {BuildLink} from "../build/BuildLink";
 
 class SandboxApp extends React.Component {
     constructor(props) {
@@ -38,6 +39,8 @@ class SandboxApp extends React.Component {
                     </div>
                     <div style={{clear: 'both'}}>&nbsp;</div>
                 </div>
+
+                <BuildLink server={'aa'} url={'aa'} job={'job'}/>
 
             </AppLayout>
         );

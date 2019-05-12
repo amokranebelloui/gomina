@@ -47,33 +47,31 @@ class Service extends React.Component<Props> {
         return ([
             <td key={'detail' + service.svc} className="service" style={{width: '100%'}} valign="middle" colSpan={5}>
                 <div style={{position: 'relative', display: 'table', width: '100%'}}>
-                    <div className="items" style={{display: 'table-cell', verticalAlign: 'middle', height: '100%'}}>
-                        <span>
-                            <b style={{fontSize: '10px'}}>{service.svc}</b>&nbsp;
-                            {service.undefined && <Badge title="Undefined Service" backgroundColor="orange">undefined?</Badge>}
+                    <div style={{display: 'table-cell', verticalAlign: 'middle', height: '100%'}}>
+                        <div className="item-container items">
+                            <li><b style={{fontSize: '14px'}}>{service.svc}</b></li>
+                            {service.undefined && <li><Badge title="Undefined Service" backgroundColor="orange">undefined?</Badge></li>}
+                            {service.component && <li><Link to={'/component/' + service.component.id}><span>&rarr;</span></Link></li>}
+                            <li><i>{service.type}</i></li>
+                            <li><Badge backgroundColor="">{instances.length}</Badge></li>
+                            <li>{service.mode}</li>
+                            <li>|{service.systems}|</li>
+
                             {service.component &&
-                                <Link to={'/component/' + service.component.id}><span>&rarr;</span></Link>
+                                <li><BuildLink key={service.component.id} url={'navigate2/' + (service.component.id)}/></li>
                             }
-                            &nbsp;
-                            <i>{service.type}</i>
-                        </span>&nbsp;
-                        <Badge backgroundColor="">{instances.length}</Badge>
-                        <span>{service.mode}</span>
-                        <span>|{service.systems}|</span>
-                        {service.component &&
-                            <BuildLink key={service.component.id} url={'navigate2/' + (service.component.id)}/>
-                        }
-                        {d.unexpected && <Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge>}
-                        {d.versions && <Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge>}
-                        {d.configs && <Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge>}
+                            {d.unexpected && <li><Badge title="Unexpected instances running" backgroundColor="orange">exp?</Badge></li>}
+                            {d.versions && <li><Badge title="Different versions between instances" backgroundColor="orange">versions?</Badge></li>}
+                            {d.configs && <li><Badge title="Config not committed or different revisions between instances" backgroundColor="orange">conf?</Badge></li>}
+                        </div>
                     </div>
 
                     <div style={{
-                        position: 'absolute', display: 'table', float: "right", height: '100%', top: '0px', bottom: '0px', right: '0px'
+                        position: 'absolute', display: 'table-cell', verticalAlign: 'middle', float: "right", height: '100%', top: '0px', bottom: '0px', right: '0px'
                     }}>
-                        <div className="items" style={{display: 'table-cell', verticalAlign: 'middle'}}>
+                        <div className="item-container items">
                         {instances.map( i =>
-                            <InstanceBadge instance={i} />
+                            <li><InstanceBadge instance={i} /></li>
                         )}
                         </div>
                     </div>
