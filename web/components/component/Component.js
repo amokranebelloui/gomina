@@ -1,5 +1,5 @@
 // @flow
-import React from "react";
+import React, {Fragment} from "react";
 import Link from "react-router-dom/es/Link";
 import {Version} from "../common/Version";
 import {LinesOfCode} from "./LinesOfCode";
@@ -32,8 +32,7 @@ function ComponentHeader(props: {}) {
             <div className='summary'><b>Component</b></div>
             <div className='loc'><b>LOC</b></div>
             <div className='coverage'><b>Coverage</b></div>
-            <div className='scm'><b>SCM</b></div>
-            <div className='last-commit'><b>LastCommit (Activity)</b></div>
+            <div className='scm'><b>SCM / LastCommit / Activity</b></div>
             <div className='build'><b>Build</b></div>
         </div>
     )
@@ -69,34 +68,35 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
                     </span>
                     <br/>
                     <span className="items">
-                        <span style={{fontSize: 8}}>{component.artifactId}</span>
+                        {component.artifactId && <Fragment><span style={{fontSize: 8}}>{component.artifactId}</span> | </Fragment>}
                         {systems.map(system =>
-                            <span style={{fontSize: 8, marginLeft: 2}}>{system}</span>
+                            <span style={{fontSize: 8}}>{system}</span>
                         )}
                         |
                         {languages.map(tag =>
-                            <span style={{fontSize: 8, marginLeft: 2}}>{tag}</span>
+                            <span style={{fontSize: 8}}>{tag}</span>
                         )}
                         |
                         {tags.map(tag =>
-                            <span style={{fontSize: 8, marginLeft: 2}}>{tag}</span>
+                            <span style={{fontSize: 8}}>{tag}</span>
                         )}
                     </span>
                 </div>
                 <div className='loc'><LinesOfCode loc={component.loc} /></div>
                 <div className='coverage'><Coverage coverage={component.coverage} /></div>
-                <div className='scm'><ScmLink type={component.scmType} url={component.scmLocation} changes={component.changes} /></div>
-                <div className='last-commit'>
+                <div className='scm'>
+                    <ScmLink type={component.scmType} url={component.scmLocation} changes={component.changes} />
                     <DateTime date={component.lastCommit} />&nbsp;
                     {(component.commitActivity != undefined && component.commitActivity != 0) &&
                         <Badge backgroundColor='#EAA910' color='white'>{component.commitActivity}</Badge>
                     }
                 </div>
                 <div className='build'>
-                    <BuildLink server={component.jenkinsServer} url={component.jenkinsUrl} />
-                    <BuildStatus status={component.buildStatus}/>
-                    <br/>
-                    <DateTime date={component.buildTimestamp}/>
+                    <ul className='item-container items'>
+                        <li><BuildStatus status={component.buildStatus}/></li>
+                        <li><BuildLink server={component.jenkinsServer} url={component.jenkinsUrl} /></li>
+                        <li><DateTime date={component.buildTimestamp}/></li>
+                    </ul>
                 </div>
             </div>
         )

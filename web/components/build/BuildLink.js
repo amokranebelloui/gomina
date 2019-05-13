@@ -4,7 +4,7 @@ import jenkinsIcon from "./build-jenkins.png";
 
 type Props = {
     server?: ?string,
-    url: string,
+    url?: ?string,
     job?: ?string
 }
 
@@ -19,7 +19,6 @@ class BuildLink extends React.Component<Props> {
             ' job:' + (this.props.job||'?') +
             ' url:' + (this.props.url||'?');
         return (
-            <div style={{display: 'inline-block'}}>
             <a href={this.props.url} target="_blank"
                title={title}
                style={{
@@ -39,7 +38,6 @@ class BuildLink extends React.Component<Props> {
                     }
                 </span>
             </a>
-            </div>
         )
     }
 }

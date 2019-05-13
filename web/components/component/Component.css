@@ -20,10 +20,6 @@
     /*min-width: 50px;*/
 }
 
-.component-row > .released, .latest, .scm, .build {
-    text-align: center;
-}
-
 .component-badge > * {
     margin-right: 3px
 }
