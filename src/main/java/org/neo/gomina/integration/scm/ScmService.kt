@@ -79,7 +79,7 @@ class ScmService {
                 .map { (artifactId, release, date) -> VersionRelease(artifactId, Version(release), date) }
 
         val releasedVersion = releasedVersion(log)
-        val changes = commitCountTo(log, releasedVersion?.revision)
+        val changes = commitCountTo(log, releasedVersion?.revision)?.let { it - 1 }
         val latestVersion = latestVersion(log, pomFile)
 
         componentRepo.updateVersions(component.id, latestVersion, releasedVersion, changes)

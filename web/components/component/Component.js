@@ -48,6 +48,7 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
         const systems = component.systems || [];
         const languages = component.languages || [];
         const tags = component.tags || [];
+        let deployedStyle = {color: 'white', backgroundColor: '#ebebeb'};
         return (
             <div className='component-row'>
                 <div className='summary'>
@@ -63,7 +64,7 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
                             <StarRating value={this.props.knowledge} />
                         </Secure>
                         <Version version={component.released} />
-                        <Version version={component.latest} displaySnapshotRevision={true} />
+                        <Version version={component.latest} displaySnapshotRevision={true} {...deployedStyle} />
                         <UnreleasedChangeCount changes={component.changes} />
                     </span>
                     <br/>

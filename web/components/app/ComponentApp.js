@@ -355,7 +355,7 @@ class ComponentApp extends React.Component {
                 thisComponent.setState({callChain: null});
             });
     }
-    selectChainDependency() {
+    clearSelectedChainDependency() {
         this.setState({chainSelectedInvocation: []});
         this.setState({chainSelectedCall: []});
     }
@@ -379,18 +379,18 @@ class ComponentApp extends React.Component {
                 thisComponent.setState({doc: null});
             });
     }
-    retrieveEvents() {
+    retrieveEvents(componentId) {
         const thisComponent = this;
-        axios.get('/data/events/component/' + this.state.componentId)
+        axios.get('/data/events/component/' + componentId)
             .then(response => {
                 console.info("events", typeof response.data, response.data.events)
                 thisComponent.setState({events: response.data.events})
             })
             .catch(() => thisComponent.setState({events: []}))
     }
-    retrieveKnowledge() {
+    retrieveKnowledge(componentId) {
         const thisComponent = this;
-        axios.get('/data/knowledge/component/' + this.state.componentId)
+        axios.get('/data/knowledge/component/' + componentId)
             .then(response => thisComponent.setState({knowledge: response.data}))
             .catch(() => thisComponent.setState({knowledge: []}))
     }
@@ -425,7 +425,7 @@ class ComponentApp extends React.Component {
         this.retrieveImpacted(this.state.componentId);
         this.retrieveInvocationChain(this.state.componentId);
         this.retrieveCallChain(this.state.componentId);
-        this.selectChainDependency();
+        this.clearSelectedChainDependency();
         if (this.state.docId) {
             this.retrieveDoc(this.state.componentId, this.state.docId);
         }
@@ -435,8 +435,8 @@ class ComponentApp extends React.Component {
         else {
             this.retrieveBranch(this.state.componentId, null);
         }
-        this.retrieveEvents();
-        this.retrieveKnowledge()
+        this.retrieveEvents(this.state.componentId);
+        this.retrieveKnowledge(this.state.componentId)
     }
 
     componentWillReceiveProps(nextProps) {
@@ -460,9 +460,9 @@ class ComponentApp extends React.Component {
             this.retrieveImpacted(newComponent);
             this.retrieveInvocationChain(newComponent);
             this.retrieveCallChain(newComponent);
-            this.selectChainDependency();
-            this.retrieveEvents();
-            this.retrieveKnowledge()
+            this.clearSelectedChainDependency();
+            this.retrieveEvents(newComponent);
+            this.retrieveKnowledge(newComponent)
         }
         if (newComponent && newDoc &&
             (this.props.match.params.id !== newComponent || this.props.match.params.docId !== newDoc)) {
