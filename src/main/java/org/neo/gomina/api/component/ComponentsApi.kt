@@ -497,7 +497,6 @@ class ComponentsApi {
             logger.info("Edit ArtifactId $componentId $artifactId ...")
             val component = componentRepo.get(componentId)
             componentRepo.editArtifactId(componentId, artifactId)
-            libraries.changeArtifactId(artifactId, component?.artifactId, component?.latest)
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {

@@ -10,8 +10,7 @@ interface Libraries {
     fun library(artifactId: ArtifactId): Map<Version, List<ComponentVersion>>
     fun usedByComponent(componentId: String): List<ArtifactId>
     fun componentsUsing(artifactId: ArtifactId): List<ComponentVersion>
-    fun add(componentId: String, version: Version, artifacts: List<ArtifactId>)
-    fun addArtifactId(artifactId: String?, version: Version)
-    fun changeArtifactId(artifactId: String?, oldArtifactId: String?, version: Version?)
+    fun addArtifactId(artifactId: String, version: Version)
+    fun addUsage(componentId: String, version: Version, artifacts: List<ArtifactId>)
 
 }

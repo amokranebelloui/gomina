@@ -4,17 +4,17 @@ Contexts, entities, schemas
 ### Users (0)
 
 ### Components (1)
-component:<componentId> (hash)
-commit:<componentId>:<rev> (hset)
-commits:<componentId> (zset) commit{timestamp}
-branch_commits:<componentId>:<branchId> (zset) commit{timestamp}
-versions:<componentId> (zset) version{releaseDate}
-libraries:<componentId> (set) libraries used by a component
-library:<artifactId> (set) components using a library
+- component:<componentId> (hash)
+- commit:<componentId>:<rev> (hset)
+- commits:<componentId> (zset) commit{timestamp}
+- branch_commits:<componentId>:<branchId> (zset) commit{timestamp}
+- versions:<componentId> (zset) version{releaseDate}
 
 ### Interaction (2)
 - api:<source>:<componentId>:exposes:<functionName> (hash) name type
 - api:<source>:<componentId>:uses:<functionName> (hash) name type usage
+- libraries:<componentId> (set) libraries used by a component
+- library:<artifactId> (set) components using a library
 
 ### Inventory (3)
 - env:<envId> (hash) type description monitoring_url active

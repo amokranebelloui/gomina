@@ -40,7 +40,7 @@ data class CallChainDetail(val serviceId: String,
 data class FunctionData(val name: String, val type: String)
 data class FunctionUsageData(val name: String, val type: String, val usage: String? = null)
 
-data class LibraryDetail(val artifactId: String, val versions: List<String>)
+data class LibraryDetail(val artifactId: String, val versions: Collection<String>)
 
 data class LibraryUsageDetail(val version: String, val components: List<ComponentVersionDetail>)
 data class ComponentVersionDetail(val component: ComponentRef, val version: String)
@@ -300,7 +300,22 @@ class DependenciesApi {
     private fun libraries(ctx: RoutingContext) {
         logger.info("Get Libraries")
         try {
-            val deps = libraries.libraries().map { (artifactId, versions) -> LibraryDetail(artifactId.toStr(), versions.map { it.version }) }
+
+            val components = componentRepo.getAll()
+                    .map { ArtifactId.tryWithGroup(it.artifactId) to it.latest }
+                    .mapNotNull { (a, v) -> if (a != null && v != null) a to v else null }
+                    .toMap()
+
+            val libs = libraries.libraries()
+
+
+            val merge = (components.keys + libs.keys).toSet().sortedBy { it.toStr() }.map {
+                it to ((libs[it] ?: emptyList()) + components[it]).filterNotNull()
+            }
+
+            val deps = merge.map { (artifactId, versions) ->
+                LibraryDetail(artifactId.toStr(), versions.map { it.version }.toSet())
+            }
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(deps))
         }
         catch (e: Exception) {
@@ -315,9 +330,11 @@ class DependenciesApi {
         try {
             // FIXME Limit to: Latest, LastReleased, Deployed versions
             val componentsMap = componentRepo.getAll().associateBy { it.id }
-            val usageDetail = artifactId?.let { libraries.library(it) }?.map { (v, cvs) ->
-                LibraryUsageDetail(v.version, cvs.mapNotNull { it.toDetail(componentsMap) })
-            }
+            val usageDetail = artifactId
+                    ?.let { libraries.library(it) }
+                    ?.map { (v, cvs) ->
+                        LibraryUsageDetail(v.version, cvs.mapNotNull { it.toDetail(componentsMap) })
+                    }
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(usageDetail))
         }
         catch (e: Exception) {

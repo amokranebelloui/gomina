@@ -29,10 +29,10 @@ data class ArtifactId(val groupId: String? = null, val artifactId: String, val v
             }
         }
         fun tryWithVersion(str: String?): ArtifactId? {
-            return str?.let { withVersion(it) }
+            return str?.takeIf { it.isNotBlank() }?.let { withVersion(it) }
         }
         fun tryWithGroup(str: String?): ArtifactId? {
-            return str?.let { withGroup(it) }
+            return str?.takeIf { it.isNotBlank() }?.let { withGroup(it) }
         }
     }
     fun toStr() = "${groupId?.let { "$it:" } ?: ""}$artifactId${version?.let { ":$it" } ?: ""}"

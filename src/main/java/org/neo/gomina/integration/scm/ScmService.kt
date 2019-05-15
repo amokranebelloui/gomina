@@ -60,16 +60,15 @@ class ScmService {
         // Information
         val artifactId = MavenUtils.extractArtifactId(pomFile)
         pomFile?.let { componentRepo.editArtifactId(component.id, artifactId) }
-        libraries.changeArtifactId(artifactId ?: component.artifactId, component.artifactId, component.latest)
         componentRepo.updateDocFiles(component.id, scmClient.listFiles("/", "-1").filter { it.endsWith(".md") })
 
         // Trunk
         val trunk = scmClient.getTrunk() // FIXME Handle Branches
         val log = scmClient.getLog(trunk, "0", 100)
+        val versionsLog = log.filter { c -> c.version != null && Version.isStable(c.version) }
 
         // Versions
-        val versions: List<VersionRelease> = log
-                .filter { c -> c.version != null && Version.isStable(c.version) }
+        val versions: List<VersionRelease> = versionsLog
                 .mapNotNull { commit -> commit.version?.let { Triple(
                         MavenUtils.extractArtifactId(scmClient.getFile("pom.xml", commit.revision)),
                         it,
@@ -78,34 +77,46 @@ class ScmService {
                 //.filter { (_, release, _) -> Version.isStable(release) }
                 .map { (artifactId, release, date) -> VersionRelease(artifactId, Version(release), date) }
 
+        println(component.id + " " + versions)
+        
         val releasedVersion = releasedVersion(log)
         val changes = commitCountTo(log, releasedVersion?.revision)?.let { it - 1 }
         val latestVersion = latestVersion(log, pomFile)
 
         componentRepo.updateVersions(component.id, latestVersion, releasedVersion, changes)
         componentRepo.updateVersions(component.id, versions)
-        versions.forEach { libraries.addArtifactId(it.artifactId, it.version) }
+        versions.forEach {
+            if (it.artifactId?.isNotBlank() == true) {
+                libraries.addArtifactId(it.artifactId, it.version)
+            }
+        }
 
         // Metadata
         if (component.hasMetadata) {
-            val metadata = scmClient.getFile("project.yaml", "-1")?.let { metadataMapper.map(it) }
+            run {
+                val metadata = scmClient.getFile("project.yaml", "-1")?.let { metadataMapper.map(it) }
 
-            componentRepo.editInceptionDate(component.id, metadata?.inceptionDate)
-            componentRepo.editOwner(component.id, metadata?.owner)
-            componentRepo.editCriticity(component.id, metadata?.criticity)
+                componentRepo.editInceptionDate(component.id, metadata?.inceptionDate)
+                componentRepo.editOwner(component.id, metadata?.owner)
+                componentRepo.editCriticity(component.id, metadata?.criticity)
 
-            interactionsRepo.update("metadata", listOf(
-                    Interactions(component.id,
-                            metadata?.api?.map { Function(it.name, it.type) } ?: emptyList(),
-                            metadata?.dependencies?.map { FunctionUsage(it.name, it.type, it.usage?.let { Usage(it) }) } ?: emptyList()
-                    )
-            ))
+                interactionsRepo.update("metadata", listOf(
+                        Interactions(component.id,
+                                metadata?.api?.map { Function(it.name, it.type) } ?: emptyList(),
+                                metadata?.dependencies?.map { FunctionUsage(it.name, it.type, it.usage?.let { Usage(it) }) }
+                                        ?: emptyList()
+                        )
+                ))
+            }
 
-            metadata?.libraries?.mapNotNull { ArtifactId.tryWithVersion(it) }?.let {
-                if (latestVersion != null) {
-                    libraries.add(component.id, latestVersion, it)
+            versionsLog.forEach { versionCommit ->
+                val versionMetadata = scmClient.getFile("project.yaml", versionCommit.revision)?.let { metadataMapper.map(it) }
+                versionMetadata?.libraries?.mapNotNull { ArtifactId.tryWithVersion(it) }?.let {
+                    if (latestVersion != null) {
+                        libraries.addUsage(component.id, latestVersion, it)
+                    }
+                    // FIXME Previous version static dependencies
                 }
-                // FIXME Previous version static dependencies
             }
         }
 

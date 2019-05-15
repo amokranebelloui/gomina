@@ -88,10 +88,14 @@ class LibrariesApp extends React.Component<Props, State> {
                                     <tbody>
                                     {this.sortLibraryUsage(this.state.library).map(libUsage =>
                                         <tr>
-                                            <td valign="top" style={{textAlign: 'right', minWidth: '40px', padding: '0px 5px'}}>
-                                                {libUsage.version}
+                                            <td valign="top" style={{
+                                                textAlign: 'right', minWidth: '40px', padding: '0px 5px',
+                                                borderBottom: '1px solid lightgray',
+                                                borderRight: '1px solid lightgray'
+                                            }}>
+                                                <b>{libUsage.version}</b>
                                             </td>
-                                            <td>
+                                            <td style={{borderBottom: '1px solid lightgray'}}>
                                                 {libUsage.components.map(c =>
                                                     <Fragment>
                                                         <Link to={'/component/' + c.component.id}>{c.component.label} </Link>

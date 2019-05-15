@@ -31,7 +31,7 @@ class RedisLibraries : Libraries {
             return jedis.keys("library:*")
                     .map { it.replace(Regex("^library:"), "") }
                     .map { it.splitVersion() }
-                    .map { (artifactId, version) -> ArtifactId.tryWithVersion(artifactId) to Version(version) }
+                    .map { (artifactId, version) -> ArtifactId.tryWithGroup(artifactId) to Version(version) }
                     .mapNotNull { (artifactId, version) -> artifactId?.let { artifactId to version } }
                     .groupBy( { it.first } ) { it.second }
         }
@@ -65,7 +65,13 @@ class RedisLibraries : Libraries {
         }
     }
 
-    override fun add(componentId: String, version: Version, artifacts: List<ArtifactId>) {
+    override fun addArtifactId(artifactId: String, version: Version) {
+        pool.resource.use { jedis ->
+            jedis.sadd("library:$artifactId:${version.version}", "")
+        }
+    }
+
+    override fun addUsage(componentId: String, version: Version, artifacts: List<ArtifactId>) {
         pool.resource.use { jedis ->
             jedis.pipelined().let { pipe ->
                 artifacts.forEach { artifact ->
@@ -75,19 +81,6 @@ class RedisLibraries : Libraries {
                     pipe.sadd("library:$artifactKey", componentKey)
                 }
                 pipe.sync()
-            }
-        }
-    }
-
-    override fun addArtifactId(artifactId: String?, version: Version) {
-        changeArtifactId(artifactId, null, version)
-    }
-
-    override fun changeArtifactId(artifactId: String?, oldArtifactId: String?, version: Version?) {
-        artifactId?.let {
-            pool.resource.use { jedis ->
-                val v = version?.version ?: "latest"
-                jedis.sadd("library:$artifactId:$v", "")
             }
         }
     }
