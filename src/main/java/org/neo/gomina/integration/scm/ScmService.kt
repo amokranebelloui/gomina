@@ -18,6 +18,7 @@ import org.neo.gomina.model.event.Event
 import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.release.ReleaseService
+import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.activity
 import org.neo.gomina.model.version.Version
@@ -50,123 +51,96 @@ class ScmService {
         //logger.info("Last processed ${component.id} -> $lastRevision")
 
         val scmClient = scmClients.getClient(scm)
-        val pomFile: String? = scmClient.getFile("pom.xml", "-1")
+        //-----------------------
 
-        // Commit Log
-        val branches = scmClient.getBranches()
-        branches.forEach { branch ->
-            componentRepo.updateCommitLog(component.id, scmClient.getLog(branch.name, "0", 100))
-        }
-        componentRepo.updateBranches(component.id, branches)
+        val visitor = object : ComponentScmVisitor {
+            override fun visitTrunk(commitLog: List<Commit>, latestVersion: Version?, releasedVersion: Version?, changes: Int?) {
 
-        // Information
-        val artifactId = MavenUtils.extractArtifactId(pomFile)
-        pomFile?.let { componentRepo.editArtifactId(component.id, artifactId) }
-        componentRepo.updateDocFiles(component.id, scmClient.listFiles("/", "-1").filter { it.endsWith(".md") })
+                // Latest Available Versions
+                componentRepo.updateVersions(component.id, latestVersion, releasedVersion, changes)
 
-        // Trunk
-        val trunk = scmClient.getTrunk() // FIXME Handle Branches
-        val log = scmClient.getLog(trunk, "0", 100)
-        val versionsLog = log.filter { c -> c.version != null && Version.isStable(c.version) }
+                // Activity Analysis
+                val prodEnvs = inventory.getProdEnvironments().map { it.id }
+                val releases = events.releases(component.id, prodEnvs)
+                val commitToRelease = ReleaseService.commitToRelease(commitLog, releases)
 
-        // Versions
-        val versions: List<VersionRelease> = versionsLog
-                .mapNotNull { commit -> commit.version?.let { Triple(
-                        MavenUtils.extractArtifactId(scmClient.getFile("pom.xml", commit.revision)),
-                        it,
-                        commit.date
-                )}}
-                //.filter { (_, release, _) -> Version.isStable(release) }
-                .map { (artifactId, release, date) -> VersionRelease(artifactId, Version(release), date) }
-
-        println(component.id + " " + versions)
-        
-        val releasedVersion = releasedVersion(log)
-        val changes = commitCountTo(log, releasedVersion?.revision)?.let { it - 1 }
-        val latestVersion = latestVersion(log, pomFile)
-
-        componentRepo.updateVersions(component.id, latestVersion, releasedVersion, changes)
-        componentRepo.updateVersions(component.id, versions)
-        versions.forEach {
-            if (it.artifactId?.isNotBlank() == true) {
-                libraries.addArtifactId(it.artifactId, it.version)
-            }
-        }
-
-        // Metadata
-        if (component.hasMetadata) {
-            run {
-                val metadata = scmClient.getFile("project.yaml", "-1")?.let { metadataMapper.map(it) }
-
-                componentRepo.editInceptionDate(component.id, metadata?.inceptionDate)
-                componentRepo.editOwner(component.id, metadata?.owner)
-                componentRepo.editCriticity(component.id, metadata?.criticity)
-
-                interactionsRepo.update("metadata", listOf(
-                        Interactions(component.id,
-                                metadata?.api?.map { Function(it.name, it.type) } ?: emptyList(),
-                                metadata?.dependencies?.map { FunctionUsage(it.name, it.type, it.usage?.let { Usage(it) }) }
-                                        ?: emptyList()
-                        )
-                ))
+                componentRepo.updateLastCommit(component.id, commitLog.firstOrNull()?.date)
+                componentRepo.updateCommitActivity(component.id, commitLog.activity(LocalDateTime.now(Clock.systemUTC())))
+                componentRepo.updateCommitToRelease(component.id, commitToRelease)
             }
 
-            versionsLog.forEach { versionCommit ->
-                val versionMetadata = scmClient.getFile("project.yaml", versionCommit.revision)?.let { metadataMapper.map(it) }
-                versionMetadata?.libraries?.mapNotNull { ArtifactId.tryWithVersion(it) }?.let {
-                    if (latestVersion != null) {
-                        libraries.addUsage(component.id, latestVersion, it)
+            override fun visitHead(commit: Commit, isTrunk: Boolean) {
+                println("--> visit head isTrunk=$isTrunk")
+                if (isTrunk) {
+                    val pomFile: String? = scmClient.getFile("pom.xml", commit.revision)
+
+                    val artifactId = MavenUtils.extractArtifactId(pomFile)
+                    pomFile?.let { componentRepo.editArtifactId(component.id, artifactId) }
+
+                    val docFiles = scmClient.listFiles("/", commit.revision).filter { it.endsWith(".md") }
+                    componentRepo.updateDocFiles(component.id, docFiles)
+
+                    if (component.hasMetadata) {
+                        val metadata = scmClient.getFile("project.yaml", commit.revision)?.let { metadataMapper.map(it) }
+
+                        componentRepo.editInceptionDate(component.id, metadata?.inceptionDate)
+                        componentRepo.editOwner(component.id, metadata?.owner)
+                        componentRepo.editCriticity(component.id, metadata?.criticity)
+
+                        interactionsRepo.update("metadata", listOf(
+                                Interactions(component.id,
+                                        metadata?.api?.map { Function(it.name, it.type) } ?: emptyList(),
+                                        metadata?.dependencies?.map { FunctionUsage(it.name, it.type, it.usage?.let { Usage(it) }) }
+                                                ?: emptyList()
+                                )
+                        ))
+
+                        val latestVersion = latestVersion(listOf(commit), pomFile) // FIXME chgSignature
+                        if (latestVersion != null) {
+                            metadata?.libraries?.mapNotNull { ArtifactId.tryWithVersion(it) }?.let {
+                                libraries.addUsage(component.id, latestVersion, it)
+                            }
+                        }
                     }
-                    // FIXME Previous version static dependencies
+
+                    pomFile?.let { mavenDependencyResolver.dependencies(it) }?.forEach { println("-> $it") }
                 }
             }
+
+            override fun visitVersion(commit: Commit, isTrunk: Boolean, versionRelease: VersionRelease) {
+                println("--> visit version ${component.id} isTrunk=$isTrunk $versionRelease")
+
+                componentRepo.updateVersions(component.id, listOf(versionRelease)) // FIXME chgSignature
+
+                if (versionRelease.artifactId?.isNotBlank() == true) {
+                    libraries.addArtifactId(versionRelease.artifactId, versionRelease.version)
+                }
+
+                if (component.hasMetadata) {
+                    val versionMetadata = scmClient.getFile("project.yaml", commit.revision)?.let { metadataMapper.map(it) }
+                    versionMetadata?.libraries?.mapNotNull { ArtifactId.tryWithVersion(it) }?.let {
+                        libraries.addUsage(component.id, versionRelease.version, it)
+                    }
+                }
+
+                val releaseEvent = Event(
+                        id = "${component.id}-${versionRelease.version}",
+                        timestamp = versionRelease.releaseDate,
+                        type = "version", message = "Available",
+                        componentId = component.id,
+                        version = versionRelease.version.version)
+                events.save(listOf(releaseEvent), "version") // FIXME chgSignature
+            }
+
         }
-        pomFile?.let { mavenDependencyResolver.dependencies(it) }?.forEach { println("-> $it") }
 
-        // Activity Analysis
-        val prodEnvs = inventory.getProdEnvironments().map { it.id }
-        val releases = this.events.releases(component.id, prodEnvs)
-        val commitToRelease = ReleaseService.commitToRelease(log, releases)
-
-        componentRepo.updateLastCommit(component.id, log.firstOrNull()?.date)
-        componentRepo.updateCommitActivity(component.id, log.activity(LocalDateTime.now(Clock.systemUTC())))
-        componentRepo.updateCommitToRelease(component.id, commitToRelease)
-
-        // Events
-        val versionEvents = versions.map { Event(
-                id = "${component.id}-${it.version}", timestamp = it.releaseDate, type = "version", message = "Available",
-                componentId = component.id, version = it.version.version)
-        }
-        events.save(versionEvents, "version")
+        component.accept(scmClient, componentRepo, visitor)
     }
 
     private fun latestVersion(log: List<Commit>, pomFile: String?): Version? {
         val latest = MavenUtils.extractVersion(pomFile)
         val latestRevision = log.firstOrNull()?.revision
         return latest?.takeIf { latest.isNotBlank() }?.let { Version(it, latestRevision) }
-    }
-
-    private fun releasedVersion(log: List<Commit>): Version? {
-        val firstReleaseCommit = log.firstOrNull { it.version != null && Version.isStable(it.version) }
-        //val releasedRevision = log.firstOrNull { StringUtils.isNotBlank(it.newVersion) }?.revision
-        return if (firstReleaseCommit?.version != null) {
-            Version(firstReleaseCommit.version, firstReleaseCommit.revision)
-        }
-        else null
-    }
-
-    private fun commitCountTo(logEntries: List<Commit>, to: String?): Int? {
-        logEntries.map { it.revision }.withIndex().forEach { (count, revision) ->
-            if (StringUtils.equals(revision, to)) return count
-        }
-        return null
-    }
-
-    @Deprecated("Get from local database", ReplaceWith("componentRepo.getBranch(componentId, branchId)"))
-    fun getBranch(scm: Scm, branchId: String): List<Commit> {
-        val scmClient = scmClients.getClient(scm)
-        // FIXME Number of commits to process ??
-        return scmClient.getLog(branchId, "0", 100)
     }
 
     // TODO Cache documents, for quicker serving + from branches ??
