@@ -4,6 +4,7 @@ import com.github.rjeschke.txtmark.Processor
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.ArtifactId
+import org.neo.gomina.integration.maven.MavenDependencyResolver
 import org.neo.gomina.integration.maven.MavenUtils
 import org.neo.gomina.integration.scm.impl.ScmClients
 import org.neo.gomina.integration.scm.metadata.ProjectMetadataMapper
@@ -33,6 +34,7 @@ class ScmService {
     @Inject lateinit var scmClients: ScmClients
     @Inject lateinit var componentRepo: ComponentRepo
     @Inject lateinit var interactionsRepo: InteractionsRepository
+    @Inject lateinit var mavenDependencyResolver: MavenDependencyResolver
     @Inject lateinit var libraries: Libraries
     @Inject lateinit var inventory: Inventory
     @Inject lateinit var events: Events
@@ -119,6 +121,7 @@ class ScmService {
                 }
             }
         }
+        pomFile?.let { mavenDependencyResolver.dependencies(it) }?.forEach { println("-> $it") }
 
         // Activity Analysis
         val prodEnvs = inventory.getProdEnvironments().map { it.id }

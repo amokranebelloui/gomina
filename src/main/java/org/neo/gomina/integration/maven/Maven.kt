@@ -1,27 +1,12 @@
 package org.neo.gomina.integration.maven
 
-//import com.jcabi.aether.Aether
 import org.apache.logging.log4j.LogManager
-import org.apache.maven.artifact.repository.ArtifactRepositoryPolicy
-import org.apache.maven.artifact.repository.MavenArtifactRepository
-import org.apache.maven.artifact.repository.layout.DefaultRepositoryLayout
-import org.apache.maven.model.Model
-import org.apache.maven.model.building.*
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader
-import org.apache.maven.project.MavenProject
 import org.neo.gomina.model.version.Version
-//import org.sonatype.aether.util.artifact.DefaultArtifact
 import org.w3c.dom.Document
 import java.io.ByteArrayInputStream
-import java.io.File
-import java.io.FileReader
 import java.nio.charset.StandardCharsets
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.xpath.XPathFactory
-import org.apache.maven.model.building.DefaultModelBuilderFactory
-import org.apache.maven.repository.internal.MavenRepositorySystemUtils
-//import org.sonatype.aether.util.artifact.JavaScopes
-
 
 data class ArtifactId(val groupId: String? = null, val artifactId: String, val version: String? = null) {
     companion object {
@@ -98,58 +83,3 @@ object MavenUtils {
     }
 
 }
-/*
-fun main1(args: Array<String>) {
-    val model = loadModel(File("pom.xml"))
-    model.dependencies.forEach {
-        println(it)
-    }
-}
-
-fun main(args: Array<String>) {
-    //val pom = "/Users/Amokrane/Work/Code/Idea/rxjava-test/pom.xml"
-    val pom = "pom.xml"
-    val project = MavenProject(loadModel(File(pom))).apply { remoteArtifactRepositories = listOf(
-            MavenArtifactRepository("maven-central", "http://repo1.maven.org/maven2/", DefaultRepositoryLayout(), ArtifactRepositoryPolicy(), ArtifactRepositoryPolicy())
-    )}
-    val aether = Aether(project, File(".temp/repository"))
-
-    //val newSession = MavenRepositorySystemUtils.newSession()
-    
-    val artifacts = project.dependencies.flatMap { depend ->
-        //println("DEP $depend")
-        val defaultArtifact = DefaultArtifact(depend.groupId, depend.artifactId, depend.classifier, depend.type, depend.version)
-        aether.resolve(defaultArtifact, JavaScopes.RUNTIME) { n, nodes ->
-            //println(n.premanagedScope)
-            true
-        }
-        //.map { art -> println("ART $art") }
-
-    }
-    artifacts.sortedBy { it.groupId }.forEach { println(it) }
-}
-
-fun loadProject(pomFile: File): MavenProject {
-    val mavenReader = MavenXpp3Reader()
-    return FileReader(pomFile).use { reader ->
-        MavenProject(mavenReader.read(reader)?.also { it.pomFile = pomFile })
-    }
-}
-
-fun loadModel(pomFile: File): Model {
-    val modelBuilder = DefaultModelBuilderFactory().newInstance()
-    //modelBuilder.setProfileSelector(DefaultProfileSelector())
-    //modelBuilder.setModelProcessor(DefaultModelProcessor())
-    val modelRequest = DefaultModelBuildingRequest()
-    modelRequest.pomFile = pomFile
-    val modelBuildingResult = modelBuilder.build(modelRequest)
-    return modelBuildingResult.effectiveModel.also { it.pomFile = pomFile }
-}
-
-fun loadModel2(pomFile: File): Model {
-    val mavenReader = MavenXpp3Reader()
-    return FileReader(pomFile).use { reader ->
-        mavenReader.read(reader)
-    }
-}
-*/

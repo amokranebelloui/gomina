@@ -27,6 +27,8 @@ import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.jenkins.jenkins.JenkinsConnectorImpl
+import org.neo.gomina.integration.maven.MavenDependencyResolver
+import org.neo.gomina.integration.maven.MavenRepo
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.scm.impl.CommitDecorator
 import org.neo.gomina.integration.scm.impl.ScmClients
@@ -117,6 +119,13 @@ class GominaModule : AbstractModule() {
         bind(CommitDecorator::class.java).`in`(Scopes.SINGLETON)
         bind(ScmClients::class.java).`in`(Scopes.SINGLETON)
         bind(ScmService::class.java).`in`(Scopes.SINGLETON)
+
+        // Maven
+        bind(String::class.java).annotatedWith(named("maven.local.repository"))
+                .toInstance(config.maven.localRepository)
+        bind(typeLiteral<List<@JvmSuppressWildcards MavenRepo>>()).annotatedWith(named("maven.remote.repositories"))
+                .toInstance(config.maven.remoteRepositories)
+        bind(MavenDependencyResolver::class.java).`in`(Scopes.SINGLETON)
 
         // Jenkins
         bind(JenkinsConfig::class.java).toInstance(config.jenkins)

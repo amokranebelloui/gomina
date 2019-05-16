@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.dummy.DummyEventsProviderConfig
 import org.neo.gomina.integration.elasticsearch.ElasticEventsProviderConfig
 import org.neo.gomina.integration.jenkins.JenkinsConfig
+import org.neo.gomina.integration.maven.MavenRepo
 import org.neo.gomina.integration.monitoring.MonitoringEventsProviderConfig
 import org.neo.gomina.integration.sonar.SonarConfig
 import java.io.File
@@ -30,6 +31,8 @@ data class EventsConfig(
     fun all() = internalMonitoring + elasticSearch + dummy
 }
 
+data class MavenConfig(var localRepository: String = "", var remoteRepositories: List<MavenRepo> = emptyList())
+
 data class Config (
 
         var name: String? = null,
@@ -38,6 +41,7 @@ data class Config (
         var domains: List<String> = emptyList(),
         val jiraUrl: String = "",
         val jiraProjects: List<String> = emptyList(),
+        val maven: MavenConfig = MavenConfig(),
         var database: DatabaseConfig = DatabaseConfig(),
         var inventory: InventoryConfig = InventoryConfig(),
         var work: WorkConfig = WorkConfig(),

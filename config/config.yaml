@@ -12,6 +12,13 @@ database:
   host: 'localhost'
   port: '7080'
 
+maven:
+  localRepository: '/Users/Amokrane/Applications/maven-libs'
+  remoteRepositories:
+    - id: 'central'
+      type: 'default'
+      url: 'http://central.maven.org/maven2/'
+
 inventory:
   componentsFile: 'data/components.json'
   interactionsFile: 'data/interactions2.json'

@@ -100,9 +100,25 @@ class DummyScmClient : ScmClient {
         val c = ArtifactId.tryWithGroup(commit["artifactId"] as String?)
         return """
             <project>
+                <modelVersion>4.0.0</modelVersion>
                 ${c?.groupId?.let { "<groupId>$it</groupId>" }}
                 ${c?.artifactId?.let { "<artifactId>$it</artifactId>" }}
                 ${c?.version?.let { "<version>$it</version>" }}
+                <dependencies>
+
+                    <dependency>
+                        <groupId>javax.inject</groupId>
+                        <artifactId>javax.inject</artifactId>
+                        <version>1</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>com.google.inject</groupId>
+                        <artifactId>guice</artifactId>
+                        <version>3.0</version>
+                    </dependency>
+
+                </dependencies>
             </project>
 
         """.trimMargin()
