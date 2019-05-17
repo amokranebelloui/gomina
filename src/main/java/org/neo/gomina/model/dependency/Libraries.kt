@@ -8,10 +8,10 @@ data class ComponentVersion(val componentId: String, val version: Version)
 interface Libraries {
     fun libraries(): Map<ArtifactId, List<Version>>
     fun library(artifactId: ArtifactId): Map<Version, List<ComponentVersion>>
-    fun usedByComponent(componentId: String): List<ArtifactId>
+    fun forComponent(componentId: String, version: Version): List<ArtifactId>
     fun componentsUsing(artifactId: ArtifactId): List<ComponentVersion>
     fun addArtifactId(artifactId: String, version: Version)
     fun addUsage(componentId: String, version: Version, artifacts: List<ArtifactId>)
-    fun removeAllSnapshots(componentId: String)
+    fun cleanSnapshotVersions(componentId: String)
 
 }

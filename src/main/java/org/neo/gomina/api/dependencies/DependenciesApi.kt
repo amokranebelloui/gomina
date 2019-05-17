@@ -19,6 +19,7 @@ import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
+import org.neo.gomina.model.version.Version
 import org.neo.gomina.model.work.WorkList
 
 
@@ -349,9 +350,12 @@ class DependenciesApi {
 
     private fun componentLibraries(ctx: RoutingContext) {
         val componentId = ctx.request().getParam("componentId")
+        val versionId = ctx.request().getParam("version")?.let { Version(it) }
         logger.info("Get Libraries $componentId")
         try {
-            val deps = libraries.usedByComponent(componentId).map { it.toStr() }
+            val component = componentRepo.get(componentId)
+            val version = versionId ?: component?.latest
+            val deps = version?.let{ v -> libraries.forComponent(componentId, v).map { it.toStr() } }
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(deps))
         }
         catch (e: Exception) {

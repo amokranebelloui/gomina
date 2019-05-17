@@ -49,9 +49,9 @@ class RedisLibraries : Libraries {
         }
     }
 
-    override fun usedByComponent(componentId: String): List<ArtifactId> {
+    override fun forComponent(componentId: String, version: Version): List<ArtifactId> {
         pool.resource.use { jedis ->
-            return jedis.keys("libraries:$componentId:*")
+            return jedis.keys("libraries:$componentId:${version.version}")
                     .flatMap { jedis.smembers(it) }
                     .mapNotNull { ArtifactId.tryWithVersion(it) }
         }
@@ -85,7 +85,7 @@ class RedisLibraries : Libraries {
         }
     }
 
-    override fun removeAllSnapshots(componentId: String) {
+    override fun cleanSnapshotVersions(componentId: String) {
         pool.resource.use { jedis ->
             val snapshotComponentsV = jedis.keys("libraries:$componentId:*-SNAPSHOT")
             snapshotComponentsV.forEach { componentVersionKey ->

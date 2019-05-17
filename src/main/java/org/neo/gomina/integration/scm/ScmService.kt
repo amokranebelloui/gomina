@@ -52,7 +52,7 @@ class ScmService {
         //-----------------------
 
         componentRepo.cleanSnapshotVersions(component.id)
-        libraries.removeAllSnapshots(component.id)
+        libraries.cleanSnapshotVersions(component.id)
 
         val visitor = object : ComponentScmVisitor {
             override fun visitTrunk(commitLog: List<Commit>, latestVersion: Version?, releasedVersion: Version?, changes: Int?) {
