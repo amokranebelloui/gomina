@@ -22,7 +22,7 @@ class RedisLibraries : Libraries {
     private fun initialize(@Named("database.host") host: String, @Named("database.port") port: Int) {
         pool = JedisPool(
                 GenericObjectPoolConfig().apply { testOnBorrow = true },
-                host, port, 10000, null, 2)
+                host, port, 10000, null, 8)
         logger.info("Libraries Database connected $host $port")
     }
 
@@ -81,6 +81,20 @@ class RedisLibraries : Libraries {
                     pipe.sadd("library:$artifactKey", componentKey)
                 }
                 pipe.sync()
+            }
+        }
+    }
+
+    override fun removeAllSnapshots(componentId: String) {
+        pool.resource.use { jedis ->
+            val snapshotComponentsV = jedis.keys("libraries:$componentId:*-SNAPSHOT")
+            snapshotComponentsV.forEach { componentVersionKey ->
+                val componentVersion = componentVersionKey.replace(Regex("^libraries:"), "")
+                val libraries = jedis.smembers(componentVersionKey)
+                libraries.forEach { library ->
+                    jedis.srem("library:$library", componentVersion)
+                    jedis.del(componentVersionKey)
+                }
             }
         }
     }

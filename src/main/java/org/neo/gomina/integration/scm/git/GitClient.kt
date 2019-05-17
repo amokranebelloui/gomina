@@ -70,7 +70,7 @@ class GitClient : ScmClient {
         return commits.map {
             val revision = it.name
             val message = StringUtils.replaceChars(it.fullMessage, "\n", " ")
-            val version = commitDecorator.flag(revision, message, this)
+            val version = commitDecorator.flag(branch, revision, message, this)
             Commit(
                     revision = revision,
                     date = Instant.ofEpochMilli(it.commitTime.toLong() * 1000L).atZone(ZoneOffset.UTC).toLocalDateTime(),
@@ -84,9 +84,9 @@ class GitClient : ScmClient {
         }
     }
 
-    override fun getFile(url: String, rev: String): String? {
-        val trunk = getTrunk()
-        val head = repository.getRef(trunk)
+    override fun getFile(branch : String, url: String, rev: String): String? {
+        //val trunk = getTrunk()
+        val head = repository.getRef(branch)
         val walk = RevWalk(repository)
         val commit = walk.parseCommit(head.getObjectId())
         val tree = commit.tree

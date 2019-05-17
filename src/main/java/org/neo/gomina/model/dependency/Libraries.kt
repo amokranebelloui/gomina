@@ -12,5 +12,6 @@ interface Libraries {
     fun componentsUsing(artifactId: ArtifactId): List<ComponentVersion>
     fun addArtifactId(artifactId: String, version: Version)
     fun addUsage(componentId: String, version: Version, artifacts: List<ArtifactId>)
+    fun removeAllSnapshots(componentId: String)
 
 }

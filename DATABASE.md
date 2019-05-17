@@ -13,8 +13,6 @@ Contexts, entities, schemas
 ### Interaction (2)
 - api:<source>:<componentId>:exposes:<functionName> (hash) name type
 - api:<source>:<componentId>:uses:<functionName> (hash) name type usage
-- libraries:<componentId> (set) libraries used by a component
-- library:<artifactId> (set) components using a library
 
 ### Inventory (3)
 - env:<envId> (hash) type description monitoring_url active
@@ -63,5 +61,10 @@ Contexts, entities, schemas
 - knowledge:component:<componentId> (zset) user{knowledge}
 - knowledge:user:<userId> (zset) component{knowledge}
 
- 
+### Libraries (8) 
+ - libraries:<componentId> (set) libraries used by a component
+ - library:<artifactId> (set) components using a library
 
+## Tools
+
+`eval "redis.call('select', 2) for _,key in ipairs(redis.call('KEYS', 'librar*')) do redis.call('move', key, 8) end" 0`

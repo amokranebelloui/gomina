@@ -17,7 +17,7 @@ class DummyScmClientTest {
     @Throws(Exception::class)
     fun getFile() {
         val client = DummyScmClient("OMS/Server/tradex-basketmanager")
-        val file = client.getFile("doc.md", "-1")
+        val file = client.getFile("trunk", "doc.md", "-1")
         logger.info(file)
     }
 

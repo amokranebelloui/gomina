@@ -99,7 +99,7 @@ class TmateSoftSvnClient : ScmClient {
             */
             val revision = revAsString(it.revision) ?: ""
             val message = StringUtils.replaceChars(it.message, "\n", " ")
-            val version = commitDecorator.flag(revision, message, this)
+            val version = commitDecorator.flag(branch, revision, message, this)
             Commit(
                     revision = revision,
                     date = it.date.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime(),
@@ -112,14 +112,14 @@ class TmateSoftSvnClient : ScmClient {
         }
     }
 
-    override fun getFile(path: String, rev: String): String? {
-        val trunk = getTrunk()
+    override fun getFile(branch: String, path: String, rev: String): String? {
+        //val trunk = getTrunk()
         try {
             val baos = ByteArrayOutputStream()
-            repository.getFile("$projectUrl/$trunk/$path", java.lang.Long.valueOf(rev), SVNProperties(), baos)
+            repository.getFile("$projectUrl/$branch/$path", java.lang.Long.valueOf(rev), SVNProperties(), baos)
             return String(baos.toByteArray())
         } catch (e: Exception) {
-            logger.info("Cannot find file $projectUrl/$trunk/$path")
+            logger.info("Cannot find file $projectUrl/$branch/$path")
         }
         return null
     }

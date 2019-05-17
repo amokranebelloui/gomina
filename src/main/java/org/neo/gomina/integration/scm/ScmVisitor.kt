@@ -11,8 +11,8 @@ import org.neo.gomina.model.version.Version
 
 interface ComponentScmVisitor {
     fun visitTrunk(commitLog: List<Commit>, latestVersion: Version?, releasedVersion: Version?, changes: Int?)
-    fun visitHead(commit: Commit, isTrunk: Boolean)
-    fun visitVersion(commit: Commit, isTrunk: Boolean, versionRelease: VersionRelease)
+    fun visitHead(commit: Commit, branch: String, isTrunk: Boolean)
+    fun visitVersion(commit: Commit, branch: String, isTrunk: Boolean, versionRelease: VersionRelease)
 }
 
 fun Component.accept(scmClient: ScmClient, componentRepo: ComponentRepo, visitor: ComponentScmVisitor) {
@@ -41,20 +41,20 @@ fun Component.accept(scmClient: ScmClient, componentRepo: ComponentRepo, visitor
             componentRepo.updateCommitLog(this.id, commitLog)
 
             // Information
-            commitLog.firstOrNull()?.let { head -> visitor.visitHead(head, isTrunk) }
+            commitLog.firstOrNull()?.let { head -> visitor.visitHead(head, branch.name, isTrunk) }
 
             // Versions
             commitLog
                     .filter { c -> c.version != null && Version.isStable(c.version) }
                     .mapNotNull { commit -> commit.version?.let { Triple(
-                            MavenUtils.extractArtifactId(scmClient.getFile("pom.xml", commit.revision)),
+                            MavenUtils.extractArtifactId(scmClient.getFile(branch.name, "pom.xml", commit.revision)),
                             it,
                             commit
                     )}}
                     //.filter { (_, release, _) -> Version.isStable(release) }
                     .map { (artifactId, release, commit) ->
                         val versionRelease = VersionRelease(artifactId, Version(release), commit.date)
-                        visitor.visitVersion(commit, isTrunk, versionRelease)
+                        visitor.visitVersion(commit, branch.name, isTrunk, versionRelease)
                         versionRelease
                     }
         }

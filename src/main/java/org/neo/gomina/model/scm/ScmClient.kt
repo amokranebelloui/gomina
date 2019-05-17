@@ -69,7 +69,7 @@ interface ScmClient {
     fun getLog(branch: String, rev: String, count: Int): List<Commit>
 
     /** get file for a revision, HEAD is -1 **/
-    fun getFile(url: String, rev: String): String?
+    fun getFile(branch: String, url: String, rev: String): String?
 
     fun listFiles(url: String, rev: String): List<String>
 }

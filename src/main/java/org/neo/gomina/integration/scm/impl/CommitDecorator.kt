@@ -6,7 +6,7 @@ import org.neo.gomina.model.scm.ScmClient
 
 class CommitDecorator {
 
-    fun flag(revision: String, message: String, scmClient: ScmClient): String? {
+    fun flag(branch: String, revision: String, message: String, scmClient: ScmClient): String? {
         // FIXME Detect build system
         /*
         if (StringUtils.startsWith(message, "[maven-release-plugin] prepare release")) {
@@ -19,7 +19,7 @@ class CommitDecorator {
         }
         return null
         */
-        val pom = scmClient.getFile("pom.xml", revision)
+        val pom = scmClient.getFile(branch, "pom.xml", revision)
         return MavenUtils.extractVersion(pom)
     }
 

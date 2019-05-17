@@ -26,7 +26,7 @@ class TmateSoftSvnClientTest {
     @Test
     fun testGetFile() {
         val svnClient = TmateSoftSvnClient(root, projectUrl)
-        svnClient.getFile("README.md", "-1")?.let { println(it) }
+        svnClient.getFile("trunk", "README.md", "-1")?.let { println(it) }
     }
 
     @Test
