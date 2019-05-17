@@ -298,18 +298,6 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
-    override fun getVersions(componentId: String): List<VersionRelease> {
-        pool.resource.use { jedis ->
-            return jedis.zrevrangeWithScores("versions:$componentId", 0, -1).mapNotNull {
-                val artifactIdWithVersion = ArtifactId.tryWithVersion(it.element)
-                val artifactId = artifactIdWithVersion?.toStrWithoutVersion()
-                val version = artifactIdWithVersion?.getVersion()
-                val releaseDate = Instant.ofEpochMilli(it.score.toLong()).atZone(ZoneOffset.UTC).toLocalDateTime()
-                if (artifactId != null && version != null) VersionRelease(artifactId, version, releaseDate) else null
-            }
-        }
-    }
-
     override fun updateVersions(componentId: String, latest: Version?, released: Version?, changes: Int?) {
         pool.resource.use { jedis ->
             val data = mapOf(
@@ -324,17 +312,41 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
-    override fun updateVersions(componentId: String, versions: List<VersionRelease>) {
+    override fun getVersions(componentId: String, branchId: String?): List<VersionRelease> {
+        pool.resource.use { jedis ->
+            val suffix = branchId?.let { ":$it" } ?: ""
+            return jedis.zrevrangeWithScores("versions:$componentId$suffix", 0, -1).mapNotNull {
+                val artifactIdWithVersion = ArtifactId.tryWithVersion(it.element)
+                val artifactId = artifactIdWithVersion?.toStrWithoutVersion()
+                val version = artifactIdWithVersion?.getVersion()
+                val releaseDate = Instant.ofEpochMilli(it.score.toLong()).atZone(ZoneOffset.UTC).toLocalDateTime()
+                if (artifactId != null && version != null) VersionRelease(artifactId, version, releaseDate) else null
+            }
+        }
+    }
+
+    override fun addVersions(componentId: String, branch: String, versions: List<VersionRelease>) {
         pool.resource.use { jedis ->
             jedis.pipelined().let { pipe ->
                 versions.forEach { v ->
                     val artifactId = ArtifactId.tryWithGroup(v.artifactId)
                     val versionedArtifactId = ArtifactId(artifactId?.groupId, artifactId?.artifactId ?: "", v.version.version)
                     val time = v.releaseDate.atZone(ZoneOffset.UTC).toInstant().toEpochMilli().toDouble()
+                    pipe.zadd("versions:$componentId:$branch", time, versionedArtifactId.toStr())
                     pipe.zadd("versions:$componentId", time, versionedArtifactId.toStr())
                 }
                 pipe.sync()
             }
+        }
+    }
+
+    override fun cleanSnapshotVersions(componentId: String) {
+        pool.resource.use { jedis ->
+            val pipe = jedis.pipelined()
+            jedis.keys("versions:$componentId:*-SNAPSHOT").forEach {
+                pipe.del(it)
+            }
+            pipe.sync()
         }
     }
 

@@ -109,9 +109,10 @@ interface ComponentRepo {
 
     fun updateBuildStatus(componentId: String, number: String?, status: String?, building: Boolean?, timestamp: Long?)
 
-    fun getVersions(componentId: String): List<VersionRelease>
     fun updateVersions(componentId: String, latest: Version?, released: Version?, changes: Int?)
-    fun updateVersions(componentId: String, versions: List<VersionRelease>)
+    fun getVersions(componentId: String, branchId: String?): List<VersionRelease>
+    fun addVersions(componentId: String, branch: String, versions: List<VersionRelease>)
+    fun cleanSnapshotVersions(componentId: String)
 
     fun updateBranches(componentId: String, branches: List<Branch>)
     fun updateDocFiles(componentId: String, docFiles: List<String>)

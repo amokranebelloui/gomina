@@ -346,9 +346,10 @@ class ComponentsApi {
 
     private fun versions(ctx: RoutingContext) {
         val componentId = ctx.request().getParam("componentId")
+        val branchId = ctx.request().getParam("branchId")
         try {
-            logger.info("Get versions $componentId")
-            val versions = componentRepo.getVersions(componentId).map {
+            logger.info("Get versions $componentId $branchId")
+            val versions = componentRepo.getVersions(componentId, branchId).map {
                 VersionReleaseDetail(it.artifactId, it.version.toVersionDetail(), it.releaseDate.toDateUtc)
             }
             ctx.response().putHeader("content-type", "text/html").end(mapper.writeValueAsString(versions))

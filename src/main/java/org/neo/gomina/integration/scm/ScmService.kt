@@ -51,6 +51,7 @@ class ScmService {
         val scmClient = scmClients.getClient(scm)
         //-----------------------
 
+        componentRepo.cleanSnapshotVersions(component.id)
         libraries.removeAllSnapshots(component.id)
 
         val visitor = object : ComponentScmVisitor {
@@ -72,11 +73,15 @@ class ScmService {
             override fun visitHead(commit: Commit, branch: String, isTrunk: Boolean) {
                 println("--> visit head isTrunk=$isTrunk")
                 val pomFile: String? = scmClient.getFile(branch, "pom.xml", commit.revision)
+                val artifactId = MavenUtils.extractArtifactId(pomFile)
                 val latestVersion = latestVersion(listOf(commit), pomFile) // FIXME chgSignature
+
+                if (latestVersion != null) {
+                    componentRepo.addVersions(component.id, branch, listOf(VersionRelease(artifactId, latestVersion, commit.date)))
+                }
 
                 if (isTrunk) {
 
-                    val artifactId = MavenUtils.extractArtifactId(pomFile)
                     pomFile?.let { componentRepo.editArtifactId(component.id, artifactId) }
 
                     val docFiles = scmClient.listFiles("/", commit.revision).filter { it.endsWith(".md") }
@@ -114,7 +119,7 @@ class ScmService {
                 println("--> visit version ${component.id} isTrunk=$isTrunk $versionRelease")
                 val pomFile: String? = scmClient.getFile(branch, "pom.xml", commit.revision)
 
-                componentRepo.updateVersions(component.id, listOf(versionRelease)) // FIXME chgSignature
+                componentRepo.addVersions(component.id, branch, listOf(versionRelease)) // FIXME chgSignature
 
                 if (versionRelease.artifactId?.isNotBlank() == true) {
                     libraries.addArtifactId(versionRelease.artifactId, versionRelease.version)
