@@ -83,18 +83,6 @@ class ComponentApp extends React.Component {
                 thisComponent.setState({associated: []});
             });
     }
-    reloadScm(componentId) {
-        console.info("reloading", componentId);
-        axios.put('/data/components/reload-scm?componentIds=' + componentId)
-            .then(response => {
-                console.log("component reloaded", response.data);
-                this.retrieveComponent(componentId)
-                this.retrieveBranch(this.state.componentId, this.state.branchId);
-            })
-            .catch(function (error) {
-                console.log("component reload error", error.response);
-            });
-    }
     reloadBuild(componentId) {
         console.info("reloading build ", componentId);
         axios.put('/data/components/reload-build?componentIds=' + componentId)
@@ -140,10 +128,24 @@ class ComponentApp extends React.Component {
     editScm(componentId, type, url, path, hasMetadata) {
         axios.put('/data/components/' + componentId + '/scm?type=' + type + '&url=' + url + '&path=' + path + '&hasMetadata=' + hasMetadata)
             .then(() => {
-                this.retrieveComponent(componentId);
-                this.retrieveBranch(componentId, this.state.branchId);
+                //this.retrieveComponent(componentId);
+                //this.retrieveBranch(componentId, this.state.branchId);
+                this.reloadAll()
             })
             .catch((error) => console.error("cannot edit scm", error.response));
+    }
+    reloadScm(componentId) {
+        console.info("reloading", componentId);
+        axios.put('/data/components/reload-scm?componentIds=' + componentId)
+            .then(response => {
+                console.log("component reloaded", response.data);
+                //this.retrieveComponent(componentId)
+                //this.retrieveBranch(this.state.componentId, this.state.branchId);
+                this.reloadAll()
+            })
+            .catch(function (error) {
+                console.log("component reload error", error.response);
+            });
     }
     editInceptionDate(componentId, date) {
         axios.put('/data/components/' + componentId + '/inceptionDate?inceptionDate=' + date)
@@ -243,14 +245,8 @@ class ComponentApp extends React.Component {
     retrieveBranch(componentId, branchId) {
         const thisComponent = this;
         axios.get('/data/components/' + componentId + '/scm?branchId=' + (branchId ? branchId : ""))
-            .then(response => {
-                console.log("branch data", response.data);
-                thisComponent.setState({branch: response.data});
-            })
-            .catch(function (error) {
-                console.log("branch error", error.response);
-                thisComponent.setState({branch: null});
-            });
+            .then(response => thisComponent.setState({branch: response.data}))
+            .catch((error) => thisComponent.setState({branch: null}))
     }
     retrieveVersions(componentId) {
         const thisComponent = this;
@@ -258,9 +254,9 @@ class ComponentApp extends React.Component {
             .then(response => thisComponent.setState({versions: response.data}))
             .catch(() => thisComponent.setState({versions: null}))
     }
-    retrieveLibraries(componentId) {
+    retrieveLibraries(componentId, branchId) {
         const thisComponent = this;
-        axios.get('/data/dependencies/libraries/' + componentId)
+        axios.get('/data/dependencies/libraries/' + componentId + (branchId ? '?branchId=' + branchId : ""))
             .then(response => thisComponent.setState({libraries: response.data}))
             .catch(() => thisComponent.setState({libraries: null}))
     }
@@ -419,7 +415,6 @@ class ComponentApp extends React.Component {
         this.retrieveComponent(this.state.componentId);
         this.retrieveAssociated(this.state.componentId);
         this.retrieveVersions(this.state.componentId);
-        this.retrieveLibraries(this.state.componentId);
         this.retrieveApi(this.state.componentId);
         this.retrieveUsage(this.state.componentId);
         this.retrieveDependencies(this.state.componentId);
@@ -432,9 +427,11 @@ class ComponentApp extends React.Component {
         }
         if (this.state.branchId) {
             this.retrieveBranch(this.state.componentId, this.state.branchId);
+            this.retrieveLibraries(this.state.componentId, this.state.branchId);
         }
         else {
             this.retrieveBranch(this.state.componentId, null);
+            this.retrieveLibraries(this.state.componentId, null);
         }
         this.retrieveEvents(this.state.componentId);
         this.retrieveKnowledge(this.state.componentId)
@@ -449,11 +446,10 @@ class ComponentApp extends React.Component {
         console.info("componentApp !props-chg ", this.props.match.params.id, newComponent);
         console.info("branch", queryParams.branchId, newBranch);
         this.setState({componentId: newComponent, branchId: newBranch, docId: newDoc});
-        if (this.props.match.params.id !== newComponent && newComponent) {
+        if (newComponent && this.props.match.params.id !== newComponent) {
             this.retrieveComponent(newComponent);
             this.retrieveAssociated(newComponent);
             this.retrieveVersions(newComponent);
-            this.retrieveLibraries(newComponent);
             //this.retrieveInstances(newComponent);
             this.retrieveApi(newComponent);
             this.retrieveUsage(newComponent);
@@ -470,9 +466,9 @@ class ComponentApp extends React.Component {
             this.retrieveDoc(newComponent, newDoc);
         }
         console.info("change ", queryParams.branchId, newBranch, this.props.match.params.id, newComponent);
-        if (newComponent &&
-            (this.props.match.params.id !== newComponent || queryParams.branchId !== newBranch)) {
+        if (newComponent && (this.props.match.params.id !== newComponent || queryParams.branchId !== newBranch)) {
             this.retrieveBranch(newComponent, newBranch);
+            this.retrieveLibraries(newComponent, newBranch);
         }
     }
     render() {
@@ -500,7 +496,7 @@ class ComponentApp extends React.Component {
                                 <UnreleasedChangeCount changes={component.changes} />
                             </div>
 
-                            <ComponentMenu component={component} location={this.props.location}
+                            <ComponentMenu component={component} selectedBranch={this.state.branchId} location={this.props.location}
                             />
                         </Well>
 
@@ -570,7 +566,7 @@ class ComponentApp extends React.Component {
                             <Fragment>
                                 <h3>Libraries</h3>
                                 <div className="items">
-                                    {this.state.libraries.map(library =>
+                                    {this.state.libraries && this.state.libraries.map(library =>
                                         <Fragment>
                                             <span>{library}</span>
                                             <br/>

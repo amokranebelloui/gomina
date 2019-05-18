@@ -24,7 +24,7 @@ import {SonarEditor} from "./SonarEditor";
 import {Label} from "../common/Label";
 import {EditableDate} from "../common/EditableDate";
 import {StarRating} from "../common/StarRating";
-import {Branch, sortBranchesDetails} from "../commitlog/Branch";
+import {Branch, isTrunk, sortBranchesDetails} from "../commitlog/Branch";
 import queryString from "query-string"
 
 function ComponentHeader(props: {}) {
@@ -387,6 +387,7 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
 }
 
 type ComponentMenuProps = {
+    selectedBranch: string,
     component: ComponentType,
     location: any
 }
@@ -398,49 +399,74 @@ function ComponentMenu(props: ComponentMenuProps) {
     */
     const params = queryString.parse(props.location.search);
     const pathname = props.location.pathname;
+    const isHome = pathname === '/component/'+props.component.id;
+    const isScm = pathname.match(RegExp('/component/.*/scm'));
+    const isApi = pathname.match(RegExp('/component/.*/api'));
+    const isDeps = pathname.match(RegExp('/component/.*/dependencies'));
+    const isLibs = pathname.match(RegExp('/component/.*/libraries'));
+    const isEvents = pathname.match(RegExp('/component/.*/events'));
+    const showBranches = (isScm || isLibs);
+    const branchSuffix = props.selectedBranch ? '?branchId=' + props.selectedBranch : '';
     return (
         component &&
             <div style={{marginTop: '4px'}}>
                 <div className="items" style={{display: 'inline'}}>
-                    <Link to={'/component/' + props.component.id}>
-                        <Badge backgroundColor={pathname === '/component/'+props.component.id ? 'lightgray' : null}>HOME</Badge>
+                    <Link to={'/component/' + props.component.id + branchSuffix}>
+                        <Badge backgroundColor={isHome ? 'lightgray' : null}>HOME</Badge>
+                    </Link>
+                    <Link to={'/component/' + props.component.id + '/scm' + branchSuffix}>
+                        <Badge backgroundColor={isScm ? 'lightgray' : null}>COMMITS</Badge>
+                    </Link>
+                    <Link to={'/component/' + props.component.id + '/api' + branchSuffix}>
+                        <Badge backgroundColor={isApi ? 'lightgray' : null}>API</Badge>
+                    </Link>
+                    <Link to={'/component/' + props.component.id + '/dependencies' + branchSuffix}>
+                        <Badge backgroundColor={isDeps ? 'lightgray' : null}>DEPS</Badge>
+                    </Link>
+                    <Link to={'/component/' + props.component.id + '/libraries' + branchSuffix}>
+                        <Badge backgroundColor={isLibs ? 'lightgray' : null}>LIBS</Badge>
+                    </Link>
+                    <Link to={'/component/' + props.component.id + '/events' + branchSuffix}>
+                        <Badge backgroundColor={isEvents ? 'lightgray' : null}>EVENTS</Badge>
                     </Link>
 
-                    {component.branches && sortBranchesDetails(component.branches)
-                        .map(branch =>
-                            <span key={branch.name} title={"from: " + (branch.origin || "") + " rev:" + (branch.originRevision || "")}>
-                                <Link to={'/component/' + props.component.id + '/scm?branchId=' + branch.name}>
-                                    <Branch branch={branch} selected={pathname.match(RegExp('/component/.*/scm')) && params.branchId === branch.name || false} />
-                                </Link>
-                            </span>
-                        )
-                    }
-
-                    <Link to={'/component/' + props.component.id + '/api'}>
-                        <Badge backgroundColor={pathname.match(RegExp('/component/.*/api')) ? 'lightgray' : null}>API</Badge>
-                    </Link>
-                    <Link to={'/component/' + props.component.id + '/dependencies'}>
-                        <Badge backgroundColor={pathname.match(RegExp('/component/.*/dependencies')) ? 'lightgray' : null}>DEPS</Badge>
-                    </Link>
-                    <Link to={'/component/' + props.component.id + '/libraries'}>
-                        <Badge backgroundColor={pathname.match(RegExp('/component/.*/libraries')) ? 'lightgray' : null}>LIBS</Badge>
-                    </Link>
-                    <Link to={'/component/' + props.component.id + '/events'}>
-                        <Badge backgroundColor={pathname.match(RegExp('/component/.*/events')) ? 'lightgray' : null}>EVENTS</Badge>
-                    </Link>
-
-                </div>
-                <div className="items" style={{display: 'inline', float: 'right'}}>
+                    |
+                    
                     {component.docFiles && component.docFiles.map(doc =>
-                        <Link key={doc} to={'/component/' + props.component.id + '/doc/' + doc}>
+                        <Link key={doc} to={'/component/' + props.component.id + '/doc/' + doc + branchSuffix}>
                             <Badge backgroundColor={pathname.match(RegExp('/component/.*/doc/'+doc)) ? 'lightgray' : null}>{doc}</Badge>
                         </Link>
+                    )}
+                    
+                </div>
+                <div className="items" style={{display: 'inline', float: 'right'}}>
+                    {component.branches && sortBranchesDetails(component.branches).map(branch =>
+                        <span key={branch.name} title={"from: " + (branch.origin || "") + " rev:" + (branch.originRevision || "")}>
+                            {showBranches ?
+                                <Link to={pathname + '?branchId=' + branch.name}>
+                                    <Branch branch={branch}
+                                            selected={sameBranch(params.branchId, branch.name) || !showBranches && isTrunk(branch.name)}/>
+                                </Link>
+                            : isTrunk(branch.name) ?
+                                <Link to={pathname + '?branchId=' + branch.name}>
+                                    <Branch branch={branch} selected={true}/>
+                                </Link>
+                            :
+                                <span style={{opacity: '.2'}}>
+                                    <Branch branch={branch} selected={sameBranch(params.branchId, branch.name)}/>
+                                </span>
+                            }
+                        </span>
                     )}
                 </div>
                 <div style={{clear: 'both'}}></div>
             </div>
         || null
     )
+}
+
+function sameBranch(b1: ?string, b2: ?string) {
+    return b1 === b2 || !b1 && isTrunk(b2) || !b2 && isTrunk(b1)
 }
 
 export {ComponentHeader, ComponentSummary, ComponentBadge, ComponentMenu}

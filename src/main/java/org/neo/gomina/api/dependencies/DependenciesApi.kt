@@ -351,11 +351,24 @@ class DependenciesApi {
     private fun componentLibraries(ctx: RoutingContext) {
         val componentId = ctx.request().getParam("componentId")
         val versionId = ctx.request().getParam("version")?.let { Version(it) }
+        val branchId: String? = ctx.request().getParam("branchId")
         logger.info("Get Libraries $componentId")
         try {
-            val component = componentRepo.get(componentId)
-            val version = versionId ?: component?.latest
-            val deps = version?.let{ v -> libraries.forComponent(componentId, v).map { it.toStr() } }
+            if (versionId == null) {
+
+            }
+            else if (!branchId.isNullOrBlank()) {
+
+            }
+            val version = when {
+                versionId != null -> versionId
+                branchId != null -> componentRepo.getVersions(componentId, branchId).firstOrNull()?.let { it.version }
+                else -> componentRepo.get(componentId)?.latest
+            }
+
+            val deps = version?.let{ v ->
+                libraries.forComponent(componentId, v).map { it.toStr() }
+            } ?: emptyList()
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(deps))
         }
         catch (e: Exception) {

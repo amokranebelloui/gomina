@@ -80,4 +80,4 @@ function sortBranches(branches: Array<string>): Array<string> {
     return branches.sort((a, b) => isTrunk(a) ? -1 : a > b ? 1 : -1)
 }
 
-export {BranchColor, Branch, sortBranches, sortBranchesDetails}
+export {BranchColor, Branch, isTrunk, sortBranches, sortBranchesDetails}
