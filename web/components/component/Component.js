@@ -25,6 +25,7 @@ import {Label} from "../common/Label";
 import {EditableDate} from "../common/EditableDate";
 import {StarRating} from "../common/StarRating";
 import {Branch, sortBranchesDetails} from "../commitlog/Branch";
+import queryString from "query-string"
 
 function ComponentHeader(props: {}) {
     return (
@@ -387,35 +388,56 @@ class ComponentBadge extends React.Component<ComponentBadgeProps, ComponentBadge
 
 type ComponentMenuProps = {
     component: ComponentType,
-    selectedDoc: string,
-    selectedBranch: ComponentType
+    location: any
 }
+
 function ComponentMenu(props: ComponentMenuProps) {
     const component = props.component;
     /*
     <Link to={'/component/' + component.id}>Main</Link><span>|</span>
     */
+    const params = queryString.parse(props.location.search);
+    const pathname = props.location.pathname;
     return (
         component &&
             <div style={{marginTop: '4px'}}>
-                <div className="items" style={{display: 'inline-block'}}>
-                    {component.docFiles && component.docFiles.map(doc =>
-                        <Link key={doc} to={'/component/' + props.component.id + '/doc/' + doc}>
-                            <Badge backgroundColor={doc === props.selectedDoc ? 'lightgray' : null}>{doc}</Badge>
-                        </Link>
-                    )}
-                </div>
-                <div className="items" style={{display: 'inline-block', float: 'right'}}>
+                <div className="items" style={{display: 'inline'}}>
+                    <Link to={'/component/' + props.component.id}>
+                        <Badge backgroundColor={pathname === '/component/'+props.component.id ? 'lightgray' : null}>HOME</Badge>
+                    </Link>
+
                     {component.branches && sortBranchesDetails(component.branches)
                         .map(branch =>
                             <span key={branch.name} title={"from: " + (branch.origin || "") + " rev:" + (branch.originRevision || "")}>
                                 <Link to={'/component/' + props.component.id + '/scm?branchId=' + branch.name}>
-                                    <Branch branch={branch} selected={branch.name === props.selectedBranch} />
+                                    <Branch branch={branch} selected={pathname.match(RegExp('/component/.*/scm')) && params.branchId === branch.name || false} />
                                 </Link>
                             </span>
                         )
                     }
+
+                    <Link to={'/component/' + props.component.id + '/api'}>
+                        <Badge backgroundColor={pathname.match(RegExp('/component/.*/api')) ? 'lightgray' : null}>API</Badge>
+                    </Link>
+                    <Link to={'/component/' + props.component.id + '/dependencies'}>
+                        <Badge backgroundColor={pathname.match(RegExp('/component/.*/dependencies')) ? 'lightgray' : null}>DEPS</Badge>
+                    </Link>
+                    <Link to={'/component/' + props.component.id + '/libraries'}>
+                        <Badge backgroundColor={pathname.match(RegExp('/component/.*/libraries')) ? 'lightgray' : null}>LIBS</Badge>
+                    </Link>
+                    <Link to={'/component/' + props.component.id + '/events'}>
+                        <Badge backgroundColor={pathname.match(RegExp('/component/.*/events')) ? 'lightgray' : null}>EVENTS</Badge>
+                    </Link>
+
                 </div>
+                <div className="items" style={{display: 'inline', float: 'right'}}>
+                    {component.docFiles && component.docFiles.map(doc =>
+                        <Link key={doc} to={'/component/' + props.component.id + '/doc/' + doc}>
+                            <Badge backgroundColor={pathname.match(RegExp('/component/.*/doc/'+doc)) ? 'lightgray' : null}>{doc}</Badge>
+                        </Link>
+                    )}
+                </div>
+                <div style={{clear: 'both'}}></div>
             </div>
         || null
     )

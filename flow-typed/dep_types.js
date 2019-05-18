@@ -27,6 +27,9 @@ declare module 'react-datepicker' {
 declare module 'react-datepicker/dist/react-datepicker.css' {
     declare module.exports: any;
 }
+declare module 'query-string' {
+    declare module.exports: any;
+}
 
 declare module '@fortawesome/fontawesome-svg-core' {
     declare module.exports: any;

@@ -41,7 +41,7 @@ class EditableLabel extends React.Component<Props, State> {
         this.setState({edition: false}) //, label: this.props.label
     }
     componentWillReceiveProps(nextProps: Props) {
-        console.info("EditableLabel will receive props", this.props, nextProps);
+        //console.info("EditableLabel will receive props", this.props, nextProps);
     }
     render() {
         return (

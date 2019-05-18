@@ -21,6 +21,7 @@ import {Events} from "../environment/Events";
 import {Knowledge} from "../knowledge/Knowledge";
 import {DateTime} from "../common/DateTime";
 import {Well} from "../common/Well";
+import Route from "react-router-dom/es/Route";
 
 class ComponentApp extends React.Component {
     
@@ -475,57 +476,118 @@ class ComponentApp extends React.Component {
         }
     }
     render() {
-        const queryParams = queryString.parse(this.props.location.search);
         const component = this.state.component;
-        const docId = this.props.match.params.docId;
-        const branchId = queryParams.branchId;
-        /*
-        <Dependencies dependencies={this.state.dependencies} />
-        <Dependencies dependencies={this.state.impacted} />
-         */
         return (
             <AppLayout title={"Component: " + component.label}>
                 <PrimarySecondaryLayout>
                     <Container>
                         <Well block>
-                            <span title={component.id}>
-                                <span style={{fontSize: 14}}><b>{component.label}</b></span>
-                                {component.disabled &&
-                                    <span>&nbsp;<s>DISABLED</s></span>
-                                }
-                                <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
-                            </span>
-                            <br/>
-                            <span style={{fontSize: 9}}>{component.artifactId}</span>
-                            <br/>
+                            <div style={{borderBottom: '1px solid lightgray', paddingBottom: '2px'}}>
+                                <span title={component.id}>
+                                    <span style={{fontSize: 14}}><b>{component.label}</b></span>
+                                    {component.disabled &&
+                                        <span>&nbsp;<s>DISABLED</s></span>
+                                    }
+                                    <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
+                                </span>
+                                <br/>
+                                <span style={{fontSize: 9}}>{component.artifactId}</span>
+                                <br/>
 
-                            <ScmLink type={component.scmType} />&nbsp;
-                            <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
-                            <br/>
-                            <UnreleasedChangeCount changes={component.changes} />
-                            
-                            <ComponentMenu
-                                selectedDoc={this.state.docId}
-                                selectedBranch={this.state.branch && this.state.branch.branch || ""}
-                                component={component} />
+                                <ScmLink type={component.scmType} />&nbsp;
+                                <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
+                                <br/>
+                                <UnreleasedChangeCount changes={component.changes} />
+                            </div>
+
+                            <ComponentMenu component={component} location={this.props.location}
+                            />
                         </Well>
 
-                        {   docId
-                            ? <Fragment>
-                                <Documentation doc={this.state.doc} />
-                              </Fragment>
-                            : <Fragment>
+                        <Route exact path="/component/:id" render={props =>
+                            <div>
                                 {this.state.branch &&
                                     <Fragment>
                                         <CommitLog type={component.scmType}
                                                    commits={this.state.branch.log}
                                                    branch={this.state.branch.branch}
                                                    unresolved={(this.state.branch || {}).unresolved}/>
-                                        <CommitLogLegend />
+                                        <CommitLogLegend/>
                                     </Fragment>
                                 }
-                              </Fragment>
+                            </div>
+                        }/>
+
+                        <Route path="/component/:id/scm" render={props =>
+                            this.state.branch &&
+                            <Fragment>
+                                <CommitLog type={component.scmType}
+                                           commits={this.state.branch.log}
+                                           branch={this.state.branch.branch}
+                                           unresolved={(this.state.branch || {}).unresolved}/>
+                                <CommitLogLegend/>
+                            </Fragment>
                         }
+                        />
+                        <Route path="/component/:id/doc/:docId" render={props =>
+                            <Documentation doc={this.state.doc}/>
+                        }/>
+                        <Route path="/component/:id/api" render={props =>
+                            <Fragment>
+                                <h3>API</h3>
+                                {(this.state.api || []).map(api =>
+                                    <ApiDefinition api={api} onManualApiRemove={() => this.removeApi(component.id, api.name, api.type)} />
+                                )}
+                                <Secure permission="component.edit.api">
+                                    <ApiDefinitionEditor type="definition" api={{name: "", type: ""}} onAdd={(f) => this.addApi(component.id, f.name, f.type)} />
+                                </Secure>
+                                <br/>
+
+                                <h3>Usage</h3>
+                                {(this.state.usage || []).map(usage =>
+                                    <ApiUsage usage={usage} onManualUsageRemove={() => this.removeUsage(component.id, usage.name, usage.type)} />
+                                )}
+                                <Secure permission="component.edit.usage">
+                                    <ApiDefinitionEditor type="usage" api={{name: "", type: ""}} onAdd={(f) => this.addUsage(component.id, f.name, f.type, f.usage)} />
+                                </Secure>
+                            </Fragment>
+                        }/>
+                        <Route path="/component/:id/dependencies" render={props =>
+                            <Fragment>
+                                <h3>Invocation Chain</h3>
+                                <CallChain chain={this.state.invocationChain} displayFirst={true}
+                                           onDependencySelected={(child, parent) => this.selectInvocationDependency(child, parent)}/>
+                                <Dependencies dependencies={this.state.chainSelectedInvocation}/>
+                                <br/>
+
+                                <h3>Call Chain</h3>
+                                <CallChain chain={this.state.callChain} displayFirst={true}
+                                           onDependencySelected={(child, parent) => this.selectCallDependency(child, parent)}/>
+                                <Dependencies dependencies={this.state.chainSelectedCall}/>
+                            </Fragment>
+                        }/>
+                        <Route path="/component/:id/libraries" render={props =>
+                            <Fragment>
+                                <h3>Libraries</h3>
+                                <div className="items">
+                                    {this.state.libraries.map(library =>
+                                        <Fragment>
+                                            <span>{library}</span>
+                                            <br/>
+                                        </Fragment>
+                                    )}
+                                </div>
+                            </Fragment>
+                        }/>
+                        <Route path="/component/:id/events" render={props =>
+                            <Fragment>
+                                <h3>Events</h3>
+                                <button onClick={e => this.reloadEvents()}>Reload Events</button>
+                                <Container>
+                                    <Events events={this.state.events || []} errors={[]}/>
+                                </Container>
+                            </Fragment>
+                        }/>
 
                     </Container>
                     <div>
@@ -583,53 +645,9 @@ class ComponentApp extends React.Component {
                             )}
                         </div>
                         <br/>
-                        <h3>Libraries</h3>
-                        <div className="items">
-                            {this.state.libraries.map(library =>
-                                <Fragment>
-                                    <span>{library}</span>
-                                    <br/>
-                                </Fragment>
-                            )}
-                        </div>
-                        <br/>
+
                         <h3>Knowledge</h3>
                         <Knowledge knowledge={this.state.knowledge} hideComponent={true} />
-                        <br/>
-                        <h3>API</h3>
-                        {(this.state.api || []).map(api =>
-                            <ApiDefinition api={api} onManualApiRemove={() => this.removeApi(component.id, api.name, api.type)} />
-                        )}
-                        <Secure permission="component.edit.api">
-                            <ApiDefinitionEditor type="definition" api={{name: "", type: ""}} onAdd={(f) => this.addApi(component.id, f.name, f.type)} />
-                        </Secure>
-                        <br/>
-
-                        <h3>Usage</h3>
-                        {(this.state.usage || []).map(usage =>
-                            <ApiUsage usage={usage} onManualUsageRemove={() => this.removeUsage(component.id, usage.name, usage.type)} />
-                        )}
-                        <Secure permission="component.edit.usage">
-                            <ApiDefinitionEditor type="usage" api={{name: "", type: ""}} onAdd={(f) => this.addUsage(component.id, f.name, f.type, f.usage)} />
-                        </Secure>
-                        <br/>
-
-                        <h3>Invocation Chain</h3>
-                        <CallChain chain={this.state.invocationChain} displayFirst={true}
-                                   onDependencySelected={(child, parent) => this.selectInvocationDependency(child, parent)}/>
-                        <Dependencies dependencies={this.state.chainSelectedInvocation} />
-                        <br/>
-
-                        <h3>Call Chain</h3>
-                        <CallChain chain={this.state.callChain} displayFirst={true}
-                                   onDependencySelected={(child, parent) => this.selectCallDependency(child, parent)} />
-                        <Dependencies dependencies={this.state.chainSelectedCall} />
-
-                        <h3>Events</h3>
-                        <button onClick={e => this.reloadEvents()}>Reload Events</button>
-                        <Container>
-                            <Events events={this.state.events || []} errors={[]} />
-                        </Container>
 
                     </Container>
                 </PrimarySecondaryLayout>
