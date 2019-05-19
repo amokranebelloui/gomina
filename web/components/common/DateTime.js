@@ -3,7 +3,7 @@ import React, {Fragment} from 'react'
 
 type Props = {
     date?: ?Date | ?number | ?string,
-    style: any,
+    style?: ?any,
     displayTime?: ?boolean
 }
 

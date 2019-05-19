@@ -35,6 +35,7 @@ data class Version(val version: String = "", val revision: String?) : Comparable
         */
     }
     fun clean() = if (this.isSnapshot()) this else Version(this.version)
+    fun simple() = Version(this.version)
     override fun toString() = version + "@" + revision
 }
 

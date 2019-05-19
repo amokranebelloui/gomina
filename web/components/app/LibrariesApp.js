@@ -6,6 +6,9 @@ import Link from "react-router-dom/es/Link";
 import {compareVersions, compareVersionsReverse} from "../common/version-utils";
 import type {ComponentRefType} from "../component/ComponentType";
 import {Well} from "../common/Well";
+import type {InstanceRefType} from "../environment/InstanceType";
+import {Badge} from "../common/Badge";
+import {flatMap} from "../common/utils";
 
 type LibraryType = {
     artifactId: string,
@@ -14,7 +17,8 @@ type LibraryType = {
 
 type ComponentVersionType = {
     component: ComponentRefType,
-    version: string
+    version: string,
+    instances: Array<InstanceRefType>
 }
 
 type LibraryUsageType = {
@@ -74,6 +78,9 @@ class LibrariesApp extends React.Component<Props, State> {
             this.retrieveLibrary(this.props.match.params.id);
         }
     }
+    groupByComponent(usageList: Array<LibraryUsageType>) {
+        return usageList && flatMap(usageList, usage => usage.component) || {}
+    }
     render() {
         const libraries = (this.state.libraries || []).filter(l => this.matchesSearch(l));
         return (
@@ -99,7 +106,12 @@ class LibrariesApp extends React.Component<Props, State> {
                                                 {libUsage.components.map(c =>
                                                     <Fragment>
                                                         <Link to={'/component/' + c.component.id}>{c.component.label} </Link>
-                                                        <i style={{color: 'lightgray'}}>{c.version}</i>
+                                                        <i style={{color: 'lightgray'}}>{c.version}</i>&nbsp;
+                                                        <span className="items">
+                                                            {(c.instances||[]).map(instance =>
+                                                                <Badge key={instance.id} backgroundColor="lightgray">{instance.env} {instance.name}</Badge>
+                                                            )}
+                                                        </span>
                                                         <br/>
                                                     </Fragment>
                                                 )}

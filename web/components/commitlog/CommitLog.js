@@ -13,6 +13,7 @@ import {Issue} from "../misc/Issue";
 import type {VersionType} from "../common/version-utils";
 import {flatMap} from "../common/utils";
 import {BranchColor} from "./Branch";
+import type {InstanceRefType} from "../environment/InstanceType";
 
 type CommitType = {
     author?: ?UserRefType,
@@ -25,13 +26,6 @@ type CommitType = {
     prodReleaseDate?: ?number,
     instances?: Array<InstanceRefType>,
     deployments?: Array<InstanceRefType>
-}
-type InstanceRefType = {
-    id: string,
-    env: string,
-    name: string,
-    running: VersionType,
-    deployed: VersionType
 }
 
 type Props = {

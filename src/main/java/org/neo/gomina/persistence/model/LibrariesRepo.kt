@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.ArtifactId
 import org.neo.gomina.model.dependency.ComponentVersion
 import org.neo.gomina.model.dependency.Libraries
+import org.neo.gomina.model.dependency.LibraryVersions
 import org.neo.gomina.model.version.Version
 import redis.clients.jedis.JedisPool
 
@@ -26,7 +27,7 @@ class RedisLibraries : Libraries {
         logger.info("Libraries Database connected $host $port")
     }
 
-    override fun libraries(): Map<ArtifactId, List<Version>> {
+    override fun libraries(): List<LibraryVersions> {
         pool.resource.use { jedis ->
             return jedis.keys("library:*")
                     .map { it.replace(Regex("^library:"), "") }
@@ -34,6 +35,7 @@ class RedisLibraries : Libraries {
                     .map { (artifactId, version) -> ArtifactId.tryWithGroup(artifactId) to Version(version) }
                     .mapNotNull { (artifactId, version) -> artifactId?.let { artifactId to version } }
                     .groupBy( { it.first } ) { it.second }
+                    .map { (artifactId, versions) -> LibraryVersions(artifactId, versions) }
         }
     }
 
@@ -54,14 +56,6 @@ class RedisLibraries : Libraries {
             return jedis.keys("libraries:$componentId:${version.version}")
                     .flatMap { jedis.smembers(it) }
                     .mapNotNull { ArtifactId.tryWithVersion(it) }
-        }
-    }
-
-    override fun componentsUsing(artifactId: ArtifactId): List<ComponentVersion> {
-        pool.resource.use { jedis ->
-            return jedis.keys("library:${artifactId.toStr()}:*")
-                    .flatMap { jedis.smembers(it) }
-                    .mapNotNull { it.toComponentVersion() }
         }
     }
 

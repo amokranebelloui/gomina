@@ -13,12 +13,16 @@ import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.api.common.splitParams
 import org.neo.gomina.api.component.ComponentRef
+import org.neo.gomina.api.component.InstanceRefDetail
 import org.neo.gomina.api.component.toComponentRef
+import org.neo.gomina.api.component.toRef
 import org.neo.gomina.integration.maven.ArtifactId
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
+import org.neo.gomina.model.runtime.ExtInstance
+import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.version.Version
 import org.neo.gomina.model.work.WorkList
 
@@ -44,7 +48,7 @@ data class FunctionUsageData(val name: String, val type: String, val usage: Stri
 data class LibraryDetail(val artifactId: String, val versions: Collection<String>)
 
 data class LibraryUsageDetail(val version: String, val components: List<ComponentVersionDetail>)
-data class ComponentVersionDetail(val component: ComponentRef, val version: String)
+data class ComponentVersionDetail(val component: ComponentRef, val version: String, val instances: List<InstanceRefDetail>)
 
 class DependenciesApi {
 
@@ -64,6 +68,7 @@ class DependenciesApi {
     @Inject lateinit var interactionsRepository: InteractionsRepository
     @Inject lateinit var libraries: Libraries
     @Inject lateinit var interactionProviders: InteractionProviders
+    @Inject lateinit var topology: Topology
 
     @Inject
     constructor(vertx: Vertx) {
@@ -301,23 +306,21 @@ class DependenciesApi {
     private fun libraries(ctx: RoutingContext) {
         logger.info("Get Libraries")
         try {
-
             val components = componentRepo.getAll()
-                    .map { ArtifactId.tryWithGroup(it.artifactId) to it.latest }
+                    .map { ArtifactId.tryWithGroup(it.artifactId) to listOf(it.latest, it.released) }
                     .mapNotNull { (a, v) -> if (a != null && v != null) a to v else null }
                     .toMap()
-
-            val libs = libraries.libraries()
-
-
-            val merge = (components.keys + libs.keys).toSet().sortedBy { it.toStr() }.map {
-                it to ((libs[it] ?: emptyList()) + components[it]).filterNotNull()
+            val libs = libraries.libraries().map { it.artifactId to it.versions }.toMap()
+            val allArtifacts = (components.keys + libs.keys).toSet().sortedBy { it.toStr() }
+            val merged = allArtifacts.map {
+                val versions = (libs[it] ?: emptyList()) + (components[it] ?: emptyList())
+                it to versions.filterNotNull()
             }
-
-            val deps = merge.map { (artifactId, versions) ->
-                LibraryDetail(artifactId.toStr(), versions.map { it.version }.toSet())
-            }
-            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(deps))
+            val libraries = merged
+                    .map { (artifactId, versions) ->
+                        LibraryDetail(artifactId.toStr(), versions.map { it.version }.toSet())
+                    }
+            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(libraries))
         }
         catch (e: Exception) {
             logger.error("Cannot get Libraries", e)
@@ -329,12 +332,27 @@ class DependenciesApi {
         val artifactId = ctx.request().getParam("artifactId")?.let { ArtifactId.tryWithVersion(it) }
         logger.info("Get Library $artifactId")
         try {
-            // FIXME Limit to: Latest, LastReleased, Deployed versions
-            val componentsMap = componentRepo.getAll().associateBy { it.id }
+            val componentsMap = componentRepo.getAll()
+                    .map { it.id to (it to topology.buildExtInstances(it.id)) }
+                    .toMap()
+
             val usageDetail = artifactId
                     ?.let { libraries.library(it) }
-                    ?.map { (v, cvs) ->
-                        LibraryUsageDetail(v.version, cvs.mapNotNull { it.toDetail(componentsMap) })
+                    ?.map { (version, componentVersions) ->
+                        val inventoryVersions = componentVersions.map { it.componentId }.toSet()
+                                .flatMap { c -> componentsMap[c]?.second?.map { c to it } ?: emptyList() }
+                                .flatMap { (c, i) -> listOf(i.deployedVersion?.simple()?.let { c to it }, i.runningVersion?.simple()?.let { c to it }) }
+                                .filterNotNull()
+                                .toSet()
+                                .map { (c, v) -> ComponentVersion(c, v) }
+                        val allVersions = (componentVersions + inventoryVersions).toSet()
+                        val componentVersionsDetail = allVersions
+                                .mapNotNull { it.toDetail(componentsMap) }
+                                .sortedWith(
+                                        compareBy<ComponentVersionDetail> { it.component.label }
+                                        .thenByDescending { it.version }
+                                )
+                        LibraryUsageDetail(version.version, componentVersionsDetail)
                     }
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(usageDetail))
         }
@@ -344,8 +362,14 @@ class DependenciesApi {
         }
     }
 
-    private fun ComponentVersion.toDetail(componentsMap: Map<String, Component>): ComponentVersionDetail? {
-        return componentsMap[this.componentId]?.toComponentRef()?.let { ComponentVersionDetail(it, this.version.version) }
+    private fun ComponentVersion.toDetail(componentsMap: Map<String, Pair<Component, List<ExtInstance>>>): ComponentVersionDetail? {
+        return componentsMap[this.componentId]?.let { (component, instances) ->
+            ComponentVersionDetail(
+                    component = component.toComponentRef(),
+                    version = this.version.version,
+                    instances = instances.filter { it.matchesVersion(this.version) }.map { it.toRef() }
+            )
+        }
     }
 
     private fun componentLibraries(ctx: RoutingContext) {
@@ -354,12 +378,6 @@ class DependenciesApi {
         val branchId: String? = ctx.request().getParam("branchId")
         logger.info("Get Libraries $componentId")
         try {
-            if (versionId == null) {
-
-            }
-            else if (!branchId.isNullOrBlank()) {
-
-            }
             val version = when {
                 versionId != null -> versionId
                 branchId != null -> componentRepo.getVersions(componentId, branchId).firstOrNull()?.let { it.version }

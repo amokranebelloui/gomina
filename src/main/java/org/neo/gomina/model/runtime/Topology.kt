@@ -1,5 +1,6 @@
 package org.neo.gomina.model.runtime
 
+import org.neo.gomina.api.instances.VersionDetail
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.inventory.Environment
@@ -8,6 +9,7 @@ import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.RuntimeInfo
+import org.neo.gomina.model.version.Version
 import javax.inject.Inject
 
 private data class EnvInstance(val envId: String, val service: Service, val instance: Instance)
@@ -26,6 +28,12 @@ data class ExtInstance(
     val instanceId get() = id.second
     val expected get() = instance != null
     val notExpected get() = instance == null
+    val deployedVersion get() = instance?.deployedVersion
+    val runningVersion get() = indicators?.version
+    fun matchesVersion(version: Version): Boolean {
+        return deployedVersion?.let { it.version == version.version } ?: false ||
+                runningVersion?.let { it.version == version.version } ?: false
+    }
 }
 
 class Topology {
