@@ -1,5 +1,6 @@
 package org.neo.gomina.model.component
 
+import org.neo.gomina.integration.maven.Artifact
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.system.System
@@ -48,7 +49,7 @@ data class Component(
     }
 }
 
-data class VersionRelease(val artifactId: String?, val version: Version, val releaseDate: LocalDateTime, val branchId: String)
+data class VersionRelease(val artifact: Artifact?, val version: Version, val releaseDate: LocalDateTime, val branchId: String)
 
 data class NewComponent(
         var id: String,

@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.maven.ArtifactId
+import org.neo.gomina.integration.maven.Artifact
 import org.neo.gomina.model.dependency.ComponentVersion
 import org.neo.gomina.model.dependency.Libraries
 import org.neo.gomina.model.dependency.LibraryVersions
@@ -31,19 +31,24 @@ class RedisLibraries : Libraries {
         pool.resource.use { jedis ->
             return jedis.keys("library:*")
                     .map { it.replace(Regex("^library:"), "") }
-                    .map { it.splitVersion() }
-                    .map { (artifactId, version) -> ArtifactId.tryWithGroup(artifactId) to Version(version) }
-                    .mapNotNull { (artifactId, version) -> artifactId?.let { artifactId to version } }
+                    //.map { it.splitVersion() }
+                    .mapNotNull { Artifact.parse(it) }
+                    .map { it to Version(it.version ?: "UNKNOWN") }
+                    .map { (artifact, version) -> artifact.let { artifact.withoutVersion() to version } }
                     .groupBy( { it.first } ) { it.second }
-                    .map { (artifactId, versions) -> LibraryVersions(artifactId, versions) }
+                    .map { (artifact, versions) -> LibraryVersions(artifact, versions) }
         }
     }
 
-    override fun library(artifactId: ArtifactId): Map<Version, List<ComponentVersion>> {
+    override fun library(artifact: Artifact): Map<Version, List<ComponentVersion>> {
         pool.resource.use { jedis ->
-            return jedis.keys("library:${artifactId.toStr()}:*")
-                    .mapNotNull { key ->
-                        val version = ArtifactId.tryWithVersion(key.replace(Regex("^library:"), ""))?.getVersion()
+            return jedis.keys("library:$artifact:*")
+                    .map { key -> key to Artifact.parse(key.replace(Regex("^library:"), "")) }
+                    .filter { (_, a) ->
+                        a?.withoutVersion() == artifact.withoutVersion()
+                    }
+                    .mapNotNull { (key, artifact) ->
+                        val version = artifact?.getVersion()
                         val componentsVersions = jedis.smembers(key).mapNotNull { it.toComponentVersion() }
                         version?.let { version to componentsVersions }
                     }
@@ -51,26 +56,26 @@ class RedisLibraries : Libraries {
         }
     }
 
-    override fun forComponent(componentId: String, version: Version): List<ArtifactId> {
+    override fun forComponent(componentId: String, version: Version): List<Artifact> {
         pool.resource.use { jedis ->
             return jedis.keys("libraries:$componentId:${version.version}")
                     .flatMap { jedis.smembers(it) }
-                    .mapNotNull { ArtifactId.tryWithVersion(it) }
+                    .mapNotNull { Artifact.parse(it) }
         }
     }
 
-    override fun addArtifactId(artifactId: String, version: Version) {
+    override fun addArtifact(artifact: Artifact, version: Version) {
         pool.resource.use { jedis ->
-            jedis.sadd("library:$artifactId:${version.version}", "")
+            jedis.sadd("library:$artifact:${version.version}", "")
         }
     }
 
-    override fun addUsage(componentId: String, version: Version, artifacts: List<ArtifactId>) {
+    override fun addUsage(componentId: String, version: Version, artifacts: List<Artifact>) {
         pool.resource.use { jedis ->
             jedis.pipelined().let { pipe ->
                 artifacts.forEach { artifact ->
                     val componentKey = "$componentId:${version.version}"
-                    val artifactKey = artifact.toStr()
+                    val artifactKey = artifact.toString()
                     pipe.sadd("libraries:$componentKey", artifactKey)
                     pipe.sadd("library:$artifactKey", componentKey)
                 }

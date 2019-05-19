@@ -4,7 +4,7 @@ import com.google.inject.Inject
 import com.google.inject.name.Named
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.maven.ArtifactId
+import org.neo.gomina.integration.maven.Artifact
 import org.neo.gomina.model.component.*
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
@@ -319,11 +319,10 @@ class RedisComponentRepo : ComponentRepo {
             return keys.flatMap { key ->
                 val branch = key.substring(key.lastIndexOf(":") + 1)
                 jedis.zrevrangeWithScores(key, 0, -1).mapNotNull {
-                    val artifactIdWithVersion = ArtifactId.tryWithVersion(it.element)
-                    val artifactId = artifactIdWithVersion?.toStrWithoutVersion()
-                    val version = artifactIdWithVersion?.getVersion()
+                    val artifact = Artifact.parse(it.element)
+                    val version = artifact?.getVersion()
                     val releaseDate = Instant.ofEpochMilli(it.score.toLong()).atZone(ZoneOffset.UTC).toLocalDateTime()
-                    if (artifactId != null && version != null) VersionRelease(artifactId, version, releaseDate, branch) else null
+                    if (artifact != null && version != null) VersionRelease(artifact, version, releaseDate, branch) else null
                 }
             }
             .sortedWith(compareBy({ it.releaseDate }, {it.version}))
@@ -335,11 +334,9 @@ class RedisComponentRepo : ComponentRepo {
         pool.resource.use { jedis ->
             jedis.pipelined().let { pipe ->
                 versions.forEach { v ->
-                    val artifactId = ArtifactId.tryWithGroup(v.artifactId)
-                    val versionedArtifactId = ArtifactId(artifactId?.groupId, artifactId?.artifactId ?: "", v.version.version)
                     val time = v.releaseDate.atZone(ZoneOffset.UTC).toInstant().toEpochMilli().toDouble()
-                    pipe.zadd("versions:$componentId:$branch", time, versionedArtifactId.toStr())
-                    pipe.zadd("versions:$componentId", time, versionedArtifactId.toStr())
+                    pipe.zadd("versions:$componentId:$branch", time, v.artifact.toString())
+                    pipe.zadd("versions:$componentId", time, v.artifact.toString())
                 }
                 pipe.sync()
             }

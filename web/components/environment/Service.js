@@ -69,7 +69,7 @@ class Service extends React.Component<Props> {
                     <div style={{
                         position: 'absolute', display: 'table-cell', verticalAlign: 'middle', float: "right", height: '100%', top: '0px', bottom: '0px', right: '0px'
                     }}>
-                        <div className="item-container items">
+                        <div className="item-container items" style={{display: 'inline-block'}}>
                         {instances.map( i =>
                             <li><InstanceBadge instance={i} /></li>
                         )}

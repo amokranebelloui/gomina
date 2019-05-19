@@ -350,7 +350,7 @@ class ComponentsApi {
         try {
             logger.info("Get versions $componentId")
             val versions: List<VersionReleaseDetail> = componentRepo.getVersions(componentId, null).map {
-                VersionReleaseDetail(it.artifactId, it.version.toVersionDetail(), it.releaseDate.toDateUtc, it.branchId)
+                VersionReleaseDetail(it.artifact.toString(), it.version.toVersionDetail(), it.releaseDate.toDateUtc, it.branchId)
             }
             ctx.response().putHeader("content-type", "text/html").end(mapper.writeValueAsString(versions))
         }

@@ -2,7 +2,7 @@ package org.neo.gomina.integration.scm
 
 import com.github.rjeschke.txtmark.Processor
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.maven.ArtifactId
+import org.neo.gomina.integration.maven.Artifact
 import org.neo.gomina.integration.maven.MavenDependencyResolver
 import org.neo.gomina.integration.maven.MavenUtils
 import org.neo.gomina.integration.scm.impl.ScmClients
@@ -73,16 +73,16 @@ class ScmService {
             override fun visitHead(commit: Commit, branch: String, isTrunk: Boolean) {
                 println("--> visit head isTrunk=$isTrunk")
                 val pomFile: String? = scmClient.getFile(branch, "pom.xml", commit.revision)
-                val artifactId = MavenUtils.extractArtifactId(pomFile)
+                val artifact = MavenUtils.extractArtifactId(pomFile)
                 val latestVersion = latestVersion(listOf(commit), pomFile) // FIXME chgSignature
 
                 if (latestVersion != null) {
-                    componentRepo.addVersions(component.id, branch, listOf(VersionRelease(artifactId, latestVersion, commit.date, branch)))
+                    componentRepo.addVersions(component.id, branch, listOf(VersionRelease(artifact, latestVersion, commit.date, branch)))
                 }
 
                 if (isTrunk) {
 
-                    pomFile?.let { componentRepo.editArtifactId(component.id, artifactId) }
+                    pomFile?.let { componentRepo.editArtifactId(component.id, artifact?.idOnly()) }
 
                     val docFiles = scmClient.listFiles("/", commit.revision).filter { it.endsWith(".md") }
                     componentRepo.updateDocFiles(component.id, docFiles)
@@ -103,7 +103,7 @@ class ScmService {
                         ))
 
                         if (latestVersion != null) {
-                            metadata?.libraries?.mapNotNull { ArtifactId.tryWithVersion(it) }?.let {
+                            metadata?.libraries?.mapNotNull { Artifact.parse(it) }?.let {
                                 libraries.addUsage(component.id, latestVersion, it)
                             }
                         }
@@ -121,13 +121,13 @@ class ScmService {
 
                 componentRepo.addVersions(component.id, branch, listOf(versionRelease)) // FIXME chgSignature
 
-                if (versionRelease.artifactId?.isNotBlank() == true) {
-                    libraries.addArtifactId(versionRelease.artifactId, versionRelease.version)
+                if (versionRelease.artifact != null) {
+                    libraries.addArtifact(versionRelease.artifact, versionRelease.version)
                 }
 
                 if (component.hasMetadata) {
                     val versionMetadata = scmClient.getFile(branch, "project.yaml", commit.revision)?.let { metadataMapper.map(it) }
-                    versionMetadata?.libraries?.mapNotNull { ArtifactId.tryWithVersion(it) }?.let {
+                    versionMetadata?.libraries?.mapNotNull { Artifact.parse(it) }?.let {
                         libraries.addUsage(component.id, versionRelease.version, it)
                     }
                 }
@@ -151,7 +151,13 @@ class ScmService {
     private fun processLibraryUsage(component: Component, version: Version, pom: String?) {
         val dependencies = pom?.let { mavenDependencyResolver.dependencies(it) } ?: emptyList()
         libraries.addUsage(component.id, version, dependencies.map {
-            ArtifactId(it.artifact.groupId, it.artifact.artifactId, it.artifact.version)
+            Artifact(
+                    it.artifact.groupId,
+                    it.artifact.artifactId,
+                    it.artifact.version,
+                    _type = it.artifact.extension,
+                    _classifier = it.artifact.classifier
+            )
         })
     }
 

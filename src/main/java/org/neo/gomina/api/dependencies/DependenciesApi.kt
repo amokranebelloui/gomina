@@ -16,7 +16,8 @@ import org.neo.gomina.api.component.ComponentRef
 import org.neo.gomina.api.component.InstanceRefDetail
 import org.neo.gomina.api.component.toComponentRef
 import org.neo.gomina.api.component.toRef
-import org.neo.gomina.integration.maven.ArtifactId
+import org.neo.gomina.integration.maven.Artifact
+import org.neo.gomina.integration.maven.parseArtifact
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.*
@@ -307,18 +308,18 @@ class DependenciesApi {
         logger.info("Get Libraries")
         try {
             val components = componentRepo.getAll()
-                    .map { ArtifactId.tryWithGroup(it.artifactId) to listOf(it.latest, it.released) }
-                    .mapNotNull { (a, v) -> if (a != null && v != null) a to v else null }
+                    .map { it.artifactId?.parseArtifact()?.withoutVersion() to listOfNotNull(it.latest, it.released) }
+                    .mapNotNull { (a, v) -> if (a != null) a to v else null }
                     .toMap()
             val libs = libraries.libraries().map { it.artifactId to it.versions }.toMap()
-            val allArtifacts = (components.keys + libs.keys).toSet().sortedBy { it.toStr() }
+            val allArtifacts = (components.keys + libs.keys).toSet().sortedBy { it.toString() }
             val merged = allArtifacts.map {
                 val versions = (libs[it] ?: emptyList()) + (components[it] ?: emptyList())
-                it to versions.filterNotNull()
+                it to versions
             }
             val libraries = merged
                     .map { (artifactId, versions) ->
-                        LibraryDetail(artifactId.toStr(), versions.map { it.version }.toSet())
+                        LibraryDetail(artifactId.toString(), versions.map { it.version }.toSet())
                     }
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(libraries))
         }
@@ -329,7 +330,7 @@ class DependenciesApi {
     }
 
     private fun library(ctx: RoutingContext) {
-        val artifactId = ctx.request().getParam("artifactId")?.let { ArtifactId.tryWithVersion(it) }
+        val artifactId = ctx.request().getParam("artifactId")?.let { Artifact.parse(it, containsVersion = false) }
         logger.info("Get Library $artifactId")
         try {
             val componentsMap = componentRepo.getAll()
@@ -385,7 +386,7 @@ class DependenciesApi {
             }
 
             val deps = version?.let{ v ->
-                libraries.forComponent(componentId, v).map { it.toStr() }
+                libraries.forComponent(componentId, v).map { it.toString() }
             } ?: emptyList()
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(deps))
         }

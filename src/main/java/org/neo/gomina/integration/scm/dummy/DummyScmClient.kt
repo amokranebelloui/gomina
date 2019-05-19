@@ -8,7 +8,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.integration.maven.ArtifactId
+import org.neo.gomina.integration.maven.Artifact
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
@@ -106,7 +106,7 @@ class DummyScmClient : ScmClient {
     }
 
     private fun pomXml(commit: Map<String, Any>): String {
-        val c = ArtifactId.tryWithGroup(commit["artifactId"] as String?)
+        val c = commit["artifactId"]?.let { Artifact.parse(it as String) }
         return """
             <project>
                 <modelVersion>4.0.0</modelVersion>
@@ -154,7 +154,7 @@ class DummyScmClient : ScmClient {
     }
 
     private fun buildFrom(commitData: Map<String, Any>, branch: String): Commit {
-        val c = ArtifactId.tryWithGroup(commitData["artifactId"] as String?)
+        val c = commitData["artifactId"]?.let { Artifact.parse(it as String) }
         return Commit(
                 revision = commitData["revision"] as String,
                 date = LocalDateTime.parse(commitData["date"] as String, DateTimeFormatter.ISO_DATE_TIME),
