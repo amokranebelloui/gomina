@@ -8,7 +8,8 @@ import type {ComponentRefType} from "../component/ComponentType";
 import {Well} from "../common/Well";
 import type {InstanceRefType} from "../environment/InstanceType";
 import {Badge} from "../common/Badge";
-import {flatMap} from "../common/utils";
+import {groupingBy} from "../common/utils";
+import type {EnvType} from "../environment/Environment";
 
 type LibraryType = {
     artifactId: string,
@@ -32,6 +33,7 @@ type Props = {
 
 type State = {
     search: string,
+    envs: Array<EnvType>,
     libraries: Array<LibraryType>,
     libraryId: ?string,
     library: Array<LibraryUsageType>
@@ -42,10 +44,17 @@ class LibrariesApp extends React.Component<Props, State> {
         super(props);
         this.state = {
             search: '',
+            envs: [],
             libraries: [],
             libraryId: this.props.match.params.id,
             library: []
         }
+    }
+    retrieveEnvs() {
+        const thisComponent = this;
+        axios.get('/data/envs')
+            .then(response => thisComponent.setState({envs: response.data}))
+            .catch(error => thisComponent.setState({envs: []}));
     }
     retrieveLibraries() {
         const thisComponent = this;
@@ -73,16 +82,39 @@ class LibrariesApp extends React.Component<Props, State> {
         }
     }
     componentDidMount() {
+        this.retrieveEnvs();
+
         this.retrieveLibraries();
         if (this.props.match.params.id) {
             this.retrieveLibrary(this.props.match.params.id);
         }
     }
-    groupByComponent(usageList: Array<LibraryUsageType>) {
-        return usageList && flatMap(usageList, usage => usage.component) || {}
+    groupByComponent(components: Array<ComponentVersionType>): Array<{component: ComponentRefType, usages: Array<ComponentVersionType>}> {
+        const map = components && groupingBy(components, c => c.component.id) || {};
+        const result = Object.keys(map)
+            .map(c => {
+                return {component: map[c][0].component, usages: map[c] || []}}
+            );
+        return result || [];
+    }
+    groupByEnv(instances: Array<InstanceRefType>): Array<{env: string, count: number}> {
+        const map = instances && groupingBy(instances, i => i.env) || {};
+        const result = Object.keys(map).map(env => { return {'env': env, count: map[env].length}}) ;
+        return result;
     }
     render() {
         const libraries = (this.state.libraries || []).filter(l => this.matchesSearch(l));
+        const envs = {};
+        this.state.envs.forEach(e => envs[e.env] = e);
+        const color = e => {
+            const env = envs[e];
+            return env && (env.type === 'PROD' ? '#FFFFFF' : env.type === 'TEST' ? 'black' : 'black')
+        };
+        const backgroundColor = e => {
+            const env = envs[e];
+            return env && (env.type === 'PROD' ? '#a9c8d4' : env.type === 'TEST' ? '#c3cfd4' : 'lightgray')
+        };
+
         return (
             <AppLayout title="Libraries">
                 <PrimarySecondaryLayout>
@@ -91,30 +123,51 @@ class LibrariesApp extends React.Component<Props, State> {
                             <Fragment>
                                 <h3>Usage of '{this.state.libraryId}'</h3>
                                 <br/>
-                                <table>
+                                <table width="100%">
                                     <tbody>
                                     {this.sortLibraryUsage(this.state.library).map(libUsage =>
                                         <tr>
                                             <td valign="top" style={{
                                                 textAlign: 'right', minWidth: '40px', padding: '0px 5px',
                                                 borderBottom: '1px solid lightgray',
-                                                borderRight: '1px solid lightgray'
+                                                borderRight: '1px solid lightgray',
+                                                whiteSpace: 'nowrap'
                                             }}>
                                                 <b>{libUsage.version}</b>
                                             </td>
-                                            <td style={{borderBottom: '1px solid lightgray'}}>
-                                                {libUsage.components.map(c =>
-                                                    <Fragment>
-                                                        <Link to={'/component/' + c.component.id}>{c.component.label} </Link>
-                                                        <i style={{color: 'lightgray'}}>{c.version}</i>&nbsp;
-                                                        <span className="items">
-                                                            {(c.instances||[]).map(instance =>
-                                                                <Badge key={instance.id} backgroundColor="lightgray">{instance.env} {instance.name}</Badge>
-                                                            )}
+                                            <td width="100%" style={{borderBottom: '1px solid lightgray'}}>
+                                            {this.groupByComponent(libUsage.components).map(usage =>
+                                                <Fragment>
+                                                    <Link to={'/component/' + usage.component.id}>{usage.component.label} </Link>
+                                                    <br/>
+                                                    {usage.usages.map(c =>
+                                                        <span className="items" style={{paddingLeft: '20px'}}>
+                                                            {c.instances && c.instances.length > 0 ?
+                                                                <Fragment>
+                                                                    <Badge>{c.version}</Badge>
+                                                                    {this.groupByEnv(c.instances).map(env =>
+                                                                        <Fragment>
+                                                                            <span>
+                                                                                <Badge key={env.env}
+                                                                                       title={c.instances.filter(i => i.env === env.env).map(instance => instance.name).join(' ')}
+                                                                                       backgroundColor={backgroundColor(env.env)}
+                                                                                       color={color(env.env)}>
+                                                                                    {env.env} ({env.count})
+                                                                                </Badge>
+                                                                            </span>
+                                                                        </Fragment>
+                                                                    )}
+                                                                </Fragment>
+                                                            :
+                                                                <Badge><i style={{color: 'lightgray'}}>{c.version}</i></Badge>
+                                                            }
+                                                            &nbsp;
+
+                                                            <br/>
                                                         </span>
-                                                        <br/>
-                                                    </Fragment>
-                                                )}
+                                                    )}
+                                                </Fragment>
+                                            )}
                                             </td>
                                         </tr>
                                     )}

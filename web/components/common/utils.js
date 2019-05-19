@@ -13,6 +13,14 @@ function uniqCount(arr) {
 
 const flatMap = (arr, f) => arr.map(f).reduce((x,y) => x.concat(y), []);
 
+function groupingBy(list, f) {
+    return list.reduce((result, obj) => {
+        const value = obj && f(obj);
+        (result[value] = result[value] || []).push(obj);
+        return result;
+    }, {});
+}
+
 function groupBy(list, property) {
     return list.reduce((result, obj) => {
         const value = obj[property];
@@ -48,4 +56,4 @@ function joinTags(tags: ?Array<string>) {
     return tags != null && tags.length > 0 ? tags.join(',') : null;
 }
 
-export {uniq, uniqCount, flatMap, groupBy, matchesList, splitTags, joinTags}
+export {uniq, uniqCount, flatMap, groupBy, groupingBy, matchesList, splitTags, joinTags}
