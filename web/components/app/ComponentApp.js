@@ -23,6 +23,8 @@ import {DateTime} from "../common/DateTime";
 import {Well} from "../common/Well";
 import Route from "react-router-dom/es/Route";
 import {Branch} from "../commitlog/Branch";
+import {Libraries} from "../library/Libraries";
+import {filterLibraries, LibraryFilter} from "../library/LibraryFilter";
 
 class ComponentApp extends React.Component {
     
@@ -566,14 +568,12 @@ class ComponentApp extends React.Component {
                         <Route path="/component/:id/libraries" render={props =>
                             <Fragment>
                                 <h3>Libraries</h3>
-                                <div className="items">
-                                    {this.state.libraries && this.state.libraries.map(library =>
-                                        <Fragment>
-                                            <span>{library}</span>
-                                            <br/>
-                                        </Fragment>
-                                    )}
+                                <div style={{float: 'right'}}>
+                                    <LibraryFilter search={this.state.librarySearch}
+                                                   onChange={e => this.setState({"librarySearch": e})} />
                                 </div>
+                                <Libraries libraries={filterLibraries(this.state.libraries, this.state.librarySearch)}
+                                           totalCount={this.state.libraries.length} />
                             </Fragment>
                         }/>
                         <Route path="/component/:id/events" render={props =>

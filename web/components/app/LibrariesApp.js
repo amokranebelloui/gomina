@@ -1,6 +1,7 @@
 // @flow
 import React, {Fragment} from "react"
 import axios from "axios/index";
+import ls from "local-storage"
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import Link from "react-router-dom/es/Link";
 import {compareVersions, compareVersionsReverse} from "../common/version-utils";
@@ -10,22 +11,9 @@ import type {InstanceRefType} from "../environment/InstanceType";
 import {Badge} from "../common/Badge";
 import {groupingBy} from "../common/utils";
 import type {EnvType} from "../environment/Environment";
-
-type LibraryType = {
-    artifactId: string,
-    versions: Array<string>
-}
-
-type ComponentVersionType = {
-    component: ComponentRefType,
-    version: string,
-    instances: Array<InstanceRefType>
-}
-
-type LibraryUsageType = {
-    version: string,
-    components: Array<ComponentVersionType>
-}
+import type {ComponentVersionType, LibraryType, LibraryUsageType} from "../library/LibraryType";
+import {LibraryCatalog} from "../library/Libraries";
+import {filterLibraries, LibraryFilter} from "../library/LibraryFilter";
 
 type Props = {
     match: any
@@ -43,7 +31,7 @@ class LibrariesApp extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
         this.state = {
-            search: '',
+            search: ls.get('libraries.search'),
             envs: [],
             libraries: [],
             libraryId: this.props.match.params.id,
@@ -71,8 +59,9 @@ class LibrariesApp extends React.Component<Props, State> {
     sortLibraryUsage(libraryUsage: Array<LibraryUsageType>): Array<LibraryUsageType> {
         return libraryUsage.sort((a, b) => compareVersions(b.version, a.version))
     }
-    matchesSearch(library: LibraryType) {
-        return library.artifactId.match(new RegExp(this.state.search, "i"));
+    changeSearch(e: string) {
+        this.setState({"search": e});
+        ls.set('libraries.search', e)
     }
     componentWillReceiveProps(nextProps: Props) {
         const newLibraryId = nextProps.match.params.id;
@@ -103,7 +92,8 @@ class LibrariesApp extends React.Component<Props, State> {
         return result;
     }
     render() {
-        const libraries = (this.state.libraries || []).filter(l => this.matchesSearch(l));
+        const libraries = filterLibraries(this.state.libraries, this.state.search) || [];
+        const totalCount = this.state.libraries && this.state.libraries.length || 0;
         const envs = {};
         this.state.envs.forEach(e => envs[e.env] = e);
         const color = e => {
@@ -191,20 +181,11 @@ class LibrariesApp extends React.Component<Props, State> {
                     </div>
                     <div>
                         <Well block>
-                            <b>Search: </b>
-                            <input type="text" name="search"
-                                   value={this.state.search}
-                                   onChange={e => this.setState({"search": e.target.value})}
-                                   autoComplete="off"
-                            />
+                            <LibraryFilter search={this.state.search}
+                                           onChange={e => this.changeSearch(e)} />
                         </Well>
                         <Well block>
-                        {libraries.map(l =>
-                            <div>
-                                <Link to={'/library/' + l.artifactId}>{l.artifactId}</Link>
-                                &nbsp;&nbsp;
-                                {l.versions.sort(compareVersionsReverse).map(v => <b>{v}&nbsp;&nbsp;</b>)}</div>
-                        )}
+                            <LibraryCatalog libraries={libraries} totalCount={totalCount} />
                         </Well>
                     </div>
                 </PrimarySecondaryLayout>
