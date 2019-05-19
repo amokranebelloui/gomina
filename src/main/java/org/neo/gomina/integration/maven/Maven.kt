@@ -1,7 +1,6 @@
 package org.neo.gomina.integration.maven
 
 import org.apache.logging.log4j.LogManager
-import org.neo.gomina.model.component.VersionRelease
 import org.neo.gomina.model.version.Version
 import org.w3c.dom.Document
 import java.io.ByteArrayInputStream
@@ -41,25 +40,31 @@ data class ArtifactId(val groupId: String? = null, val artifactId: String, val v
     fun getVersion() = this.version?.let { Version(it) }
 }
 
-data class Artifact(val groupId: String, val artifactId: String,
-                    private val _version: String? = null,
-                    private val _type: String? = null,
-                    private val _classifier: String? = null) {
-
-    val version = _version?.takeIf { it.isNotBlank() }
-    val type = _type?.takeIf { it.isNotBlank() } ?: "jar"
-    val classifier = _classifier?.takeIf { it.isNotBlank() }
+data class Artifact private constructor (val groupId: String, val artifactId: String,
+                                         val version: String? = null,
+                                         val type: String? = null, val classifier: String? = null) {
 
     companion object {
+        fun from(groupId: String, artifactId: String,
+                 version: String? = null,
+                 type: String? = null, classifier: String? = null): Artifact {
+            return Artifact(
+                    groupId,
+                    artifactId,
+                    version?.takeIf { it.isNotBlank() },
+                    type?.takeIf { it.isNotBlank() } ?: "jar",
+                    classifier?.takeIf { it.isNotBlank() }
+            )
+        }
         fun parse(str: String, containsVersion: Boolean = true): Artifact? {
             val s = str.split(":")
             return when {
-                s.size >= 5 -> Artifact(groupId = s[0], artifactId = s[1], _type = s[2], _classifier = s[3], _version = s[4])
-                s.size >= 4 && containsVersion  -> Artifact(groupId = s[0], artifactId = s[1], _type = s[2], _version = s[3])
-                s.size >= 4 && !containsVersion -> Artifact(groupId = s[0], artifactId = s[1], _type = s[2], _classifier = s[3])
-                s.size >= 3 && containsVersion  -> Artifact(groupId = s[0], artifactId = s[1], _version = s[2])
-                s.size >= 3 && !containsVersion -> Artifact(groupId = s[0], artifactId = s[1], _type = s[2])
-                s.size >= 2 -> Artifact(groupId = s[0], artifactId = s[1])
+                s.size >= 5 -> Artifact.from(groupId = s[0], artifactId = s[1], type = s[2], classifier = s[3], version = s[4])
+                s.size >= 4 && containsVersion  -> Artifact.from(groupId = s[0], artifactId = s[1], type = s[2], version = s[3])
+                s.size >= 4 && !containsVersion -> Artifact.from(groupId = s[0], artifactId = s[1], type = s[2], classifier = s[3])
+                s.size >= 3 && containsVersion  -> Artifact.from(groupId = s[0], artifactId = s[1], version = s[2])
+                s.size >= 3 && !containsVersion -> Artifact.from(groupId = s[0], artifactId = s[1], type = s[2])
+                s.size >= 2 -> Artifact.from(groupId = s[0], artifactId = s[1])
                 else -> null
             }
         }
@@ -101,7 +106,7 @@ object MavenUtils {
                 val type = xpath.compile("/project/type/text()").evaluate(doc)
                 val classifier = xpath.compile("/project/classifier/text()").evaluate(doc)
                 if (groupId.isNotBlank() && artifactId.isNotBlank()) {
-                    return Artifact(groupId, artifactId, version, type, classifier)
+                    return Artifact.from(groupId, artifactId, version, type, classifier)
                 }
             } catch (e: Exception) {
                 logger.warn("Cannot parse pom", e)
