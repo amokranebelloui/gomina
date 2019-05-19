@@ -77,7 +77,7 @@ class ScmService {
                 val latestVersion = latestVersion(listOf(commit), pomFile) // FIXME chgSignature
 
                 if (latestVersion != null) {
-                    componentRepo.addVersions(component.id, branch, listOf(VersionRelease(artifactId, latestVersion, commit.date)))
+                    componentRepo.addVersions(component.id, branch, listOf(VersionRelease(artifactId, latestVersion, commit.date, branch)))
                 }
 
                 if (isTrunk) {

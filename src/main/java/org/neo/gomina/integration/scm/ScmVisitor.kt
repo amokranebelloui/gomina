@@ -53,7 +53,7 @@ fun Component.accept(scmClient: ScmClient, componentRepo: ComponentRepo, visitor
                     )}}
                     //.filter { (_, release, _) -> Version.isStable(release) }
                     .map { (artifactId, release, commit) ->
-                        val versionRelease = VersionRelease(artifactId, Version(release), commit.date)
+                        val versionRelease = VersionRelease(artifactId, Version(release), commit.date, branch.name)
                         visitor.visitVersion(commit, branch.name, isTrunk, versionRelease)
                         versionRelease
                     }

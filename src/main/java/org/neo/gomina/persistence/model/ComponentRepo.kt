@@ -314,14 +314,20 @@ class RedisComponentRepo : ComponentRepo {
 
     override fun getVersions(componentId: String, branchId: String?): List<VersionRelease> {
         pool.resource.use { jedis ->
-            val suffix = branchId?.let { ":$it" } ?: ""
-            return jedis.zrevrangeWithScores("versions:$componentId$suffix", 0, -1).mapNotNull {
-                val artifactIdWithVersion = ArtifactId.tryWithVersion(it.element)
-                val artifactId = artifactIdWithVersion?.toStrWithoutVersion()
-                val version = artifactIdWithVersion?.getVersion()
-                val releaseDate = Instant.ofEpochMilli(it.score.toLong()).atZone(ZoneOffset.UTC).toLocalDateTime()
-                if (artifactId != null && version != null) VersionRelease(artifactId, version, releaseDate) else null
+            val suffix = branchId?.let { ":$it" } ?: ":*"
+            val keys = jedis.keys("versions:$componentId$suffix")
+            return keys.flatMap { key ->
+                val branch = key.substring(key.lastIndexOf(":") + 1)
+                jedis.zrevrangeWithScores(key, 0, -1).mapNotNull {
+                    val artifactIdWithVersion = ArtifactId.tryWithVersion(it.element)
+                    val artifactId = artifactIdWithVersion?.toStrWithoutVersion()
+                    val version = artifactIdWithVersion?.getVersion()
+                    val releaseDate = Instant.ofEpochMilli(it.score.toLong()).atZone(ZoneOffset.UTC).toLocalDateTime()
+                    if (artifactId != null && version != null) VersionRelease(artifactId, version, releaseDate, branch) else null
+                }
             }
+            .sortedWith(compareBy({ it.releaseDate }, {it.version}))
+            .reversed()
         }
     }
 

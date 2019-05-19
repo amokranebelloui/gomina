@@ -129,7 +129,7 @@ data class NewComponentDetail(
         var jenkinsJob: String? = null
 )
 
-data class VersionReleaseDetail(val artifactId: String?, val version: VersionDetail, val releaseDate: Date)
+data class VersionReleaseDetail(val artifactId: String?, val version: VersionDetail, val releaseDate: Date, val branchId: String)
 
 class ComponentsApi {
 
@@ -346,11 +346,11 @@ class ComponentsApi {
 
     private fun versions(ctx: RoutingContext) {
         val componentId = ctx.request().getParam("componentId")
-        val branchId = ctx.request().getParam("branchId")
+        //val branchId = ctx.request().getParam("branchId")
         try {
-            logger.info("Get versions $componentId $branchId")
-            val versions = componentRepo.getVersions(componentId, branchId).map {
-                VersionReleaseDetail(it.artifactId, it.version.toVersionDetail(), it.releaseDate.toDateUtc)
+            logger.info("Get versions $componentId")
+            val versions: List<VersionReleaseDetail> = componentRepo.getVersions(componentId, null).map {
+                VersionReleaseDetail(it.artifactId, it.version.toVersionDetail(), it.releaseDate.toDateUtc, it.branchId)
             }
             ctx.response().putHeader("content-type", "text/html").end(mapper.writeValueAsString(versions))
         }

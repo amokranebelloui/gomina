@@ -8,7 +8,7 @@ Contexts, entities, schemas
 - commit:<componentId>:<rev> (hset)
 - commits:<componentId> (zset) commit{timestamp}
 - branch_commits:<componentId>:<branchId> (zset) commit{timestamp}
-- versions:<componentId> (zset) version{releaseDate}
+- versions:<componentId>:<branchId> (zset) version{releaseDate}
 
 ### Interaction (2)
 - api:<source>:<componentId>:exposes:<functionName> (hash) name type
@@ -62,8 +62,8 @@ Contexts, entities, schemas
 - knowledge:user:<userId> (zset) component{knowledge}
 
 ### Libraries (8) 
- - libraries:<componentId> (set) libraries used by a component
- - library:<artifactId> (set) components using a library
+ - libraries:<componentId>:<version> (set) libraries used by a component
+ - library:<artifactId>:<version> (set) components using a library
 
 ## Tools
 

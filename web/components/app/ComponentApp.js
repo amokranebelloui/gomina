@@ -22,6 +22,7 @@ import {Knowledge} from "../knowledge/Knowledge";
 import {DateTime} from "../common/DateTime";
 import {Well} from "../common/Well";
 import Route from "react-router-dom/es/Route";
+import {Branch} from "../commitlog/Branch";
 
 class ComponentApp extends React.Component {
     
@@ -634,8 +635,9 @@ class ComponentApp extends React.Component {
                             {this.state.versions && this.state.versions.map(versionRelease =>
                                 <span>
                                     <span>{versionRelease.artifactId}</span>&nbsp;
-                                    <span>{versionRelease.version.version}</span>&nbsp;
-                                    <DateTime date={versionRelease.releaseDate} />
+                                    <b>{versionRelease.version.version}</b>&nbsp;
+                                    <DateTime date={versionRelease.releaseDate} displayTime={false} style={{color: 'lightgray'}} />&nbsp;
+                                    <Branch branch={versionRelease.branchId} />
                                     <br/>
                                 </span>
                             )}

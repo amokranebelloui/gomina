@@ -26,7 +26,7 @@ class BranchColor extends React.Component<Props> {
 }
 
 type BranchLabelProps = {
-    branch: BranchDetailType,
+    branch: BranchDetailType|string,
     selected: boolean
 }
 
@@ -36,7 +36,8 @@ class Branch extends React.Component<BranchLabelProps> {
     }
     render() {
         const branch = this.props.branch;
-        const name = simplifyName(branch.name);
+        const branchName = typeof branch === 'string' ? branch : branch.name;
+        const name = simplifyName(branchName);
         return (
             <Badge backgroundColor={this.props.selected ? 'lightgray' : null}>
                 <BranchColor branch={name}/>
@@ -47,7 +48,7 @@ class Branch extends React.Component<BranchLabelProps> {
     }
 }
 
-function isTrunk(branch) {
+function isTrunk(branch: string) {
     return branch === "trunk" || branch === "master" || branch === "refs/heads/master";
 }
 
