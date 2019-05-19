@@ -14,17 +14,21 @@ import type {EnvType} from "../environment/Environment";
 import type {ComponentVersionType, LibraryType, LibraryUsageType} from "../library/LibraryType";
 import {LibraryCatalog} from "../library/Libraries";
 import {filterLibraries, LibraryFilter} from "../library/LibraryFilter";
+import "../common/items.css"
 
 type Props = {
     match: any
 }
+
+type SortDirection = 'ascending'|'descending'
 
 type State = {
     search: string,
     envs: Array<EnvType>,
     libraries: Array<LibraryType>,
     libraryId: ?string,
-    library: Array<LibraryUsageType>
+    library: Array<LibraryUsageType>,
+    sort: SortDirection
 }
 
 class LibrariesApp extends React.Component<Props, State> {
@@ -35,7 +39,8 @@ class LibrariesApp extends React.Component<Props, State> {
             envs: [],
             libraries: [],
             libraryId: this.props.match.params.id,
-            library: []
+            library: [],
+            sort: ls.get('libraries.sort') || 'ascending'
         }
     }
     retrieveEnvs() {
@@ -57,11 +62,16 @@ class LibrariesApp extends React.Component<Props, State> {
             .catch(error => thisComponent.setState({library: []}));
     }
     sortLibraryUsage(libraryUsage: Array<LibraryUsageType>): Array<LibraryUsageType> {
-        return libraryUsage.sort((a, b) => compareVersions(b.version, a.version))
+        const factor = this.state.sort === 'ascending' ? 1 : -1;
+        return libraryUsage.sort((a, b) => factor * compareVersions(a.version, b.version))
     }
     changeSearch(e: string) {
         this.setState({"search": e});
         ls.set('libraries.search', e)
+    }
+    changeSort(sort: SortDirection) {
+        this.setState({"sort": sort});
+        ls.set('libraries.sort', sort)
     }
     componentWillReceiveProps(nextProps: Props) {
         const newLibraryId = nextProps.match.params.id;
@@ -111,7 +121,17 @@ class LibrariesApp extends React.Component<Props, State> {
                     <div>
                         {this.state.libraryId && this.state.library &&
                             <Fragment>
-                                <h3>Usage of '{this.state.libraryId}'</h3>
+                                <h3 style={{display: 'inline-block'}}>Usage of '{this.state.libraryId}'</h3>
+                                <div style={{float: 'right'}}>
+                                    <button onClick={e => this.changeSort('ascending')}
+                                            style={{padding: '2px', color: this.state.sort === 'ascending' ? 'gray' : null}}>
+                                        OLD FIRST
+                                    </button>
+                                    <button onClick={e => this.changeSort('descending')}
+                                            style={{padding: '2px', color: this.state.sort === 'descending' ? 'gray' : null}}>
+                                        RECENT FIRST
+                                    </button>
+                                </div>
                                 <br/>
                                 <table width="100%">
                                     <tbody>
