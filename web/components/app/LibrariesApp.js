@@ -15,6 +15,7 @@ import type {ComponentVersionType, LibraryType, LibraryUsageType} from "../libra
 import {LibraryCatalog} from "../library/Libraries";
 import {filterLibraries, LibraryFilter} from "../library/LibraryFilter";
 import "../common/items.css"
+import {LibrariesSummary} from "../library/LibrariesSummary";
 
 type Props = {
     match: any
@@ -187,15 +188,9 @@ class LibrariesApp extends React.Component<Props, State> {
                         }
                         {!(this.state.libraryId && this.state.library) &&
                             <div>
-                                <p>
-                                    Understand the dependencies to libraries and their different versions
-                                    <br/>
-                                    <b>WILL ALSO INCLUDE A VIEW OF THE RUNTIME</b>
-                                </p>
+                                <p>Understand the dependencies to libraries and their different versions.</p>
                                 <br/>
-                                {libraries.map(l =>
-                                    <div>{l.artifactId} {l.versions.sort(compareVersionsReverse).map(v => <b>{v}&nbsp;&nbsp;</b>)}</div>
-                                )}
+                                <LibrariesSummary libraries={this.state.libraries} />
                             </div>
                         }
                     </div>

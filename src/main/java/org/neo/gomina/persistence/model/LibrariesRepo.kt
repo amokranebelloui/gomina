@@ -66,7 +66,7 @@ class RedisLibraries : Libraries {
 
     override fun addArtifact(artifact: Artifact, version: Version) {
         pool.resource.use { jedis ->
-            jedis.sadd("library:$artifact:${version.version}", "")
+            jedis.sadd("library:${artifact.withoutVersion()}:${version.version}", "")
         }
     }
 
