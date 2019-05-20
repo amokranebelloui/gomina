@@ -42,15 +42,21 @@ class RedisLibraries : Libraries {
 
     override fun library(artifact: Artifact): Map<Version, List<ComponentVersion>> {
         pool.resource.use { jedis ->
-            return jedis.keys("library:$artifact:*")
+            val pipe = jedis.pipelined()
+            val result = jedis.keys("library:$artifact:*")
                     .map { key -> key to Artifact.parse(key.replace(Regex("^library:"), "")) }
                     .filter { (_, a) ->
                         a?.withoutVersion() == artifact.withoutVersion()
                     }
                     .mapNotNull { (key, artifact) ->
                         val version = artifact?.getVersion()
-                        val componentsVersions = jedis.smembers(key).mapNotNull { it.toComponentVersion() }
+                        val componentsVersions = pipe.smembers(key)
                         version?.let { version to componentsVersions }
+                    }
+            pipe.sync()
+            return result
+                    .map { (version, componentsFutures) ->
+                        version to componentsFutures.get().mapNotNull { it.toComponentVersion() }
                     }
                     .toMap()
         }

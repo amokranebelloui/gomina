@@ -59,7 +59,7 @@ class ConfigLoader {
 
     fun load(): Config {
         val configFile = System.getProperty("gomina.config.file")
-        val file = File(if (configFile.isNotBlank()) configFile else "config/config.yaml")
+        val file = File(if (configFile?.isNotBlank() == true) configFile else "config/config.yaml")
         logger.info("Loading configuration from $file")
         return mapper.readValue(file)
     }
@@ -68,8 +68,4 @@ class ConfigLoader {
         private val logger = LogManager.getLogger(ConfigLoader.javaClass)
     }
 
-}
-
-fun main(args: Array<String>) {
-    println(ConfigLoader().load())
 }
