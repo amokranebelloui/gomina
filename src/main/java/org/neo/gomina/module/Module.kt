@@ -44,6 +44,7 @@ import org.neo.gomina.model.dependency.EnrichDependencies
 import org.neo.gomina.model.dependency.InteractionProviders
 import org.neo.gomina.model.dependency.InteractionsRepository
 import org.neo.gomina.model.dependency.Libraries
+import org.neo.gomina.model.diagram.Diagrams
 import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.HostUtils
@@ -100,6 +101,7 @@ class GominaModule : AbstractModule() {
         bind(InteractionProviders::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsRepository::class.java).to(RedisInteractionsRepository::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsFileProvider::class.java).asEagerSingleton()
+        bind(Diagrams::class.java).to(RedisDiagrams::class.java).`in`(Scopes.SINGLETON)
         bind(WorkList::class.java).to(RedisWorkList::class.java).`in`(Scopes.SINGLETON)
         bind(Hosts::class.java).to(RedisHosts::class.java).`in`(Scopes.SINGLETON)
         //bind(Inventory::class.java).to(InventoryFile::class.java).`in`(Scopes.SINGLETON)

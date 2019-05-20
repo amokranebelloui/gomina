@@ -10,13 +10,17 @@ import io.vertx.core.json.Json
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.model.dependency.Dependencies
+import org.neo.gomina.model.dependency.InteractionsRepository
+import org.neo.gomina.model.diagram.DiagramComponent
+import org.neo.gomina.model.diagram.Diagrams
 import java.io.File
 import java.io.IOException
 import java.util.*
 
-data class Component (val name: String, val x: Int = 0, val y: Int = 0)
-data class Dependency (val from: String, val to: String)
-data class Diagram (val components: List<Component>, val dependencies: List<Dependency>)
+data class DiagramComponentDetail (val name: String, val x: Int = 0, val y: Int = 0)
+data class DiagramDependencyDetail (val from: String, val to: String)
+data class DiagramDetail (val components: List<DiagramComponentDetail>, val dependencies: List<DiagramDependencyDetail>)
 
 class DiagramBuilder {
 
@@ -24,8 +28,8 @@ class DiagramBuilder {
         private val logger = LogManager.getLogger(DiagramBuilder::class.java)
     }
 
-    private val components = HashMap<String, Component>()
-    private val dependencies = ArrayList<Dependency>()
+    private val components = HashMap<String, DiagramComponentDetail>()
+    private val dependencies = ArrayList<DiagramDependencyDetail>()
 
     private val objectMapper = ObjectMapper().registerKotlinModule()
             .configure(SerializationFeature.INDENT_OUTPUT, true)
@@ -34,7 +38,7 @@ class DiagramBuilder {
 
     init {
         try {
-            val diagram = objectMapper.readValue<Diagram>(file)
+            val diagram = objectMapper.readValue<DiagramDetail>(file)
             diagram.components.forEach { components.put(it.name, it) }
             dependencies += diagram.dependencies
         }
@@ -44,7 +48,7 @@ class DiagramBuilder {
     }
 
     fun updateComponent(name: String, x: Int, y: Int) {
-        components[name] = Component(name, x, y)
+        components[name] = DiagramComponentDetail(name, x, y)
         try {
             objectMapper.writeValue(file, getDiagram())
         }
@@ -54,7 +58,7 @@ class DiagramBuilder {
 
     }
 
-    fun getDiagram(): Diagram = Diagram(ArrayList(components.values), dependencies)
+    fun getDiagram(): DiagramDetail = DiagramDetail(ArrayList(components.values), dependencies)
     
 }
 
@@ -67,6 +71,9 @@ class DiagramApi {
 
     val router: Router
 
+    @Inject lateinit var interactionsRepository: InteractionsRepository
+    @Inject lateinit var diagrams: Diagrams
+
     @Inject
     constructor(vertx: Vertx) {
         this.router = Router.router(vertx)
@@ -78,18 +85,41 @@ class DiagramApi {
     fun data(ctx: RoutingContext) {
         try {
             logger.info("Get Diagram data")
-            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(diagramBuilder.getDiagram()))
+
+            val diagram = diagrams.get("main")
+            val names = diagram.components.map { it.name }
+
+            val allInteractions = interactionsRepository.getAll().associateBy { p -> p.serviceId }
+            val functions = Dependencies.functions(allInteractions.values)
+            val dependencies = Dependencies.dependencies(functions)
+                    //.filter { it.to == componentId }
+                    .filter { names.contains(it.from) && names.contains(it.to) }
+                    .map { DiagramDependencyDetail(it.from, it.to) }
+
+            //val diagramDetail = diagramBuilder.getDiagram()
+            val diagramDetail = DiagramDetail(
+                    diagram.components.map { DiagramComponentDetail(it.name, it.x, it.y) },
+                    dependencies
+            )
+
+            logger.info(diagramDetail)
+
+            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(diagramDetail))
         } catch (e: Exception) {
             logger.error("Cannot get Diagram data", e)
             ctx.fail(500)
         }
     }
 
-    fun updateDiagram(ctx: RoutingContext) {
+    private fun updateDiagram(ctx: RoutingContext) {
         try {
             val json = ctx.bodyAsJson
-            logger.info("Update ... " + json)
-            diagramBuilder.updateComponent(json.getString("name"), json.getInteger("x")!!, json.getInteger("y")!!)
+            logger.info("Update ... $json")
+            val name = json.getString("name")
+            val x = json.getInteger("x")
+            val y = json.getInteger("y")
+            diagramBuilder.updateComponent(name, x, y)
+            diagrams.update("main", DiagramComponent(name, x, y))
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
