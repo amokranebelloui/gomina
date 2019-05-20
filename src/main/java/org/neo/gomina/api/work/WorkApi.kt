@@ -291,5 +291,5 @@ private fun Work.toWorkRef(components: List<ComponentRef>): WorkRef {
 
 fun String.toIssueRef(issueTrackerUrl: String): IssueRef {
     val url = if (issueTrackerUrl.isNotBlank()) issueTrackerUrl else null
-    return IssueRef(this, url?.let { "$it/$this" })
+    return IssueRef(this, url?.let { "$it/jira/browse/$this" })
 }
