@@ -25,19 +25,22 @@ private val port: Int = 7080
 private val jedis = Jedis(host, port)
 
 private val md = MessageDigest.getInstance("SHA-512")
-private val defaultHash = md.digest("pwd".toByteArray(StandardCharsets.UTF_8)).toString(StandardCharsets.UTF_8)
+private val defaultHash = md.digest("!!password12".toByteArray(StandardCharsets.UTF_8)).toString(StandardCharsets.UTF_8)
 
 fun main(args: Array<String>) {
     //loadUsers()
     //defaultPasswordsIfEmpty()
+    jedis.select(0); jedis.hset("user:ab6743", "password_hash", defaultHash)
     //loadComponents()
     //loadInteractions()
 
+    /*
     jedis.select(1)
     jedis.keys("component:*").forEach {
         val maven = jedis.hget(it, "maven")
         if (maven != null) jedis.hset(it, "artifact_id", maven)
     }
+    */
 }
 
 private fun loadUsers() {
