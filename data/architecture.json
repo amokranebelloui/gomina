@@ -1,8 +1,8 @@
 {
   "components" : [ {
     "name" : "basket",
-    "x" : 230,
-    "y" : 71
+    "x" : 226,
+    "y" : 57
   }, {
     "name" : "fidessa",
     "x" : 119,
@@ -41,16 +41,16 @@
     "y" : 292
   }, {
     "name" : "fixout",
-    "x" : 506,
-    "y" : 116
+    "x" : 519,
+    "y" : 112
   }, {
     "name" : "referential",
     "x" : 246,
     "y" : 290
   }, {
     "name" : "order",
-    "x" : 233,
-    "y" : 172
+    "x" : 175,
+    "y" : 197
   } ],
   "dependencies" : [ {
     "from" : "basket",

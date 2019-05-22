@@ -1,21 +1,32 @@
+// @flow
 import React from "react";
 import axios from "axios/index";
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
+import type {DiagramComponentType, DiagramDependencyType} from "../archidiagram/ArchiDiagram";
 import {ArchiDiagram} from "../archidiagram/ArchiDiagram";
-import {DSM} from "../dependency/DSM";
-import {Dependencies} from "../dependency/Dependencies";
-import {TagCloud} from "../common/TagCloud";
 import {Container} from "../common/Container";
 
-class ArchitectureApp extends React.Component {
-    constructor(props) {
+type Props = {
+
+}
+
+type State = {
+    components: Array<DiagramComponentType>,
+    dependencies: Array<DiagramDependencyType>
+}
+
+class ArchitectureApp extends React.Component<Props, State> {
+    constructor(props: Props) {
         super(props);
         this.state = {
             components: [],
             dependencies: []
         };
+        //$FlowFixMe
         this.addData = this.addData.bind(this);
+        //$FlowFixMe
         this.removeData = this.removeData.bind(this);
+        //$FlowFixMe
         this.componentMoved = this.componentMoved.bind(this);
     }
 
@@ -47,7 +58,7 @@ class ArchitectureApp extends React.Component {
         console.info("Reload: rem");
     }
 
-    componentMoved(d) {
+    componentMoved(d: DiagramComponentType) {
         console.info("moved 2", d);
 
         axios.post('/data/diagram/update', d)

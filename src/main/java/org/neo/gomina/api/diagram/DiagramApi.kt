@@ -1,9 +1,5 @@
 package org.neo.gomina.api.diagram
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.Inject
 import io.vertx.core.Vertx
 import io.vertx.core.json.Json
@@ -14,59 +10,15 @@ import org.neo.gomina.model.dependency.Dependencies
 import org.neo.gomina.model.dependency.InteractionsRepository
 import org.neo.gomina.model.diagram.DiagramComponent
 import org.neo.gomina.model.diagram.Diagrams
-import java.io.File
-import java.io.IOException
-import java.util.*
 
 data class DiagramComponentDetail (val name: String, val x: Int = 0, val y: Int = 0)
 data class DiagramDependencyDetail (val from: String, val to: String)
 data class DiagramDetail (val components: List<DiagramComponentDetail>, val dependencies: List<DiagramDependencyDetail>)
 
-class DiagramBuilder {
-
-    companion object {
-        private val logger = LogManager.getLogger(DiagramBuilder::class.java)
-    }
-
-    private val components = HashMap<String, DiagramComponentDetail>()
-    private val dependencies = ArrayList<DiagramDependencyDetail>()
-
-    private val objectMapper = ObjectMapper().registerKotlinModule()
-            .configure(SerializationFeature.INDENT_OUTPUT, true)
-
-    private val file = File("data/architecture.json")
-
-    init {
-        try {
-            val diagram = objectMapper.readValue<DiagramDetail>(file)
-            diagram.components.forEach { components.put(it.name, it) }
-            dependencies += diagram.dependencies
-        }
-        catch (e: IOException) {
-            logger.error("Error reading diagram", e)
-        }
-    }
-
-    fun updateComponent(name: String, x: Int, y: Int) {
-        components[name] = DiagramComponentDetail(name, x, y)
-        try {
-            objectMapper.writeValue(file, getDiagram())
-        }
-        catch (e: IOException) {
-            logger.error("Error writing diagram", e)
-        }
-
-    }
-
-    fun getDiagram(): DiagramDetail = DiagramDetail(ArrayList(components.values), dependencies)
-    
-}
-
 class DiagramApi {
 
     companion object {
         private val logger = LogManager.getLogger(DiagramApi::class.java)
-        val diagramBuilder = DiagramBuilder()
     }
 
     val router: Router
@@ -118,7 +70,6 @@ class DiagramApi {
             val name = json.getString("name")
             val x = json.getInteger("x")
             val y = json.getInteger("y")
-            diagramBuilder.updateComponent(name, x, y)
             diagrams.update("main", DiagramComponent(name, x, y))
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
