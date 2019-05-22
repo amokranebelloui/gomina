@@ -39,6 +39,7 @@ type Props = {
     components: Array<DiagramComponentType>,
     dependencies: Array<DiagramDependencyType>,
     onComponentMoved: DiagramComponentType => void,
+    onComponentSelected: DiagramComponentType => void,
     onLinkSelected: DiagramDependencyType => void
 }
 
@@ -49,20 +50,16 @@ type State = {
 class ArchiDiagram extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
-        //$FlowFixMe
-        this.createDiagram = this.createDiagram.bind(this);
-        //$FlowFixMe
-        this.redrawLines = this.redrawLines.bind(this);
-        //$FlowFixMe
-        this.onLinkSelected = this.onLinkSelected.bind(this);
-        //this.onComponentMoved = this.onComponentMoved.bind(this)
-
-        this.state = {active: true}
+        this.state = {
+            active: true
+        }
     }
     componentDidMount() {
+        console.info("?didMount");
         this.createDiagram();
     }
     componentDidUpdate() {
+        console.info("?didUpdate");
         this.createDiagram(); // FIXME Moyen update existing
         // update ?
         this.redrawLines(false);
@@ -96,10 +93,7 @@ class ArchiDiagram extends React.Component<Props, State> {
 
         const line = dependencies.enter().append("line")
             .call(this.dependency, indexedComponents)
-            .on("click", function(d) {
-                console.info("selected dependency", d);
-                this_.onLinkSelected(d)
-            });
+            .on("click", d => this_.onLinkSelected(d));
         if (init) {
             line.attr("stroke", "orange");
         }
@@ -120,6 +114,7 @@ class ArchiDiagram extends React.Component<Props, State> {
         d3.select(n).select("circle").attr("fill", "#8cccef");
         d3.select(n).interrupt().raise().classed("active", true);
         d3.event.sourceEvent.stopPropagation();
+        this.props.onComponentSelected && this.props.onComponentSelected(d)
     }
     dragged(d: DiagramComponentType2, n: any) {
         d.x = d3.event.x;
@@ -138,12 +133,16 @@ class ArchiDiagram extends React.Component<Props, State> {
     onComponentMoved(d: DiagramComponentType) {
         this.props.onComponentMoved && this.props.onComponentMoved(d)
     }
+    onComponentSelected(c: DiagramComponentType) {
+        this.props.onComponentSelected && this.props.onComponentSelected(c)
+    }
     onLinkSelected(d: DiagramDependencyType) {
         this.props.onLinkSelected && this.props.onLinkSelected(d)
     }
     createDiagram() {
         const this_ = this;
         const positions = this.props.components;
+        console.info("?draw", positions);
         //$FlowFixMe
         var svg = d3.select(this.node);
 
@@ -158,7 +157,7 @@ class ArchiDiagram extends React.Component<Props, State> {
             .style("position", "absolute")
             .style("opacity", 0);
 
-        var comps = svg.select("#nodes").selectAll("g node-group").data(positions, d => {return d.name});
+        var comps = svg.select("#nodes").selectAll("g.node-group").data(positions, d => {return "comp-" + d.name});
 
         var comp = comps.enter()
             .append("g")
@@ -167,6 +166,7 @@ class ArchiDiagram extends React.Component<Props, State> {
             .attr("transform", function(d) {
                 return "translate(" + d.x + "," + d.y + ")"
             })
+            .on("click", d => {this_.onComponentSelected(d)})
             .call(d3.drag()
                 .on("start", function(d) { this_.dragStarted(d, this)})
                 .on("drag", function(d) { this_.dragged(d, this)})
@@ -197,6 +197,9 @@ class ArchiDiagram extends React.Component<Props, State> {
             .attr("dy", ".35em")
             .attr("text-anchor", "middle")
 
+        comps.exit()
+            .remove()
+
     }
     render() {
         return (
@@ -204,8 +207,8 @@ class ArchiDiagram extends React.Component<Props, State> {
                 <Toggle toggled={this.state.active} onToggleChanged={value => {this.setState({active: value})}} />
                 <br/>
                 <div ref={node =>
-                         //$FlowFixMe
-                         this.container = node} style={{position: 'relative'}}
+                    //$FlowFixMe
+                    this.container = node} style={{position: 'relative'}}
                 >
                     <svg ref={node =>
                         //$FlowFixMe
