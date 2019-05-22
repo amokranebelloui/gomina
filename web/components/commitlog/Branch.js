@@ -48,7 +48,7 @@ class Branch extends React.Component<BranchLabelProps> {
     }
 }
 
-function isTrunk(branch: string) {
+function isTrunk(branch: ?string) {
     return branch === "trunk" || branch === "master" || branch === "refs/heads/master";
 }
 
