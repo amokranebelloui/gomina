@@ -42,6 +42,8 @@ class DiagramApi {
         router.delete("/node/remove").handler(this::removeNode)
 
         router.post("/add").handler(this::add)
+        router.put("/name").handler(this::updateName)
+        router.put("/description").handler(this::updateDescription)
         router.delete("/delete").handler(this::delete)
     }
 
@@ -129,6 +131,34 @@ class DiagramApi {
         }
         catch (e: Exception) {
             logger.error("Cannot add Diagram", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun updateName(ctx: RoutingContext) {
+        val diagramId = ctx.request().getParam("diagramId")
+        try {
+            val name = ctx.bodyAsString
+            logger.info("Update ... $diagramId $name")
+            diagrams.updateName(diagramId, name)
+            ctx.response().putHeader("content-type", "text/javascript").end(diagramId)
+        }
+        catch (e: Exception) {
+            logger.error("Cannot update Diagram name", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun updateDescription(ctx: RoutingContext) {
+        val diagramId = ctx.request().getParam("diagramId")
+        try {
+            val desc = ctx.bodyAsString
+            logger.info("Update ... $diagramId $desc")
+            diagrams.updateDescription(diagramId, desc)
+            ctx.response().putHeader("content-type", "text/javascript").end(diagramId)
+        }
+        catch (e: Exception) {
+            logger.error("Cannot update Diagram name", e)
             ctx.fail(500)
         }
     }

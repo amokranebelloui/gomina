@@ -81,6 +81,18 @@ class RedisDiagrams : Diagrams {
         }
     }
 
+    override fun updateName(diagramId: String, name: String) {
+        pool.resource.use { jedis ->
+            jedis.persist("diagram:$diagramId", mapOf("name" to name))
+        }
+    }
+
+    override fun updateDescription(diagramId: String, description: String) {
+        pool.resource.use { jedis ->
+            jedis.persist("diagram:$diagramId", mapOf("description" to description))
+        }
+    }
+
     override fun delete(diagramId: String): Boolean {
         pool.resource.use { jedis ->
             if (!jedis.exists("diagram_detail:$diagramId")) {

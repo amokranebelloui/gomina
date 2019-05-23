@@ -9,7 +9,7 @@ type Props = {
     sortByCount?: ?boolean, // true
     displayCount?: ?boolean,
     sortAlphabetically?: ?boolean, // true
-    selectionChanged?: ?Array<string> => void
+    selectionChanged?: Array<string> => void
 }
 type State = {
     selected: Array<string>

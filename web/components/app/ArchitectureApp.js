@@ -2,17 +2,22 @@
 import React, {Fragment} from "react";
 import axios from "axios/index";
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
-import type {DiagramComponentType, DiagramDependencyType} from "../archidiagram/ArchiDiagram";
+import type {DiagramComponentType} from "../archidiagram/ArchiDiagram";
 import {ArchiDiagram} from "../archidiagram/ArchiDiagram";
 import {Container} from "../common/Container";
 import type {ComponentRefType} from "../component/ComponentType";
 import {Well} from "../common/Well";
-import {DiagramEditor} from "../archidiagram/DiagramEditor";
 import type {DiagramRefType} from "../archidiagram/DiagramEditor";
+import {DiagramEditor} from "../archidiagram/DiagramEditor";
 import {InlineAdd} from "../common/InlineAdd";
 import Link from "react-router-dom/es/Link";
 import type {DiagramType} from "../archidiagram/DiagramType";
 import Route from "react-router-dom/es/Route";
+import {EditableLabel} from "../common/EditableLabel";
+import {TagCloud} from "../common/TagCloud";
+import {joinTags, matchesList, splitTags} from "../common/utils";
+import ls from "local-storage";
+import {extendSystems} from "../system/system-utils";
 
 type Props = {
     match: any
@@ -20,6 +25,8 @@ type Props = {
 
 type State = {
     diagrams: Array<DiagramRefType>,
+    systemRefs: Array<string>,
+    selectedSystems: Array<string>,
     componentRefs: Array<ComponentRefType>,
     selectedDiagram: ?DiagramType,
     selectedComponent: ?string,
@@ -32,6 +39,8 @@ class ArchitectureApp extends React.Component<Props, State> {
         super(props);
         this.state = {
             diagrams: [],
+            systemRefs: [],
+            selectedSystems: splitTags(ls.get('components.systems')) || [],
             componentRefs: [],
             selectedDiagram: null,
             selectedComponent: null,
@@ -40,9 +49,10 @@ class ArchitectureApp extends React.Component<Props, State> {
     }
 
     componentDidMount() {
+        this.retrieveComponentRefs();
+        this.retrieveSystems();
         this.retrieveDiagrams();
         this.retrieveDiagram(this.props.match.params.id);
-        this.retrieveComponentRefs();
     }
     componentWillReceiveProps(nextProps: Props) {
         const newDiagramId = nextProps.match.params.id;
@@ -53,20 +63,30 @@ class ArchitectureApp extends React.Component<Props, State> {
                 : this.setState({selectedDiagram: null});
         }
     }
-    retrieveDiagrams() {
-        const thisComponent = this;
-        axios.get('/data/diagram/all')
-            .then(response => thisComponent.setState({diagrams: response.data}))
-            .catch(error => thisComponent.setState({diagrams: []}));
-    }
-
     retrieveComponentRefs() {
         const thisComponent = this;
         axios.get('/data/components/refs')
             .then(response => thisComponent.setState({componentRefs: response.data}))
             .catch(error => thisComponent.setState({componentRefs: []}));
     }
+    retrieveSystems() {
+        const thisComponent = this;
+        axios.get('/data/systems/refs')
+            .then(response => thisComponent.setState({systemRefs: response.data}))
+            .catch(error => thisComponent.setState({systemRefs: []}));
+    }
+    selectedSystemsChanged(systems: Array<string>) {
+        console.info("selected systems", systems);
+        this.setState({selectedSystems: systems});
+        ls.set('components.systems', joinTags(systems));
+    }
 
+    retrieveDiagrams() {
+        const thisComponent = this;
+        axios.get('/data/diagram/all')
+            .then(response => thisComponent.setState({diagrams: response.data}))
+            .catch(error => thisComponent.setState({diagrams: []}));
+    }
     retrieveDiagram(diagramId: string) {
         diagramId && axios.get('/data/diagram/data?diagramId=' + diagramId)
             .then(response => {
@@ -83,6 +103,18 @@ class ArchitectureApp extends React.Component<Props, State> {
         const newDiagram = this.state.newDiagram;
         return newDiagram && axios.post('/data/diagram/add?diagramId=' + newDiagram.diagramId, newDiagram);
     }
+    changeName(diagramId: string, name: string) {
+        console.info(":change name");
+        axios.put('/data/diagram/name?diagramId=' + diagramId, name)
+            .then(() => this.retrieveDiagram(diagramId))
+            .catch(error => console.log(":change name error", error.response));
+    }
+    changeDescription(diagramId: string, desc: string) {
+        console.info(":change name");
+        axios.put('/data/diagram/description?diagramId=' + diagramId, desc)
+            .then(() => this.retrieveDiagram(diagramId))
+            .catch(error => console.log(":change desc error", error.response));
+    }
     deleteDiagram(diagramId: string, history: any) {
         console.info(":del diagram");
         axios.delete('/data/diagram/delete?diagramId=' + diagramId)
@@ -98,14 +130,20 @@ class ArchitectureApp extends React.Component<Props, State> {
         const diag = this.state.selectedDiagram;
         if (diag) {
             if (!diag.components.find(c => c.name === component.id)) {
-                const dComp = {name: component.id, x: 50, y: 50};
+                const this_ = this;
+                const x = Math.floor((Math.random() * 400) + 30);
+                const y = Math.floor((Math.random() * 200) + 30);
+                const dComp = {name: component.id, x: x, y: y};
                 const newComponents = [].concat(diag.components, [dComp]);
                 let newDiag = Object.assign({}, diag, {components: newComponents});
                 this.setState({selectedDiagram: newDiag});
                 console.info(":add component");
                 diag &&
                 axios.post('/data/diagram/node/update?diagramId=' + diag.diagramId, dComp)
-                    .then(response => console.log(":added", response.data))
+                    .then(response => {
+                        console.log(":added", response.data);
+                        this_.retrieveDiagram(diag.diagramId)
+                    })
                     .catch(error => console.log(":add error", error.response));
             }
         }
@@ -142,7 +180,8 @@ class ArchitectureApp extends React.Component<Props, State> {
     render() {
         const selectedComponent = this.state.selectedComponent;
         const diagram = this.state.selectedDiagram;
-        const componentRefs = this.state.componentRefs.sort((a,b) => (a.label||'') > (b.label||'') ? 1 : -1);
+        const componentRefs = filterComponents(this.state.componentRefs, this.state.selectedSystems)
+            .sort((a,b) => (a.label||'') > (b.label||'') ? 1 : -1);
         return (
             <AppLayout title="Architecture Diagram">
                 <PrimarySecondaryLayout>
@@ -182,9 +221,12 @@ class ArchitectureApp extends React.Component<Props, State> {
                                             <input type="button" value="Delete" onClick={e => this.deleteDiagram(diagram.diagramId, history)} />
                                         )}/>
                                     </div>
-                                    <b>{diagram.name}</b>
-                                    <p>{diagram.description}</p>
-                                    <div style={{clear: 'both'}}></div>
+                                    <EditableLabel label={diagram.name} style={{fontSize: 16, fontWeight: 'bold'}}  altText={'<>'}
+                                                   onLabelEdited={name => this.changeName(diagram.diagramId, name)}/>
+                                    <br/>
+                                    <EditableLabel label={diagram.description} style={{width: '99%'}}  altText={'<>'}
+                                                   onLabelEdited={desc => this.changeDescription(diagram.diagramId, desc)}/>
+                                    <div style={{clear: 'both'}} />
                                 </div>
                                 <ArchiDiagram components={diagram.components}
                                               dependencies={diagram.dependencies}
@@ -203,13 +245,24 @@ class ArchitectureApp extends React.Component<Props, State> {
                     <div>
                         <h3>Control Panel</h3>
                         <Well block>
-
+                            <b>Systems:</b>
+                            <TagCloud tags={this.state.systemRefs} selected={this.state.selectedSystems}
+                                      selectionChanged={s => this.selectedSystemsChanged(s)} />
+                            <br/>
                         </Well>
                         <Well block>
                             {componentRefs.map(c =>
                                 <div key={c.id}>
-                                    {c.label} - {c.id}
-                                    <button onClick={e => this.addData(c)}>Add</button>
+                                    {diagram && diagram.components.filter(cc => cc.name === c.id).length === 0 ?
+                                        <Fragment>
+                                            {c.label} - {c.id} &nbsp;
+                                            <button onClick={e => this.addData(c)}>Add</button>
+                                        </Fragment>
+                                        :
+                                        <Fragment>
+                                            <span style={{color: 'lightgray'}}>{c.label} - {c.id}</span>
+                                        </Fragment>
+                                    }
                                 </div>
                             )}
                         </Well>
@@ -218,6 +271,13 @@ class ArchitectureApp extends React.Component<Props, State> {
             </AppLayout>
         );
     }
+}
+
+function filterComponents(components: Array<ComponentRefType>, systems: Array<string>) {
+    return components.filter(c =>
+        //matchesSearch(c, search) &&
+        matchesList(extendSystems(c.systems), systems)
+    );
 }
 
 export { ArchitectureApp };

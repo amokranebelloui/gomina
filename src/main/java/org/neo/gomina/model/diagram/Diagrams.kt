@@ -10,5 +10,7 @@ interface Diagrams {
     fun update(diagramId: String, component: DiagramComponent)
     fun remove(diagramId: String, name: String)
     fun add(diagramId: String, name: String, description: String)
+    fun updateName(diagramId: String, name: String)
+    fun updateDescription(diagramId: String, description: String)
     fun delete(diagramId: String): Boolean
 }
