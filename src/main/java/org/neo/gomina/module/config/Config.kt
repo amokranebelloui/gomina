@@ -15,12 +15,7 @@ import org.neo.gomina.integration.sonar.SonarConfig
 import java.io.File
 
 data class DatabaseConfig(var host: String = "localhost", var port: Int = 0)
-data class InventoryConfig(var componentsFile: String = "",
-                           var interactionsFile: String = "",
-                           var workFile: String = "",
-                           var hostsFile: String = "",
-                           var inventoryDir: String = "",
-                           var inventoryFilter: String = "")
+data class InteractionsConfig(val file: String = "")
 data class WorkConfig(var referenceEnv: String = "")
 data class MonitoringConfig(var timeout: Int = 5)
 data class EventsConfig(
@@ -37,13 +32,12 @@ data class Config (
 
         var name: String? = null,
         var passwordsFile: String? = null,
-        val usersFile: String?,
         var domains: List<String> = emptyList(),
         val jiraUrl: String = "",
         val jiraProjects: List<String> = emptyList(),
         val maven: MavenConfig = MavenConfig(),
         var database: DatabaseConfig = DatabaseConfig(),
-        var inventory: InventoryConfig = InventoryConfig(),
+        var interactions: InteractionsConfig = InteractionsConfig(),
         var work: WorkConfig = WorkConfig(),
         var monitoring: MonitoringConfig = MonitoringConfig(),
         var events: EventsConfig = EventsConfig(),
