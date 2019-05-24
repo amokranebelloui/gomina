@@ -50,12 +50,14 @@ class Topology {
         val monitoring = monitoring.instancesFor(env.id)
                 .associateBy { env.id to it.instanceId }
 
+        val componentMap = componentRepo.getAll().associateBy { it.id }
+
         // FIXME associate real time and monitoring by monitoring url@<env> and no more env.id
         return merge(inventory, monitoring)
                 .map { (id, instance, indicators) ->
                     val svc = instance?.first?.svc ?: indicators?.service ?: "x"
                     val service = services[svc] ?: Service(svc = svc, type = indicators?.type, undefined = true)
-                    val component = service.componentId?.let { componentRepo.get(it) }
+                    val component = service.componentId?.let { componentMap[it] }
 
                     ExtInstance(id, component, service, instance?.second, indicators)
                 }
@@ -63,6 +65,8 @@ class Topology {
 
     fun buildExtInstances(componentId: String): List<ExtInstance> {
         val environments = inventory.getEnvironments()
+
+        val componentMap = componentRepo.getAll().associateBy { it.id }
 
         val services = environments
                 .flatMap { env -> env.services.map { env to it } }
@@ -86,7 +90,7 @@ class Topology {
                     val envService = eInstance?.let { services[it.envId to it.service.svc] }
                             ?: eRuntime?.let { services[it.envId to it.indicators.service] }
                             ?: EnvService(id.first, Service(svc = svc, type = eRuntime?.indicators?.type, undefined = true))
-                    val component = envService.service.componentId?.let { componentRepo.get(it) }
+                    val component = envService.service.componentId?.let { componentMap[it] }
 
                     ExtInstance(id.first to id.second, component, envService.service, eInstance?.instance, eRuntime?.indicators)
                 }

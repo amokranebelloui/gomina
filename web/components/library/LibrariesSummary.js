@@ -35,7 +35,11 @@ class LibrariesSummary extends React.Component<Props> {
             .filter(l => withDependents(l.versions).length >= fragmentationThreshold)
             .sort((l1, l2) => withDependents(l2.versions).length - withDependents(l1.versions).length || l1.artifactId - l2.artifactId );
 
-        const mostUsed = libraries.sort((l1,l2) => dependents(l2) > dependents(l1) ? 1 : -1).slice(0, 15);
+        const mostUsed = libraries.sort((l1,l2) => {
+            const c1 = dependents(l1);
+            const c2 = dependents(l2);
+            return (c2 === c1 ? 0 : c2 > c1 ? 1 : -1) || (l1.artifactId > l2.artifactId ? 1 : -1);
+        }).slice(0, 15);
 
         return (
             <div>
