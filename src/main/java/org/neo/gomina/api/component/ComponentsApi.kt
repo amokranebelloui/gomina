@@ -403,18 +403,26 @@ class ComponentsApi {
 
     private fun reloadScm(ctx: RoutingContext) {
         try {
-            ctx.request().getParam("componentIds")?.split(",")?.map { it.trim() }?.forEach {
-                componentRepo.get(it)?.let { component ->
-                    try {
-                        logger.info("Reload SCM data for $it ...")
-                        component.scm?.let { scmService.reloadScmDetails(component, it) }
-                    }
-                    catch (e: Exception) {
-                        logger.error("Error Reloading SCM for ${component.id}", e)
+            vertx.executeBlocking({future: Future<Void> ->
+
+                ctx.request().getParam("componentIds")?.split(",")?.map { it.trim() }?.forEach {
+                    componentRepo.get(it)?.let { component ->
+                        try {
+                            logger.info("Reload SCM data for $it ...")
+                            component.scm?.let { scmService.reloadScmDetails(component, it) }
+                        }
+                        catch (e: Exception) {
+                            logger.error("Error Reloading SCM for ${component.id}", e)
+                        }
                     }
                 }
+
+                future.complete()
+            }, false)
+            {res: AsyncResult<Void> ->
+                ctx.response().putHeader("content-type", "text/javascript").end()
             }
-            ctx.response().putHeader("content-type", "text/javascript").end()
+
         }
         catch (e: Exception) {
             logger.error("Cannot get component", e)
@@ -550,18 +558,26 @@ class ComponentsApi {
 
     private fun editScm(ctx: RoutingContext) {
         try {
-            val componentId = ctx.request().getParam("componentId")
-            val type = ctx.request().getParam("type")
-            val url = ctx.request().getParam("url")
-            val path = ctx.request().getParam("path")
-            val hasMetadata = ctx.request().getParam("hasMetadata")
-            logger.info("Edit SCM $componentId $type $url $path $hasMetadata ...")
-            componentRepo.editScm(componentId, type, url, path, hasMetadata?.toBoolean() ?: false)
-            componentRepo.get(componentId)?.let { component ->
-                logger.info("Reload SCM data for $componentId ...")
-                component.scm?.let { scmService.reloadScmDetails(component, it) }
+            vertx.executeBlocking({future: Future<Void> ->
+
+                val componentId = ctx.request().getParam("componentId")
+                val type = ctx.request().getParam("type")
+                val url = ctx.request().getParam("url")
+                val path = ctx.request().getParam("path")
+                val hasMetadata = ctx.request().getParam("hasMetadata")
+                logger.info("Edit SCM $componentId $type $url $path $hasMetadata ...")
+                componentRepo.editScm(componentId, type, url, path, hasMetadata?.toBoolean() ?: false)
+                componentRepo.get(componentId)?.let { component ->
+                    logger.info("Reload SCM data for $componentId ...")
+                    component.scm?.let { scmService.reloadScmDetails(component, it) }
+                }
+
+                future.complete()
+            }, false)
+            {res: AsyncResult<Void> ->
+                ctx.response().putHeader("content-type", "text/javascript").end()
             }
-            ctx.response().putHeader("content-type", "text/javascript").end()
+
         }
         catch (e: Exception) {
             logger.error("Cannot edit SCM", e)

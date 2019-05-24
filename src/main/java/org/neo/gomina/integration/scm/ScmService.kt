@@ -149,16 +149,21 @@ class ScmService {
     }
 
     private fun processLibraryUsage(component: Component, version: Version, pom: String?) {
-        val dependencies = pom?.let { mavenDependencyResolver.dependencies(it) } ?: emptyList()
-        libraries.addUsage(component.id, version, dependencies.map {
-            Artifact.from(
-                    it.artifact.groupId,
-                    it.artifact.artifactId,
-                    it.artifact.version,
-                    type = it.artifact.extension,
-                    classifier = it.artifact.classifier
-            )
-        })
+        try {
+            val dependencies = pom?.let { mavenDependencyResolver.dependencies(it) } ?: emptyList()
+            libraries.addUsage(component.id, version, dependencies.map {
+                Artifact.from(
+                        it.artifact.groupId,
+                        it.artifact.artifactId,
+                        it.artifact.version,
+                        type = it.artifact.extension,
+                        classifier = it.artifact.classifier
+                )
+            })
+        }
+        catch (e: Exception) {
+            logger.error("", e)
+        }
     }
 
     private fun latestVersion(log: List<Commit>, pomFile: String?): Version? {
