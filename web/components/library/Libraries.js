@@ -28,7 +28,12 @@ class LibraryCatalog extends React.Component<Props> {
                     <div>
                         <Link to={'/library/' + l.artifactId}>{l.artifactId}</Link>
                         &nbsp;&nbsp;
-                        {l.versions.sort(compareVersionsReverse).map(v => <b>{v}&nbsp;&nbsp;</b>)}
+                        {l.versions
+                            .sort((a,b) => compareVersionsReverse(a.version, b.version))
+                            .map(v =>
+                                <b>{v.version}<i style={{color: 'lightgray'}}>({v.dependents})</i> &nbsp;&nbsp;</b>
+                            )
+                        }
                     </div>
                 )}
             </div>

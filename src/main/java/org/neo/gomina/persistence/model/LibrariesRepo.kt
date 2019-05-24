@@ -8,6 +8,7 @@ import org.neo.gomina.integration.maven.Artifact
 import org.neo.gomina.model.dependency.ComponentVersion
 import org.neo.gomina.model.dependency.Libraries
 import org.neo.gomina.model.dependency.LibraryVersions
+import org.neo.gomina.model.dependency.VersionUsage
 import org.neo.gomina.model.version.Version
 import redis.clients.jedis.JedisPool
 
@@ -29,14 +30,24 @@ class RedisLibraries : Libraries {
 
     override fun libraries(): List<LibraryVersions> {
         pool.resource.use { jedis ->
-            return jedis.keys("library:*")
-                    .map { it.replace(Regex("^library:"), "") }
-                    //.map { it.splitVersion() }
-                    .mapNotNull { Artifact.parse(it) }
-                    .map { it to Version(it.version ?: "UNKNOWN") }
-                    .map { (artifact, version) -> artifact.let { artifact.withoutVersion() to version } }
-                    .groupBy( { it.first } ) { it.second }
+            val pipe = jedis.pipelined()
+            val data = jedis.keys("library:*")
+                    .mapNotNull { key ->
+                        Artifact.parse(key.replace(Regex("^library:"), ""))?.let {
+                            Triple(it, pipe.scard(key), pipe.sismember(key, ""))
+                        }
+                    }
+            pipe.sync()
+
+            val result = data
+                    .map { (artifact, nb, containsBlank) ->
+                        val count = nb.get() - if (containsBlank.get()) 1 else 0
+                        artifact to VersionUsage(Version(artifact.version ?: "UNKNOWN"), count.toInt())
+                    }
+                    .map { (artifact, versionUsage) -> artifact.let { artifact.withoutVersion() to versionUsage } }
+                    .groupBy({ it.first }) { it.second }
                     .map { (artifact, versions) -> LibraryVersions(artifact, versions) }
+            return result
         }
     }
 

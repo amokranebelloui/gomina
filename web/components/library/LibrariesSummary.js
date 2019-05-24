@@ -7,22 +7,36 @@ type Props = {
     libraries: ?Array<LibraryType>
 }
 
+function withDependents(libraries: Array<LibraryType>) {
+    return libraries.filter(l => l.dependents > 0)
+}
+
+function dependents(library: LibraryType) {
+    console.info(library.versions);
+    return library.versions.map(v => v.dependents).reduce((a, b) => a + b, 0)
+}
+
 class LibrariesSummary extends React.Component<Props> {
     constructor(props: Props) {
         super(props);
     }
     render() {
         const libraries = this.props.libraries || [];
-        const nbVersionsPerLibrary = {};
+        const nbVersionsPerLibrary:{[number]: number} = {};
         libraries.forEach(l => {
-            const nbVersions = l.versions.length;
+            const nbVersions = withDependents(l.versions).length;
             nbVersionsPerLibrary[nbVersions] = (nbVersionsPerLibrary[nbVersions]||0) + 1
         });
-        const nbVersions = Object.keys(nbVersionsPerLibrary).sort((a, b) => b > a ? 1 : -1);
-        const fragmentationThreshold = nbVersions.length > 1 ? nbVersions[1] : nbVersions.length > 0 ? nbVersions[0] : 999;
+        //$FlowFixMe
+        const nbVersions: Array<number> = Object.keys(nbVersionsPerLibrary).sort((a, b) => b > a ? 1 : -1);
+        //$FlowFixMe
+        const fragmentationThreshold: number = nbVersions.length > 1 ? nbVersions[1] : nbVersions.length > 0 ? nbVersions[0] : 999;
         const mostFragmented = libraries
-            .filter(l => l.versions.length >= fragmentationThreshold)
-            .sort((l1, l2) => l2.versions.length - l1.versions.length || l1.artifactId - l2.artifactId );
+            .filter(l => withDependents(l.versions).length >= fragmentationThreshold)
+            .sort((l1, l2) => withDependents(l2.versions).length - withDependents(l1.versions).length || l1.artifactId - l2.artifactId );
+
+        const mostUsed = libraries.sort((l1,l2) => dependents(l2) > dependents(l1) ? 1 : -1).slice(0, 15);
+
         return (
             <div>
                 <div>
@@ -42,6 +56,13 @@ class LibrariesSummary extends React.Component<Props> {
                     <b>Most Fragmented</b>
                     <ul>
                         <LibraryCatalog libraries={mostFragmented} totalCount={mostFragmented.length}/>
+                    </ul>
+                </div>
+                <br/>
+                <div>
+                    <b>Most Used</b>
+                    <ul>
+                        <LibraryCatalog libraries={mostUsed} totalCount={mostUsed.length}/>
                     </ul>
                 </div>
             </div>

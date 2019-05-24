@@ -46,7 +46,8 @@ data class CallChainDetail(val serviceId: String,
 data class FunctionData(val name: String, val type: String)
 data class FunctionUsageData(val name: String, val type: String, val usage: String? = null)
 
-data class LibraryDetail(val artifactId: String, val versions: Collection<String>)
+data class VersionUsageDetail(val version: String, val dependents: Int)
+data class LibraryDetail(val artifactId: String, val versions: Collection<VersionUsageDetail>)
 
 data class LibraryUsageDetail(val version: String, val components: List<ComponentVersionDetail>)
 data class ComponentVersionDetail(val component: ComponentRef, val version: String, val instances: List<InstanceRefDetail>)
@@ -304,24 +305,31 @@ class DependenciesApi {
         }
     }
 
+    fun List<VersionUsage>.merge(other: List<VersionUsage>?): List<VersionUsage> {
+        return (this + (other ?: emptyList()))
+                .groupBy({it.version}, {it.dependents})
+                .map { (v, deps) -> VersionUsage(v, deps.sum()) }
+    }
+
     private fun libraries(ctx: RoutingContext) {
         logger.info("Get Libraries")
         try {
             val components = componentRepo.getAll()
-                    .map { it.artifactId?.parseArtifact()?.withoutVersion() to listOfNotNull(it.latest, it.released) }
+                    .map {
+                        val artifactWithoutVersion = it.artifactId?.parseArtifact()?.withoutVersion()
+                        val versionsUsage = listOfNotNull(it.latest, it.released).map { v -> VersionUsage(v, 0) }
+                        artifactWithoutVersion to versionsUsage
+                    }
                     .mapNotNull { (a, v) -> if (a != null) a to v else null }
                     .toMap()
-            val libs = libraries.libraries().map { it.artifactId to it.versions }.toMap()
-            val allArtifacts = (components.keys + libs.keys).toSet().sortedBy { it.toString() }
-            val merged = allArtifacts.map {
-                val versions = (libs[it] ?: emptyList()) + (components[it] ?: emptyList())
-                it to versions
-            }
-            val libraries = merged
+
+            val libs = libraries.libraries()
+                    .map { it.artifactId to it.versions.merge(components[it.artifactId]) }//.toMap()
                     .map { (artifactId, versions) ->
-                        LibraryDetail(artifactId.toString(), versions.map { it.version }.toSet())
+                        LibraryDetail(artifactId.toString(), versions.map { VersionUsageDetail(it.version.version, it.dependents) })
                     }
-            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(libraries))
+
+            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(libs))
         }
         catch (e: Exception) {
             logger.error("Cannot get Libraries", e)

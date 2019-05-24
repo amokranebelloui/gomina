@@ -1,9 +1,14 @@
 import type {ComponentRefType} from "../component/ComponentType";
 import type {InstanceRefType} from "../environment/InstanceType";
 
+type VersionUsage = {
+    version: string,
+    dependents: number
+}
+
 type LibraryType = {
     artifactId: string,
-    versions: Array<string>
+    versions: Array<VersionUsage>
 }
 
 type ComponentVersionType = {

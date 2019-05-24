@@ -3,7 +3,9 @@ package org.neo.gomina.model.dependency
 import org.neo.gomina.integration.maven.Artifact
 import org.neo.gomina.model.version.Version
 
-data class LibraryVersions(val artifactId: Artifact, val versions: List<Version>)
+data class VersionUsage(val version: Version, val dependents: Int)
+
+data class LibraryVersions(val artifactId: Artifact, val versions: List<VersionUsage>)
 
 data class ComponentVersion(val componentId: String, val version: Version)
 
