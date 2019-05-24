@@ -31,7 +31,7 @@ class Knowledge extends React.Component<Props> {
         return (
             <div>
                 {knowledge.map(k =>
-                    <Fragment>
+                    <Fragment key={k.component.id + k.user.id}>
                         <StarRating value={k.knowledge} />&nbsp;
                         {!this.props.hideUser && <span>{k.user.shortName}&nbsp;</span>}
                         {!this.props.hideComponent && <span>{k.component.label}&nbsp;</span>}

@@ -83,10 +83,14 @@ class CommitLog extends React.Component<Props> {
                         {log.map(commit =>
                             <tr block="true" key={commit.revision}
                                 style={{opacity: this.highlight(commit) ? 1.0 : 0.15}}>
-                                <td style={{width: '30px'}}><Revision revision={commit.revision} type={this.props.type}></Revision></td>
-                                <td style={{width: '20px'}}>{commit.author && <UserRef user={commit.author} /> || '-'}</td>
+                                <td style={{width: '30px'}}>
+                                    <Revision revision={commit.revision} type={this.props.type} />
+                                </td>
+                                <td style={{width: '20px'}}>
+                                    {commit.author && <UserRef user={commit.author} /> || '-'}
+                                </td>
                                 <td style={{width: '80px'}}>
-                                    <DateTime date={commit.date}/>
+                                    <DateTime key="commitDate" date={commit.date}/>
                                 </td>
                                 <td style={{verticalAlign: 'middle'}}>
                                     <span style={{display: 'inline-block', verticalAlign: 'middle'}}>
@@ -99,15 +103,15 @@ class CommitLog extends React.Component<Props> {
                                     }
                                     <span className="items" style={{display: 'inline-block', float: 'right'}}>
                                         {(commit.instances||[]).map(instance =>
-                                            <Badge key={instance.id} title={instance.running} backgroundColor="#AABBAA">{instance.env} {instance.name}</Badge>
+                                            <Badge key={instance.id} title={instance.running.version} backgroundColor="#AABBAA">{instance.env} {instance.name}</Badge>
                                         )}
                                         {(commit.deployments||[]).map(instance =>
-                                            <Badge key={instance.id} title={instance.deployed} backgroundColor="#EEEEAA">{instance.env} {instance.name}</Badge>
+                                            <Badge key={instance.id} title={instance.deployed.version} backgroundColor="#EEEEAA">{instance.env} {instance.name}</Badge>
                                         )}
                                     </span>
                                 </td>
                                 <td style={{verticalAlign: 'middle', width: '80px'}}>
-                                    <DateTime date={commit.prodReleaseDate} />
+                                    <DateTime key="prodRel" date={commit.prodReleaseDate} />
                                 </td>
                                 {branches.map(b =>
                                     <td title={b}

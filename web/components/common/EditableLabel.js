@@ -1,6 +1,6 @@
 // @flow
 
-import * as React from "react"
+import React from "react"
 
 type Props = {
     label: ?string,
@@ -35,7 +35,7 @@ class EditableLabel extends React.Component<Props, State> {
     update() {
         //console.info("update label", this.state.label);
         this.setState({edition: false});
-        this.props.onLabelEdited && this.state.label && this.props.onLabelEdited(this.state.label)
+        this.state.label && this.props.onLabelEdited && this.props.onLabelEdited(this.state.label)
     }
     cancelEdition() {
         this.setState({edition: false}) //, label: this.props.label
@@ -44,6 +44,7 @@ class EditableLabel extends React.Component<Props, State> {
         //console.info("EditableLabel will receive props", this.props, nextProps);
     }
     render() {
+        const alt = this.props.altText || '?';
         return (
             this.state.edition ?
                 <input type="text" name="label" placeholder=""
@@ -53,12 +54,12 @@ class EditableLabel extends React.Component<Props, State> {
                        onKeyPress={e => e.key === 'Enter' && this.update()}
                        onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
                        onChange={e => this.setState({label: e.target.value})}
-                       {...this.props} />
+                       style={this.props.style} />
             :
-                <span onDoubleClick={() => this.editLabel()} {...this.props}>
+                <span onDoubleClick={() => this.editLabel()} style={this.props.style}>
                     {this.props.label
                         ? this.props.label
-                        : <span style={{opacity: .5, textDecoration: 'italic'}}>{this.props.altText || '?'}</span>
+                        : <span style={{opacity: .5, textDecoration: 'italic'}}>{alt}</span>
                     }
                 </span>
 

@@ -17,10 +17,11 @@ class Label extends React.Component<Props> {
         console.info("EditableLabel will receive props", this.props, nextProps);
     }
     render() {
+        const alt = this.props.altText || '?';
         return (
             this.props.label
                 ? <span>{this.props.label}</span>
-                : <span style={{opacity: .5, textDecoration: 'italic'}}>{this.props.altText || '?'}</span>
+                : <span style={{opacity: .5, textDecoration: 'italic'}}>{alt}</span>
         )
     }
 }

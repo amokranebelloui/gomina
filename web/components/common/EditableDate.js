@@ -1,6 +1,6 @@
 // @flow
 
-import * as React from "react"
+import React from "react"
 import {DateTime} from "./DateTime";
 import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css";
@@ -37,7 +37,7 @@ class EditableDate extends React.Component<Props, State> {
     }
     update() {
         this.setState({edition: false});
-        this.props.onDateEdited && this.state.date && this.props.onDateEdited(this.state.date)
+        this.state.date && this.props.onDateEdited && this.props.onDateEdited(this.state.date)
     }
     cancelEdition() {
         this.setState({edition: false}) //, label: this.props.label
@@ -56,13 +56,13 @@ class EditableDate extends React.Component<Props, State> {
                     onKeyPress={e => e.key === 'Enter' && this.update()}
                     onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
                     onChange={date => this.setState({date: date.toISOString().substring(0, 10)})}
-                    {...this.props}
+                    style={this.props.style}
                 />,
                 <button onClick={() => this.update()}>OK</button>,
                 <button onClick={() => this.cancelEdition()}>Cancel</button>
                 ]
             :
-                <span onDoubleClick={() => this.edit()} {...this.props}>
+                <span onDoubleClick={() => this.edit()} style={this.props.style}>
                     {this.props.date
                         ? <DateTime date={this.props.date} />
                         : <span style={{opacity: .5, textDecoration: 'italic'}}>{this.props.altText || '?'}</span>

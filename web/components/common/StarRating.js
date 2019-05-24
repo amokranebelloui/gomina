@@ -32,7 +32,7 @@ class StarRating extends React.Component<Props> {
             const prefix = this.props.editable ? "editable-" : "";
             const className = prefix + (i < value ? "star-rating-selected" : "star-rating");
             stars.push(
-                <FontAwesomeIcon icon="star" className={className}
+                <FontAwesomeIcon key={i} icon="star" className={className}
                                  onClick={() => this.changeRating(i + 1)} />
             )
         }

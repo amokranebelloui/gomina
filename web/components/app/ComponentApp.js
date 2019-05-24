@@ -382,10 +382,7 @@ class ComponentApp extends React.Component {
     retrieveEvents(componentId) {
         const thisComponent = this;
         axios.get('/data/events/component/' + componentId)
-            .then(response => {
-                console.info("events", typeof response.data, response.data.events)
-                thisComponent.setState({events: response.data.events})
-            })
+            .then(response => thisComponent.setState({events: response.data.events}))
             .catch(() => thisComponent.setState({events: []}))
     }
     retrieveKnowledge(componentId) {
@@ -626,14 +623,14 @@ class ComponentApp extends React.Component {
                         <h3>Other Components</h3>
                         <div className="items">
                             {this.state.associated.map(componentRef =>
-                                <Link to={"/component/" + componentRef.id}>{componentRef.label || componentRef.id}</Link>
+                                <Link key={componentRef.id} to={"/component/" + componentRef.id}>{componentRef.label || componentRef.id}</Link>
                             )}
                         </div>
                         <br/>
                         <h3>Versions</h3>
                         <div className="items">
                             {this.state.versions && this.state.versions.map(versionRelease =>
-                                <span>
+                                <span key={versionRelease.artifactId + versionRelease.version.version + versionRelease.branchId}>
                                     <span>{versionRelease.artifactId}</span>&nbsp;
                                     <b>{versionRelease.version.version}</b>&nbsp;
                                     <DateTime date={versionRelease.releaseDate} displayTime={false} style={{color: 'lightgray'}} />&nbsp;

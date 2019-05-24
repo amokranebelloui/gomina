@@ -72,15 +72,15 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
                     <span className="items">
                         {component.artifactId && <Fragment><span style={{fontSize: 8}}>{component.artifactId}</span> | </Fragment>}
                         {systems.map(system =>
-                            <span style={{fontSize: 8}}>{system}</span>
+                            <span key={system} style={{fontSize: 8}}>{system}</span>
                         )}
                         |
-                        {languages.map(tag =>
-                            <span style={{fontSize: 8}}>{tag}</span>
+                        {languages.map(language =>
+                            <span key={language} style={{fontSize: 8}}>{language}</span>
                         )}
                         |
                         {tags.map(tag =>
-                            <span style={{fontSize: 8}}>{tag}</span>
+                            <span key={tag} style={{fontSize: 8}}>{tag}</span>
                         )}
                     </span>
                 </div>

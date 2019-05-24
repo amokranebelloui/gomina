@@ -14,20 +14,19 @@ function DateTime(props: Props) {
         const timeStyle = Object.assign({}, {color: 'gray', fontSize: '7px', lineHeight: '-10px'}, props.style);
         const displayTime = props.displayTime !== null && typeof props.displayTime !== 'undefined'
             ? props.displayTime : true;
-        return ([
-            <Fragment>
-                <span key="date" style={dataStyle}>
+        return (
+            <span>
+                <span style={dataStyle}>
                     {date.toLocaleDateString()}
                 </span>
                 {displayTime &&
                     <Fragment>
-                        <span key="sep">&nbsp;</span>
-                        <span key="time" style={timeStyle}>{date.toLocaleTimeString()}</span>
+                        <span>&nbsp;</span>
+                        <span style={timeStyle}>{date.toLocaleTimeString()}</span>
                     </Fragment>
                 }
-
-            </Fragment>
-        ])
+            </span>
+        )
     }
     else {
         return null
