@@ -477,7 +477,7 @@ class EnvApp extends React.Component {
                                 }
                                 <div>
                                     {selectedInstances.map((i: InstanceType) =>
-                                        <Well block>
+                                        <Well key={i.id} block>
                                             <b>Instance: {i.id}</b>
                                             <div style={{float: 'right'}}>
                                             <Secure permission="env.manage">

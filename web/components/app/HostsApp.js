@@ -174,7 +174,7 @@ class HostsApp extends React.Component {
                                     <b>Should not be there</b>
                                 {host && host.unexpected && host.unexpected.length > 0 &&
                                     host.unexpected.map(f =>
-                                    <div>{f}</div>
+                                        <div key={f}>{f}</div>
                                     )
                                 }
                             </div>
@@ -249,7 +249,7 @@ function Host(props) {
             <div>
                 <b>Tags: </b>
                 {host.tags.map(tag =>
-                    <span>{tag} </span>
+                    <span key={tag}>{tag} </span>
                 )}
             </div>
         </div>

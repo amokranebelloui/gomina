@@ -191,7 +191,7 @@ class UserApp extends React.Component<Props, State> {
                                 <b>Accounts: </b>
                                 <span className="items">
                                 {this.state.user.accounts.map(account =>
-                                    <Badge backgroundColor={'#EEEEEE'}>{account}</Badge>
+                                    <Badge key={account} backgroundColor={'#EEEEEE'}>{account}</Badge>
                                 )}
                                 </span>
                                 <br/>

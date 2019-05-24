@@ -12,7 +12,6 @@ function withDependents(libraries: Array<LibraryType>) {
 }
 
 function dependents(library: LibraryType) {
-    console.info(library.versions);
     return library.versions.map(v => v.dependents).reduce((a, b) => a + b, 0)
 }
 
@@ -51,7 +50,7 @@ class LibrariesSummary extends React.Component<Props> {
                     <b>Fragmentation</b>
                     <ul>
                         {nbVersions.map(nb =>
-                            <li>{nb} version(s), {nbVersionsPerLibrary[nb]} component(s)</li>
+                            <li key={nb}>{nb} version(s), {nbVersionsPerLibrary[nb]} component(s)</li>
                         )}
                     </ul>
                 </div>

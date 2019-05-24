@@ -56,7 +56,7 @@ class WorkApp extends React.Component<Props, State> {
         super(props);
         this.state = {
             envs: [],
-            refEnv: ls.get('work.list.ref.env'),
+            refEnv: ls.get('work.list.ref.env') || '',
             commitLimit: ls.get('work.list.commit.limit') || 100,
             components: [],
             users: [],

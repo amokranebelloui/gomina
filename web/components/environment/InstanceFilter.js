@@ -76,7 +76,7 @@ class InstanceFilter extends React.Component<InstanceFilterProps> {
 
                 <div style={{display: 'inline-block'}} className='items'>
                     {statusFilters.map(filter =>
-                        <Selection id={filter.label} label={filter.label} selected={this.props.id}
+                        <Selection key={filter.label} id={filter.label} label={filter.label} selected={this.props.id}
                                    onSelectionChanged={e => this.changeSelected(filter.label, i => i && filter.f(i) || false)}/>
                     )}
                 </div>
@@ -84,11 +84,11 @@ class InstanceFilter extends React.Component<InstanceFilterProps> {
 
                 <div style={{display: 'inline-block'}} className='items'>
                     {metadataFilters.map(filter =>
-                        <Selection id={filter.label} label={filter.label} selected={this.props.id}
+                        <Selection key={filter.label} id={filter.label} label={filter.label} selected={this.props.id}
                                    onSelectionChanged={e => this.changeSelected(filter.label, i => i && filter.f(i) || false)}/>
                     )}
                     {serviceFilters.map(filter =>
-                        <Selection id={filter.label} label={filter.label} selected={this.props.id}
+                        <Selection key={filter.label} id={filter.label} label={filter.label} selected={this.props.id}
                                    onSelectionChanged={e => this.changeSelected(filter.label, (i, s) => filter.f(s))}/>
                     )}
                 </div>

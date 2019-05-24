@@ -28,7 +28,7 @@ class Systems extends React.Component<Props> {
             <table>
                 <tbody>
                 {systems.map(s =>
-                    <tr>
+                    <tr key={s.id}>
                         <td>{s.id}</td>
                         <td align="center" style={{width: '50px'}}>{s.components}</td>
                         <td style={{width: '150px'}}><LinesOfCode loc={s.loc}/>/{s.locBasis}</td>

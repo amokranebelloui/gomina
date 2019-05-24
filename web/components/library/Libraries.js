@@ -25,13 +25,13 @@ class LibraryCatalog extends React.Component<Props> {
                     <i style={{color: 'gray'}}>{all ? count + ' ' + suffix : count + ' of ' + totalCount + ' ' + suffix}</i>
                 </div>
                 {libraries.map(l =>
-                    <div>
+                    <div key={l.artifactId}>
                         <Link to={'/library/' + l.artifactId}>{l.artifactId}</Link>
                         &nbsp;&nbsp;
                         {l.versions
                             .sort((a,b) => compareVersionsReverse(a.version, b.version))
                             .map(v =>
-                                <b>{v.version}<i style={{color: 'lightgray'}}>({v.dependents})</i> &nbsp;&nbsp;</b>
+                                <b key={v.version}>{v.version}<i style={{color: 'lightgray'}}>({v.dependents})</i> &nbsp;&nbsp;</b>
                             )
                         }
                     </div>
@@ -61,7 +61,7 @@ class Libraries extends React.Component<LibraryProps> {
                     <i style={{color: 'gray'}}>{all ? count + ' ' + suffix : count + ' of ' + totalCount + ' ' + suffix}</i>
                 </div>
                 {this.props.libraries && this.props.libraries.map(library =>
-                    <div>{library}</div>
+                    <div key={library}>{library}</div>
                 )}
             </Fragment>
         );

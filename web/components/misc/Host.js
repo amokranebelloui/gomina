@@ -23,7 +23,11 @@ class Host extends React.Component<Props> {
                 <span title={title} style={{userSelect: 'all'}}>
                     {host}
                 </span>
-                {unexpected && <span style={{userSelect: 'all', textDecoration: 'line-through', marginLeft: '2px', opacity: 0.4}}>{this.props.expected}</span>}
+                {unexpected &&
+                    <span style={{userSelect: 'all', textDecoration: 'line-through', marginLeft: '2px', opacity: 0.4}}>
+                        {this.props.expected}
+                    </span>
+                }
             </span>
         )
     }

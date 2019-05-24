@@ -137,7 +137,7 @@ class LibrariesApp extends React.Component<Props, State> {
                                 <table width="100%">
                                     <tbody>
                                     {this.sortLibraryUsage(this.state.library).map(libUsage =>
-                                        <tr>
+                                        <tr key={libUsage.version}>
                                             <td valign="top" style={{
                                                 textAlign: 'right', minWidth: '40px', padding: '0px 5px',
                                                 borderBottom: '1px solid lightgray',
@@ -148,16 +148,16 @@ class LibrariesApp extends React.Component<Props, State> {
                                             </td>
                                             <td width="100%" style={{borderBottom: '1px solid lightgray'}}>
                                             {this.groupByComponent(libUsage.components).map(usage =>
-                                                <Fragment>
+                                                <Fragment key={usage.component.id}>
                                                     <Link to={'/component/' + usage.component.id}>{usage.component.label} </Link>
                                                     <br/>
                                                     {usage.usages.map(c =>
-                                                        <span className="items" style={{paddingLeft: '20px'}}>
+                                                        <span key={c.version} className="items" style={{paddingLeft: '20px'}}>
                                                             {c.instances && c.instances.length > 0 ?
                                                                 <Fragment>
                                                                     <Badge>{c.version}</Badge>
                                                                     {this.groupByEnv(c.instances).map(env =>
-                                                                        <Fragment>
+                                                                        <Fragment key={env.env}>
                                                                             <span>
                                                                                 <Badge key={env.env}
                                                                                        title={c.instances.filter(i => i.env === env.env).map(instance => instance.name).join(' ')}

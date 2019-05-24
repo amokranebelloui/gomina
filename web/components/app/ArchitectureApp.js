@@ -191,7 +191,7 @@ class ArchitectureApp extends React.Component<Props, State> {
                                 <p>Set of blueprints describing system architecture</p>
                                 <br/>
                                 {this.state.diagrams.map(d =>
-                                <div>
+                                <div key={d.diagramId}>
                                     <Link to={'/architecture/' + d.diagramId} >
                                     {d.name} - {d.description}
                                     </Link>
