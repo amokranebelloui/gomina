@@ -1,7 +1,6 @@
 
 name: 'My Governance Dashboard'
 passwordsFile: 'config/pass.properties'
-usersFile: 'data/users.json'
 jiraUrl: 'http://localhost/jira'
 jiraProjects:
   - 'DEMO'
@@ -19,16 +18,11 @@ maven:
       type: 'default'
       url: 'http://central.maven.org/maven2/'
 
-inventory:
-  componentsFile: 'data/components.json'
-  interactionsFile: 'data/interactions2.json'
-  workFile: 'data/work.json'
-  hostsFile: 'data/hosts.json'
-  inventoryDir: 'data'
-  inventoryFilter: 'env\.(.*?)\.json'
-
 monitoring:
   timeout: 4
+
+interactions:
+  file: 'datadummy/interactions2.json'
 
 events:
   internalMonitoring:

@@ -1,9 +1,5 @@
 package org.neo.gomina.api.diagram
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.Inject
 import io.vertx.core.Vertx
 import io.vertx.core.json.Json
@@ -14,59 +10,20 @@ import org.neo.gomina.model.dependency.Dependencies
 import org.neo.gomina.model.dependency.InteractionsRepository
 import org.neo.gomina.model.diagram.DiagramComponent
 import org.neo.gomina.model.diagram.Diagrams
-import java.io.File
-import java.io.IOException
-import java.util.*
 
 data class DiagramComponentDetail (val name: String, val x: Int = 0, val y: Int = 0)
 data class DiagramDependencyDetail (val from: String, val to: String)
-data class DiagramDetail (val components: List<DiagramComponentDetail>, val dependencies: List<DiagramDependencyDetail>)
-
-class DiagramBuilder {
-
-    companion object {
-        private val logger = LogManager.getLogger(DiagramBuilder::class.java)
-    }
-
-    private val components = HashMap<String, DiagramComponentDetail>()
-    private val dependencies = ArrayList<DiagramDependencyDetail>()
-
-    private val objectMapper = ObjectMapper().registerKotlinModule()
-            .configure(SerializationFeature.INDENT_OUTPUT, true)
-
-    private val file = File("data/architecture.json")
-
-    init {
-        try {
-            val diagram = objectMapper.readValue<DiagramDetail>(file)
-            diagram.components.forEach { components.put(it.name, it) }
-            dependencies += diagram.dependencies
-        }
-        catch (e: IOException) {
-            logger.error("Error reading diagram", e)
-        }
-    }
-
-    fun updateComponent(name: String, x: Int, y: Int) {
-        components[name] = DiagramComponentDetail(name, x, y)
-        try {
-            objectMapper.writeValue(file, getDiagram())
-        }
-        catch (e: IOException) {
-            logger.error("Error writing diagram", e)
-        }
-
-    }
-
-    fun getDiagram(): DiagramDetail = DiagramDetail(ArrayList(components.values), dependencies)
-    
-}
+data class DiagramDetail (
+        val diagramId: String,
+        val name: String,
+        val description: String?,
+        val components: List<DiagramComponentDetail>,
+        val dependencies: List<DiagramDependencyDetail>)
 
 class DiagramApi {
 
     companion object {
         private val logger = LogManager.getLogger(DiagramApi::class.java)
-        val diagramBuilder = DiagramBuilder()
     }
 
     val router: Router
@@ -78,15 +35,35 @@ class DiagramApi {
     constructor(vertx: Vertx) {
         this.router = Router.router(vertx)
 
-        router.post("/update").handler(this::updateDiagram)
+        router.get("/all").handler(this::all)
+
         router.get("/data").handler(this::data)
+        router.post("/node/update").handler(this::updateNode)
+        router.delete("/node/remove").handler(this::removeNode)
+
+        router.post("/add").handler(this::add)
+        router.put("/name").handler(this::updateName)
+        router.put("/description").handler(this::updateDescription)
+        router.delete("/delete").handler(this::delete)
+    }
+
+    fun all(ctx: RoutingContext) {
+        try {
+            logger.info("Get Diagrams")
+            val diagrams = diagrams.all()
+            ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(diagrams))
+        } catch (e: Exception) {
+            logger.error("Cannot get Diagrams", e)
+            ctx.fail(500)
+        }
     }
 
     fun data(ctx: RoutingContext) {
         try {
+            val diagramId = ctx.request().getParam("diagramId")
             logger.info("Get Diagram data")
 
-            val diagram = diagrams.get("main")
+            val diagram = diagrams.get(diagramId)
             val names = diagram.components.map { it.name }
 
             val allInteractions = interactionsRepository.getAll().associateBy { p -> p.serviceId }
@@ -98,6 +75,7 @@ class DiagramApi {
 
             //val diagramDetail = diagramBuilder.getDiagram()
             val diagramDetail = DiagramDetail(
+                    diagram.ref.diagramId, diagram.ref.name, diagram.ref.description,
                     diagram.components.map { DiagramComponentDetail(it.name, it.x, it.y) },
                     dependencies
             )
@@ -111,19 +89,94 @@ class DiagramApi {
         }
     }
 
-    private fun updateDiagram(ctx: RoutingContext) {
+    private fun updateNode(ctx: RoutingContext) {
         try {
+            val diagramId = ctx.request().getParam("diagramId")
             val json = ctx.bodyAsJson
             logger.info("Update ... $json")
             val name = json.getString("name")
             val x = json.getInteger("x")
             val y = json.getInteger("y")
-            diagramBuilder.updateComponent(name, x, y)
-            diagrams.update("main", DiagramComponent(name, x, y))
+            diagrams.update(diagramId, DiagramComponent(name, x, y))
             ctx.response().putHeader("content-type", "text/javascript").end()
         }
         catch (e: Exception) {
             logger.error("Cannot update Diagram data", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun removeNode(ctx: RoutingContext) {
+        try {
+            val diagramId = ctx.request().getParam("diagramId")
+            val json = ctx.bodyAsJson
+            logger.info("Remove ... $json")
+            val name = json.getString("name")
+            diagrams.remove(diagramId, name)
+            ctx.response().putHeader("content-type", "text/javascript").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot remove Diagram data", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun add(ctx: RoutingContext) {
+        val diagramId = ctx.request().getParam("diagramId")
+        try {
+            val json = ctx.bodyAsJson
+            logger.info("Add ... $diagramId $json")
+            diagrams.add(diagramId, json.getString("name"), json.getString("description"))
+            ctx.response().putHeader("content-type", "text/javascript").end(diagramId)
+        }
+        catch (e: Exception) {
+            logger.error("Cannot add Diagram", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun updateName(ctx: RoutingContext) {
+        val diagramId = ctx.request().getParam("diagramId")
+        try {
+            val name = ctx.bodyAsString
+            logger.info("Update ... $diagramId $name")
+            diagrams.updateName(diagramId, name)
+            ctx.response().putHeader("content-type", "text/javascript").end(diagramId)
+        }
+        catch (e: Exception) {
+            logger.error("Cannot update Diagram name", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun updateDescription(ctx: RoutingContext) {
+        val diagramId = ctx.request().getParam("diagramId")
+        try {
+            val desc = ctx.bodyAsString
+            logger.info("Update ... $diagramId $desc")
+            diagrams.updateDescription(diagramId, desc)
+            ctx.response().putHeader("content-type", "text/javascript").end(diagramId)
+        }
+        catch (e: Exception) {
+            logger.error("Cannot update Diagram name", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun delete(ctx: RoutingContext) {
+        val diagramId = ctx.request().getParam("diagramId")
+        try {
+            logger.info("Delete ... $diagramId")
+            val deleted = diagrams.delete(diagramId)
+            if (deleted) {
+                ctx.response().putHeader("content-type", "text/javascript").end(diagramId)
+            }
+            else {
+                ctx.response().setStatusCode(400).end("Cannot delete non empty diagram")
+            }
+        }
+        catch (e: Exception) {
+            logger.error("Cannot delete Diagram", e)
             ctx.fail(500)
         }
     }

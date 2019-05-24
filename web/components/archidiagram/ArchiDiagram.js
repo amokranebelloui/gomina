@@ -1,3 +1,4 @@
+// @flow
 import React from "react";
 import * as d3 from "d3";
 import "./ArchiDiagram.css";
@@ -10,126 +11,132 @@ function index(list) {
     }, {});
 }
 
-class ArchiDiagram extends React.Component {
-    constructor(props){
+type DiagramComponentType = {
+    name: string,
+    x: number,
+    y: number
+}
+
+type DiagramComponentType2 = {
+    name: string,
+    x: number,
+    y: number,
+    dragging: boolean
+}
+
+type DiagramComponentIndexType = {
+    [name: string]: DiagramComponentType,
+}
+
+
+type DiagramDependencyType = {
+    from: string,
+    to: string
+}
+
+
+type Props = {
+    components: Array<DiagramComponentType>,
+    dependencies: Array<DiagramDependencyType>,
+    onComponentMoved: DiagramComponentType => void,
+    onComponentSelected: DiagramComponentType => void,
+    onLinkSelected: DiagramDependencyType => void
+}
+
+type State = {
+    active: boolean
+}
+
+class ArchiDiagram extends React.Component<Props, State> {
+    constructor(props: Props) {
         super(props);
-        this.createDiagram = this.createDiagram.bind(this);
-        this.redrawLines = this.redrawLines.bind(this);
-        this.onLinkSelected = this.onLinkSelected.bind(this);
-        //this.onComponentMoved = this.onComponentMoved.bind(this)
-        this.state = {active: true}
+        this.state = {
+            active: true
+        }
     }
     componentDidMount() {
-        this.createDiagram();
-        //console.info("did mount", this.createDiagram)
+        console.info("?didMount");
+        this.drawNodes(this.props);
+        this.redrawLines(this.props, true);
     }
-    componentDidUpdate() {
-        this.createDiagram(); // FIXME Moyen update existing
-        // update ?
-        //console.info("diagram prop updated", this.createDiagram)
-        this.redrawLines(false);
+    componentWillReceiveProps(nextProps: Props) {
+        console.info("?receiveProps");
+        this.drawNodes(nextProps); // FIXME Moyen update existing
+        this.redrawLines(nextProps, false);
     }
     componentWillUnmount() {
+        //$FlowFixMe
         const el = this.node;
-        console.info(el);
         //d3.destroy(el); // Doesn't work
         //d3.select("svg").remove(); // Is it necessary?
     }
-    dependency(selection, positions) {
-        selection.attr("x1", function (d) { return positions[d.from].x; })
-            .attr("x2", function (d) { return positions[d.to].x; })
-            .attr("y1", function (d) { return positions[d.from].y; })
-            .attr("y2", function (d) { return positions[d.to].y; })
-            .attr("stroke-width", 3);
-    }
-
-    redrawLines(init) {
-        const this_ = this;
-        let indexedComponents = index(this.props.components);
-        const svg = d3.select(this.node);
-        const dependencies = svg.select("#links").selectAll("line").data(this.props.dependencies, d => {return d.from+'|'+d.to});
-
-        dependencies.exit()
-            .transition()
-            .duration(1000)
-            .style("opacity", "0")
-            .remove();
-
-        const line = dependencies.enter().append("line")
-            .call(this.dependency, indexedComponents)
-            .on("click", function(d) {
-                console.info("selected dependency", d);
-                this_.onLinkSelected(d)
-            });
-        if (init) {
-            line.attr("stroke", "orange");
-        }
-        else {
-            line.attr("stroke", "red")
-                .style("opacity", "0")
-                .transition()
-                .duration(1000)
-                .attr("stroke", "orange")
-                .style("opacity", "1");
-        }
-
-        dependencies.call(this.dependency, indexedComponents)
-            .attr("stroke", "orange");
-    };
-    dragStarted(d, comp) {
-        //console.info("drag start", d, this);
+    dragStarted(d: DiagramComponentType2, n: any) {
         d.dragging = true;
-        d3.select(comp).select("circle").attr("fill", "#8cccef");
-        d3.select(comp).interrupt().raise().classed("active", true);
+        d3.select(n).select("circle").attr("fill", "#8cccef");
+        d3.select(n).interrupt().raise().classed("active", true);
         d3.event.sourceEvent.stopPropagation();
+        this.props.onComponentSelected && this.props.onComponentSelected(d)
     }
-    dragged(d, comp) {
-        //console.info("drag", this);
+    dragged(d: DiagramComponentType2, n: any) {
         d.x = d3.event.x;
         d.y = d3.event.y;
-        this.redrawLines();
-        d3.select(comp).attr("transform", function(d) {
+        this.redrawLines(this.props);
+        d3.select(n).attr("transform", function(d) {
             return "translate(" + d.x + "," + d.y + ")"
         });
     }
-    dragEnded(d, comp) {
-        //console.info("drag end", d, this);
+    dragEnded(d: DiagramComponentType2, n: any) {
         d.dragging = false;
-        d3.select(comp).classed("active", false);
-        d3.select(comp).select("circle").attr("fill", "lightblue");
+        d3.select(n).classed("active", false);
+        d3.select(n).select("circle").attr("fill", "lightblue");
         this.onComponentMoved(d)
     }
-    onComponentMoved(d) {
+    onComponentMoved(d: DiagramComponentType) {
         this.props.onComponentMoved && this.props.onComponentMoved(d)
     }
-    onLinkSelected(d) {
+    onComponentSelected(c: DiagramComponentType) {
+        this.props.onComponentSelected && this.props.onComponentSelected(c)
+    }
+    onLinkSelected(d: DiagramDependencyType) {
         this.props.onLinkSelected && this.props.onLinkSelected(d)
     }
-    createDiagram() {
+    drawNodes(props: Props) {
         const this_ = this;
-        const positions = this.props.components;
-        console.info('$$$$2', positions);
+        const positions = props.components;
+        console.info("?draw", positions);
+        //$FlowFixMe
         var svg = d3.select(this.node);
 
         //svg.append("g").attr("id", "links");
         //svg.append("g").attr("id", "nodes");
 
-        this.redrawLines(true);
-
+        //$FlowFixMe
         var div = d3.select(this.container).append("div")
             .attr("class", "tooltip")
             .style("position", "absolute")
             .style("opacity", 0);
 
-        var comps = svg.select("#nodes").selectAll("g node-group").data(positions, d => {return d.name});
+        var comps = svg.select("#nodes").selectAll("g.node-group").data(positions, d => "comp-" + d.name);
+
+
+        comps.exit()
+            .remove();
+
+        comps.transition()
+            .duration(100)
+            .attr("transform", function(d) {
+                return "translate(" + d.x + "," + d.y + ")"
+            });
+
 
         var comp = comps.enter()
             .append("g")
-            .attr("id", function(d) { return "comp-" + d.name })
+            //.attr("id", d => "comp-" + d.name)
             .attr("class", "node-group")
             .attr("transform", function(d) {
                 return "translate(" + d.x + "," + d.y + ")"
             })
+            .on("click", d => {this_.onComponentSelected(d)})
             .call(d3.drag()
                 .on("start", function(d) { this_.dragStarted(d, this)})
                 .on("drag", function(d) { this_.dragged(d, this)})
@@ -161,20 +168,65 @@ class ArchiDiagram extends React.Component {
             .attr("text-anchor", "middle")
 
     }
+    redrawLines(props: Props, init: boolean = false) {
+        const this_ = this;
+        let indexedComponents = index(props.components);
+        //$FlowFixMe
+        const svg = d3.select(this.node);
+        const dependencies = svg.select("#links").selectAll("line").data(props.dependencies, d => d.from + '|' + d.to);
+
+        dependencies.exit()
+            .transition()
+            .duration(100)
+            .style("opacity", "0")
+            .remove();
+
+        const line = dependencies.enter().append("line")
+            .call(this.dependency, indexedComponents)
+            .on("click", d => this_.onLinkSelected(d));
+        if (init) {
+            line.attr("stroke", "orange");
+        }
+        else {
+            line.attr("stroke", "red")
+                .style("opacity", "0")
+                .transition()
+                .duration(100)
+                .attr("stroke", "orange")
+                .style("opacity", "1");
+        }
+
+        dependencies.call(this.dependency, indexedComponents)
+            .attr("stroke", "orange");
+    };
+    dependency(selection: any, positions: DiagramComponentIndexType) {
+        selection.attr("x1", function (d) { return positions[d.from].x; })
+            .attr("x2", function (d) { return positions[d.to].x; })
+            .attr("y1", function (d) { return positions[d.from].y; })
+            .attr("y2", function (d) { return positions[d.to].y; })
+            .attr("stroke-width", 3);
+    }
+    
     render() {
         return (
-            <div>
-                <Toggle toggled={this.state.active} onToggleChanged={value => {this.setState({active: value})}} />
-                <br/>
-                <div ref={node => this.container = node} style={{position: 'relative'}}>
-                    <svg ref={node => this.node = node} width="960" height="450">
-                        <g id="links"></g>
-                        <g id="nodes"></g>
-                    </svg>
-                </div>
+            <div ref={node =>
+                //$FlowFixMe
+                this.container = node} style={{
+                    position: 'relative',
+                    border: '1px solid lightgray',
+                    minWidth:  '400px', minHeight: '450px', overflow: 'auto'
+                }}
+            >
+                <svg ref={node =>
+                    //$FlowFixMe
+                    this.node = node} width="100%" height="450">
+                    <g id="links"></g>
+                    <g id="nodes"></g>
+                </svg>
             </div>
         );
     }
 }
 
 export {ArchiDiagram};
+export type {DiagramComponentType, DiagramDependencyType}

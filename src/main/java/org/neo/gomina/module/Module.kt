@@ -22,7 +22,6 @@ import org.neo.gomina.api.system.SystemsApi
 import org.neo.gomina.api.users.UsersApi
 import org.neo.gomina.api.work.WorkApi
 import org.neo.gomina.integration.events.EventsService
-import org.neo.gomina.model.issues.IssueProjects
 import org.neo.gomina.integration.jenkins.JenkinsConfig
 import org.neo.gomina.integration.jenkins.JenkinsConnector
 import org.neo.gomina.integration.jenkins.JenkinsService
@@ -50,6 +49,7 @@ import org.neo.gomina.model.event.EventsProviderConfig
 import org.neo.gomina.model.host.HostUtils
 import org.neo.gomina.model.host.Hosts
 import org.neo.gomina.model.inventory.Inventory
+import org.neo.gomina.model.issues.IssueProjects
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.security.Passwords
@@ -81,18 +81,12 @@ class GominaModule : AbstractModule() {
         bind(Passwords::class.java).`in`(Scopes.SINGLETON)
 
         // Model
-        bind(File::class.java).annotatedWith(named("users.file")).toInstance(File(config.usersFile))
         bind(Users::class.java).to(RedisUserRepo::class.java).`in`(Scopes.SINGLETON)
 
-        bind(File::class.java).annotatedWith(named("components.file")).toInstance(File(config.inventory.componentsFile))
-        bind(File::class.java).annotatedWith(named("interactions.file")).toInstance(File(config.inventory.interactionsFile))
-        bind(File::class.java).annotatedWith(named("work.file")).toInstance(File(config.inventory.workFile))
+        bind(File::class.java).annotatedWith(named("interactions.file")).toInstance(File(config.interactions.file))
         bind(String::class.java).annotatedWith(named("work.reference.env")).toInstance(config.work.referenceEnv)
-        bind(File::class.java).annotatedWith(named("hosts.file")).toInstance(File(config.inventory.hostsFile))
         bind(String::class.java).annotatedWith(named("database.host")).toInstance(config.database.host)
         bind(Int::class.java).annotatedWith(named("database.port")).toInstance(config.database.port)
-        bind(String::class.java).annotatedWith(named("inventory.dir")).toInstance(config.inventory.inventoryDir)
-        bind(String::class.java).annotatedWith(named("inventory.filter")).toInstance(config.inventory.inventoryFilter)
 
         bind(ComponentRepo::class.java).to(RedisComponentRepo::class.java).`in`(Scopes.SINGLETON)
         bind(Libraries::class.java).to(RedisLibraries::class.java).`in`(Scopes.SINGLETON)
