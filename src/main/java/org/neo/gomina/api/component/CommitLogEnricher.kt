@@ -40,13 +40,18 @@ class CommitLogEnricher {
             }
         }
         val commitReleaseDates = ReleaseService.releaseDates(log, releaseEvents).mapKeys { (k, v) ->  k.revision}
+
+        val accountIndex = users.getUsers()
+                .flatMap { user -> user.accounts.map { it to user } }
+                .associateBy({ (account, _) -> account }, {(_, user) -> user})
+
         return CommitLogDetail(
                 branch = branch,
                 log = tmp.map { (commit, running, deployed) ->
                     CommitDetail(
                             revision = commit.revision,
                             date = commit.date.toDateUtc,
-                            author = commit.author?.let { users.findForAccount(it) }?.toRef() ?: commit.author?.let { UserRef(shortName = commit.author) },
+                            author = commit.author?.let { accountIndex[it] }?.toRef() ?: commit.author?.let { UserRef(shortName = commit.author) },
                             message = commit.message,
                             branches = commit.branches,
                             version = commit.version,

@@ -44,14 +44,26 @@ class RedisInventoryRepo : Inventory {
     override fun getEnvironment(env: String): Environment? {
         pool.resource.use { jedis ->
             //val services = jedis.keys("service:$env:*")
-            val services = jedis.zrange("services:$env", 0, -1).map { svc ->
-                val instances = jedis.keys("instance:$env:$svc:*").map {
-                    val id = it.substring(it.lastIndexOf(':') + 1)
-                    jedis.hgetAll(it).asInstance(id)
-                }
-                jedis.hgetAll("service:$env:$svc").asService(svc, instances)
+            val pipe = jedis.pipelined()
+            val envF = pipe.hgetAll("env:$env")
+            val servicesListF = pipe.zrange("services:$env", 0, -1)
+            pipe.sync()
+            val servicesF = servicesListF.get().map { svc ->
+                (svc to pipe.hgetAll("service:$env:$svc")) to pipe.keys("instance:$env:$svc:*")
             }
-            return jedis.hgetAll("env:$env").asEnv(env, services)
+            pipe.sync()
+            val svcInstancesF = servicesF.map { (service, instanceKeys) ->
+                service to instanceKeys.get().map {
+                    val id = it.substring(it.lastIndexOf(':') + 1)
+                    id to pipe.hgetAll(it)
+                }
+            }
+            pipe.sync()
+            val services = svcInstancesF.map { (serviceF, instancesF) ->
+                val instances = instancesF.map { (id, data) -> data.get().asInstance(id) }
+                serviceF.let { (id, data) -> data.get().asService(id, instances) }
+            }
+            return envF.get().asEnv(env, services)
         }
     }
 
