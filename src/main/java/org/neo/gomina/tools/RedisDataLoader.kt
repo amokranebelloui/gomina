@@ -30,7 +30,7 @@ private val defaultHash = md.digest("!!password12".toByteArray(StandardCharsets.
 fun main(args: Array<String>) {
     //loadUsers()
     //defaultPasswordsIfEmpty()
-    jedis.select(0); jedis.hset("user:ab6743", "password_hash", defaultHash)
+    //jedis.select(0); jedis.hset("user:ab6743", "password_hash", defaultHash)
     //loadComponents()
     //loadInteractions()
 

@@ -28,8 +28,21 @@ private val mapper = ObjectMapper(YAMLFactory())
 fun main(args: Array<String>) {
     //val components = File("C:\\Work\\Code\\Tools\\governance-tools\\data\\projects.json")
 
-    val env = File("/Users/Amokrane/Work/Code/Idea/gomina-data/env.tradex-prod-pt.json")
-    reloadEnvironment(env)
+    reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.monitorx-prod.json"))
+    reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.monitorx-stg.json"))
+    reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.postx-int.json"))
+    reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.postx-prod.json"))
+    reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.registry-prod.json"))
+    reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.registry-stg.json"))
+    //reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.tradex-hom.json"))
+    //reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.tradex-int.json"))
+    //reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.tradex-preprod.json"))
+    reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.tradex-prod-est.json"))
+    reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.tradex-prod-pt.json"))
+    reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.tradex-stg.json"))
+    reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.tradex-uat.json"))
+    reloadEnvironment(File("C:\\Work\\Code\\Tools\\governance-tools\\data\\env.tradex-uatb.json"))
+
 }
 
 private fun reloadEnvironment(file: File) {
@@ -38,34 +51,34 @@ private fun reloadEnvironment(file: File) {
     jedis.select(3)
     val env = jsonMapper.readValue<DEnvironment>(file)
 
-    if (jedis.exists("env:${env.name}")) {
-        println("${env.name} already exists")
-    } else {
-        jedis.persist("env:${env.name}", mapOf(
-                "type" to env.type,
-                "description" to env.name,
-                "monitoring_url" to env.monitoringUrl + "@" + env.code,
-                "active" to env.active.toString()
+    jedis.persist("env:${env.code}", mapOf(
+            "type" to env.type,
+            "description" to env.name,
+            "monitoring_url" to env.monitoringUrl + "@" + env.code,
+            "active" to env.active.toString()
+    ))
+    var counter = 1.0
+    env.instances.groupBy { it.svc }.forEach { (svc1, instances) ->
+        val svc = if (env.name == "tradex-uatb" || env.name == "tradex-prod-est") svc1 + "est" else svc1
+        val extraScore = if (env.name == "tradex-uatb" || env.name == "tradex-prod-est") 50 else 0
+        val type = instances[0].type
+        val mode = if (type == "redis" || env.code == "UAT") "LEADERSHIP" to "2" else "ONE_ONLY" to "1"
+        jedis.persist("service:${env.code}:$svc", mapOf(
+                "type" to type,
+                "mode" to mode.first,
+                "active_count" to mode.second,
+                "component" to instances[0].project
         ))
-        var counter = 1.0
-        env.instances.groupBy { it.svc }.forEach { (svc, instances) ->
-            jedis.persist("service:${env.name}:$svc", mapOf(
-                    "type" to instances[0].type,
-                    "mode" to "ONE_ONLY",
-                    "active_count" to "1",
-                    "component" to instances[0].project
-            ))
-            jedis.zadd("services:${env.name}", counter++, svc)
+        jedis.zadd("services:${env.code}", extraScore + counter++, svc)
 
-            instances.map { instance ->
-                jedis.persist("instance:${env.name}:$svc:${instance.id}", mapOf(
-                        "host" to instance.host,
-                        "floder" to instance.folder
-                ))
-            }
+        instances.map { instance ->
+            jedis.persist("instance:${env.code}:$svc:${instance.id}", mapOf(
+                    "host" to instance.host,
+                    "folder" to instance.folder
+            ))
         }
-        println("Migrated ${env.name}")
     }
+    println("Migrated ${env.code}")
 }
 
 private fun reloadComponents(file: File) {
