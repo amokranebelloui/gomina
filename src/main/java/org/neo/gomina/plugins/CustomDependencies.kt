@@ -70,7 +70,7 @@ fun flat(rawDeps: XRawDeps): XComponentDeps {
 object XDepSource {
 
     // FIXME Move to config
-    val nexusAccess = NexusConnector("viw-facto-101", 8081, "releases", "snapshots", isNexus3 = true)
+    val nexusAccess = NexusConnector("viw-facto-101", 18081, "releases", "snapshots", isNexus3 = true)
 
     private val objectMapper = ObjectMapper()
     init {

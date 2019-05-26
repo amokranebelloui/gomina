@@ -420,13 +420,13 @@ class CustomInteractionProvider : InteractionsProvider {
         // Map to the right format
         val result = interactions.map {d ->
             val apiCmd = d.api?.commands?.flatMap { it.value }?.map { Function(it, "cmd") } ?: emptyList()
-            val apiCmI = d.api?.commands?.flatMap { it.value }?.map { Function(it, "cmd-internal") } ?: emptyList()
+            //val apiCmI = d.api?.commands?.flatMap { it.value }?.map { Function(it, "cmd-internal") } ?: emptyList()
             val apiEvt = d.api?.raised?.flatMap { it.value }?.map { Function(it, "evt") } ?: emptyList()
             val depCmd = d.dependencies?.commands?.flatMap { it.value }?.map { FunctionUsage(it, "cmd", Usage("CMD-INVOCATION")) } ?: emptyList()
-            val depCmI = d.dependencies?.commandsInternal?.flatMap { it.value }?.map { FunctionUsage(it, "cmd-internal", Usage("CMD-INVOCATION")) } ?: emptyList()
+            val depCmI = d.dependencies?.commandsInternal?.flatMap { it.value }?.map { FunctionUsage(it, "cmd", Usage("CMD-INVOCATION")) } ?: emptyList()
             val depEvt = d.dependencies?.events?.flatMap { it.value }?.map { FunctionUsage(it, "evt", Usage("EVT-INVOCATION")) } ?: emptyList()
             val depRed = d.dependencies?.redis?.map { FunctionUsage(it.redisName ?: "", "database", Usage(it.type ?: "")) } ?: emptyList()
-            Interactions(d.component, apiCmd + apiCmI + apiEvt, depCmd + depCmI + depEvt + depRed)
+            Interactions(d.component, apiCmd + /*apiCmI +*/ apiEvt, depCmd + depCmI + depEvt + depRed)
         }
 
         val specialInteractions = interactions

@@ -8,11 +8,14 @@ import org.elasticsearch.client.RestClient
 import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
+import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.event.Event
 import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.event.EventsProvider
 import org.neo.gomina.model.event.EventsProviderConfig
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
@@ -20,16 +23,20 @@ data class ElasticEventsProviderConfig(
         var id: String,
         var host: String = "localhost",
         var port: Int = 9200,
+        var indice: String?,
+        var size: Int = 1000,
         var timestamp: String = "timestamp",
         var type: String = "type",
         var message: String = "message",
         var envId: String = "envId",
         var instanceId: String = "instanceId",
+        var componentId: String = "componentId",
         var version: String = "version"
 ) : EventsProviderConfig
 
 class ElasticEventsProvider : EventsProvider {
 
+    @Inject private lateinit var components: ComponentRepo
     @Inject private lateinit var events: Events
     private val config: ElasticEventsProviderConfig
     private val client: RestHighLevelClient
@@ -45,26 +52,37 @@ class ElasticEventsProvider : EventsProvider {
     override fun group(): String = "release"
 
     override fun reload(since: LocalDateTime) {
+        logger.info("Loading ES events from ${config.indice} since: $since maxResults: ${config.size}")
+        val componentMap = components.getAll().map { it.artifactId to it.id }.toMap()
         val eventsToSave = try {
-            val query = SearchRequest().source(SearchSourceBuilder()
-                    .query(QueryBuilders.rangeQuery("timestamp").gte(since)))
+            val request = config.indice?.let { SearchRequest(it) } ?: SearchRequest()
+            val query = request
+                    .source(SearchSourceBuilder()
+                        //.query(QueryBuilders.matchAllQuery())
+                        .query(QueryBuilders.rangeQuery(config.timestamp).gte(since))
+                        .size(config.size)
+                    )
 
             //val pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             val pattern = DateTimeFormatter.ISO_DATE_TIME
             client.search(query).hits.hits.mapNotNull {
                 val map = it.sourceAsMap
                 try {
+                    val timestamp = LocalDateTime.ofInstant(Instant.ofEpochMilli(map[config.timestamp] as Long), ZoneOffset.UTC)
                     Event(
                             "es-${it.id}",
-                            timestamp = LocalDateTime.parse(map[config.timestamp] as String, pattern),
-                            type = map[config.type] as String?,
+                            //timestamp = LocalDateTime.parse(map[config.timestamp] as String, pattern),
+                            timestamp = timestamp,
+                            type = config.type,
                             message = map[config.message] as String?,
                             envId = map[config.envId] as String?,
                             instanceId = map[config.instanceId] as String?,
+                            componentId = (map[config.componentId] as String?)?.let { artifact -> componentMap[artifact] },
                             version = map[config.version] as String?
                     )
                 }
                 catch (e: Exception) {
+                    logger.error("Cannot process event", e)
                     null
                 }
             }
@@ -74,6 +92,7 @@ class ElasticEventsProvider : EventsProvider {
             logger.error(msg, e)
             throw Exception(msg)
         }
+        logger.info("${eventsToSave.size} events found")
         events.save(eventsToSave, group())
     }
 
