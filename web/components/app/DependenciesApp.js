@@ -1,13 +1,12 @@
-import React from "react";
+import React, {Fragment} from "react";
 import axios from "axios/index";
-import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import {DSM} from "../dependency/DSM";
 import {Dependencies} from "../dependency/Dependencies";
 import {TagCloud} from "../common/TagCloud";
-import {Container} from "../common/Container";
 import ls from "local-storage"
 import {Well} from "../common/Well";
 import {joinTags, splitTags} from "../common/utils";
+import {ApplicationLayout} from "./common/ApplicationLayout";
 
 class DependenciesApp extends React.Component {
     constructor(props) {
@@ -85,44 +84,46 @@ class DependenciesApp extends React.Component {
     render() {
         const selectedDeps = this.state.deps.dependencies.filter(d => this.state.selectedDependencies.find(s => s.from === d.from && s.to === d.to));
         return (
-            <AppLayout title="Architecture Diagram">
-                <PrimarySecondaryLayout>
-                    <Container>
-                        <DSM components={this.state.deps.services}
-                             dependencies={this.state.deps.dependencies.map(d => {return {"from": d.from, "to": d.to, "count": d.functions.length, "detail": d.functions}})}
-                             onSelectedDependenciesChanged={e => this.onSelectedDependenciesChanged(e)}  />
-                    </Container>
-                    <Well block>
-                        <b>Systems:</b>
-                        <TagCloud tags={this.state.systems} selected={this.state.selectedSystems}
-                                  selectionChanged={e => this.selectedSystemsChanged(e)} />
-                        <br/>
-                        <b>Work: </b>
-                        <select name="type" value={this.state.selectedWork}
-                                onChange={e => this.selectedWorkChanged(e.target.value)}
-                                style={{width: '150px', fontSize: 9}}>
-                            <option value=""></option>
-                            {this.state.workRefs.map(w =>
-                                <option key={w.id} value={w.id}>{w.label} ({w.components.length})</option>
-                            )}
-                        </select>
-                        <br/>
-                        <b>Function Types:</b>
-                        <TagCloud tags={this.state.deps.functionTypes} selected={this.state.selectedFunctionTypes}
-                                  selectionChanged={e => this.selectedFunctionTypesChanged(e)} />
-                        <hr/>
-                        <button onClick={e => this.retrieveDependencies()}>Refresh</button>
-                        <button onClick={() => this.reloadSources()}>Reload Sources</button>
-                    </Well>
-                    <Well block>
-                        <h3>Dependency Details</h3>
-                        {selectedDeps && selectedDeps.length > 0
-                            ? <Dependencies dependencies={selectedDeps} />
-                            : <span>Select some dependencies to see the details</span>
-                        }
-                    </Well>
-                </PrimarySecondaryLayout>
-            </AppLayout>
+            <ApplicationLayout title="Architecture Diagram"
+               main={() =>
+                   <DSM components={this.state.deps.services}
+                        dependencies={this.state.deps.dependencies.map(d => {return {"from": d.from, "to": d.to, "count": d.functions.length, "detail": d.functions}})}
+                        onSelectedDependenciesChanged={e => this.onSelectedDependenciesChanged(e)}  />
+               }
+               sidePrimary={() =>
+                   <Fragment>
+                       <b>Systems:</b>
+                       <TagCloud tags={this.state.systems} selected={this.state.selectedSystems}
+                                 selectionChanged={e => this.selectedSystemsChanged(e)} />
+                       <br/>
+                       <b>Work: </b>
+                       <select name="type" value={this.state.selectedWork}
+                               onChange={e => this.selectedWorkChanged(e.target.value)}
+                               style={{width: '150px', fontSize: 9}}>
+                           <option value=""></option>
+                           {this.state.workRefs.map(w =>
+                               <option key={w.id} value={w.id}>{w.label} ({w.components.length})</option>
+                           )}
+                       </select>
+                       <br/>
+                       <b>Function Types:</b>
+                       <TagCloud tags={this.state.deps.functionTypes} selected={this.state.selectedFunctionTypes}
+                                 selectionChanged={e => this.selectedFunctionTypesChanged(e)} />
+                       <hr/>
+                       <button onClick={e => this.retrieveDependencies()}>Refresh</button>
+                       <button onClick={() => this.reloadSources()}>Reload Sources</button>
+                   </Fragment>
+               }
+               sideSecondary={() =>
+                   <Fragment>
+                       <h3>Dependency Details</h3>
+                       {selectedDeps && selectedDeps.length > 0
+                           ? <Dependencies dependencies={selectedDeps} />
+                           : <span>Select some dependencies to see the details</span>
+                       }
+                   </Fragment>
+               }
+            />
         );
     }
 }

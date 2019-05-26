@@ -1,18 +1,16 @@
 // @flow
 import React, {Fragment} from "react"
-import {AppLayout, PrimarySecondaryLayout} from "./common/layout"
 import {Secure} from "../permission/Secure"
-import {Container} from "../common/Container";
 import axios from "axios/index";
 import Link from "react-router-dom/es/Link";
 import type {KnowledgeType} from "../knowledge/Knowledge";
 import {Knowledge} from "../knowledge/Knowledge";
 import {Badge} from "../common/Badge";
 import type {UserDataType, UserType} from "../user/UserType";
-import {Well} from "../common/Well";
 import {InlineAdd} from "../common/InlineAdd";
 import Route from "react-router-dom/es/Route";
 import {UserEditor} from "../user/UserEditor";
+import {ApplicationLayout} from "./common/ApplicationLayout";
 
 
 type Props = {
@@ -157,9 +155,9 @@ class UserApp extends React.Component<Props, State> {
     render() {
 
         return (
-            <AppLayout title="Users">
-                <PrimarySecondaryLayout>
-                    <Container>
+            <ApplicationLayout title="Users"
+                main={() =>
+                    <Fragment>
                         {!!this.state.user &&
                         <div>
                             {!this.state.userEdition &&
@@ -233,38 +231,41 @@ class UserApp extends React.Component<Props, State> {
                             </Secure>
                         </div>
                         }
-                    </Container>
-                    <div>
-                        <Well block>
-                            <Secure permission="user.add">
-                                <Route render={({ history }) => (
-                                    <InlineAdd type="User"
-                                               action={() => this.addUser()}
-                                               onEnterAdd={() => this.clearNewUserState()}
-                                               onItemAdded={(work) => this.onUserAdded(work, history)}
-                                               editionForm={() =>
-                                                   <UserEditor user={{}}
-                                                               onChange={(id, u) => this.setState({newUserData: u})} />
-                                               }
-                                               successDisplay={(data: any) =>
-                                                   <div>
-                                                       <b>{data ? ("Added " + JSON.stringify(data)) : 'no data returned'}</b>
-                                                   </div>
-                                               }
-                                    />
-                                )} />
-                            </Secure>
-                        </Well>
-                        <Well block>
-                            <div className="items">
-                            {(this.state.users||[]).map(user =>
-                                [<Link key={user.id} to={"/user/" + user.id}>{user.shortName}: {user.firstName} {user.lastName}</Link>,<br key={"b" + user.id}/>]
-                            )}
-                            </div>
-                        </Well>
+                    </Fragment>
+                }
+                sidePrimary={() =>
+                    <Secure permission="user.add">
+                        <Route render={({ history }) => (
+                            <InlineAdd type="User"
+                                       action={() => this.addUser()}
+                                       onEnterAdd={() => this.clearNewUserState()}
+                                       onItemAdded={(work) => this.onUserAdded(work, history)}
+                                       editionForm={() =>
+                                           <UserEditor user={{}}
+                                                       onChange={(id, u) => this.setState({newUserData: u})} />
+                                       }
+                                       successDisplay={(data: any) =>
+                                           <div>
+                                               <b>{data ? ("Added " + JSON.stringify(data)) : 'no data returned'}</b>
+                                           </div>
+                                       }
+                            />
+                        )} />
+                    </Secure>
+                }
+                sideSecondary={() =>
+                    <div className="items">
+                        {(this.state.users||[]).map(user =>
+                            <Fragment key={user.id}>
+                                <Link to={"/user/" + user.id}>
+                                    {user.shortName}: {user.firstName} {user.lastName}
+                                </Link>
+                                <br/>
+                            </Fragment>
+                        )}
                     </div>
-                </PrimarySecondaryLayout>
-            </AppLayout>
+                }
+            />
         )
     }
 }

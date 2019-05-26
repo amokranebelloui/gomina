@@ -13,7 +13,7 @@ class ComponentSort extends React.Component {
     }
     render() {
         return (
-            <div>
+            <div className="items">
                 Sort:
                 <button disabled={this.props.sortBy === 'alphabetical'} onClick={e => this.changeSelected('alphabetical')}>Alphabetical</button>
                 <button disabled={this.props.sortBy === 'unreleased-changes'} onClick={e => this.changeSelected('unreleased-changes')}>Unreleased Changes</button>

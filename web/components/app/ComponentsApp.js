@@ -1,10 +1,8 @@
-import React from "react";
+import React, {Fragment} from "react";
 import ls from "local-storage"
-import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import {Secure} from "../permission/Secure"
 import {ComponentHeader, ComponentSummary} from "../component/Component";
 import axios from "axios/index";
-import {Container} from "../common/Container";
 import {Well} from "../common/Well";
 import {flatMap, joinTags, splitTags} from "../common/utils";
 import {ComponentSort, sortComponentsBy} from "../component/ComponentSort";
@@ -12,6 +10,8 @@ import {extendSystems} from "../system/system-utils";
 import {AddComponent} from "../component/AddComponent";
 import {ComponentFilter, filterComponents} from "../component/ComponentFilter";
 import Cookies from "js-cookie";
+import {ApplicationLayout} from "./common/ApplicationLayout";
+import {Container} from "../common/Container";
 
 class ComponentsApp extends React.Component {
 
@@ -142,11 +142,12 @@ class ComponentsApp extends React.Component {
         const languages = flatMap(this.state.components, p => p.languages && p.languages.length > 0 ? p.languages : [""]);
         const tags = flatMap(this.state.components, p => p.tags && p.tags.length > 0 ? p.tags : [""]);
         return (
-            <AppLayout title="Components" onUserLoggedIn={() => this.retrieveKnowledge()}>
-                <PrimarySecondaryLayout>
-                    <Container>
-                        <ComponentSort sortBy={this.state.sortBy} onSortChanged={sortBy => this.sortChanged(sortBy)} />
-                        <hr/>
+            <ApplicationLayout title="Components" onUserLoggedIn={() => this.retrieveKnowledge()}
+                header={() =>
+                    <ComponentSort sortBy={this.state.sortBy} onSortChanged={sortBy => this.sortChanged(sortBy)} />
+                }
+                main={() =>
+                    <Fragment>
                         <div className='component-list'>
                             <ComponentHeader />
                             {this.selectedComponents(components).map(component =>
@@ -154,29 +155,29 @@ class ComponentsApp extends React.Component {
                                                   knowledge={this.componentKnowledge(component.id)} />
                             )}
                         </div>
-                    </Container>
-                    <div>
-                        <Well block>
-                            <ComponentFilter filter={this.state.filter}
-                                             onFilterChanged={(filter) => this.setFilter(filter)}
-                                             types={types} systems={systems} languages={languages} tags={tags}
-                             />
-                        </Well>
-                        <Well block>
+                    </Fragment>
+                }
+                sidePrimary={() =>
+                    <Fragment>
+                        <ComponentFilter filter={this.state.filter}
+                                         onFilterChanged={(filter) => this.setFilter(filter)}
+                                         types={types} systems={systems} languages={languages} tags={tags}
+                        />
+                        <div>
                             <button onClick={e => this.reloadAll()}>RELOAD</button>
                             <button onClick={e => this.reloadScm()}>SCM</button>
                             <button onClick={e => this.reloadBuild()}>BUILD</button>
                             <button onClick={e => this.reloadSonar()}>SONAR</button>
-                        </Well>
-                        <Secure permission="component.add">
-                            <Well block>
-                                <AddComponent systemsContext={this.state.selectedSystems}
-                                              onComponentAdded={comp => this.setState({components: [...this.state.components, comp]})} />
-                            </Well>
-                        </Secure>
-                    </div>
-                </PrimarySecondaryLayout>
-            </AppLayout>
+                        </div>
+                    </Fragment>
+                }
+                sideSecondary={() =>
+                    <Secure permission="component.add">
+                        <AddComponent systemsContext={this.state.selectedSystems}
+                                      onComponentAdded={comp => this.setState({components: [...this.state.components, comp]})} />
+                    </Secure>
+                }
+            />
         );
     }
 }

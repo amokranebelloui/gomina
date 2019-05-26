@@ -1,6 +1,5 @@
 import React, {Fragment} from "react";
 import axios from "axios/index";
-import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import {ComponentBadge, ComponentMenu} from "../component/Component";
 import "../component/Component.css"
 import "../common/items.css"
@@ -20,11 +19,11 @@ import {LoggedUserContext, Secure} from "../permission/Secure";
 import {Events} from "../environment/Events";
 import {Knowledge} from "../knowledge/Knowledge";
 import {DateTime} from "../common/DateTime";
-import {Well} from "../common/Well";
 import Route from "react-router-dom/es/Route";
 import {Branch} from "../commitlog/Branch";
 import {Libraries} from "../library/Libraries";
 import {filterLibraries, LibraryFilter} from "../library/LibraryFilter";
+import {ApplicationLayout} from "./common/ApplicationLayout";
 
 class ComponentApp extends React.Component {
     
@@ -474,180 +473,181 @@ class ComponentApp extends React.Component {
     render() {
         const component = this.state.component;
         return (
-            <AppLayout title={"Component: " + component.label}>
-                <PrimarySecondaryLayout>
-                    <Container>
-                        <Well block>
-                            <div style={{borderBottom: '1px solid lightgray', paddingBottom: '2px'}}>
+            <ApplicationLayout title={"Component: " + component.label}
+               header={() =>
+                   <Fragment>
+                       <div style={{borderBottom: '1px solid lightgray', paddingBottom: '2px'}}>
                                 <span title={component.id}>
                                     <span style={{fontSize: 14}}><b>{component.label}</b></span>
                                     {component.disabled &&
-                                        <span>&nbsp;<s>DISABLED</s></span>
+                                    <span>&nbsp;<s>DISABLED</s></span>
                                     }
                                     <span style={{fontSize: 8, marginLeft: 2}}>({component.type})</span>
                                 </span>
-                                <br/>
-                                <span style={{fontSize: 9}}>{component.artifactId}</span>
-                                <br/>
+                           <br/>
+                           <span style={{fontSize: 9}}>{component.artifactId}</span>
+                           <br/>
 
-                                <ScmLink type={component.scmType} />&nbsp;
-                                <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
-                                <br/>
-                                <UnreleasedChangeCount changes={component.changes} />
-                            </div>
+                           <ScmLink type={component.scmType} />&nbsp;
+                           <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
+                           <br/>
+                           <UnreleasedChangeCount changes={component.changes} />
+                       </div>
 
-                            <ComponentMenu component={component} selectedBranch={this.state.branchId} location={this.props.location}
-                            />
-                        </Well>
+                       <ComponentMenu component={component} selectedBranch={this.state.branchId} location={this.props.location} />
+                   </Fragment>
+               }
+               main={() =>
+                   <Fragment>
+                       <Route exact path="/component/:id" render={props =>
+                           <div>
+                               {this.state.branch &&
+                               <Fragment>
+                                   <CommitLog type={component.scmType}
+                                              commits={this.state.branch.log}
+                                              branch={this.state.branch.branch}
+                                              unresolved={(this.state.branch || {}).unresolved}/>
+                                   <CommitLogLegend/>
+                               </Fragment>
+                               }
+                           </div>
+                       }/>
 
-                        <Route exact path="/component/:id" render={props =>
-                            <div>
-                                {this.state.branch &&
-                                    <Fragment>
-                                        <CommitLog type={component.scmType}
-                                                   commits={this.state.branch.log}
-                                                   branch={this.state.branch.branch}
-                                                   unresolved={(this.state.branch || {}).unresolved}/>
-                                        <CommitLogLegend/>
-                                    </Fragment>
-                                }
-                            </div>
-                        }/>
+                       <Route path="/component/:id/scm" render={props =>
+                           this.state.branch &&
+                           <Fragment>
+                               <CommitLog type={component.scmType}
+                                          commits={this.state.branch.log}
+                                          branch={this.state.branch.branch}
+                                          unresolved={(this.state.branch || {}).unresolved}/>
+                               <CommitLogLegend/>
+                           </Fragment>
+                       }
+                       />
+                       <Route path="/component/:id/doc/:docId" render={props =>
+                           <Documentation doc={this.state.doc}/>
+                       }/>
+                       <Route path="/component/:id/api" render={props =>
+                           <Fragment>
+                               <h3>API</h3>
+                               {(this.state.api || []).map(api =>
+                                   <ApiDefinition api={api} onManualApiRemove={() => this.removeApi(component.id, api.name, api.type)} />
+                               )}
+                               <Secure permission="component.edit.api">
+                                   <ApiDefinitionEditor type="definition" api={{name: "", type: ""}} onAdd={(f) => this.addApi(component.id, f.name, f.type)} />
+                               </Secure>
+                               <br/>
 
-                        <Route path="/component/:id/scm" render={props =>
-                            this.state.branch &&
-                            <Fragment>
-                                <CommitLog type={component.scmType}
-                                           commits={this.state.branch.log}
-                                           branch={this.state.branch.branch}
-                                           unresolved={(this.state.branch || {}).unresolved}/>
-                                <CommitLogLegend/>
-                            </Fragment>
-                        }
-                        />
-                        <Route path="/component/:id/doc/:docId" render={props =>
-                            <Documentation doc={this.state.doc}/>
-                        }/>
-                        <Route path="/component/:id/api" render={props =>
-                            <Fragment>
-                                <h3>API</h3>
-                                {(this.state.api || []).map(api =>
-                                    <ApiDefinition api={api} onManualApiRemove={() => this.removeApi(component.id, api.name, api.type)} />
-                                )}
-                                <Secure permission="component.edit.api">
-                                    <ApiDefinitionEditor type="definition" api={{name: "", type: ""}} onAdd={(f) => this.addApi(component.id, f.name, f.type)} />
-                                </Secure>
-                                <br/>
+                               <h3>Usage</h3>
+                               {(this.state.usage || []).map(usage =>
+                                   <ApiUsage usage={usage} onManualUsageRemove={() => this.removeUsage(component.id, usage.name, usage.type)} />
+                               )}
+                               <Secure permission="component.edit.usage">
+                                   <ApiDefinitionEditor type="usage" api={{name: "", type: ""}} onAdd={(f) => this.addUsage(component.id, f.name, f.type, f.usage)} />
+                               </Secure>
+                           </Fragment>
+                       }/>
+                       <Route path="/component/:id/dependencies" render={props =>
+                           <Fragment>
+                               <h3>Invocation Chain</h3>
+                               <CallChain chain={this.state.invocationChain} displayFirst={true}
+                                          onDependencySelected={(child, parent) => this.selectInvocationDependency(child, parent)}/>
+                               <Dependencies dependencies={this.state.chainSelectedInvocation}/>
+                               <br/>
 
-                                <h3>Usage</h3>
-                                {(this.state.usage || []).map(usage =>
-                                    <ApiUsage usage={usage} onManualUsageRemove={() => this.removeUsage(component.id, usage.name, usage.type)} />
-                                )}
-                                <Secure permission="component.edit.usage">
-                                    <ApiDefinitionEditor type="usage" api={{name: "", type: ""}} onAdd={(f) => this.addUsage(component.id, f.name, f.type, f.usage)} />
-                                </Secure>
-                            </Fragment>
-                        }/>
-                        <Route path="/component/:id/dependencies" render={props =>
-                            <Fragment>
-                                <h3>Invocation Chain</h3>
-                                <CallChain chain={this.state.invocationChain} displayFirst={true}
-                                           onDependencySelected={(child, parent) => this.selectInvocationDependency(child, parent)}/>
-                                <Dependencies dependencies={this.state.chainSelectedInvocation}/>
-                                <br/>
-
-                                <h3>Call Chain</h3>
-                                <CallChain chain={this.state.callChain} displayFirst={true}
-                                           onDependencySelected={(child, parent) => this.selectCallDependency(child, parent)}/>
-                                <Dependencies dependencies={this.state.chainSelectedCall}/>
-                            </Fragment>
-                        }/>
-                        <Route path="/component/:id/libraries" render={props =>
-                            <Fragment>
-                                <h3>Libraries</h3>
-                                <div style={{float: 'right'}}>
-                                    <LibraryFilter search={this.state.librarySearch}
-                                                   onChange={e => this.setState({"librarySearch": e})} />
-                                </div>
-                                <Libraries libraries={filterLibraries(this.state.libraries, this.state.librarySearch)}
-                                           totalCount={this.state.libraries.length} />
-                            </Fragment>
-                        }/>
-                        <Route path="/component/:id/events" render={props =>
-                            <Fragment>
-                                <h3>Events</h3>
-                                <button onClick={e => this.reloadEvents()}>Reload Events</button>
-                                <Container>
-                                    <Events events={this.state.events || []} errors={[]}/>
-                                </Container>
-                            </Fragment>
-                        }/>
-
-                    </Container>
-                    <div>
-                        <LoggedUserContext.Consumer>
-                            {loggedUser =>
-                                <ComponentBadge buildServers={this.state.buildServers}
-                                                sonarServers={this.state.sonarServers}
-                                                component={component}
-                                                knowledge={this.componentKnowledge(loggedUser.userId)}
-                                                onReload={id => this.reloadAll(id)}
-                                                onReloadScm={id => this.reloadScm(id)}
-                                                onReloadBuild={id => this.reloadBuild(id)}
-                                                onReloadSonar={id => this.reloadSonar(id)}
-                                                onLabelEdited={(id, l) => this.editLabel(id, l)}
-                                                onTypeEdited={(id, t) => this.editType(id, t)}
-                                                onArtifactIdEdited={(id, artifactId) => this.editArtifactId(id, artifactId)}
-                                                onScmEdited={(id, t, u, p, md) => this.editScm(id, t, u, p, md)}
-                                                onInceptionDateEdited={(id, d) => this.editInceptionDate(id, d)}
-                                                onOwnerEdited={(id, o) => this.editOwner(id, o)}
-                                                onCriticityEdited={(id, c) => this.editCriticity(id, c)}
-                                                onSonarEdited={(id, s) => this.editSonar(id, s)}
-                                                onBuildEdited={(id, s, j) => this.editBuild(id, s, j)}
-                                                onSystemAdd={(id, s) => this.addSystem(id, s)}
-                                                onSystemDelete={(id, s) => this.deleteSystem(id, s)}
-                                                onLanguageAdd={(id, l) => this.addLanguage(id, l)}
-                                                onLanguageDelete={(id, l) => this.deleteLanguage(id, l)}
-                                                onTagAdd={(id, t) => this.addTag(id, t)}
-                                                onTagDelete={(id, t) => this.deleteTag(id, t)}
-                                                onKnowledgeChange={(id, k) => this.changeKnowledge(id, loggedUser.userId, k)}
-                                                onEnable={id => this.enable(id)}
-                                                onDisable={id => this.disable(id)}
-                                                onDelete={id => this.delete(id)}
-                                />
-                            }
-                        </LoggedUserContext.Consumer>
-                        <br/>
-                    </div>
-                    <Container>
-                        <h3>Other Components</h3>
-                        <div className="items">
-                            {this.state.associated.map(componentRef =>
-                                <Link key={componentRef.id} to={"/component/" + componentRef.id}>{componentRef.label || componentRef.id}</Link>
-                            )}
-                        </div>
-                        <br/>
-                        <h3>Versions</h3>
-                        <div className="items">
-                            {this.state.versions && this.state.versions.map(versionRelease =>
-                                <span key={versionRelease.artifactId + versionRelease.version.version + versionRelease.branchId}>
+                               <h3>Call Chain</h3>
+                               <CallChain chain={this.state.callChain} displayFirst={true}
+                                          onDependencySelected={(child, parent) => this.selectCallDependency(child, parent)}/>
+                               <Dependencies dependencies={this.state.chainSelectedCall}/>
+                           </Fragment>
+                       }/>
+                       <Route path="/component/:id/libraries" render={props =>
+                           <Fragment>
+                               <h3>Libraries</h3>
+                               <div style={{float: 'right'}}>
+                                   <LibraryFilter search={this.state.librarySearch}
+                                                  onChange={e => this.setState({"librarySearch": e})} />
+                               </div>
+                               <Libraries libraries={filterLibraries(this.state.libraries, this.state.librarySearch)}
+                                          totalCount={this.state.libraries.length} />
+                           </Fragment>
+                       }/>
+                       <Route path="/component/:id/events" render={props =>
+                           <Fragment>
+                               <h3>Events</h3>
+                               <button onClick={e => this.reloadEvents()}>Reload Events</button>
+                               <Container>
+                                   <Events events={this.state.events || []} errors={[]}/>
+                               </Container>
+                           </Fragment>
+                       }/>
+                   </Fragment>
+               }
+               sidePrimary={() =>
+                   <Fragment>
+                       <LoggedUserContext.Consumer>
+                           {loggedUser =>
+                               <ComponentBadge buildServers={this.state.buildServers}
+                                               sonarServers={this.state.sonarServers}
+                                               component={component}
+                                               knowledge={this.componentKnowledge(loggedUser.userId)}
+                                               onReload={id => this.reloadAll(id)}
+                                               onReloadScm={id => this.reloadScm(id)}
+                                               onReloadBuild={id => this.reloadBuild(id)}
+                                               onReloadSonar={id => this.reloadSonar(id)}
+                                               onLabelEdited={(id, l) => this.editLabel(id, l)}
+                                               onTypeEdited={(id, t) => this.editType(id, t)}
+                                               onArtifactIdEdited={(id, artifactId) => this.editArtifactId(id, artifactId)}
+                                               onScmEdited={(id, t, u, p, md) => this.editScm(id, t, u, p, md)}
+                                               onInceptionDateEdited={(id, d) => this.editInceptionDate(id, d)}
+                                               onOwnerEdited={(id, o) => this.editOwner(id, o)}
+                                               onCriticityEdited={(id, c) => this.editCriticity(id, c)}
+                                               onSonarEdited={(id, s) => this.editSonar(id, s)}
+                                               onBuildEdited={(id, s, j) => this.editBuild(id, s, j)}
+                                               onSystemAdd={(id, s) => this.addSystem(id, s)}
+                                               onSystemDelete={(id, s) => this.deleteSystem(id, s)}
+                                               onLanguageAdd={(id, l) => this.addLanguage(id, l)}
+                                               onLanguageDelete={(id, l) => this.deleteLanguage(id, l)}
+                                               onTagAdd={(id, t) => this.addTag(id, t)}
+                                               onTagDelete={(id, t) => this.deleteTag(id, t)}
+                                               onKnowledgeChange={(id, k) => this.changeKnowledge(id, loggedUser.userId, k)}
+                                               onEnable={id => this.enable(id)}
+                                               onDisable={id => this.disable(id)}
+                                               onDelete={id => this.delete(id)}
+                               />
+                           }
+                       </LoggedUserContext.Consumer>
+                       <br/>
+                   </Fragment>
+               }
+               sideSecondary={() =>
+                   <Fragment>
+                       <h3>Other Components</h3>
+                       <div className="items">
+                           {this.state.associated.map(componentRef =>
+                               <Link key={componentRef.id} to={"/component/" + componentRef.id}>{componentRef.label || componentRef.id}</Link>
+                           )}
+                       </div>
+                       <br/>
+                       <h3>Versions</h3>
+                       <div className="items">
+                           {this.state.versions && this.state.versions.map(versionRelease =>
+                               <span key={versionRelease.artifactId + versionRelease.version.version + versionRelease.branchId}>
                                     <span>{versionRelease.artifactId}</span>&nbsp;
-                                    <b>{versionRelease.version.version}</b>&nbsp;
-                                    <DateTime date={versionRelease.releaseDate} displayTime={false} style={{color: 'lightgray'}} />&nbsp;
-                                    <Branch branch={versionRelease.branchId} />
+                                   <b>{versionRelease.version.version}</b>&nbsp;
+                                   <DateTime date={versionRelease.releaseDate} displayTime={false} style={{color: 'lightgray'}} />&nbsp;
+                                   <Branch branch={versionRelease.branchId} />
                                     <br/>
                                 </span>
-                            )}
-                        </div>
-                        <br/>
+                           )}
+                       </div>
+                       <br/>
 
-                        <h3>Knowledge</h3>
-                        <Knowledge knowledge={this.state.knowledge} hideComponent={true} />
-
-                    </Container>
-                </PrimarySecondaryLayout>
-            )}
-            </AppLayout>
+                       <h3>Knowledge</h3>
+                       <Knowledge knowledge={this.state.knowledge} hideComponent={true} />
+                   </Fragment>
+               }
+            />
         );
     }
 }

@@ -1,9 +1,9 @@
 // @flow
-import * as React from "react"
-import {AppLayout} from "./common/layout";
+import React, {Fragment} from "react"
 import axios from "axios/index"
 import type {SystemType} from "../system/Systems";
 import {Systems} from "../system/Systems";
+import {ApplicationLayout} from "./common/ApplicationLayout";
 
 type Props = {
 
@@ -32,10 +32,14 @@ class Index extends React.Component<Props, State> {
     render() {
 
         return (
-            <AppLayout title='Index'>
-                An overview of the different managed systems<br/><br/>
-                <Systems systems={this.state.systems} />
-            </AppLayout>
+            <ApplicationLayout title='Index'
+                   main={() =>
+                       <Fragment>
+                           An overview of the different managed systems<br/><br/>
+                           <Systems systems={this.state.systems} />
+                       </Fragment>
+                   }
+            />
         );
     }
 }

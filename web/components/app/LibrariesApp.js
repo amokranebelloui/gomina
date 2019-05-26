@@ -2,11 +2,9 @@
 import React, {Fragment} from "react"
 import axios from "axios/index";
 import ls from "local-storage"
-import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
 import Link from "react-router-dom/es/Link";
-import {compareVersions, compareVersionsReverse} from "../common/version-utils";
+import {compareVersions} from "../common/version-utils";
 import type {ComponentRefType} from "../component/ComponentType";
-import {Well} from "../common/Well";
 import type {InstanceRefType} from "../environment/InstanceType";
 import {Badge} from "../common/Badge";
 import {groupingBy} from "../common/utils";
@@ -16,6 +14,7 @@ import {LibraryCatalog} from "../library/Libraries";
 import {filterLibraries, LibraryFilter} from "../library/LibraryFilter";
 import "../common/items.css"
 import {LibrariesSummary} from "../library/LibrariesSummary";
+import {ApplicationLayout} from "./common/ApplicationLayout";
 
 type Props = {
     match: any
@@ -117,94 +116,97 @@ class LibrariesApp extends React.Component<Props, State> {
         };
 
         return (
-            <AppLayout title="Libraries">
-                <PrimarySecondaryLayout>
-                    <div>
-                        {this.state.libraryId && this.state.library &&
-                            <Fragment>
-                                <h3 style={{display: 'inline-block'}}>Usage of '{this.state.libraryId}'</h3>
-                                <div style={{float: 'right'}}>
-                                    <button onClick={e => this.changeSort('ascending')}
-                                            style={{padding: '2px', color: this.state.sort === 'ascending' ? 'gray' : null}}>
-                                        OLD FIRST
-                                    </button>
-                                    <button onClick={e => this.changeSort('descending')}
-                                            style={{padding: '2px', color: this.state.sort === 'descending' ? 'gray' : null}}>
-                                        RECENT FIRST
-                                    </button>
-                                </div>
-                                <br/>
-                                <table width="100%">
-                                    <tbody>
-                                    {this.sortLibraryUsage(this.state.library).map(libUsage =>
-                                        <tr key={libUsage.version}>
-                                            <td valign="top" style={{
-                                                textAlign: 'right', minWidth: '40px', padding: '0px 5px',
-                                                borderBottom: '1px solid lightgray',
-                                                borderRight: '1px solid lightgray',
-                                                whiteSpace: 'nowrap'
-                                            }}>
-                                                <b>{libUsage.version}</b>
-                                            </td>
-                                            <td width="100%" style={{borderBottom: '1px solid lightgray'}}>
-                                            {this.groupByComponent(libUsage.components).map(usage =>
-                                                <Fragment key={usage.component.id}>
-                                                    <Link to={'/component/' + usage.component.id}>{usage.component.label} </Link>
-                                                    <br/>
-                                                    {usage.usages.map(c =>
-                                                        <span key={c.version} className="items" style={{paddingLeft: '20px'}}>
-                                                            {c.instances && c.instances.length > 0 ?
-                                                                <Fragment>
-                                                                    <Badge>{c.version}</Badge>
-                                                                    {this.groupByEnv(c.instances).map(env =>
-                                                                        <Fragment key={env.env}>
-                                                                            <span>
-                                                                                <Badge key={env.env}
-                                                                                       title={c.instances.filter(i => i.env === env.env).map(instance => instance.name).join(' ')}
-                                                                                       backgroundColor={backgroundColor(env.env)}
-                                                                                       color={color(env.env)}>
-                                                                                    {env.env} ({env.count})
-                                                                                </Badge>
-                                                                            </span>
-                                                                        </Fragment>
-                                                                    )}
-                                                                </Fragment>
-                                                            :
-                                                                <Badge><i style={{color: 'lightgray'}}>{c.version}</i></Badge>
-                                                            }
-                                                            &nbsp;
+            <ApplicationLayout title="Libraries"
+               header={() =>
+                   <Fragment>
+                       <h3 style={{display: 'inline-block'}}>Usage of '{this.state.libraryId}'</h3>
+                       <div style={{float: 'right'}}>
+                           <button onClick={e => this.changeSort('ascending')}
+                                   style={{padding: '2px', color: this.state.sort === 'ascending' ? 'gray' : null}}>
+                               OLD FIRST
+                           </button>
+                           <button onClick={e => this.changeSort('descending')}
+                                   style={{padding: '2px', color: this.state.sort === 'descending' ? 'gray' : null}}>
+                               RECENT FIRST
+                           </button>
+                       </div>
+                       <div style={{clear: 'both'}} />
+                   </Fragment>
+               }
+               main={()=>
+                   <Fragment>
+                       {this.state.libraryId && this.state.library &&
+                       <Fragment>
 
-                                                            <br/>
-                                                        </span>
-                                                    )}
-                                                </Fragment>
-                                            )}
-                                            </td>
-                                        </tr>
-                                    )}
-                                    </tbody>
-                                </table>
-                            </Fragment>
-                        }
-                        {!(this.state.libraryId && this.state.library) &&
-                            <div>
-                                <p>Understand the dependencies to libraries and their different versions.</p>
-                                <br/>
-                                <LibrariesSummary libraries={this.state.libraries} />
-                            </div>
-                        }
-                    </div>
-                    <div>
-                        <Well block>
-                            <LibraryFilter search={this.state.search}
-                                           onChange={e => this.changeSearch(e)} />
-                        </Well>
-                        <Well block>
-                            <LibraryCatalog libraries={libraries} totalCount={totalCount} />
-                        </Well>
-                    </div>
-                </PrimarySecondaryLayout>
-            </AppLayout>
+                           <table width="100%">
+                               <tbody>
+                               {this.sortLibraryUsage(this.state.library).map(libUsage =>
+                                   <tr key={libUsage.version}>
+                                       <td valign="top" style={{
+                                           textAlign: 'right', minWidth: '40px', padding: '0px 5px',
+                                           borderBottom: '1px solid lightgray',
+                                           borderRight: '1px solid lightgray',
+                                           whiteSpace: 'nowrap'
+                                       }}>
+                                           <b>{libUsage.version}</b>
+                                       </td>
+                                       <td width="100%" style={{borderBottom: '1px solid lightgray'}}>
+                                           {this.groupByComponent(libUsage.components).map(usage =>
+                                               <Fragment key={usage.component.id}>
+                                                   <Link to={'/component/' + usage.component.id}>{usage.component.label} </Link>
+                                                   <br/>
+                                                   {usage.usages.map(c =>
+                                                           <span key={c.version} className="items" style={{paddingLeft: '20px'}}>
+                                                    {c.instances && c.instances.length > 0 ?
+                                                        <Fragment>
+                                                            <Badge>{c.version}</Badge>
+                                                            {this.groupByEnv(c.instances).map(env =>
+                                                                <Fragment key={env.env}>
+                                                                    <span>
+                                                                        <Badge key={env.env}
+                                                                               title={c.instances.filter(i => i.env === env.env).map(instance => instance.name).join(' ')}
+                                                                               backgroundColor={backgroundColor(env.env)}
+                                                                               color={color(env.env)}>
+                                                                            {env.env} ({env.count})
+                                                                        </Badge>
+                                                                    </span>
+                                                                </Fragment>
+                                                            )}
+                                                        </Fragment>
+                                                        :
+                                                        <Badge><i style={{color: 'lightgray'}}>{c.version}</i></Badge>
+                                                    }
+                                                               &nbsp;
+
+                                                               <br/>
+                                                </span>
+                                                   )}
+                                               </Fragment>
+                                           )}
+                                       </td>
+                                   </tr>
+                               )}
+                               </tbody>
+                           </table>
+                       </Fragment>
+                       }
+                       {!(this.state.libraryId && this.state.library) &&
+                       <div>
+                           <p>Understand the dependencies to libraries and their different versions.</p>
+                           <br/>
+                           <LibrariesSummary libraries={this.state.libraries} />
+                       </div>
+                       }
+                   </Fragment>
+               }
+               sidePrimary={()=>
+                   <LibraryFilter search={this.state.search}
+                                  onChange={e => this.changeSearch(e)} />
+               }
+               sideSecondary={()=>
+                   <LibraryCatalog libraries={libraries} totalCount={totalCount} />
+               }
+            />
         );
     }
 }

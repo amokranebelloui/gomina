@@ -33,6 +33,9 @@ declare module 'query-string' {
 declare module 'd3' {
     declare module.exports: any;
 }
+declare module 'js-cookie' {
+    declare module.exports: any;
+}
 
 declare module '@fortawesome/fontawesome-svg-core' {
     declare module.exports: any;

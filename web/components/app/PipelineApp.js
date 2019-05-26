@@ -1,8 +1,8 @@
-import React from "react";
+import React, {Fragment} from "react";
 import {groupBy} from "../common/utils";
-import {AppLayout} from "./common/layout";
 import {DeploymentPipeline} from "../pipeline/DeploymentPipeline";
 import axios from "axios";
+import {ApplicationLayout} from "./common/ApplicationLayout";
 
 class PipelineApp extends React.Component {
     constructor(props) {
@@ -54,11 +54,15 @@ class PipelineApp extends React.Component {
         console.info('pipeApp render! ', instancesByComponent);
         const components = this.state.components;
         return (
-            <AppLayout title="Pipeline">
-                {components.map(component =>
-                    <DeploymentPipeline key={component.id} component={component} instances={instancesByComponent[component.id]}/>
-                )}
-            </AppLayout>
+            <ApplicationLayout title="Pipeline"
+                   main={() =>
+                       <Fragment>
+                           {components.map(component =>
+                               <DeploymentPipeline key={component.id} component={component} instances={instancesByComponent[component.id]}/>
+                           )}
+                       </Fragment>
+                   }
+            />
         );
     }
 }

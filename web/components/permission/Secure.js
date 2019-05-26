@@ -3,8 +3,8 @@
 import * as React from 'react'
 
 type LoggedUserType = {
-    userId?: string,
-    login?: string,
+    userId?: ?string,
+    login?: ?string,
     permissions?: Array<string>
 }
 

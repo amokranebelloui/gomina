@@ -1,6 +1,5 @@
 import axios from "axios/index";
-import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
-import React from "react";
+import React, {Fragment} from "react";
 import {Well} from "../common/Well";
 import Link from "react-router-dom/es/Link";
 import {Badge} from "../common/Badge";
@@ -10,6 +9,7 @@ import {HostEditor} from "../environment/HostEditor";
 import {Secure} from "../permission/Secure";
 import {HostConnectivityEditor} from "../environment/HostConnectivityEditor";
 import {OSFamily} from "../misc/OSFamily";
+import {ApplicationLayout} from "./common/ApplicationLayout";
 
 class HostsApp extends React.Component {
 
@@ -121,14 +121,16 @@ class HostsApp extends React.Component {
         const hostId = this.state.hostId;
         let host = hosts.find(h => h.host == hostId);
         return (
-            <AppLayout title="Hosts">
-                <PrimarySecondaryLayout>
+            <ApplicationLayout title="Hosts"
+                main={() =>
                     <div style={{display: 'flex', flexFlow: 'row wrap'}}>
                         {hosts.map(host =>
                             <Host key={host.host} host={host}></Host>
                         )}
                     </div>
-                    <div>
+                }
+                sidePrimary={() =>
+                    <Fragment>
                         <Secure permission="host.add">
                             <Route render={({ history }) => (
                                 <InlineAdd type="Host"
@@ -151,9 +153,12 @@ class HostsApp extends React.Component {
                                 />
                             )} />
                         </Secure>
-
+                    </Fragment>
+                }
+                sideSecondary={() =>
+                    <Fragment>
                         {host &&
-                        <Well block>
+                        <Fragment>
                             <h3>Detail {host && host.host}</h3>
                             <div style={{float: 'right'}}>
                                 <Secure permission="host.manage">
@@ -167,15 +172,15 @@ class HostsApp extends React.Component {
                             {!this.state.hostEdition && !this.state.hostConnectivityEdition &&
                             <div>
                                 {host.managed &&
-                                    <button onClick={() => this.reloadSsh()}>RELOAD SSH</button>
+                                <button onClick={() => this.reloadSsh()}>RELOAD SSH</button>
                                 }
                                 {host && <Host host={host}></Host>}
-                                    <hr/>
-                                    <b>Should not be there</b>
+                                <hr/>
+                                <b>Should not be there</b>
                                 {host && host.unexpected && host.unexpected.length > 0 &&
-                                    host.unexpected.map(f =>
-                                        <div key={f}>{f}</div>
-                                    )
+                                host.unexpected.map(f =>
+                                    <div key={f}>{f}</div>
+                                )
                                 }
                             </div>
                             }
@@ -197,11 +202,11 @@ class HostsApp extends React.Component {
                             </div>
                             }
 
-                        </Well>
+                        </Fragment>
                         }
-                    </div>
-                </PrimarySecondaryLayout>
-            </AppLayout>
+                    </Fragment>
+                }
+            />
         )
     }
 }

@@ -1,7 +1,6 @@
 // @flow
-import * as React from "react";
-import {isSnapshot, isSnapshotVersion, isStableVersion, sameVersions} from "../common/version-utils";
-import {Well} from "../common/Well";
+import React, {Fragment} from "react";
+import {isSnapshotVersion, isStableVersion, sameVersions} from "../common/version-utils";
 import type {InstanceType} from "./Instance"
 import type {ServiceType} from "./Service";
 
@@ -68,7 +67,7 @@ class InstanceFilter extends React.Component<InstanceFilterProps> {
             }
         ];
         return (
-            <Well block>
+            <Fragment>
                 <h4>Filters</h4>
                 <Selection id='ALL' label='ALL' selected={this.props.id}
                            onSelectionChanged={e => this.changeSelected('ALL', null)}/>
@@ -105,7 +104,7 @@ class InstanceFilter extends React.Component<InstanceFilterProps> {
                     )}
                 </div>
 
-            </Well>
+            </Fragment>
         )
     }
 }

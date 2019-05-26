@@ -1,13 +1,11 @@
-import React from "react";
+import React, {Fragment} from "react";
 import SockJS from "sockjs-client";
 import axios from "axios/index";
 import {flatMap, groupBy, matchesList} from "../common/utils";
 import type {EnvType} from "../environment/Environment";
 import {EnvironmentLogical} from "../environment/Environment";
-import {AppLayout} from "./common/layout";
 //import {Link} from "react-router-dom";
 import {Toggle} from "../common/Toggle";
-import {Container} from "../common/Container";
 import {InstanceFilter} from "../environment/InstanceFilter";
 import {Events} from "../environment/Events";
 import type {InstanceType} from "../environment/Instance";
@@ -27,6 +25,7 @@ import {EnvEditor} from "../environment/EnvEditor";
 import {ServiceDetail} from "../environment/ServiceDetail";
 import {ServiceEditor} from "../environment/ServiceEditor";
 import ls from "local-storage";
+import {ApplicationLayout} from "./common/ApplicationLayout";
 
 class EnvApp extends React.Component {
     constructor(props) {
@@ -342,168 +341,167 @@ class EnvApp extends React.Component {
         );
 
         return (
-            <AppLayout title={title}>
-                <div className='main-content'>
-                    <div className='principal-content'>
-                        <Container>
-                            <b>{this.state.env}</b>
-                            {
-                                this.state.group === "INSTANCES" ? <EnvInstances services={selectedServices} highlight={this.state.highlight} /> :
-                                <EnvironmentLogical env={this.state.env}
-                                                    services={selectedServices}
-                                                    highlight={this.state.highlight}
-                                                    onOrderChange={(s, t) => this.changeServiceOrder(s, t)}
-                                />
-                            }
-                        </Container>
-                    </div>
-                    <div className='side-content'>
-                        <div className='side-content-wrapper'>
-                            <div className='side-primary'>
-                                <button
-                                    style={{color: this.state.group === 'SERVICES' ? 'gray' : null}}
-                                    onClick={() => this.setState({group: "SERVICES"})} >
-                                    SERVICES
-                                </button>
-                                <button
-                                    style={{color: this.state.group === 'INSTANCES' ? 'gray' : null}}
-                                    onClick={() => this.setState({group: "INSTANCES"})}>
-                                    INSTANCES
-                                </button>
-                                <InstanceFilter id={this.state.filterId} hosts={hosts} onFilterChanged={(e, hf) => this.changeSelected(e, hf)} />
-                                Systems:
-                                <TagCloud tags={systems} displayCount={true}
-                                          selectionChanged={values => this.setState({selectedSystems: values})} />
-                                <br/>
-                                <button onClick={() => this.reloadInventory()}>RELOAD INV</button>
-                                <button onClick={() => this.reloadScm()}>RELOAD SCM</button>
-                                <button onClick={() => this.reloadSsh()}>RELOAD SSH</button>
-                                <button onClick={() => this.reloadEvents()}>RELOAD Events</button>
-                                <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
-                                <br/>
-                                <Secure permission="env.add">
-                                    <Well block>
-                                        <AddEnvironment onEnvironmentAdded={e => this.retrieveEnvs()} />
-                                    </Well>
-                                </Secure>
+            <ApplicationLayout title={title}
+               header={() =>
+                   <Fragment>
+                       <b>{this.state.env}</b>
+                       <div style={{float: 'right'}}>
+                           <button
+                               style={{color: this.state.group === 'SERVICES' ? 'gray' : null}}
+                               onClick={() => this.setState({group: "SERVICES"})} >
+                               SERVICES
+                           </button>
+                           <button
+                               style={{color: this.state.group === 'INSTANCES' ? 'gray' : null}}
+                               onClick={() => this.setState({group: "INSTANCES"})}>
+                               INSTANCES
+                           </button>
+                       </div>
+                       <div style={{clear: 'both'}}/>
+                   </Fragment>
+               }
+               main={() =>
+                   this.state.group === "INSTANCES" ?
+                       <EnvInstances services={selectedServices} highlight={this.state.highlight} />
+                       :
+                       <EnvironmentLogical env={this.state.env}
+                                           services={selectedServices}
+                                           highlight={this.state.highlight}
+                                           onOrderChange={(s, t) => this.changeServiceOrder(s, t)}
+                       />
+               }
+               sidePrimary={() =>
+                   <Fragment>
+                       <InstanceFilter id={this.state.filterId} hosts={hosts} onFilterChanged={(e, hf) => this.changeSelected(e, hf)} />
+                       <br/>
+                       <b>Systems: </b>
+                       <TagCloud tags={systems} displayCount={true}
+                                 selectionChanged={values => this.setState({selectedSystems: values})} />
+                       <br/>
+                       <button onClick={() => this.reloadInventory()}>RELOAD INV</button>
+                       <button onClick={() => this.reloadScm()}>RELOAD SCM</button>
+                       <button onClick={() => this.reloadSsh()}>RELOAD SSH</button>
+                       <button onClick={() => this.reloadEvents()}>RELOAD Events</button>
+                       <Toggle toggled={this.state.realtime} onToggleChanged={this.switch} />
+                       <br/>
+                       <Secure permission="env.add">
+                           <Well block>
+                               <AddEnvironment onEnvironmentAdded={e => this.retrieveEnvs()} />
+                           </Well>
+                       </Secure>
 
-                                {selectedEnv &&
-                                <Well block>
-                                    <b>Env: {selectedEnv.env} </b>
-                                    <div style={{float: 'right'}}>
-                                        {manageable &&
-                                            <Secure permission="env.manage">
-                                                <button onClick={() => this.editEnv()}>Edit</button>
-                                            </Secure>
-                                        }
-                                        {!selectedEnv.active &&
-                                            <Secure permission="env.manage">
-                                                <button onClick={() => this.enableEnv(selectedEnv.env)}>Enable</button>
-                                            </Secure>
-                                        }
-                                        {selectedEnv.active &&
-                                            <Secure permission="env.manage">
-                                                <button onClick={() => this.disableEnv(selectedEnv.env)}>Disable</button>
-                                            </Secure>
-                                        }
-                                    </div>
-                                    <br/>
-                                    {!this.state.envEdition &&
-                                        <div>
-                                            <EnvDetail env={selectedEnv} />
-                                            {!selectedEnv.active &&
-                                                <Secure permission="env.delete">
-                                                    <button onClick={() => this.deleteEnv(selectedEnv.env)}>Delete</button>
-                                                </Secure>
-                                            }
-                                            <br/>
-                                            {manageable &&
-                                            <Secure permission="env.manage">
-                                                <AddService env={selectedEnv.env}
-                                                            components={this.state.components}
-                                                            onServiceAdded={s => this.serviceAdded(s)}/>
-                                            </Secure>
-                                            }
-                                        </div>
-                                    }
-                                    {this.state.envEdition &&
-                                        <div>
-                                            <EnvEditor env={selectedEnv} onChange={(id, e) => this.changeEnv(e)} />
-                                            <hr/>
-                                            <button onClick={() => this.updateEnv()}>Update</button>
-                                            <button onClick={() => this.cancelEnvEdition()}>Cancel</button>
-                                        </div>
-                                    }
-                                </Well>
-                                }
+                       {selectedEnv &&
+                       <Well block>
+                           <b>Env: {selectedEnv.env} </b>
+                           <div style={{float: 'right'}}>
+                               {manageable &&
+                               <Secure permission="env.manage">
+                                   <button onClick={() => this.editEnv()}>Edit</button>
+                               </Secure>
+                               }
+                               {!selectedEnv.active &&
+                               <Secure permission="env.manage">
+                                   <button onClick={() => this.enableEnv(selectedEnv.env)}>Enable</button>
+                               </Secure>
+                               }
+                               {selectedEnv.active &&
+                               <Secure permission="env.manage">
+                                   <button onClick={() => this.disableEnv(selectedEnv.env)}>Disable</button>
+                               </Secure>
+                               }
+                           </div>
+                           <br/>
+                           {!this.state.envEdition &&
+                           <div>
+                               <EnvDetail env={selectedEnv} />
+                               {!selectedEnv.active &&
+                               <Secure permission="env.delete">
+                                   <button onClick={() => this.deleteEnv(selectedEnv.env)}>Delete</button>
+                               </Secure>
+                               }
+                               <br/>
+                               {manageable &&
+                               <Secure permission="env.manage">
+                                   <AddService env={selectedEnv.env}
+                                               components={this.state.components}
+                                               onServiceAdded={s => this.serviceAdded(s)}/>
+                               </Secure>
+                               }
+                           </div>
+                           }
+                           {this.state.envEdition &&
+                           <div>
+                               <EnvEditor env={selectedEnv} onChange={(id, e) => this.changeEnv(e)} />
+                               <hr/>
+                               <button onClick={() => this.updateEnv()}>Update</button>
+                               <button onClick={() => this.cancelEnvEdition()}>Cancel</button>
+                           </div>
+                           }
+                       </Well>
+                       }
 
-                                {svcId && selectedService &&
-                                <Well block>
-                                    <b>Service: {svcId} </b>
-                                    {manageable &&
-                                    <div style={{float: 'right'}}>
-                                        <Secure permission="env.manage">
-                                            <button onClick={() => this.editService()}>Edit</button>
-                                        </Secure>
-                                        <Secure permission="env.manage">
-                                            <button onClick={() => this.deleteService(this.state.env, svcId)}>Delete</button>
-                                        </Secure>
-                                    </div>
-                                    }
-                                    <br/>
-                                    {!this.state.serviceEdition &&
-                                    <div>
-                                        <ServiceDetail service={selectedService} />
-                                        <br/>
-                                        {manageable &&
-                                        <Secure permission="env.manage">
-                                            <AddInstance env={this.state.env} svc={svcId}
-                                                         onInstanceAdded={i => this.instanceAdded(i)}/>
-                                        </Secure>
-                                        }
-                                    </div>
-                                    }
-                                    {this.state.serviceEdition &&
-                                        <div>
-                                            <ServiceEditor components={this.state.components}
-                                                           service={selectedService}
-                                                           onChange={(svc, s) => this.changeService(s)} />
-                                            <hr/>
-                                            <button onClick={() => this.updateService()}>Update</button>
-                                            <button onClick={() => this.cancelServiceEdition()}>Cancel</button>
-                                        </div>
-                                    }
-                                </Well>
-                                }
-                                <div>
-                                    {selectedInstances.map((i: InstanceType) =>
-                                        <Well key={i.id} block>
-                                            <b>Instance: {i.id}</b>
-                                            <div style={{float: 'right'}}>
-                                            <Secure permission="env.manage">
-                                                <button onClick={() => this.deleteInstance(this.state.env, svcId, i.name)}>Delete</button>
-                                            </Secure>
-                                            </div>
-                                            <br/>
-                                            {i.id}<br/>
-                                            {i.name}<br/>
-                                            <b>Host: </b>{i.deployHost}<br/>
-                                            <b>Folder: </b>{i.deployFolder}<br/>
-                                            <InstanceProperties properties={i.properties} />
-                                        </Well>
-                                    )}
-                                </div>
-                            </div>
-                            <div className='side-secondary'>
-                                <Container>
-                                    <Events events={events} errors={eventsErrors} />
-                                </Container>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </AppLayout>
+                       {svcId && selectedService &&
+                       <Well block>
+                           <b>Service: {svcId} </b>
+                           {manageable &&
+                           <div style={{float: 'right'}}>
+                               <Secure permission="env.manage">
+                                   <button onClick={() => this.editService()}>Edit</button>
+                               </Secure>
+                               <Secure permission="env.manage">
+                                   <button onClick={() => this.deleteService(this.state.env, svcId)}>Delete</button>
+                               </Secure>
+                           </div>
+                           }
+                           <br/>
+                           {!this.state.serviceEdition &&
+                           <div>
+                               <ServiceDetail service={selectedService} />
+                               <br/>
+                               {manageable &&
+                               <Secure permission="env.manage">
+                                   <AddInstance env={this.state.env} svc={svcId}
+                                                onInstanceAdded={i => this.instanceAdded(i)}/>
+                               </Secure>
+                               }
+                           </div>
+                           }
+                           {this.state.serviceEdition &&
+                           <div>
+                               <ServiceEditor components={this.state.components}
+                                              service={selectedService}
+                                              onChange={(svc, s) => this.changeService(s)} />
+                               <hr/>
+                               <button onClick={() => this.updateService()}>Update</button>
+                               <button onClick={() => this.cancelServiceEdition()}>Cancel</button>
+                           </div>
+                           }
+                       </Well>
+                       }
+                       <div>
+                           {selectedInstances.map((i: InstanceType) =>
+                               <Well key={i.id} block>
+                                   <b>Instance: {i.id}</b>
+                                   <div style={{float: 'right'}}>
+                                       <Secure permission="env.manage">
+                                           <button onClick={() => this.deleteInstance(this.state.env, svcId, i.name)}>Delete</button>
+                                       </Secure>
+                                   </div>
+                                   <br/>
+                                   {i.id}<br/>
+                                   {i.name}<br/>
+                                   <b>Host: </b>{i.deployHost}<br/>
+                                   <b>Folder: </b>{i.deployFolder}<br/>
+                                   <InstanceProperties properties={i.properties} />
+                               </Well>
+                           )}
+                       </div>
+                   </Fragment>
+               }
+               sideSecondary={() =>
+                   <Events events={events} errors={eventsErrors} />
+               }
+            />
         );
     }
 }

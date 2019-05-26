@@ -18,6 +18,7 @@ import {TagCloud} from "../common/TagCloud";
 import {joinTags, matchesList, splitTags} from "../common/utils";
 import ls from "local-storage";
 import {extendSystems} from "../system/system-utils";
+import {ApplicationLayout} from "./common/ApplicationLayout";
 
 type Props = {
     match: any
@@ -183,92 +184,103 @@ class ArchitectureApp extends React.Component<Props, State> {
         const componentRefs = filterComponents(this.state.componentRefs, this.state.selectedSystems)
             .sort((a,b) => (a.label||'') > (b.label||'') ? 1 : -1);
         return (
-            <AppLayout title="Architecture Diagram">
-                <PrimarySecondaryLayout>
-                    <Container>
-                        {!diagram &&
-                            <Fragment>
-                                <p>Set of blueprints describing system architecture</p>
-                                <br/>
-                                {this.state.diagrams.map(d =>
-                                <div key={d.diagramId}>
-                                    <Link to={'/architecture/' + d.diagramId} >
-                                    {d.name} - {d.description}
-                                    </Link>
-                                </div>
-                                )}
-                                <br/>
-                                <InlineAdd type="Diagram"
-                                           action={() => this.addDiagram()}
-                                           onEnterAdd={() => this.setState({newDiagram: null})}
-                                           onItemAdded={() => this.retrieveDiagrams()}
-                                           editionForm={() =>
-                                               <DiagramEditor onChange={(id, d) => this.setState({newDiagram: d})} />
-                                           }
-                                           successDisplay={(data: any) =>
-                                               <div>
-                                                   <b>{data ? (data + " --> " + JSON.stringify(data)) : 'no data returned'}</b>
-                                               </div>
-                                           }
-                                />
-                            </Fragment>
-                        }
-                        {diagram &&
-                            <div style={{width: '100%', verticalAlign: 'top'}}>
-                                <div style={{display: 'block'}}>
-                                    <div style={{float: 'right'}}>
-                                        <Route render={({history}) => (
-                                            <input type="button" value="Delete" onClick={e => this.deleteDiagram(diagram.diagramId, history)} />
-                                        )}/>
-                                    </div>
-                                    <EditableLabel label={diagram.name} style={{fontSize: 16, fontWeight: 'bold'}}  altText={'<>'}
-                                                   onLabelEdited={name => this.changeName(diagram.diagramId, name)}/>
-                                    <br/>
-                                    <EditableLabel label={diagram.description} style={{width: '99%'}}  altText={'<>'}
-                                                   onLabelEdited={desc => this.changeDescription(diagram.diagramId, desc)}/>
-                                    <div style={{clear: 'both'}} />
-                                </div>
-                                <ArchiDiagram components={diagram.components}
-                                              dependencies={diagram.dependencies}
-                                              onComponentSelected={c => this.setState({selectedComponent: c.name})}
-                                              onLinkSelected={d => console.info(":selected", d)}
-                                              onComponentMoved={c => this.updateData(c)} />
-                                {selectedComponent &&
-                                <div>
-                                    {selectedComponent}
-                                    <button onClick={e => this.removeData(selectedComponent)}>Remove</button>
-                                </div>
-                                }
-                            </div>
-                        }
-                    </Container>
-                    <div>
-                        <h3>Control Panel</h3>
-                        <Well block>
-                            <b>Systems:</b>
-                            <TagCloud tags={this.state.systemRefs} selected={this.state.selectedSystems}
-                                      selectionChanged={s => this.selectedSystemsChanged(s)} />
-                            <br/>
-                        </Well>
-                        <Well block>
-                            {componentRefs.map(c =>
-                                <div key={c.id}>
-                                    {diagram && diagram.components.filter(cc => cc.name === c.id).length === 0 ?
-                                        <Fragment>
-                                            {c.label} - {c.id} &nbsp;
-                                            <button onClick={e => this.addData(c)}>Add</button>
-                                        </Fragment>
-                                        :
-                                        <Fragment>
-                                            <span style={{color: 'lightgray'}}>{c.label} - {c.id}</span>
-                                        </Fragment>
-                                    }
-                                </div>
-                            )}
-                        </Well>
-                    </div>
-                </PrimarySecondaryLayout>
-            </AppLayout>
+            <ApplicationLayout title="Architecture Diagram"
+               header={() =>
+                   <Fragment>
+                       {!diagram &&
+                           <p>Set of blueprints describing system architecture</p>
+                       }
+                       {diagram &&
+                           <div style={{width: '100%', verticalAlign: 'top'}}>
+                               <div style={{display: 'block'}}>
+                                   <div style={{float: 'right'}}>
+                                       <Route render={({history}) => (
+                                           <input type="button" value="Delete" onClick={e => this.deleteDiagram(diagram.diagramId, history)} />
+                                       )}/>
+                                   </div>
+                                   <EditableLabel label={diagram.name} style={{fontSize: 16, fontWeight: 'bold'}}  altText={'<>'}
+                                                  onLabelEdited={name => this.changeName(diagram.diagramId, name)}/>
+                                   <br/>
+                                   <EditableLabel label={diagram.description} style={{width: '99%'}}  altText={'<>'}
+                                                  onLabelEdited={desc => this.changeDescription(diagram.diagramId, desc)}/>
+                                   <div style={{clear: 'both'}} />
+                               </div>
+                           </div>
+                       }
+                   </Fragment>
+               }
+               main={() =>
+                   <Fragment>
+                       {!diagram &&
+                       <Fragment>
+                           {this.state.diagrams.map(d =>
+                               <div key={d.diagramId}>
+                                   <Link to={'/architecture/' + d.diagramId} >
+                                       {d.name} - {d.description}
+                                   </Link>
+                               </div>
+                           )}
+                           <br/>
+                           <InlineAdd type="Diagram"
+                                      action={() => this.addDiagram()}
+                                      onEnterAdd={() => this.setState({newDiagram: null})}
+                                      onItemAdded={() => this.retrieveDiagrams()}
+                                      editionForm={() =>
+                                          <DiagramEditor onChange={(id, d) => this.setState({newDiagram: d})} />
+                                      }
+                                      successDisplay={(data: any) =>
+                                          <div>
+                                              <b>{data ? (data + " --> " + JSON.stringify(data)) : 'no data returned'}</b>
+                                          </div>
+                                      }
+                           />
+                       </Fragment>
+                       }
+                       {diagram &&
+                       <div style={{width: '100%', verticalAlign: 'top'}}>
+                           <ArchiDiagram components={diagram.components}
+                                         dependencies={diagram.dependencies}
+                                         onComponentSelected={c => this.setState({selectedComponent: c.name})}
+                                         onLinkSelected={d => console.info(":selected", d)}
+                                         onComponentMoved={c => this.updateData(c)} />
+                           {selectedComponent &&
+                           <div>
+                               {selectedComponent}
+                               <button onClick={e => this.removeData(selectedComponent)}>Remove</button>
+                           </div>
+                           }
+                       </div>
+                       }
+                   </Fragment>
+               }
+               sidePrimary={() =>
+                   <Fragment>
+                       <h3>Control Panel</h3>
+                       <b>Systems:</b>
+                       <TagCloud tags={this.state.systemRefs} selected={this.state.selectedSystems}
+                                 selectionChanged={s => this.selectedSystemsChanged(s)} />
+                       <br/>
+                   </Fragment>
+               }
+               sideSecondary={() =>
+                   <Fragment>
+                       {componentRefs.map(c =>
+                           <div key={c.id}>
+                               {diagram && diagram.components.filter(cc => cc.name === c.id).length === 0 ?
+                                   <Fragment>
+                                       {c.label} - {c.id} &nbsp;
+                                       <button onClick={e => this.addData(c)}>Add</button>
+                                   </Fragment>
+                                   :
+                                   <Fragment>
+                                       <span style={{color: 'lightgray'}}>{c.label} - {c.id}</span>
+                                   </Fragment>
+                               }
+                           </div>
+                       )}
+                   </Fragment>
+               }
+            />
         );
     }
 }
