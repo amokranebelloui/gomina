@@ -6,11 +6,12 @@ import javax.inject.Inject
 
 fun main(args: Array<String>) {
     val hosts = HostUtils()
-    hosts.domains = arrayListOf("ad.exane.com")
+    hosts.domains = arrayListOf("cust.tele2.se", "local")
     println(hosts.resolve("10.132.64.3"))
     println(hosts.resolve("90.132.64.3"))
     println(hosts.resolve("google.com"))
     println(hosts.resolve("10.143.29.42"))
+    println(hosts.resolve("Amokranes-MacBook-Pro.local"))
     println(hosts.resolve(null))
 }
 

@@ -157,7 +157,7 @@ class UserApp extends React.Component<Props, State> {
     render() {
 
         return (
-            <AppLayout title="Components">
+            <AppLayout title="Users">
                 <PrimarySecondaryLayout>
                     <Container>
                         {!!this.state.user &&

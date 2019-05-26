@@ -1,6 +1,10 @@
 
 name: 'My Governance Dashboard'
 passwordsFile: 'config/pass.properties'
+
+domains:
+  - 'local'
+
 jiraUrl: 'http://localhost/jira'
 jiraProjects:
   - 'DEMO'
@@ -9,7 +13,7 @@ jiraProjects:
 
 database:
   host: 'localhost'
-  port: '7080'
+  port: '7081'
 
 maven:
   localRepository: '/Users/Amokrane/Applications/maven-libs'
