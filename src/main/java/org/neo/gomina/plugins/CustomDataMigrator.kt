@@ -8,9 +8,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import org.neo.gomina.model.inventory.Environment
-import org.neo.gomina.model.inventory.Instance
-import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.module.config.ConfigLoader
 import org.neo.gomina.persistence.model.persist
 import org.neo.gomina.persistence.model.toStr
@@ -29,12 +26,53 @@ private val mapper = ObjectMapper(YAMLFactory())
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
 fun main(args: Array<String>) {
-    val config = ConfigLoader().load()
+    //val components = File("C:\\Work\\Code\\Tools\\governance-tools\\data\\projects.json")
 
+    val env = File("/Users/Amokrane/Work/Code/Idea/gomina-data/env.tradex-prod-pt.json")
+    reloadEnvironment(env)
+}
+
+private fun reloadEnvironment(file: File) {
+    val config = ConfigLoader().load()
+    val jedis = Jedis(config.database.host, config.database.port)
+    jedis.select(3)
+    val env = jsonMapper.readValue<DEnvironment>(file)
+
+    if (jedis.exists("env:${env.name}")) {
+        println("${env.name} already exists")
+    } else {
+        jedis.persist("env:${env.name}", mapOf(
+                "type" to env.type,
+                "description" to env.name,
+                "monitoring_url" to env.monitoringUrl + "@" + env.code,
+                "active" to env.active.toString()
+        ))
+        var counter = 1.0
+        env.instances.groupBy { it.svc }.forEach { (svc, instances) ->
+            jedis.persist("service:${env.name}:$svc", mapOf(
+                    "type" to instances[0].type,
+                    "mode" to "ONE_ONLY",
+                    "active_count" to "1",
+                    "component" to instances[0].project
+            ))
+            jedis.zadd("services:${env.name}", counter++, svc)
+
+            instances.map { instance ->
+                jedis.persist("instance:${env.name}:$svc:${instance.id}", mapOf(
+                        "host" to instance.host,
+                        "floder" to instance.folder
+                ))
+            }
+        }
+        println("Migrated ${env.name}")
+    }
+}
+
+private fun reloadComponents(file: File) {
+    val config = ConfigLoader().load()
     val jedis = Jedis(config.database.host, config.database.port)
     jedis.select(1)
-    val file = "C:\\Work\\Code\\Tools\\governance-tools\\data\\projects.json"
-    jsonMapper.readValue<List<DComponent>>(File(file)).forEach {
+    jsonMapper.readValue<List<DComponent>>(file).forEach {
         //println(it)
         val systems = when {
             it.id.startsWith("tradex-") -> listOf("tradex")
@@ -44,8 +82,7 @@ fun main(args: Array<String>) {
         }
         if (jedis.exists("component:${it.id}")) {
             println("${it.id} already exists")
-        }
-        else {
+        } else {
             jedis.persist("component:${it.id}", mapOf(
                     "label" to it.id,
                     "type" to it.type,
@@ -64,32 +101,6 @@ fun main(args: Array<String>) {
         }
     }
 }
-
-
-fun main1(args: Array<String>) {
-    val file = "env.registry-prod.json"
-    val old:DEnvironment = jsonMapper.readValue(File("data/oldx/$file"))
-    val new = map(old)
-    jsonMapper.writeValue(File("data/$file"), new)
-
-}
-
-private fun map(old: DEnvironment): Environment {
-    val services = old.instances
-            .groupBy { i -> i.svc }
-            .map { (svc, instances) -> Triple(svc, instances.first(), instances) }
-            .map { (svc, i, instances) ->
-                Service(svc = svc,
-                        type = i.type,
-                        componentId = i.project,
-                        instances = instances.map { Instance(it.id, it.host, it.folder) },
-                        undefined = false
-                )
-            }
-
-    return Environment(old.code, old.name, old.type, old.monitoringUrl, old.active, services)
-}
-
 
 private data class DEnvironment (
         val name: String,

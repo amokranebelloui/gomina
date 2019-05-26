@@ -4,21 +4,21 @@ Contexts, entities, schemas
 ### Users (0)
 
 ### Components (1)
-- component:<componentId> (hash)
-- commit:<componentId>:<rev> (hset)
-- commits:<componentId> (zset) commit{timestamp}
-- branch_commits:<componentId>:<branchId> (zset) commit{timestamp}
-- versions:<componentId>:<branchId> (zset) version{releaseDate}
+- component:`<componentId>` (hash)
+- commit:`<componentId>`:`<rev>` (hset)
+- commits:`<componentId>` (zset) commit{timestamp}
+- branch_commits:`<componentId>`:`<branchId>` (zset) commit{timestamp}
+- versions:`<componentId>`:`<branchId>` (zset) version{releaseDate}
 
 ### Interaction (2)
-- api:<source>:<componentId>:exposes:<functionName> (hash) name type
-- api:<source>:<componentId>:uses:<functionName> (hash) name type usage
+- api:`<source>`:`<componentId>`:exposes:`<functionName>` (hash) name type
+- api:`<source>`:`<componentId>`:uses:`<functionName>` (hash) name type usage
 
 ### Inventory (3)
-- env:<envId> (hash) type description monitoring_url active
-- service:<envId>:<svc> (hash) type mode active_count component
-- services:<envId> (zset) svc{rank}
-- instance:<envId>:<svc>:<instanceId> (hash) host folder
+- env:`<envId>` (hash) type description monitoring_url active
+- service:`<envId>`:`<svc>` (hash) type mode active_count component
+- services:`<envId>` (zset) svc{rank}
+- instance:`<envId>`:`<svc>`:`<instanceId>` (hash) host folder
 
 
 - `hmset env:UAT type TEST description "UAT env" monitoring_url "tcp://localhost@UAT"`
@@ -47,7 +47,7 @@ Contexts, entities, schemas
 - `hmset host:neptune data_center "us-east" type PROD username Test password_alias "@test" sudo "svc"`
 
 ### Work List (5)
-- work:<workId> (hash) label type jira status people components
+- work:`<workId>` (hash) label type jira status people components
 
 
 - `hmset work:poc label "Platform POC" type "Dev" jira "DEMO-540" people "amokrane.belloui" components "kernel,basket,order" status DEV`
@@ -55,15 +55,15 @@ Contexts, entities, schemas
 - `hmset work:refacto label "refacto 1" type "Dev" people "amokrane.belloui, john.doe" components "libbus" status COMPLETED`
 
 ### Events (6)
-- event:<group>:<eventId> (hash) timestamp type message \[env instance component version\]
+- event:`<group>`:`<eventId>` (hash) timestamp type message \[env instance component version\]
 
 ### Knowledge (7)
-- knowledge:component:<componentId> (zset) user{knowledge}
-- knowledge:user:<userId> (zset) component{knowledge}
+- knowledge:component:`<componentId>` (zset) user{knowledge}
+- knowledge:user:`<userId>` (zset) component{knowledge}
 
 ### Libraries (8) 
- - libraries:<componentId>:<version> (set) libraries used by a component
- - library:<artifactId>:<version> (set) components using a library
+ - libraries:`<componentId>`:`<version>` (set) libraries used by a component
+ - library:`<artifactId>`:`<version>` (set) components using a library
 
 ## Tools
 
