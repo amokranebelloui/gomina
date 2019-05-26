@@ -45,15 +45,14 @@ data class Config (
         var sonar: SonarConfig = SonarConfig()
 )
 
-class ConfigLoader {
+class ConfigLoader(val config: File?) {
 
     private val mapper = ObjectMapper(YAMLFactory())
             .registerModule(KotlinModule())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
     fun load(): Config {
-        val configFile = System.getProperty("gomina.config.file")
-        val file = File(if (configFile?.isNotBlank() == true) configFile else "config/config.yaml")
+        val file = config ?: File("config/config.yaml")
         logger.info("Loading configuration from $file")
         return mapper.readValue(file)
     }

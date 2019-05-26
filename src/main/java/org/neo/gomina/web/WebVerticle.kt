@@ -26,6 +26,7 @@ import org.neo.gomina.api.users.UsersApi
 import org.neo.gomina.api.work.WorkApi
 import org.neo.gomina.module.GominaModule
 import org.neo.gomina.plugins.PluginAssembler
+import java.io.File
 
 class WebVerticle : AbstractVerticle() {
 
@@ -33,7 +34,8 @@ class WebVerticle : AbstractVerticle() {
     override fun start() {
         logger.info("Starting...")
 
-        val injector = Guice.createInjector(Modules.combine(GominaModule(), object : AbstractModule() {
+        val configFile = System.getProperty("gomina.config.file")?.let { File(it) }
+        val injector = Guice.createInjector(Modules.combine(GominaModule(configFile), object : AbstractModule() {
             override fun configure() {
                 bind(Vertx::class.java).toInstance(vertx)
             }

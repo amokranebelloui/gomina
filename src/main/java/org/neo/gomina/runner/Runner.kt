@@ -10,7 +10,7 @@ fun main(args: Array<String>) {
 
     System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory")
     System.setProperty("vertx.disableFileCaching", "true")
-    System.setProperty("gomina.config.file", if (args.isNotEmpty()) args[0] else "")
+    if (args.isNotEmpty()) System.setProperty("gomina.config.file", args[0])
 
     System.getProperties().forEach { (key, `val`) -> logger.info(key.toString() + "=" + `val`) }
 

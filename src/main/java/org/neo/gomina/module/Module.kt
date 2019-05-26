@@ -63,14 +63,14 @@ import org.neo.gomina.persistence.model.*
 import org.neo.gomina.plugins.*
 import java.io.File
 
-class GominaModule : AbstractModule() {
+class GominaModule(private val configFile: File?) : AbstractModule() {
 
     override fun configure() {
         binder().requireExplicitBindings()
 
         val config: Config
         try {
-            val configLoader = ConfigLoader()
+            val configLoader = ConfigLoader(configFile)
             config = configLoader.load()
         } catch (e: Exception) {
             throw RuntimeException("Cannot load config", e)

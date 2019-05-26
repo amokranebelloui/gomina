@@ -4,12 +4,13 @@ import com.google.inject.AbstractModule
 import com.google.inject.Guice
 import com.google.inject.name.Names
 import org.junit.Test
+import java.io.File
 
 
 class GominaModuleTest {
     @Test
     fun testModule() {
-        Guice.createInjector(GominaModule())
+        Guice.createInjector(GominaModule(File("config/config.yaml")))
 
         val module = object : AbstractModule() {
 

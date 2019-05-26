@@ -46,7 +46,7 @@ fun main(args: Array<String>) {
 }
 
 private fun reloadEnvironment(file: File) {
-    val config = ConfigLoader().load()
+    val config = ConfigLoader(File("config/config.yaml")).load()
     val jedis = Jedis(config.database.host, config.database.port)
     jedis.select(3)
     val env = jsonMapper.readValue<DEnvironment>(file)
@@ -82,7 +82,7 @@ private fun reloadEnvironment(file: File) {
 }
 
 private fun reloadComponents(file: File) {
-    val config = ConfigLoader().load()
+    val config = ConfigLoader(File("config/config.yaml")).load()
     val jedis = Jedis(config.database.host, config.database.port)
     jedis.select(1)
     jsonMapper.readValue<List<DComponent>>(file).forEach {
