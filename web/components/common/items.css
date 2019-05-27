@@ -13,6 +13,18 @@
     margin-right: inherit;
 }
 
+
+.vertical-items > * {
+    margin-bottom: 3px;
+    padding: 1px;
+    margin-right: 1px;
+    margin-left: 1px;
+}
+
+.vertical-items > *:last-child {
+    margin-bottom: inherit;
+}
+
 .item-container {
     display: table;
     height: 100%;

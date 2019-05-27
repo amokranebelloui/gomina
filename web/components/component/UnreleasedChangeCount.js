@@ -7,7 +7,7 @@ class UnreleasedChangeCount extends React.Component {
         const hasChanges = changesCount > 0;
         //const backgroundColor = hasChanges ? '#EAA910' : '#F2E18F';
         return (
-            hasChanges && <Badge backgroundColor='#EAA910' color='white'>{changesCount}</Badge>
+            hasChanges && <Badge backgroundColor='#EAA910' color='white' title='Unreleased changes'>{changesCount}</Badge>
         )
     }
 }
