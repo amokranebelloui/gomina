@@ -116,6 +116,9 @@ interface ComponentRepo {
     fun cleanSnapshotVersions(componentId: String)
 
     fun updateBranches(componentId: String, branches: List<Branch>)
+    fun dismissBranch(componentId: String, branchId: String)
+    fun reactivateBranch(componentId: String, branchId: String)
+
     fun updateDocFiles(componentId: String, docFiles: List<String>)
     fun updateCommitLog(componentId: String, commits: List<Commit>)
     fun updateLastCommit(componentId: String, lastCommit: LocalDateTime?)

@@ -5,7 +5,8 @@ import type {VersionType} from "../common/version-utils";
 type BranchDetailType = {
     name: string,
     origin?: ?string,
-    originRevision?: ?string
+    originRevision?: ?string,
+    dismissed?: boolean
 }
 
 type ComponentType = {

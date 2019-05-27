@@ -32,19 +32,37 @@ class RedisComponentRepo : ComponentRepo {
 
     override fun getAll(): List<Component> {
         pool.resource.use { jedis ->
+            val componentKeys = jedis.keys("component:*")
+            val branchKeys = jedis.keys("branch:*")
             val pipe = jedis.pipelined()
-            val data = jedis.keys("component:*").map { it.substring(10) to pipe.hgetAll(it) }
+            val components = componentKeys.map { it.substring(10) to pipe.hgetAll(it) }
+            val branchesMap = branchKeys
+                    .map { key -> key.split(":").let { Triple(it[1], it[2], pipe.hgetAll(key)) } }
+                    .groupBy({it.first}, {it.second to it.third})
             pipe.sync()
-            return data.map { (id, data) ->
-                toComponent(id, data.get())
+            return components.map { (id, data) ->
+                val branches = branchesMap[id]
+                        ?.map { (id, bData) -> toBranch(id, bData.get()) }
+                        ?: emptyList()
+                toComponent(id, data.get(), branches)
             }
         }
     }
 
     override fun get(componentId: String): Component? {
         pool.resource.use { jedis ->
-            return jedis.hgetAll("component:$componentId")
-                    ?.let { toComponent(componentId, it) }
+            val branchKeys = jedis.keys("branch:$componentId:*")
+            val pipe = jedis.pipelined()
+            val component = pipe.hgetAll("component:$componentId")
+            val branches = branchKeys.map { key ->
+                key.split(":")[2] to pipe.hgetAll(key)
+            }
+            pipe.sync()
+            return component?.let { toComponent(
+                    componentId,
+                    it.get(),
+                    branches.map { (id, data) -> toBranch(id, data.get()) }
+            )}
         }
     }
 
@@ -74,7 +92,7 @@ class RedisComponentRepo : ComponentRepo {
         )
     }
 
-    private fun toComponent(id: String, map: Map<String, String>): Component {
+    private fun toComponent(id: String, map: Map<String, String>, branches: List<Branch>): Component {
         return Component(
                 id = id,
                 label = map["label"],
@@ -102,7 +120,7 @@ class RedisComponentRepo : ComponentRepo {
                 released = map["released_version"]?.let { Version(it, map["latest_revision"]) },
                 changes = map["changes"]?.toInt(),
 
-                branches = map["branches"].toList().map { Branch(it) },
+                branches = branches,
                 docFiles = map["doc_files"].toList(),
                 lastCommit = map["last_commit"]?.let { LocalDateTime.parse(it, ISO_DATE_TIME) },
                 commitActivity = map["commit_activity"]?.toInt() ?: 0,
@@ -115,6 +133,13 @@ class RedisComponentRepo : ComponentRepo {
                 buildBuilding = map["build_building"]?.toBoolean(),
                 buildTimestamp = map["build_timestamp"]?.toLong(),
                 disabled = map["disabled"]?.toBoolean() == true
+        )
+    }
+
+    private fun toBranch(id: String, map: Map<String, String>): Branch {
+        return Branch(
+                name = id,
+                dismissed = map["dismissed"]?.toBoolean() == true
         )
     }
 
@@ -355,7 +380,26 @@ class RedisComponentRepo : ComponentRepo {
 
     override fun updateBranches(componentId: String, branches: List<Branch>) {
         pool.resource.use { jedis ->
-            jedis.hset("component:$componentId", "branches", branches.map { it.name }.toStr())
+            val pipe = jedis.pipelined()
+            //pipe.hset("component:$componentId", "branches", branches.map { it.name }.toStr())
+            branches.forEach {
+                pipe.persist("branch:$componentId:${it.name}", mapOf(
+                        "update_time" to now(Clock.systemUTC()).format(ISO_DATE_TIME)
+                ))
+            }
+            pipe.sync()
+        }
+    }
+
+    override fun dismissBranch(componentId: String, branchId: String) {
+        pool.resource.use { jedis ->
+            jedis.hset("branch:$componentId:$branchId", "dismissed", true.toString())
+        }
+    }
+
+    override fun reactivateBranch(componentId: String, branchId: String) {
+        pool.resource.use { jedis ->
+            jedis.hset("branch:$componentId:$branchId", "dismissed", false.toString())
         }
     }
 

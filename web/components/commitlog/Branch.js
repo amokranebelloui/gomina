@@ -42,7 +42,7 @@ class Branch extends React.Component<BranchLabelProps> {
             <Badge backgroundColor={this.props.selected ? 'lightgray' : null}>
                 <BranchColor branch={name}/>
                 &nbsp;
-                {name}
+                {branch.dismissed ? <s>{name}</s> : <span>{name}</span>}
             </Badge>
         );
     }

@@ -80,7 +80,8 @@ data class ComponentDetail(
 data class BranchDetail (
         var name: String,
         var origin: String? = null,
-        var originRevision: String? = null
+        var originRevision: String? = null,
+        var dismissed: Boolean
 )
 
 data class CommitLogDetail(
@@ -175,6 +176,9 @@ class ComponentsApi {
         router.get("/:componentId/associated").handler(this::associated)
         router.get("/:componentId/doc/:docId").handler(this::componentDoc)
         router.get("/:componentId/versions").handler(this::versions)
+
+        router.put("/:componentId/branch/dismiss").handler(this::branchDismiss)
+        router.put("/:componentId/branch/reactivate").handler(this::branchReactivate)
 
         router.post("/add").handler(this::addComponent)
         router.put("/reload-scm").handler(this::reloadScm)
@@ -356,6 +360,34 @@ class ComponentsApi {
         }
         catch (e: Exception) {
             logger.error("Cannot get versions $componentId")
+            ctx.fail(500)
+        }
+    }
+
+    private fun branchDismiss(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
+        val branchId = ctx.request().getParam("branchId")
+        try {
+            logger.info("Dismiss Branch $componentId $branchId")
+            componentRepo.dismissBranch(componentId, branchId)
+            ctx.response().putHeader("content-type", "text/html").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot dismiss Branch $componentId $branchId")
+            ctx.fail(500)
+        }
+    }
+
+    private fun branchReactivate(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
+        val branchId = ctx.request().getParam("branchId")
+        try {
+            logger.info("Reactivate Branch $componentId $branchId")
+            componentRepo.reactivateBranch(componentId, branchId)
+            ctx.response().putHeader("content-type", "text/html").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot reactivate Branch $componentId $branchId")
             ctx.fail(500)
         }
     }
@@ -769,7 +801,7 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     this.owner = component.owner
     this.criticity = component.criticity
     this.branches = component.branches.map {
-        BranchDetail(name = it.name, origin = it.origin, originRevision = it.originRevision)
+        BranchDetail(name = it.name, origin = it.origin, originRevision = it.originRevision, dismissed = it.dismissed)
     }
     this.docFiles = component.docFiles
     this.changes = component.changes

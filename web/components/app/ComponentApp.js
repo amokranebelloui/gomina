@@ -4,7 +4,6 @@ import {ComponentBadge, ComponentMenu} from "../component/Component";
 import "../component/Component.css"
 import "../common/items.css"
 import {CommitLog, CommitLogLegend} from "../commitlog/CommitLog";
-import {Container} from "../common/Container";
 import {Documentation} from "../documentation/Documentation";
 import queryString from 'query-string'
 import {Dependencies} from "../dependency/Dependencies";
@@ -20,7 +19,7 @@ import {Events} from "../environment/Events";
 import {Knowledge} from "../knowledge/Knowledge";
 import {DateTime} from "../common/DateTime";
 import Route from "react-router-dom/es/Route";
-import {Branch} from "../commitlog/Branch";
+import {Branch, isTrunk, sortBranchesDetails} from "../commitlog/Branch";
 import {Libraries} from "../library/Libraries";
 import {filterLibraries, LibraryFilter} from "../library/LibraryFilter";
 import {ApplicationLayout} from "./common/ApplicationLayout";
@@ -255,6 +254,18 @@ class ComponentApp extends React.Component {
         axios.get('/data/components/' + componentId + '/scm?branchId=' + (branchId ? branchId : ""))
             .then(response => thisComponent.setState({branch: response.data}))
             .catch((error) => thisComponent.setState({branch: null}))
+    }
+    dismissBranch(componentId, branchId) {
+        const thisComponent = this;
+        axios.put('/data/components/' + componentId + '/branch/dismiss?branchId=' + branchId)
+            .then(() => thisComponent.retrieveComponent(componentId))
+            .catch(() => console.error("Cannot dismiss branch"))
+    }
+    reactivateBranch(componentId, branchId) {
+        const thisComponent = this;
+        axios.put('/data/components/' + componentId + '/branch/reactivate?branchId=' + branchId)
+            .then(() => thisComponent.retrieveComponent(componentId))
+            .catch(() => console.error("Cannot reactivate branch"))
     }
     retrieveVersions(componentId) {
         const thisComponent = this;
@@ -534,8 +545,24 @@ class ComponentApp extends React.Component {
                                           unresolved={(this.state.branch || {}).unresolved}/>
                                <CommitLogLegend/>
                            </Fragment>
-                       }
-                       />
+                       }/>
+                       <Route path="/component/:id/branches" render={props =>
+                            <Fragment>
+                                <h3>Branches</h3>
+                                {component.branches && sortBranchesDetails(component.branches).map(branch =>
+                                    <div key={branch.name}
+                                         title={"from: " + (branch.origin || "") + " rev:" + (branch.originRevision || "")}>
+                                        <Branch branch={branch} />
+                                        {!isTrunk(branch.name) && (
+                                            branch.dismissed
+                                                ? <button onClick={e => this.reactivateBranch(component.id, branch.name)}>Reactivate</button>
+                                                : <button onClick={e => this.dismissBranch(component.id, branch.name)}>Dismiss</button>
+                                        )}
+                                        <br/>
+                                    </div>
+                                )}
+                            </Fragment>
+                       }/>
                        <Route path="/component/:id/doc/:docId" render={props =>
                            <Documentation doc={this.state.doc}/>
                        }/>
@@ -588,9 +615,23 @@ class ComponentApp extends React.Component {
                            <Fragment>
                                <h3>Events</h3>
                                <button onClick={e => this.reloadEvents()}>Reload Events</button>
-                               <Container>
-                                   <Events events={this.state.events || []} errors={[]}/>
-                               </Container>
+                               <Events events={this.state.events || []} errors={[]}/>
+                           </Fragment>
+                       }/>
+                       <Route path="/component/:id/versions" render={props =>
+                           <Fragment>
+                               <h3>Versions: </h3>
+                               <div className="items">
+                                   {this.state.versions && this.state.versions.map(versionRelease =>
+                                       <span key={versionRelease.artifactId + versionRelease.version.version + versionRelease.branchId}>
+                                           <span>{versionRelease.artifactId}</span>&nbsp;
+                                           <b>{versionRelease.version.version}</b>&nbsp;
+                                           <DateTime date={versionRelease.releaseDate} displayTime={false} style={{color: 'lightgray'}} />&nbsp;
+                                           <Branch branch={versionRelease.branchId} />
+                                           <br/>
+                                     </span>
+                                   )}
+                               </div>
                            </Fragment>
                        }/>
                    </Fragment>

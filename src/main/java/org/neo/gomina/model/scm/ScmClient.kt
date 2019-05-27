@@ -56,7 +56,8 @@ fun List<Commit>.activity(reference: LocalDateTime): Int {
 data class Branch(
         var name: String,
         var origin: String? = null,
-        var originRevision: String? = null
+        var originRevision: String? = null,
+        var dismissed: Boolean = false
 )
 
 interface ScmClient {
