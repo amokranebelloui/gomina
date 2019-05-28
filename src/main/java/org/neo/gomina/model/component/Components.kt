@@ -124,6 +124,7 @@ interface ComponentRepo {
     fun updateLastCommit(componentId: String, lastCommit: LocalDateTime?)
     fun updateCommitActivity(componentId: String, activity: Int)
     fun updateCommitToRelease(componentId: String, commitToRelease: Int?)
+    fun componentsForIssue(issue: String): Set<String>
 }
 
 

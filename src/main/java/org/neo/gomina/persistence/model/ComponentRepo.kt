@@ -6,6 +6,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.Artifact
 import org.neo.gomina.model.component.*
+import org.neo.gomina.model.issues.IssueProjects
 import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.version.Version
@@ -21,6 +22,8 @@ class RedisComponentRepo : ComponentRepo {
     }
 
     private lateinit var pool: JedisPool
+
+    @Inject lateinit var issues: IssueProjects
 
     @Inject
     private fun initialize(@Named("database.host") host: String, @Named("database.port") port: Int) {
@@ -429,6 +432,9 @@ class RedisComponentRepo : ComponentRepo {
                             commit.message?.let { "message" to it },
                             commit.version?.let { "version" to it }
                     ).toMap())
+                    commit.issues(issues).map {
+                        pipe.sadd("issue_components:$it", componentId)
+                    }
                 }
                 pipe.sync()
             }
@@ -461,4 +467,11 @@ class RedisComponentRepo : ComponentRepo {
             }
         }
     }
+
+    override fun componentsForIssue(issue: String): Set<String> {
+        pool.resource.use { jedis ->
+            return jedis.smembers("issue_components:$issue")
+        }
+    }
+    
 }

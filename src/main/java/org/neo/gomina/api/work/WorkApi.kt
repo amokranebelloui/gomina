@@ -29,9 +29,11 @@ import javax.inject.Inject
 
 data class WorkDetail(val id: String, val label: String, val type: String?,
                       val issues: List<IssueRef>, 
+                      val missingIssues: List<IssueRef>,
                       val status: String,
                       val people: List<UserRef>,
                       val components: List<ComponentRef> = emptyList(),
+                      val missingComponents: List<ComponentRef> = emptyList(),
                       var creationDate: Date? = null,
                       var dueDate: String? = null,
                       val archived: Boolean
@@ -123,7 +125,8 @@ class WorkApi {
             val workList = workList.getAll().map {
                 it.toWorkDetail(issueTrackerUrl,
                         it.people.mapNotNull { userMap[it] },
-                        it.components.mapNotNull { componentMap[it] }
+                        it.components.mapNotNull { componentMap[it] },
+                        emptySet(), emptyList()
                 )
             }
             ctx.response()
@@ -241,6 +244,7 @@ class WorkApi {
             val accounts = users.getUsers()
                     .flatMap { user -> user.accounts.map { it to user } }
                     .associateBy({ (account, _) -> account }, {(_, user) -> user})
+            val componentsIssues = mutableSetOf<IssueRef>()
             val detail = components
                     .mapNotNull { component ->
                         component.scm?.let {scm ->
@@ -258,6 +262,7 @@ class WorkApi {
                                             .contains(refEnv)
                                 }
                                 val commits = if (last != -1) commitLog.subList(0, last + 1) else commitLog
+                                componentsIssues.addAll(commits.flatMap { it.issues })
                                 ComponentWorkDetail(component.id,
                                         componentLabel = component.label ?: component.id,
                                         scmType = component.scm?.type,
@@ -272,9 +277,15 @@ class WorkApi {
                             }
                         }
                     }
+            val issuesComponents: List<ComponentRef> = work?.issues
+                    ?.flatMap { componentRepo.componentsForIssue(it) }
+                    ?.toSet()
+                    ?.mapNotNull { componentMap[it] }
+                    ?: emptyList()
             val workDetail = work?.toWorkDetail(issueTrackerUrl,
                     work.people.mapNotNull { userMap[it] },
-                    work.components.mapNotNull { componentMap[it] }
+                    work.components.mapNotNull { componentMap[it] },
+                    componentsIssues, issuesComponents
             )
             val manifest = WorkManifestDetail(workDetail, detail)
             ctx.response()
@@ -289,15 +300,18 @@ class WorkApi {
 
 }
 
-private fun Work.toWorkDetail(issueTrackerUrl: String, people: List<UserRef>, components: List<ComponentRef>): WorkDetail {
+private fun Work.toWorkDetail(issueTrackerUrl: String, people: List<UserRef>, components: List<ComponentRef>,
+                              componentsIssues: Set<IssueRef>, issuesComponents: List<ComponentRef>): WorkDetail {
     return WorkDetail(
             id = id,
             label = label,
             type = type,
             issues = issues.map { it.toIssueRef(issueTrackerUrl) },
+            missingIssues = componentsIssues.filter { !issues.contains(it.issue) },
             status = status.toString(),
             people = people,
             components = components,
+            missingComponents = issuesComponents.filter { !components.contains(it) },
             creationDate = creationDate?.toDateUtc,
             dueDate = dueDate?.toString,
             archived = archived

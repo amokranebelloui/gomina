@@ -15,9 +15,11 @@ type WorkType = {
     label: string,
     type: ?string,
     issues: Array<IssueRefType>,
+    missingIssues: Array<IssueRefType>,
     status: WorkStatusType,
     people: Array<UserRefType>,
     components: Array<ComponentRefType>,
+    missingComponents: Array<ComponentRefType>,
     creationDate: ?Date,
     dueDate: ?string,
     archived: boolean

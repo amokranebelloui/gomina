@@ -8,6 +8,8 @@ Contexts, entities, schemas
 - commit:`<componentId>`:`<rev>` (hset)
 - commits:`<componentId>` (zset) commit{timestamp}
 - branch_commits:`<componentId>`:`<branchId>` (zset) commit{timestamp}
+- issue_components:`<issueId>` (set) componentId
+- branch:`<componentId>`:`<branchId>` (hash) dismissed
 - versions:`<componentId>`:`<branchId>` (zset) version{releaseDate}
 
 ### Interaction (2)

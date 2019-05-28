@@ -20,6 +20,7 @@ import type {EnvType} from "../environment/Environment";
 import {WorkStatus} from "../work/WorkStatus";
 import {joinTags, splitTags} from "../common/utils";
 import {ApplicationLayout} from "./common/ApplicationLayout";
+import {Badge} from "../common/Badge";
 
 type Props = {
     match: any
@@ -126,9 +127,10 @@ class WorkApp extends React.Component<Props, State> {
             .then(response => thisComponent.setState({workList: response.data}))
             .catch(() => thisComponent.setState({workList: []}));
     }
-    retrieveWorkDetail(workId: string, refEnv: ?string) {
+    retrieveWorkDetail(workId: string, refEnv?: ?string) {
         const thisComponent = this;
-        axios.get('/data/work/detail' + (workId ? '/' + workId : '') + "?refEnv=" + (refEnv ? refEnv : this.state.refEnv))
+        const refEnv_ = typeof refEnv !== 'undefined' ? refEnv : this.state.refEnv;
+        axios.get('/data/work/detail' + (workId ? '/' + workId : '') + (refEnv_ ? '?refEnv=' + refEnv_ : ''))
             .then(response => thisComponent.setState({workDetail: response.data}))
             .catch(() => thisComponent.setState({workDetail: null}));
     }
@@ -155,8 +157,8 @@ class WorkApp extends React.Component<Props, State> {
 
     changeRefEnv(refEnv: string) {
         this.setState({"refEnv": refEnv});
-        ls.set('work.list.ref.env', refEnv)
-        this.retrieveWorkDetail(this.state.workId, refEnv)
+        ls.set('work.list.ref.env', refEnv);
+        this.state.workId && this.retrieveWorkDetail(this.state.workId, refEnv)
     }
     changeCommitLimit(limit: string) {
         this.setState({"commitLimit": limit && parseInt(limit) || 0});
@@ -269,7 +271,6 @@ class WorkApp extends React.Component<Props, State> {
                                    <li>Commit logs</li>
                                    <li>etc...</li>
                                </div>
-                               <hr/>
                            </Fragment>
                        }
                        {workDetail && workDetail.work &&
@@ -473,36 +474,55 @@ function Work(props: {work: WorkType, onStatusChange?: (string, WorkStatusType) 
     //border: '1px solid blue'
     return (
         <div style={{padding: '2px', minWidth: '80px'}}>
-            <div>
+            <div style={{marginBottom: '4px'}}>
                 <Link to={"/work/" + work.id}>
                     <h3 style={{display: 'inline-block'}}>{work.label} {work.archived && "(Archived)"}</h3>
                 </Link>
+                &nbsp;
+                <i>&lt;{work.type}&gt;</i>
             </div>
-            <div><i>&lt;{work.type}&gt;</i><i>&lt;{work.status}&gt;</i></div>
-            <div><b>Issues </b>{work.issues.map(issue => <i key={issue.issue}>{issue.issue} </i>)}</div>
+            <div>
+                <WorkStatus status={work.status}
+                            onStatusChange={(s) => props.onStatusChange && props.onStatusChange(work.id, s)} />
+            </div>
+            <div>
+                <b>Issues </b>
+                <span className="items">
+                    {work.issues.map(issue =>
+                        <Badge key={issue.issue} style={{color: '#42748e'}}>
+                            <Issue issue={issue} />
+                        </Badge>
+                    )}
+                    {work.missingIssues.map(issue =>
+                        <Badge key={issue.issue} style={{opacity: 0.5}}>
+                            <Issue issue={issue} />
+                        </Badge>
+                    )}
+                </span>
+            </div>
             <div>
                 <b>People </b>
                 {work.people.map(p =>
-                    <span key={p.id} style={{color: '#42748e'}}>
+                    <Badge key={p.id} style={{color: '#42748e'}}>
                         <Link to={"/user/" + p.id}>{p.shortName} </Link>
-                    </span>
+                    </Badge>
                 )}
             </div>
             <div>
                 <b>Components </b>
                 {work.components.map(c =>
-                    <span key={c.id} style={{color: '#42748e'}}>
+                    <Badge key={c.id} style={{color: '#42748e'}}>
                         <Link to={"/component/" + c.id}>{c.label} </Link>
-                    </span>
+                    </Badge>
+                )}
+                {work.missingComponents.map(c =>
+                    <Badge key={c.id} style={{opacity: 0.5}}>
+                        <Link to={"/component/" + c.id}>{c.label} </Link>
+                    </Badge>
                 )}
             </div>
             <div><b>Created </b><DateTime date={work.creationDate} /></div>
             <div><b>Due </b><DateTime date={work.dueDate} /></div>
-            <div>
-                <b>Status </b>
-                <WorkStatus status={work.status}
-                            onStatusChange={(s) => props.onStatusChange && props.onStatusChange(work.id, s)} />
-            </div>
         </div>
     )
 }
