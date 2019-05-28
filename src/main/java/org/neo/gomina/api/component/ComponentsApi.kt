@@ -30,6 +30,7 @@ import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
+import org.neo.gomina.model.user.Users
 import org.neo.gomina.model.work.WorkList
 import java.util.*
 import javax.inject.Inject
@@ -142,6 +143,7 @@ class ComponentsApi {
     val router: Router
 
     @Inject private lateinit var componentRepo: ComponentRepo
+    @Inject private lateinit var users: Users
     @Inject private lateinit var libraries: Libraries
     @Inject private lateinit var workList: WorkList
     @Inject private lateinit var inventory: Inventory
@@ -270,15 +272,20 @@ class ComponentsApi {
         val branchId = ctx.request().getParam("branchId")
         try {
             logger.info("Get SCM log for component:$componentId branch:$branchId")
-            var log = componentRepo.get(componentId)?.scm?.let { scm ->
+            val component = componentRepo.get(componentId)
+            var log = component?.scm?.let { scm ->
                 val client = scmClients.getClient(scm)
                 val branch = branchId?.takeIf { it.isNotBlank() } ?: client.getTrunk()
 
                 val log = componentRepo.getCommitLog(componentId, branch)
-                val instances = topology.buildExtInstances(componentId)
+                val accounts = users.getUsers()
+                        .flatMap { user -> user.accounts.map { it to user } }
+                        .associateBy({ (account, _) -> account }, {(_, user) -> user})
+                val environments = inventory.getEnvironments()
+                val instances = topology.buildExtInstances(component, environments)
                 val prodEnvs = inventory.getProdEnvironments().map { it.id }
                 val releases = events.releases(componentId, prodEnvs)
-                commitLogEnricher.enrichLog(branch, log, scm, instances, releases)
+                commitLogEnricher.enrichLog(branch, log, scm, accounts, instances, releases)
             }
             if (log != null) {
                 ctx.response().putHeader("content-type", "text/html")

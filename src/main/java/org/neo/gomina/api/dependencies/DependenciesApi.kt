@@ -22,6 +22,7 @@ import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
+import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.runtime.Topology
 import org.neo.gomina.model.version.Version
@@ -66,6 +67,7 @@ class DependenciesApi {
             .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
 
     @Inject lateinit var workList: WorkList
+    @Inject lateinit var inventory: Inventory
     @Inject lateinit var componentRepo: ComponentRepo
     @Inject lateinit var interactionsRepository: InteractionsRepository
     @Inject lateinit var libraries: Libraries
@@ -341,8 +343,9 @@ class DependenciesApi {
         val artifactId = ctx.request().getParam("artifactId")?.let { Artifact.parse(it, containsVersion = false) }
         logger.info("Get Library $artifactId")
         try {
+            val environments = inventory.getEnvironments()
             val componentsMap = componentRepo.getAll()
-                    .map { it.id to (it to topology.buildExtInstances(it.id)) }
+                    .map { it.id to (it to topology.buildExtInstances(it, environments)) }
                     .toMap()
 
             val usageDetail = artifactId

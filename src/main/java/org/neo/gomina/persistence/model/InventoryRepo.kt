@@ -111,6 +111,15 @@ class RedisInventoryRepo : Inventory {
         }
     }
 
+    override fun getDeployedComponents(): Set<String> {
+        pool.resource.use { jedis ->
+            val pipe = jedis.pipelined()
+            val components = jedis.keys("service:*").map { pipe.hget(it, "component") }
+            pipe.sync()
+            return components.map { it.get() }.toSet()
+        }
+    }
+
     override fun addService(env: String, svc: String, type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?) {
         pool.resource.use { jedis ->
             val serviceKey = "service:$env:$svc"

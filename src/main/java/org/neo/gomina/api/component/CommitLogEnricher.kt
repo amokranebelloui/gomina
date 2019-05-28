@@ -6,23 +6,21 @@ import org.neo.gomina.api.common.toDateUtc
 import org.neo.gomina.api.common.toRef
 import org.neo.gomina.api.work.toIssueRef
 import org.neo.gomina.model.component.Scm
-import org.neo.gomina.model.issues.IssueProjects
 import org.neo.gomina.model.event.Event
+import org.neo.gomina.model.issues.IssueProjects
 import org.neo.gomina.model.release.ReleaseService
 import org.neo.gomina.model.runtime.ExtInstance
 import org.neo.gomina.model.scm.Commit
-import org.neo.gomina.model.user.Users
+import org.neo.gomina.model.user.User
 import javax.inject.Inject
 
 class CommitLogEnricher {
 
     @Inject @Named("jira.url") lateinit var issueTrackerUrl: String
 
-    @Inject private lateinit var users: Users
     @Inject lateinit var issues: IssueProjects
 
-
-    fun enrichLog(branch: String, log: List<Commit>, scm: Scm, instances: List<ExtInstance>, releaseEvents: List<Event>): CommitLogDetail {
+    fun enrichLog(branch: String, log: List<Commit>, scm: Scm, accounts: Map<String, User>, instances: List<ExtInstance>, releaseEvents: List<Event>): CommitLogDetail {
         val tmp = log.map { Triple(it, mutableListOf<ExtInstance>(), mutableListOf<ExtInstance>()) }
         val unresolved = mutableListOf<ExtInstance>()
         instances.forEach { instance ->
@@ -41,17 +39,13 @@ class CommitLogEnricher {
         }
         val commitReleaseDates = ReleaseService.releaseDates(log, releaseEvents).mapKeys { (k, v) ->  k.revision}
 
-        val accountIndex = users.getUsers()
-                .flatMap { user -> user.accounts.map { it to user } }
-                .associateBy({ (account, _) -> account }, {(_, user) -> user})
-
         return CommitLogDetail(
                 branch = branch,
                 log = tmp.map { (commit, running, deployed) ->
                     CommitDetail(
                             revision = commit.revision,
                             date = commit.date.toDateUtc,
-                            author = commit.author?.let { accountIndex[it] }?.toRef() ?: commit.author?.let { UserRef(shortName = commit.author) },
+                            author = commit.author?.let { accounts[it] }?.toRef() ?: commit.author?.let { UserRef(shortName = commit.author) },
                             message = commit.message,
                             branches = commit.branches,
                             version = commit.version,

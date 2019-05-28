@@ -241,8 +241,9 @@ class InstancesApi {
 
     private fun instances(ctx: RoutingContext) {
         try {
+            val components = componentRepo.getAll()
             val instances = inventory.getEnvironments()
-                    .flatMap { env -> topology.buildExtInstances(env).map { buildInstanceDetail(env.id, it) } }
+                    .flatMap { env -> topology.buildExtInstances(env, components).map { buildInstanceDetail(env.id, it) } }
             ctx.response()
                     .putHeader("content-type", "text/javascript")
                     .end(mapper.writeValueAsString(instances))
@@ -274,7 +275,8 @@ class InstancesApi {
         try {
             val envId = ctx.request().getParam("envId")
 
-            val components = componentRepo.getAll().associateBy { it.id }
+            val components = componentRepo.getAll()
+            val componentsMap = components.associateBy { it.id }
 
             val res = mutableMapOf<Service, MutableList<ExtInstance>>()
 
@@ -282,7 +284,7 @@ class InstancesApi {
                 it.services.forEach { service ->
                     res.getOrPut(service) { mutableListOf() }
                 }
-                topology.buildExtInstances(it)
+                topology.buildExtInstances(it, components)
                         .forEach { i ->
                             res.getOrPut(i.service) { mutableListOf() }.add(i)
                         }
@@ -291,7 +293,7 @@ class InstancesApi {
                         */
                 res.map { (service, extInstances) ->
                     mapOf(
-                            "service" to service.toServiceDetail(components[service.componentId]),
+                            "service" to service.toServiceDetail(componentsMap[service.componentId]),
                             "instances" to extInstances.map { i -> buildInstanceDetail(envId, i) }
                     )
                 }

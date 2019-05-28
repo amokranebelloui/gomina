@@ -221,11 +221,19 @@ class WorkApi {
             logger.info("Get Work Detail")
 
             val userMap = users.getUsers().map { it.toRef() }.associateBy { it.id }
-            val componentMap = componentRepo.getAll().map { it.toComponentRef() }.associateBy { it.id }
+            val allComponents = componentRepo.getAll()
+            val deployed = inventory.getDeployedComponents()
+            logger.info("Deployed $deployed")
+            val deployedComponent = allComponents.filter { deployed.contains(it.id) }
+            val componentMap = allComponents.map { it.toComponentRef() }.associateBy { it.id }
 
             val work = workId?.let { workList.get(it) }
-            val components = work?.components?.mapNotNull { componentRepo.get(it) } ?: componentRepo.getAll()
+            val components = work?.components?.mapNotNull { componentRepo.get(it) } ?: deployedComponent
+            val environments = inventory.getEnvironments()
             val prodEnvs = inventory.getProdEnvironments().map { it.id }
+            val accounts = users.getUsers()
+                    .flatMap { user -> user.accounts.map { it to user } }
+                    .associateBy({ (account, _) -> account }, {(_, user) -> user})
             val detail = components
                     .map { component ->
                         val commits = component.scm?.let {scm ->
@@ -233,9 +241,9 @@ class WorkApi {
                                 val trunk = scmClients.getClient(scm).getTrunk()
                                 componentRepo.getCommitLog(component.id, trunk)
                                         .let { log ->
-                                            val instances = topology.buildExtInstances(component.id)
+                                            val instances = topology.buildExtInstances(component, environments)
                                             val releases = events.releases(component.id, prodEnvs)
-                                            commitLogEnricher.enrichLog(trunk, log, scm, instances, releases).log
+                                            commitLogEnricher.enrichLog(trunk, log, scm, accounts, instances, releases).log
                                         }
                                         .takeWhile { commit ->
                                             !commit.instances.map { it.env }.contains(workReferenceEnv) &&

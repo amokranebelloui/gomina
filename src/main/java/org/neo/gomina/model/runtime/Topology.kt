@@ -1,11 +1,9 @@
 package org.neo.gomina.model.runtime
 
-import org.neo.gomina.api.instances.VersionDetail
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.inventory.Environment
 import org.neo.gomina.model.inventory.Instance
-import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.inventory.Service
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.RuntimeInfo
@@ -38,11 +36,9 @@ data class ExtInstance(
 
 class Topology {
 
-    @Inject private lateinit var inventory: Inventory
-    @Inject private lateinit var componentRepo: ComponentRepo
-    @Inject lateinit private var monitoring: Monitoring
+    @Inject private lateinit var monitoring: Monitoring
 
-    fun buildExtInstances(env: Environment): List<ExtInstance> {
+    fun buildExtInstances(env: Environment, components: List<Component>): List<ExtInstance> {
         val services = env ?. services ?. associateBy { it.svc }
         val inventory = env.services
                 .flatMap { svc -> svc.instances.map { instance -> svc to instance } }
@@ -50,7 +46,7 @@ class Topology {
         val monitoring = monitoring.instancesFor(env.id)
                 .associateBy { env.id to it.instanceId }
 
-        val componentMap = componentRepo.getAll().associateBy { it.id }
+        val componentMap = components.associateBy { it.id }
 
         // FIXME associate real time and monitoring by monitoring url@<env> and no more env.id
         return merge(inventory, monitoring)
@@ -63,11 +59,7 @@ class Topology {
                 }
     }
 
-    fun buildExtInstances(componentId: String): List<ExtInstance> {
-        val environments = inventory.getEnvironments()
-
-        val componentMap = componentRepo.getAll().associateBy { it.id }
-
+    fun buildExtInstances(component: Component, environments: Collection<Environment>): List<ExtInstance> {
         val services = environments
                 .flatMap { env -> env.services.map { env to it } }
                 .map { (env, service) -> EnvService(env.id, service) }.associateBy { it.envId to it.service.svc }
@@ -85,16 +77,16 @@ class Topology {
         val merge = merge(inventory, runtime)
 
         return merge
-                .map { (id, eInstance, eRuntime) ->
+                .mapNotNull { (id, eInstance, eRuntime) ->
                     val svc = Service.safe(eInstance?.service?.svc ?: eRuntime?.indicators?.service)
                     val envService = eInstance?.let { services[it.envId to it.service.svc] }
                             ?: eRuntime?.let { services[it.envId to it.indicators.service] }
                             ?: EnvService(id.first, Service(svc = svc, type = eRuntime?.indicators?.type, undefined = true))
-                    val component = envService.service.componentId?.let { componentMap[it] }
-
-                    ExtInstance(id.first to id.second, component, envService.service, eInstance?.instance, eRuntime?.indicators)
+                    if (envService.service.componentId == component.id) {
+                        ExtInstance(id.first to id.second, component, envService.service, eInstance?.instance, eRuntime?.indicators)
+                    }
+                    else null
                 }
-                .filter { it.service.componentId == componentId }
     }
 
 }

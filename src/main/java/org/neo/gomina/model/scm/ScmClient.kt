@@ -1,5 +1,6 @@
 package org.neo.gomina.model.scm
 
+import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.issues.IssueProjects
 import org.neo.gomina.model.issues.extractIssues
 import org.neo.gomina.model.version.Version
@@ -25,9 +26,18 @@ data class Commit (
 
     fun match(version: Version, numberedRevisions: Boolean): Boolean {
         // FIXME Revision as Int
-        return this.revision == version.revision ||
-                this.version?.isStableVersion() == true && this.version == version.version ||
-                numberedRevisions && version.revision?.isNotBlank() == true && version.revision.toInt() > this.revNum
+        return try {
+            this.revision == version.revision ||
+                    this.version?.isStableVersion() == true && this.version == version.version ||
+                    numberedRevisions && version.revision?.isNotBlank() == true && version.revision.toInt() > this.revNum
+        }
+        catch (e: Exception) {
+            logger.error(e.message)
+            false
+        }
+    }
+    companion object {
+        private val logger = LogManager.getLogger(Commit::class.java)
     }
 }
 
