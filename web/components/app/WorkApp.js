@@ -41,6 +41,7 @@ type State = {
     workId: ?string,
     newWorkData?: ?WorkDataType,
     commitHighlight: string,
+    componentHighlight: string,
 
     workEdition: boolean,
     workEdited?: ?WorkDataType,
@@ -66,12 +67,11 @@ class WorkApp extends React.Component<Props, State> {
             workList: [],
             workDetail: null,
             commitHighlight: ls.get('work.list.commit.highlight') || 'all',
+            componentHighlight: ls.get('work.list.component.highlight') || 'all',
             workId: this.props.match.params.id,
             newWorkData: null,
             workEdition: false
         };
-        //this.retrieveWorkList = this.retrieveWorkList.bind(this);
-        //this.retrieveWorkDetail = this.retrieveWorkDetail.bind(this);
         console.info("workApp !constructor ");
     }
 
@@ -107,6 +107,10 @@ class WorkApp extends React.Component<Props, State> {
     setCommitHighlight(commitHighlight: string, save: boolean = true) {
         this.setState({commitHighlight: commitHighlight});
         save && ls.set('work.list.commit.highlight', commitHighlight)
+    }
+    setComponentHighlight(componentHighlight: string, save: boolean = true) {
+        this.setState({componentHighlight: componentHighlight});
+        save && ls.set('work.list.component.highlight', componentHighlight)
     }
 
     retrieveEnvs() {
@@ -152,6 +156,7 @@ class WorkApp extends React.Component<Props, State> {
     changeRefEnv(refEnv: string) {
         this.setState({"refEnv": refEnv});
         ls.set('work.list.ref.env', refEnv)
+        this.retrieveWorkDetail(this.state.workId, refEnv)
     }
     changeCommitLimit(limit: string) {
         this.setState({"commitLimit": limit && parseInt(limit) || 0});
@@ -230,19 +235,7 @@ class WorkApp extends React.Component<Props, State> {
             .catch((error) => console.log("Work unarchive error", error.response));
     }
 
-    commitsNotInEnv(commits: Array<CommitType>): Array<CommitType> {
-        /*
-        let index = null;
-        for (let i = 0; i < commits.length; i++) {
-            const commit = commits[i];
-            if (commit.instances && commit.instances.filter(i => i.env === this.state.refEnvType).length > 0 ||
-                commit.deployments && commit.deployments.filter(i => i.env === this.state.refEnvType).length > 0) {
-                index = i;
-            }
-        }
-        const count = index ? Math.min(index + 1, this.state.commitLimit) : this.state.commitLimit;
-        return commits.slice(0, count);
-        */
+    limit(commits: Array<CommitType>): Array<CommitType> {
         const count = Math.min(commits.length, this.state.commitLimit);
         return commits.slice(0, count);
     }
@@ -258,6 +251,12 @@ class WorkApp extends React.Component<Props, State> {
         else if (this.state.commitHighlight === 'work') {
             highlightedIssues = workDetail && workDetail.work && workDetail.work.issues.map(i => i.issue) || []
         }
+
+        let componentFilter = d => true
+        if (this.state.componentHighlight === 'changes') {
+            componentFilter = d => d.commits.length > 1
+        }
+
         return (
             <ApplicationLayout title="Work List"
                header={() =>
@@ -324,21 +323,31 @@ class WorkApp extends React.Component<Props, State> {
                                </div>
                            </div>
                        }
+                       <div>
                        {workDetail && workDetail.work &&
-                           <Fragment>
+                           <div style={{display: 'inline-block'}}>
                                <button disabled={this.state.commitHighlight === 'all'} onClick={e => this.setCommitHighlight('all')}>ALL</button>
                                <button disabled={this.state.commitHighlight === 'work'} onClick={e => this.setCommitHighlight('work')}>WORK</button>
                                {workDetail.work.issues.map(issue =>
                                    <button key={issue.issue} disabled={this.state.commitHighlight === issue.issue} onClick={e => this.setCommitHighlight(issue.issue, false)}>{issue.issue}</button>
                                )}
-                           </Fragment>
+                           </div>
                        }
+                           <div style={{float: 'right'}}>
+                               {workDetail && workDetail.details &&
+                                    workDetail.details.filter(componentFilter).length + '/' + workDetail.details.length + ' components '
+                               }
+                               <button disabled={this.state.componentHighlight === 'all'} onClick={e => this.setComponentHighlight('all')}>ALL</button>
+                               <button disabled={this.state.componentHighlight === 'changes'} onClick={e => this.setComponentHighlight('changes')}>CHANGES</button>
+                           </div>
+                           <div style={{clear: 'both'}} />
+                       </div>
                    </Fragment>
                }
                main={() =>
                    <Fragment>
                        <div style={{float: 'right', display: 'inline-block'}}>
-                           {this.state.refEnv}
+                           {this.state.refEnv}&nbsp;
                            <select name="type" value={this.state.refEnv}
                                    onChange={e => this.changeRefEnv(e.target.value)}
                                    style={{width: '150px', fontSize: 9}}>
@@ -352,17 +361,22 @@ class WorkApp extends React.Component<Props, State> {
                                   style={{width: '30px'}} />
                        </div>
                        <div>
-                           {workDetail && workDetail.details && workDetail.details.length} components
-                           {workDetail && workDetail.details && workDetail.details.map(d =>
-                               (workDetail.work || d.commits.length > 0) &&
-                               <div key={d.componentId}>
-                                   <h3 title={d.componentId}>
-                                        {d.componentLabel}&nbsp;
-                                        ({d.notDeployed ? 'Not Deployed' : d.upToDate ? 'Up To Date' : (d.commits.length - 1)+' changes'})
-                                   </h3>
-                                   <CommitLog type={d.scmType} commits={this.commitsNotInEnv(d.commits)} highlightedIssues={highlightedIssues} />
-                               </div>
-                           )}
+                           {workDetail && workDetail.details &&
+                                <Fragment>
+                                    {workDetail.details.filter(componentFilter).sort((a,b)=>a.componentLabel>b.componentLabel?1:-1).map(d =>
+                                       (workDetail.work || d.commits.length > 0) &&
+                                       <div key={d.componentId}>
+                                           <h3 title={d.componentId}>
+                                                <Link to={"/component/" + d.componentId}>{d.componentLabel}</Link>
+                                                &nbsp;
+                                                {d.notDeployed ? (this.state.refEnv && 'Not Deployed') : d.upToDate ? 'Up To Date' : (d.commits.length - 1)+' changes'}
+                                           </h3>
+                                           <CommitLog type={d.scmType} commits={this.limit(d.commits)} highlightedIssues={highlightedIssues} />
+                                           {d.commits.length > this.state.commitLimit && <i>... {d.commits.length - this.state.commitLimit} more filtered commits</i>}
+                                       </div>
+                                    )}
+                                </Fragment>
+                           }
                        </div>
                        <CommitLogLegend />
                    </Fragment>

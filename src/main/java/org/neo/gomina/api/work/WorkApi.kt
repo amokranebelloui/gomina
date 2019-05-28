@@ -231,7 +231,7 @@ class WorkApi {
             val allComponents = componentRepo.getAll()
             val deployed = inventory.getDeployedComponents(refEnv?.takeIf { it.isNotBlank() })
             logger.info("Deployed $deployed")
-            val deployedComponent = allComponents.filter { deployed.contains(it.id) }
+            val deployedComponent = allComponents.filter { !it.disabled }.filter { deployed.contains(it.id) }
             val componentMap = allComponents.map { it.toComponentRef() }.associateBy { it.id }
 
             val work = workId?.let { workList.get(it) }
