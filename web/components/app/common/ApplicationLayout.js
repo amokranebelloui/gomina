@@ -134,12 +134,22 @@ class ApplicationLayout extends React.Component<Props, State> {
                         <div className="content-wrapper">
                             <div className='main-content'>
                                 <div className='principal-content'>
-                                    {this.props.header &&
-                                        <Well block>{this.props.header()}</Well>
-                                    }
-                                    <Container>
-                                        {this.props.main && this.props.main()}
-                                    </Container>
+                                    <table border="0" style={{height: '100%', width: '100%'}}>
+                                        <tr>
+                                            <td>
+                                                {this.props.header &&
+                                                    <Well block>{this.props.header()}</Well>
+                                                }
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style={{height: '100%'}}>
+                                                <Container>
+                                                    {this.props.main && this.props.main()}
+                                                </Container>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </div>
                                 <div className='side-content'>
                                     <div className='side-content-wrapper'>
