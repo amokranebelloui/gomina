@@ -104,17 +104,6 @@ class ScmEditor extends React.Component<Props, State> {
                        style={{width: '80px', fontSize: 9}}
                 />&nbsp;
                 <br/>
-                Has Metadata &nbsp;
-                <input type="checkbox" name="hasMetadata"
-                       checked={this.state.hasMetadata}
-                       onChange={e => this.changeHasMetadata(e.target.checked)}
-                       onKeyPress={e => e.key === 'Enter' && this.update()}
-                       onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
-                />
-                <br/>
-                {/*
-                <span>{this.state.type}://{this.state.url}{this.state.path}</span>
-                */}
                 <input type="text" name="username" placeholder="Username"
                        value={this.state.username}
                        onChange={e => this.changeUsername(e.target.value)}
@@ -129,6 +118,18 @@ class ScmEditor extends React.Component<Props, State> {
                        onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
                        style={{width: '80px', fontSize: 9}}
                 />
+                <br/>
+                Has Metadata &nbsp;
+                <input type="checkbox" name="hasMetadata"
+                       checked={this.state.hasMetadata}
+                       onChange={e => this.changeHasMetadata(e.target.checked)}
+                       onKeyPress={e => e.key === 'Enter' && this.update()}
+                       onKeyDown={e => e.key === 'Escape' && this.cancelEdition()}
+                />
+                <br/>
+                {/*
+                <span>{this.state.type}://{this.state.url}{this.state.path}</span>
+                */}
             </div>
         )
     }
