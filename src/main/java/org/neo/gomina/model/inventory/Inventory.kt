@@ -54,7 +54,7 @@ interface Inventory {
     fun disableEnvironment(envId: String)
     fun deleteEnvironment(id: String)
 
-    fun getDeployedComponents(): Set<String>
+    fun getDeployedComponents(env: String?): Set<String>
     fun addService(env: String, svc: String,
                    type: String?, mode: ServiceMode?, activeCount: Int?, componentId: String?)
     fun updateService(env: String, svc: String,

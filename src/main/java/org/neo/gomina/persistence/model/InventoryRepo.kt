@@ -111,10 +111,11 @@ class RedisInventoryRepo : Inventory {
         }
     }
 
-    override fun getDeployedComponents(): Set<String> {
+    override fun getDeployedComponents(env: String?): Set<String> {
         pool.resource.use { jedis ->
             val pipe = jedis.pipelined()
-            val components = jedis.keys("service:*").map { pipe.hget(it, "component") }
+            val pattern = env?.let { "service:$env:*" } ?: "service:*"
+            val components = jedis.keys(pattern).map { pipe.hget(it, "component") }
             pipe.sync()
             return components.map { it.get() }.toSet()
         }

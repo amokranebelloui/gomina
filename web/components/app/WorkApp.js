@@ -122,9 +122,9 @@ class WorkApp extends React.Component<Props, State> {
             .then(response => thisComponent.setState({workList: response.data}))
             .catch(() => thisComponent.setState({workList: []}));
     }
-    retrieveWorkDetail(workId: string) {
+    retrieveWorkDetail(workId: string, refEnv: ?string) {
         const thisComponent = this;
-        axios.get('/data/work/detail' + (workId ? '/' + workId : ''))
+        axios.get('/data/work/detail' + (workId ? '/' + workId : '') + "?refEnv=" + (refEnv ? refEnv : this.state.refEnv))
             .then(response => thisComponent.setState({workDetail: response.data}))
             .catch(() => thisComponent.setState({workDetail: null}));
     }
@@ -231,15 +231,19 @@ class WorkApp extends React.Component<Props, State> {
     }
 
     commitsNotInEnv(commits: Array<CommitType>): Array<CommitType> {
+        /*
         let index = null;
         for (let i = 0; i < commits.length; i++) {
             const commit = commits[i];
-            if (commit.instances && commit.instances.filter(i => i.env === this.state.refEnv).length > 0 ||
-                commit.deployments && commit.deployments.filter(i => i.env === this.state.refEnv).length > 0) {
+            if (commit.instances && commit.instances.filter(i => i.env === this.state.refEnvType).length > 0 ||
+                commit.deployments && commit.deployments.filter(i => i.env === this.state.refEnvType).length > 0) {
                 index = i;
             }
         }
         const count = index ? Math.min(index + 1, this.state.commitLimit) : this.state.commitLimit;
+        return commits.slice(0, count);
+        */
+        const count = Math.min(commits.length, this.state.commitLimit);
         return commits.slice(0, count);
     }
 
@@ -340,7 +344,7 @@ class WorkApp extends React.Component<Props, State> {
                                    style={{width: '150px', fontSize: 9}}>
                                <option value=""></option>
                                {this.state.envs.map(e =>
-                                   <option key={e.env} value={e.env}>{e.description}</option>
+                                   <option key={e.env} value={e.env}>{e.description} ({e.env})</option>
                                )}
                            </select>
                            <input type="text" value={this.state.commitLimit}
@@ -348,10 +352,14 @@ class WorkApp extends React.Component<Props, State> {
                                   style={{width: '30px'}} />
                        </div>
                        <div>
+                           {workDetail && workDetail.details && workDetail.details.length} components
                            {workDetail && workDetail.details && workDetail.details.map(d =>
                                (workDetail.work || d.commits.length > 0) &&
                                <div key={d.componentId}>
-                                   <h3>{d.componentId}</h3>
+                                   <h3 title={d.componentId}>
+                                        {d.componentLabel}&nbsp;
+                                        ({d.notDeployed ? 'Not Deployed' : d.upToDate ? 'Up To Date' : (d.commits.length - 1)+' changes'})
+                                   </h3>
                                    <CommitLog type={d.scmType} commits={this.commitsNotInEnv(d.commits)} highlightedIssues={highlightedIssues} />
                                </div>
                            )}

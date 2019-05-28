@@ -30,8 +30,11 @@ type WorkManifestType = {
 
 type ComponentWorkType = {
     componentId: string,
+    componentLabel: string,
     scmType?: ?string,
-    commits: Array<any> // FIXME Replace by CommitDetail
+    commits: Array<any>, // FIXME Replace by CommitDetail
+    upToDate: boolean,
+    notDeployed: boolean
 }
 
 type WorkDataType = {

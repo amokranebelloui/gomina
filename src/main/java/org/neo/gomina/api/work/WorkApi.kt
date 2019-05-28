@@ -46,7 +46,13 @@ data class IssueRef(val issue: String, val issueUrl: String?)
 data class WorkManifestDetail(val work: WorkDetail?,
                               val details: List<ComponentWorkDetail> = emptyList())
 
-data class ComponentWorkDetail(val componentId: String, val scmType: String?, val commits: List<CommitDetail>)
+data class ComponentWorkDetail(val componentId: String,
+                               val componentLabel: String,
+                               val scmType: String?,
+                               val commits: List<CommitDetail>,
+                               val upToDate: Boolean,
+                               val notDeployed: Boolean
+)
 
 /*
 data class CommitDetail(
@@ -217,12 +223,13 @@ class WorkApi {
 
     private fun workDetail(ctx: RoutingContext) {
         val workId = ctx.request().getParam("workId")
+        val refEnv = ctx.request().getParam("refEnv")
         try {
-            logger.info("Get Work Detail")
+            logger.info("Get Work Detail $workId $refEnv")
 
             val userMap = users.getUsers().map { it.toRef() }.associateBy { it.id }
             val allComponents = componentRepo.getAll()
-            val deployed = inventory.getDeployedComponents()
+            val deployed = inventory.getDeployedComponents(refEnv?.takeIf { it.isNotBlank() })
             logger.info("Deployed $deployed")
             val deployedComponent = allComponents.filter { deployed.contains(it.id) }
             val componentMap = allComponents.map { it.toComponentRef() }.associateBy { it.id }
@@ -235,27 +242,35 @@ class WorkApi {
                     .flatMap { user -> user.accounts.map { it to user } }
                     .associateBy({ (account, _) -> account }, {(_, user) -> user})
             val detail = components
-                    .map { component ->
-                        val commits = component.scm?.let {scm ->
+                    .mapNotNull { component ->
+                        component.scm?.let {scm ->
                             try {
                                 val trunk = scmClients.getClient(scm).getTrunk()
-                                componentRepo.getCommitLog(component.id, trunk)
+                                val commitLog = componentRepo.getCommitLog(component.id, trunk)
                                         .let { log ->
                                             val instances = topology.buildExtInstances(component, environments)
                                             val releases = events.releases(component.id, prodEnvs)
                                             commitLogEnricher.enrichLog(trunk, log, scm, accounts, instances, releases).log
                                         }
-                                        .takeWhile { commit ->
-                                            !commit.instances.map { it.env }.contains(workReferenceEnv) &&
-                                                    !commit.deployments.map { it.env }.contains(workReferenceEnv)
-                                        }
+                                val last = commitLog.indexOfLast { commit ->
+                                    (commit.instances + commit.deployments)
+                                            .mapNotNull { it.env }
+                                            .contains(refEnv)
+                                }
+                                val commits = if (last != -1) commitLog.subList(0, last + 1) else commitLog
+                                ComponentWorkDetail(component.id,
+                                        componentLabel = component.label ?: component.id,
+                                        scmType = component.scm?.type,
+                                        commits = commits,
+                                        upToDate = last == 0,
+                                        notDeployed = last == -1
+                                )
                             }
                             catch (e: Exception) {
                                 logger.error("", e)
                                 null
                             }
                         }
-                        ComponentWorkDetail(component.id, component.scm?.type, commits ?: emptyList())
                     }
             val workDetail = work?.toWorkDetail(issueTrackerUrl,
                     work.people.mapNotNull { userMap[it] },
