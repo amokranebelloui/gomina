@@ -151,7 +151,7 @@ class RedisComponentRepo : ComponentRepo {
             if (jedis.exists("component:${component.id}")) {
                 throw Exception("${component.id} already exists")
             }
-            jedis.hmset("component:${component.id}", listOfNotNull(
+            jedis.persist("component:${component.id}", listOfNotNull(
                     "artifact_id" to component.artifactId,
                     "label" to component.label,
                     "type" to component.type,
@@ -161,6 +161,8 @@ class RedisComponentRepo : ComponentRepo {
                     "scm_type" to (component.scm?.type ?: ""),
                     "scm_url" to (component.scm?.url ?: ""),
                     "scm_path" to (component.scm?.path ?: ""),
+                    "scm_username" to (component.scm?.username ?: ""),
+                    "scm_password_alias" to (component.scm?.passwordAlias ?: ""),
                     "has_metadata" to (component.hasMetadata.toString()),
                     component.sonarServer?.let { "sonar_server" to it },
                     component.jenkinsServer?.let { "jenkins_server" to it },
@@ -212,12 +214,14 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
-    override fun editScm(componentId: String, type: String, url: String, path: String?, hasMetadata: Boolean) {
+    override fun editScm(componentId: String, type: String, url: String, path: String?, hasMetadata: Boolean, username: String?, passwordAlias: String?) {
         pool.resource.use { jedis ->
             jedis.persist("component:$componentId", mapOf(
                     "scm_type" to type,
                     "scm_url" to url,
                     "scm_path" to path,
+                    "scm_username" to username,
+                    "scm_password_alias" to passwordAlias,
                     "has_metadata" to hasMetadata.toString()
             ))
         }

@@ -15,6 +15,8 @@ type NewComponentType = {
     scmType?: ?string,
     scmUrl?: ?string,
     scmPath?: ?string,
+    scmUsername?: ?string,
+    scmPasswordAlias?: ?string,
     hasMetadata?: ?boolean,
     sonarServer?: ?string,
     jenkinsServer?: ?string,
@@ -61,11 +63,14 @@ class NewComponent extends React.Component<Props, NewComponentType> {
                 Languages <input type="text" name="languages" placeholder="Languages" onChange={e => this.setState({languages: e.target.value.split(' ')})} /><br/>
                 Tags <input type="text" name="tags" placeholder="Tags" onChange={e => this.setState({tags: e.target.value.split(' ')})} /><br/>
 
-                SCM <ScmEditor onChanged={(type, url, path, md) => this.setState({
+                SCM <ScmEditor onChanged={(type, url, path, md, u, p) => this.setState({
                     scmType: type,
                     scmUrl: url,
                     scmPath: path,
+                    scmUsername: u,
+                    scmPasswordAlias: p,
                     hasMetadata: md
+
                 })} />
                 <br/>
 

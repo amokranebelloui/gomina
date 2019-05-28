@@ -93,7 +93,7 @@ interface ComponentRepo {
     fun editOwner(componentId: String, owner: String?) // TODO Overridable
     fun editCriticity(componentId: String, criticity: Int?) // TODO Overridable
     fun editArtifactId(componentId: String, artifactId: String?) // TODO Overridable
-    fun editScm(componentId: String, type: String, url: String, path: String?, hasMetadata: Boolean)
+    fun editScm(componentId: String, type: String, url: String, path: String?, hasMetadata: Boolean, username: String?, passwordAlias: String?)
     fun editSonar(componentId: String, server: String?)
     fun editBuild(componentId: String, server: String?, job: String?)
     fun addSystem(componentId: String, system: String)

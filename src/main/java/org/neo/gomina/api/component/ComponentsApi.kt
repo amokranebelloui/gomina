@@ -57,6 +57,8 @@ data class ComponentDetail(
         var scmPath: String? = null,
         var scmLocation: String? = null,
         var hasMetadata: Boolean = false,
+        var scmUsername: String? = null,
+        var scmPasswordAlias: String? = null,
         var sonarServer: String? = null,
         var sonarUrl: String? = null,
         var jenkinsServer: String? = null,
@@ -126,6 +128,8 @@ data class NewComponentDetail(
         var scmUrl: String? = null,
         var scmPath: String? = null,
         var hasMetadata: Boolean = false,
+        var scmUsername: String?,
+        var scmPasswordAlias: String?,
         var sonarServer: String? = null,
         var jenkinsServer: String? = null,
         var jenkinsJob: String? = null
@@ -424,7 +428,7 @@ class ComponentsApi {
                     systems = newComp.systems,
                     tags = newComp.tags,
                     languages = newComp.languages,
-                    scm = Scm(newComp.scmType ?: "", newComp.scmUrl ?: "", newComp.scmPath ?: ""), // FIXME ????
+                    scm = Scm(newComp.scmType ?: "", newComp.scmUrl ?: "", newComp.scmPath ?: "", newComp.scmUsername ?: "", newComp.scmPasswordAlias ?: ""), // FIXME ????
                     hasMetadata = newComp.hasMetadata,
                     jenkinsServer = newComp.jenkinsServer,
                     jenkinsJob = newComp.jenkinsJob,
@@ -604,8 +608,10 @@ class ComponentsApi {
                 val url = ctx.request().getParam("url")
                 val path = ctx.request().getParam("path")
                 val hasMetadata = ctx.request().getParam("hasMetadata")
+                val username = ctx.request().getParam("username")
+                val passwordAlias = ctx.request().getParam("passwordAlias")
                 logger.info("Edit SCM $componentId $type $url $path $hasMetadata ...")
-                componentRepo.editScm(componentId, type, url, path, hasMetadata?.toBoolean() ?: false)
+                componentRepo.editScm(componentId, type, url, path, hasMetadata?.toBoolean() ?: false, username, passwordAlias)
                 componentRepo.get(componentId)?.let { component ->
                     logger.info("Reload SCM data for $componentId ...")
                     component.scm?.let { scmService.reloadScmDetails(component, it) }
@@ -798,6 +804,8 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     this.scmPath = component.scm?.path
     this.scmLocation = component.scm?.fullUrl
     this.hasMetadata = component.hasMetadata
+    this.scmUsername = component.scm?.username
+    this.scmPasswordAlias = component.scm?.passwordAlias
     this.sonarServer = component.sonarServer
     this.sonarUrl = sonarService.url(component)
     this.jenkinsServer = component.jenkinsServer

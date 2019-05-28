@@ -132,8 +132,8 @@ class ComponentApp extends React.Component {
             .then(() => this.retrieveComponent(componentId))
             .catch((error) => console.error("cannot edit artifactId", error.response));
     }
-    editScm(componentId, type, url, path, hasMetadata) {
-        axios.put('/data/components/' + componentId + '/scm?type=' + type + '&url=' + url + '&path=' + path + '&hasMetadata=' + hasMetadata)
+    editScm(componentId, type, url, path, username, passwordAlias, hasMetadata) {
+        axios.put('/data/components/' + componentId + '/scm?type=' + type + '&url=' + url + '&path=' + path + '&username=' + username + '&passwordAlias=' + passwordAlias + '&hasMetadata=' + hasMetadata)
             .then(() => {
                 //this.retrieveComponent(componentId);
                 //this.retrieveBranch(componentId, this.state.branchId);
@@ -640,7 +640,7 @@ class ComponentApp extends React.Component {
                    <div className="vertical-items">
                        <Well block>
                            <ComponentScm component={component}
-                                         onScmEdited={(id, t, u, p, md) => this.editScm(id, t, u, p, md)}
+                                         onScmEdited={(id, t, u, p, user, pwd, md) => this.editScm(id, t, u, p, user, pwd, md)}
                                          onReloadScm={id => this.reloadScm(id)}
                            />
                        </Well>

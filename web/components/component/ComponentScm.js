@@ -9,7 +9,7 @@ import type {ComponentType} from "./ComponentType";
 
 type Props = {
     component: ComponentType,
-    onScmEdited: (componentId: string, type: string, url: string, path: ?string, hasMetadata: ?boolean) => void,
+    onScmEdited: (componentId: string, type: string, url: string, path: ?string, username: ?string, passwordAlias: ?string, hasMetadata: ?boolean) => void,
     onReloadScm: (componentId: string) => void,
 }
 
@@ -32,14 +32,16 @@ class ComponentScm extends React.Component<Props, State> {
     cancelEditScm() {
         this.setState({scmEdition: false});
     }
-    editScm(componentId: string, type: string, url: string, path: ?string, hasMetadata: ?boolean) {
+    editScm(componentId: string, type: string, url: string, path: ?string, username: ?string, passwordAlias: ?string, hasMetadata: ?boolean) {
         this.setState({scmEdition: false});
-        this.props.onScmEdited(componentId, type, url, path, hasMetadata)
+        this.props.onScmEdited(componentId, type, url, path, username, passwordAlias, hasMetadata)
     }
     render() {
         const component = this.props.component;
         return (
             <div>
+                <b>Scm: </b>
+                <br/>
                 {!this.state.scmEdition &&
                     <div>
                         <div style={{float: 'right'}}>
@@ -49,20 +51,22 @@ class ComponentScm extends React.Component<Props, State> {
                             <button onClick={() => this.props.onReloadScm(component.id)}>ReloadSCM</button>
                         </div>
                         <div style={{display: 'inline'}}>
-                            <b>SCM: </b>
-                            <br/>
                             <ScmLink type={component.scmType} />&nbsp;
                             <span style={{fontSize: 9}}>{component.scmLocation ? component.scmLocation : 'not under scm'}</span>
                             &nbsp;
                             <br/>
-                            {component.hasMetadata ? <span><b>Has metadata</b></span> : <span>No Metadata</span>}
+                            {component.scmUsername}/{component.scmPasswordAlias}
+                            <br/>
+                            {component.hasMetadata ? <span>Has Metadata</span> : <span>No Metadata</span>}
                         </div>
                     </div>
                 }
                 {this.state.scmEdition &&
                     <div>
-                        <ScmEditor type={component.scmType} url={component.scmUrl} path={component.scmPath} hasMetadata={component.hasMetadata}
-                                   onEdited={(type, url, path, md) => this.editScm(component.id, type, url, path, md)}
+                        <ScmEditor type={component.scmType} url={component.scmUrl} path={component.scmPath}
+                                   username={component.scmUsername} passwordAlias={component.scmPasswordAlias}
+                                   hasMetadata={component.hasMetadata}
+                                   onEdited={(type, url, path, md, u, p) => this.editScm(component.id, type, url, path, u, p, md)}
                                    onEditionCancelled={() => this.cancelEditScm()} />
                     </div>
                 }
