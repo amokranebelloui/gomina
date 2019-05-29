@@ -344,28 +344,45 @@ class DependenciesApi {
         logger.info("Get Library $artifactId")
         try {
             val environments = inventory.getEnvironments()
-            val componentsMap = componentRepo.getAll()
-                    .map { it.id to (it to topology.buildExtInstances(it, environments)) }
+            val components = componentRepo.getAll()
+            val componentMap = components
+                    .associateBy { it.id }
+            val componentInstMap = components
+                    .map { it.id to topology.buildExtInstances(it, environments) }
                     .toMap()
 
             val usageDetail = artifactId
                     ?.let { libraries.library(it) }
                     ?.map { (version, componentVersions) ->
-                        val inventoryVersions = componentVersions.map { it.componentId }.toSet()
-                                .flatMap { c -> componentsMap[c]?.second?.map { c to it } ?: emptyList() }
-                                .flatMap { (c, i) -> listOf(i.deployedVersion?.simple()?.let { c to it }, i.runningVersion?.simple()?.let { c to it }) }
-                                .filterNotNull()
-                                .toSet()
-                                .map { (c, v) -> ComponentVersion(c, v) }
-                        val allVersions = (componentVersions + inventoryVersions).toSet()
-                        val componentVersionsDetail = allVersions
-                                .mapNotNull { it.toDetail(componentsMap) }
-                                .sortedWith(
-                                        compareBy<ComponentVersionDetail> { it.component.label }
-                                        .thenByDescending { it.version }
-                                )
-                        LibraryUsageDetail(version.version, componentVersionsDetail)
+                        val componentVersionsForVersion = componentVersions
+                                .groupBy { it.componentId }
+                                .flatMap { (componentId, componentVersion) ->
+                                    val component = componentMap[componentId]
+                                    if (component != null) {
+                                        val tmp = componentVersion
+                                                .map { it.version.simple() to mutableListOf<ExtInstance>() }
+                                                .toMap().toMutableMap()
+                                        componentInstMap[componentId]
+                                                ?.flatMap { i -> listOf(i.deployedVersion?.simple()?.let { it to i }, i.runningVersion?.simple()?.let { it to i }) }
+                                                ?.toSet()
+                                                ?.filterNotNull()
+                                                ?.forEach { (v, i) ->
+                                                    tmp[v]?.add(i)
+                                                }
+                                        tmp.map { (v, instances) ->
+                                            ComponentVersionDetail(
+                                                    component = component.toComponentRef(),
+                                                    version = v.version,
+                                                    instances = instances.map { it.toRef() }
+                                            )
+                                        }
+                                    } else {
+                                        emptyList()
+                                    }
+                                }
+                        LibraryUsageDetail(version.version, componentVersionsForVersion)
                     }
+
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(usageDetail))
         }
         catch (e: Exception) {
