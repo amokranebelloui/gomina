@@ -28,6 +28,7 @@ type State = {
     libraries: Array<LibraryType>,
     libraryId: ?string,
     library: Array<LibraryUsageType>,
+    filterComponent: string,
     sort: SortDirection
 }
 
@@ -40,6 +41,7 @@ class LibrariesApp extends React.Component<Props, State> {
             libraries: [],
             libraryId: this.props.match.params.id,
             library: [],
+            filterComponent: '',
             sort: ls.get('libraries.sort') || 'ascending'
         }
     }
@@ -96,24 +98,10 @@ class LibrariesApp extends React.Component<Props, State> {
             );
         return result || [];
     }
-    groupByEnv(instances: Array<InstanceRefType>): Array<{env: string, count: number}> {
-        const map = instances && groupingBy(instances, i => i.env) || {};
-        const result = Object.keys(map).map(env => { return {'env': env, count: map[env].length}}) ;
-        return result;
-    }
     render() {
         const libraries = filterLibraries(this.state.libraries, this.state.search) || [];
         const totalCount = this.state.libraries && this.state.libraries.length || 0;
-        const envs = {};
-        this.state.envs.forEach(e => envs[e.env] = e);
-        const color = e => {
-            const env = envs[e];
-            return env && (env.type === 'PROD' ? '#FFFFFF' : env.type === 'TEST' ? 'black' : 'black')
-        };
-        const backgroundColor = e => {
-            const env = envs[e];
-            return env && (env.type === 'PROD' ? '#a9c8d4' : env.type === 'TEST' ? '#c3cfd4' : 'lightgray')
-        };
+
 
         return (
             <ApplicationLayout title="Libraries"
@@ -121,6 +109,7 @@ class LibrariesApp extends React.Component<Props, State> {
                    <Fragment>
                        <h3 style={{display: 'inline-block'}}>Usage of '{this.state.libraryId}'</h3>
                        <div style={{float: 'right'}}>
+                           <input type="text" value={this.state.filterComponent} onChange={e => this.setState({filterComponent: e.target.value})} />
                            <button onClick={e => this.changeSort('ascending')}
                                    style={{padding: '2px', color: this.state.sort === 'ascending' ? 'gray' : null}}>
                                OLD FIRST
@@ -152,36 +141,11 @@ class LibrariesApp extends React.Component<Props, State> {
                                        </td>
                                        <td width="100%" style={{borderBottom: '1px solid lightgray'}}>
                                            {this.groupByComponent(libUsage.components).map(usage =>
-                                               <Fragment key={usage.component.id}>
-                                                   <Link to={'/component/' + usage.component.id}>{usage.component.label} </Link>
-                                                   <br/>
-                                                   {usage.usages.map(c =>
-                                                           <span key={c.version} className="items" style={{paddingLeft: '20px'}}>
-                                                    {c.instances && c.instances.length > 0 ?
-                                                        <Fragment>
-                                                            <Badge>{c.version}</Badge>
-                                                            {this.groupByEnv(c.instances).map(env =>
-                                                                <Fragment key={env.env}>
-                                                                    <span>
-                                                                        <Badge key={env.env}
-                                                                               title={c.instances.filter(i => i.env === env.env).map(instance => instance.name).join(' ')}
-                                                                               backgroundColor={backgroundColor(env.env)}
-                                                                               color={color(env.env)}>
-                                                                            {env.env} ({env.count})
-                                                                        </Badge>
-                                                                    </span>
-                                                                </Fragment>
-                                                            )}
-                                                        </Fragment>
-                                                        :
-                                                        <Badge><i style={{color: 'lightgray'}}>{c.version}</i></Badge>
-                                                    }
-                                                               &nbsp;
-
-                                                               <br/>
-                                                </span>
-                                                   )}
-                                               </Fragment>
+                                               usage.component.label && usage.component.label.match(RegExp(this.state.filterComponent, 'i')) &&
+                                                   <Fragment>
+                                                       <ComponentVersions usage={usage} envs={this.state.envs} sort={this.state.sort} />
+                                                       <br/>
+                                                   </Fragment>
                                            )}
                                        </td>
                                    </tr>
@@ -207,6 +171,64 @@ class LibrariesApp extends React.Component<Props, State> {
                    <LibraryCatalog libraries={libraries} totalCount={totalCount} />
                }
             />
+        );
+    }
+}
+
+type ComponentVersionsProps = {
+    usage: {component: ComponentRefType, usages: Array<ComponentVersionType>},
+    envs: Array<EnvType>,
+    sort: SortDirection
+}
+
+class ComponentVersions extends React.Component<ComponentVersionsProps> {
+    constructor(props: ComponentVersionsProps) {
+        super(props);
+    }
+    groupByEnv(instances: Array<InstanceRefType>): Array<{env: string, count: number}> {
+        const map = instances && groupingBy(instances, i => i.env) || {};
+        const result = Object.keys(map).map(env => { return {'env': env, count: map[env].length}}) ;
+        return result;
+    }
+    render() {
+        const usage = this.props.usage;
+        const envs = {};
+        this.props.envs.forEach(e => envs[e.env] = e);
+        const color = e => {
+            const env = envs[e];
+            return env && (env.type === 'PROD' ? '#FFFFFF' : env.type === 'TEST' ? 'black' : 'black')
+        };
+        const backgroundColor = e => {
+            const env = envs[e];
+            return env && (env.type === 'PROD' ? '#a9c8d4' : env.type === 'TEST' ? '#c3cfd4' : 'lightgray')
+        };
+        const factor = this.props.sort === 'ascending' ? 1 : -1;
+        const usages = usage.usages.sort((a,b) => factor * compareVersions(a.version, b.version));
+        return (
+            <Fragment key={usage.component.id}>
+                <Link to={'/component/' + usage.component.id}>{usage.component.label} </Link>
+                <span className="items">
+                {usages.map(c =>
+                    <Fragment key={c.version}>
+                        {c.instances && c.instances.length > 0 ?
+                            <Fragment>
+                                {this.groupByEnv(c.instances).map(env =>
+                                    <Badge key={env.env}
+                                           title={c.instances.filter(i => i.env === env.env).map(instance => instance.name).join(' ')}
+                                           backgroundColor={backgroundColor(env.env)}
+                                           color={color(env.env)}>
+                                        {c.version}|
+                                        {env.env} ({env.count})
+                                    </Badge>
+                                )}
+                            </Fragment>
+                            :
+                            <Badge backgroundColor='#EEEEEE' color='gray'><i>{c.version}</i></Badge>
+                        }
+                    </Fragment>
+                )}
+                </span>
+            </Fragment>
         );
     }
 }

@@ -339,44 +339,60 @@ class DependenciesApi {
         }
     }
 
+    data class ComponentVersionsSummary(val component: Component, val instances: List<ExtInstance>, val applicableVersions: List<Version>)
+
     private fun library(ctx: RoutingContext) {
         val artifactId = ctx.request().getParam("artifactId")?.let { Artifact.parse(it, containsVersion = false) }
         logger.info("Get Library $artifactId")
         try {
             val environments = inventory.getEnvironments()
-            val components = componentRepo.getAll()
-            val componentMap = components
-                    .associateBy { it.id }
-            val componentInstMap = components
-                    .map { it.id to topology.buildExtInstances(it, environments) }
-                    .toMap()
+            val summaryMap = componentRepo.getAll().filter { !it.disabled }.map { c ->
+                val instances = topology.buildExtInstances(c, environments)
+                val instanceSmallestVersion = instances
+                        .flatMap { it.versions }
+                        .map { it.simple() }
+                        .sortedBy { it }
+                        .firstOrNull()
+                val versions = componentRepo.getVersions(c.id, null)
+                val applicableVersions = if (instanceSmallestVersion != null) {
+                    versions.filter { it.version >= instanceSmallestVersion }
+                }
+                else {
+                    versions.groupBy({ it.branchId }, {it})
+                            .flatMap { (_, versions) ->
+                                versions.sortedByDescending { it.version }.take(2)
+                            }
+                }
+                c.id to ComponentVersionsSummary(c, instances, applicableVersions.map { it.version.simple() })
+            }
+            .toMap()
 
             val usageDetail = artifactId
                     ?.let { libraries.library(it) }
                     ?.map { (version, componentVersions) ->
                         val componentVersionsForVersion = componentVersions
                                 .groupBy { it.componentId }
-                                .flatMap { (componentId, componentVersion) ->
-                                    val component = componentMap[componentId]
-                                    if (component != null) {
-                                        val tmp = componentVersion
+                                .flatMap { (componentId, componentVersions) ->
+                                    val summary = summaryMap[componentId]
+                                    if (summary != null) {
+                                        val tmp = componentVersions
+                                                .filter { summary.applicableVersions.contains(it.version.simple()) }
                                                 .map { it.version.simple() to mutableListOf<ExtInstance>() }
-                                                .toMap().toMutableMap()
-                                        componentInstMap[componentId]
-                                                ?.flatMap { i -> listOf(i.deployedVersion?.simple()?.let { it to i }, i.runningVersion?.simple()?.let { it to i }) }
-                                                ?.toSet()
-                                                ?.filterNotNull()
-                                                ?.forEach { (v, i) ->
-                                                    tmp[v]?.add(i)
-                                                }
+                                                .toMap()
+                                                .toMutableMap()
+                                        summary.instances
+                                                .flatMap { i -> i.versions.map { it.simple() to i } }
+                                                .toSet()
+                                                .forEach { (v, i) -> tmp[v]?.add(i) }
                                         tmp.map { (v, instances) ->
                                             ComponentVersionDetail(
-                                                    component = component.toComponentRef(),
+                                                    component = summary.component.toComponentRef(),
                                                     version = v.version,
                                                     instances = instances.map { it.toRef() }
                                             )
                                         }
-                                    } else {
+                                    }
+                                    else {
                                         emptyList()
                                     }
                                 }

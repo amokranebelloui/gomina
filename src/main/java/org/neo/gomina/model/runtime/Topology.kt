@@ -28,6 +28,7 @@ data class ExtInstance(
     val notExpected get() = instance == null
     val deployedVersion get() = instance?.deployedVersion
     val runningVersion get() = indicators?.version
+    val versions get() = listOfNotNull(deployedVersion, runningVersion)
     fun matchesVersion(version: Version): Boolean {
         return deployedVersion?.let { it.version == version.version } ?: false ||
                 runningVersion?.let { it.version == version.version } ?: false
