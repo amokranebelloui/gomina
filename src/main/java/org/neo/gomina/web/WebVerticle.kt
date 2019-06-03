@@ -35,7 +35,8 @@ class WebVerticle : AbstractVerticle() {
         logger.info("Starting...")
 
         val configFile = System.getProperty("gomina.config.file")?.let { File(it) }
-        val injector = Guice.createInjector(Modules.combine(GominaModule(configFile), object : AbstractModule() {
+        val gominaModule = GominaModule(configFile)
+        val injector = Guice.createInjector(Modules.combine(gominaModule, object : AbstractModule() {
             override fun configure() {
                 bind(Vertx::class.java).toInstance(vertx)
             }
@@ -93,7 +94,7 @@ class WebVerticle : AbstractVerticle() {
             ctx.response().setStatusCode(ctx.statusCode()).end("Ooops! something went wrong")
         }
 
-        vertx.createHttpServer().requestHandler { router.accept(it) } .listen(8080)
+        vertx.createHttpServer().requestHandler { router.accept(it) } .listen(gominaModule.config.port)
     }
 
     override fun stop() {

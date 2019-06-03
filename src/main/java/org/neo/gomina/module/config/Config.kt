@@ -31,6 +31,7 @@ data class MavenConfig(var localRepository: String = "", var remoteRepositories:
 data class Config (
 
         var name: String? = null,
+        var port: Int,
         var passwordsFile: String? = null,
         var domains: List<String> = emptyList(),
         val jiraUrl: String = "",

@@ -65,16 +65,19 @@ import java.io.File
 
 class GominaModule(private val configFile: File?) : AbstractModule() {
 
-    override fun configure() {
-        binder().requireExplicitBindings()
+    val config: Config
 
-        val config: Config
+    init {
         try {
             val configLoader = ConfigLoader(configFile)
             config = configLoader.load()
         } catch (e: Exception) {
             throw RuntimeException("Cannot load config", e)
         }
+    }
+
+    override fun configure() {
+        binder().requireExplicitBindings()
 
         // Security
         bind(File::class.java).annotatedWith(named("passwords")).toInstance(File(config.passwordsFile!!))
