@@ -26,6 +26,7 @@ import {ServiceDetail} from "../environment/ServiceDetail";
 import {ServiceEditor} from "../environment/ServiceEditor";
 import ls from "local-storage";
 import {ApplicationLayout} from "./common/ApplicationLayout";
+import {filterEvents} from "../environment/EventFilter";
 
 class EnvApp extends React.Component {
     constructor(props) {
@@ -44,6 +45,7 @@ class EnvApp extends React.Component {
             serviceEdition: false,
             serviceEdited: null,
 
+            filterEvents: [],
             events: [],
             eventsErrors: []
         };
@@ -499,7 +501,15 @@ class EnvApp extends React.Component {
                    </Fragment>
                }
                sideSecondary={() =>
-                   <Events events={events} errors={eventsErrors} />
+                   <Fragment>
+                       <b>Events</b>
+                       <div style={{float: 'right'}}>
+                           <input type="text" value={this.state.filterEvents}
+                                  onChange={e => this.setState({filterEvents: e.target.value})} />
+                       </div>
+                       <Events events={filterEvents(events, this.state.filterEvents)} errors={eventsErrors} />
+                       <div style={{clear: 'both'}} />
+                   </Fragment>
                }
             />
         );

@@ -624,7 +624,7 @@ class ComponentApp extends React.Component {
                        }/>
                        <Route path="/component/:id/events" render={props =>
                            <Fragment>
-                               <h3 style={{display: 'inline-block'}}>Events ({this.state.filterEvent})</h3>
+                               <h3 style={{display: 'inline-block'}}>Events</h3>
                                <div style={{float: 'right'}}>
                                    <b>Search: </b>
                                    <input type="text" value={this.state.filterEvent}

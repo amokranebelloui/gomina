@@ -70,7 +70,7 @@ class EventsApi {
             vertx.executeBlocking({future: Future<Pair<List<EventDetail>, List<String>>> ->
                 val envId = ctx.request().getParam("envId")
                 logger.info("Events for env $envId")
-                val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
+                val since = LocalDate.now().minusMonths(1).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
 
                 val errors = mutableListOf<String>()
                 val events = events.forEnv(envId)
