@@ -25,15 +25,19 @@ data class Commit (
     }
 
     fun match(version: Version, numberedRevisions: Boolean): Boolean {
-        // FIXME Revision as Int
-        return try {
-            this.revision == version.revision ||
-                    this.version?.isStableVersion() == true && this.version == version.version ||
-                    numberedRevisions && version.revision?.isNotBlank() == true && version.revision.toInt() > this.revNum
+        return if (version.isStable()) {
+            version.version == this.version
         }
-        catch (e: Exception) {
-            logger.error(e.message)
-            false
+        else {
+            // FIXME Revision as Int
+            try {
+                this.revision == version.revision ||
+                        numberedRevisions && version.revision?.isNotBlank() == true && version.revision.toInt() > this.revNum
+            }
+            catch (e: Exception) {
+                logger.error(e.message)
+                false
+            }
         }
     }
     companion object {
