@@ -39,6 +39,7 @@ import org.neo.gomina.integration.zmqmonitoring.MonitoringMapper
 import org.neo.gomina.integration.zmqmonitoring.ZmqMonitorThreadPool
 import org.neo.gomina.model.component.ComponentKnowledge
 import org.neo.gomina.model.component.ComponentRepo
+import org.neo.gomina.model.component.ComponentVersionService
 import org.neo.gomina.model.dependency.EnrichDependencies
 import org.neo.gomina.model.dependency.InteractionProviders
 import org.neo.gomina.model.dependency.InteractionsRepository
@@ -94,6 +95,7 @@ class GominaModule(private val configFile: File?) : AbstractModule() {
         bind(ComponentRepo::class.java).to(RedisComponentRepo::class.java).`in`(Scopes.SINGLETON)
         bind(Libraries::class.java).to(RedisLibraries::class.java).`in`(Scopes.SINGLETON)
         bind(ComponentKnowledge::class.java).to(RedisComponentKnowledge::class.java).`in`(Scopes.SINGLETON)
+        bind(ComponentVersionService::class.java).`in`(Scopes.SINGLETON)
         bind(Systems::class.java).to(InferredSystems::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionProviders::class.java).`in`(Scopes.SINGLETON)
         bind(InteractionsRepository::class.java).to(RedisInteractionsRepository::class.java).`in`(Scopes.SINGLETON)

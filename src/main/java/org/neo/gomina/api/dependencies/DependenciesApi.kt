@@ -20,6 +20,7 @@ import org.neo.gomina.integration.maven.Artifact
 import org.neo.gomina.integration.maven.parseArtifact
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
+import org.neo.gomina.model.component.ComponentVersionService
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
 import org.neo.gomina.model.inventory.Inventory
@@ -69,6 +70,7 @@ class DependenciesApi {
     @Inject lateinit var workList: WorkList
     @Inject lateinit var inventory: Inventory
     @Inject lateinit var componentRepo: ComponentRepo
+    @Inject lateinit var componentVersionService: ComponentVersionService
     @Inject lateinit var interactionsRepository: InteractionsRepository
     @Inject lateinit var libraries: Libraries
     @Inject lateinit var interactionProviders: InteractionProviders
@@ -348,22 +350,8 @@ class DependenciesApi {
             val environments = inventory.getEnvironments()
             val summaryMap = componentRepo.getAll().filter { !it.disabled }.map { c ->
                 val instances = topology.buildExtInstances(c, environments)
-                val instanceSmallestVersion = instances
-                        .flatMap { it.versions }
-                        .map { it.simple() }
-                        .sortedBy { it }
-                        .firstOrNull()
-                val versions = componentRepo.getVersions(c.id, null)
-                val applicableVersions = if (instanceSmallestVersion != null) {
-                    versions.filter { it.version >= instanceSmallestVersion }
-                }
-                else {
-                    versions.groupBy({ it.branchId }, {it})
-                            .flatMap { (_, versions) ->
-                                versions.sortedByDescending { it.version }.take(2)
-                            }
-                }
-                c.id to ComponentVersionsSummary(c, instances, applicableVersions.map { it.version.simple() })
+                val currentVersions = componentVersionService.currentVersions(c, instances)
+                c.id to ComponentVersionsSummary(c, instances, currentVersions.map { it.version.simple() })
             }
             .toMap()
 

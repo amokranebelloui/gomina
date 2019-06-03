@@ -40,6 +40,7 @@ class ComponentApp extends React.Component {
             component: {},
             associated: [],
 
+            currentVersions: [],
             versions: [],
             libraries: [],
 
@@ -267,6 +268,12 @@ class ComponentApp extends React.Component {
             .then(() => thisComponent.retrieveComponent(componentId))
             .catch(() => console.error("Cannot reactivate branch"))
     }
+    retrieveCurrentVersions(componentId) {
+        const thisComponent = this;
+        axios.get('/data/components/' + componentId + '/versions/current')
+            .then(response => thisComponent.setState({currentVersions: response.data}))
+            .catch(() => thisComponent.setState({currentVersions: null}))
+    }
     retrieveVersions(componentId) {
         const thisComponent = this;
         axios.get('/data/components/' + componentId + '/versions')
@@ -443,6 +450,7 @@ class ComponentApp extends React.Component {
             this.retrieveLibraries(this.state.componentId, null);
         }
         this.retrieveAssociated(this.state.componentId);
+        this.retrieveCurrentVersions(this.state.componentId);
         this.retrieveVersions(this.state.componentId);
         this.retrieveApi(this.state.componentId);
         this.retrieveUsage(this.state.componentId);
@@ -467,6 +475,7 @@ class ComponentApp extends React.Component {
         if (newComponent && this.props.match.params.id !== newComponent) {
             this.retrieveComponent(newComponent);
             this.retrieveAssociated(newComponent);
+            this.retrieveCurrentVersions(newComponent);
             this.retrieveVersions(newComponent);
             //this.retrieveInstances(newComponent);
             this.retrieveApi(newComponent);
@@ -675,7 +684,7 @@ class ComponentApp extends React.Component {
                        <Well block>
                            <b>Versions: </b>
                            <div className="items">
-                               {this.state.versions && this.state.versions.map(versionRelease =>
+                               {this.state.currentVersions && this.state.currentVersions.map(versionRelease =>
                                    <span key={versionRelease.artifactId + versionRelease.version.version + versionRelease.branchId}>
                                     <span>{versionRelease.artifactId}</span>&nbsp;
                                        <b>{versionRelease.version.version}</b>&nbsp;

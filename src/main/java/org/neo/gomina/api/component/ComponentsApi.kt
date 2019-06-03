@@ -21,11 +21,7 @@ import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.scm.ScmService
 import org.neo.gomina.integration.scm.impl.ScmClients
 import org.neo.gomina.integration.sonar.SonarService
-import org.neo.gomina.model.component.Component
-import org.neo.gomina.model.component.ComponentRepo
-import org.neo.gomina.model.component.NewComponent
-import org.neo.gomina.model.component.Scm
-import org.neo.gomina.model.dependency.Libraries
+import org.neo.gomina.model.component.*
 import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.runtime.ExtInstance
@@ -147,8 +143,8 @@ class ComponentsApi {
     val router: Router
 
     @Inject private lateinit var componentRepo: ComponentRepo
+    @Inject private lateinit var componentVersionService: ComponentVersionService
     @Inject private lateinit var users: Users
-    @Inject private lateinit var libraries: Libraries
     @Inject private lateinit var workList: WorkList
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var events: Events
@@ -182,6 +178,7 @@ class ComponentsApi {
         router.get("/:componentId/associated").handler(this::associated)
         router.get("/:componentId/doc/:docId").handler(this::componentDoc)
         router.get("/:componentId/versions").handler(this::versions)
+        router.get("/:componentId/versions/current").handler(this::currentVersions)
 
         router.put("/:componentId/branch/dismiss").handler(this::branchDismiss)
         router.put("/:componentId/branch/reactivate").handler(this::branchReactivate)
@@ -364,13 +361,29 @@ class ComponentsApi {
         //val branchId = ctx.request().getParam("branchId")
         try {
             logger.info("Get versions $componentId")
-            val versions: List<VersionReleaseDetail> = componentRepo.getVersions(componentId, null).map {
+            val versions = componentVersionService.getVersions(componentId).map {
                 VersionReleaseDetail(it.artifact.toString(), it.version.toVersionDetail(), it.releaseDate.toDateUtc, it.branchId)
             }
             ctx.response().putHeader("content-type", "text/html").end(mapper.writeValueAsString(versions))
         }
         catch (e: Exception) {
             logger.error("Cannot get versions $componentId")
+            ctx.fail(500)
+        }
+    }
+
+    private fun currentVersions(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
+        //val branchId = ctx.request().getParam("branchId")
+        try {
+            logger.info("Get current versions $componentId")
+            val versions = componentVersionService.getCurrentVersions(componentId).map {
+                VersionReleaseDetail(it.artifact.toString(), it.version.toVersionDetail(), it.releaseDate.toDateUtc, it.branchId)
+            }
+            ctx.response().putHeader("content-type", "text/html").end(mapper.writeValueAsString(versions))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get current versions $componentId")
             ctx.fail(500)
         }
     }

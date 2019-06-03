@@ -41,9 +41,10 @@
       "name": "branch12",
       "origin": "35930",
       "log": [
-        {"revision": "35993", "date": "2019-03-15T17:19:08.529Z", "author": "amokrane", "message": "[maven-release-plugin] 5.1.3.2-SNAPSHOT", "artifactId": "x.oms.vac:voms-basketmanager:5.1.3.2-SNAPSHOT"},
-        {"revision": "35992", "date": "2019-03-15T17:19:08.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 5.1.3.1", "artifactId": "x.oms.vac:voms-basketmanager:5.1.3.1"},
-        {"revision": "35991", "date": "2019-01-06T17:16:55.529Z", "author": "amokrane", "message": "Small bugfixes"}
+        {"revision": "35993", "date": "2019-03-18T17:19:08.529Z", "author": "amokrane", "message": "[maven-release-plugin] 5.1.3.2-SNAPSHOT", "artifactId": "x.oms.vac:voms-basketmanager:5.1.3.2-SNAPSHOT"},
+        {"revision": "35992", "date": "2019-03-18T17:19:08.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 5.1.3.1", "artifactId": "x.oms.vac:voms-basketmanager:5.1.3.1"},
+        {"revision": "35991", "date": "2019-03-17T14:16:55.529Z", "author": "amokrane", "message": "Small bugfixes"},
+        {"revision": "35930", "date": "2019-03-17T14:15:08.529Z", "author": "amokrane", "message": "[maven-release-plugin] prepare release 5.1.3", "artifactId": "x.oms.vac:voms-basketmanager:5.1.3"}
       ]
     }
   },
