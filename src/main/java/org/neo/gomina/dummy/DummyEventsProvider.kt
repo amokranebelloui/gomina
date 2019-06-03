@@ -9,10 +9,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.google.inject.assistedinject.Assisted
 import org.neo.gomina.model.component.ComponentRepo
-import org.neo.gomina.model.event.Event
-import org.neo.gomina.model.event.Events
-import org.neo.gomina.model.event.EventsProvider
-import org.neo.gomina.model.event.EventsProviderConfig
+import org.neo.gomina.model.event.*
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -45,14 +42,13 @@ class DummyEventsProvider : EventsProvider {
 
     override fun name() = config.id
 
-    override fun group(): String = "release"
-
     override fun reload(since: LocalDateTime) {
         val map = components.getAll().associateBy { it.artifactId }
         val eventsToSave = mapper.readValue<List<DummyEvent>>(file).map {
                     Event(
                             id = "${it.timestamp}-dummy",
                             timestamp = LocalDateTime.parse(it.timestamp, DateTimeFormatter.ISO_DATE_TIME),
+                            group = EventCategory.RELEASE,
                             type = it.type,
                             message = it.message,
                             envId = it.envId,
@@ -62,7 +58,7 @@ class DummyEventsProvider : EventsProvider {
                     )
                 }
                 .filter { it.timestamp > since }
-        events.save(eventsToSave, group())
+        events.save(eventsToSave)
     }
 
 }

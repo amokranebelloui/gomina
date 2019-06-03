@@ -2,6 +2,9 @@ package org.neo.gomina.persistence.model
 
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.Pipeline
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.*
 
 fun String?.toList() = this?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() } ?: emptyList()
 fun Collection<String>.toStr() = this.joinToString(separator = ",")
@@ -20,4 +23,8 @@ fun Pipeline.persist(key: String, values: Map<String, String?>) {
 
     if (updates.isNotEmpty()) this.hmset(key, updates)
     if (deletes.isNotEmpty()) this.hdel(key, *deletes.toTypedArray())
+}
+
+fun LocalDateTime.toScore(): Double {
+    return Date.from(atZone(ZoneOffset.UTC).toInstant()).time.toDouble()
 }

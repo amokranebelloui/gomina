@@ -2,9 +2,12 @@ package org.neo.gomina.model.event
 
 import java.time.LocalDateTime
 
+enum class EventCategory {RUNTIME, RELEASE, VERSION, INFO}
+
 data class Event (
         val id: String,
         val timestamp: LocalDateTime,
+        val group: EventCategory,
         val type: String?,
         val message: String?,
         // Optional metadata
@@ -16,18 +19,16 @@ data class Event (
 )
 
 interface Events {
-    fun all(): List<Event>
     fun forEnv(envId: String): List<Event>
     fun forComponent(componentId: String): List<Event>
     fun releases(componentId: String, prodEnvs: List<String>): List<Event>
-    fun save(events: List<Event>, group: String)
+    fun save(events: List<Event>)
 }
 
 interface EventsProviderConfig
 
 interface EventsProvider {
     fun name(): String
-    fun group(): String
     fun reload(since: LocalDateTime)
 }
 

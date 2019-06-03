@@ -29,6 +29,7 @@ import {ComponentBuild} from "../component/ComponentBuild";
 import {ComponentSonar} from "../component/ComponentSonar";
 import {Well} from "../common/Well";
 import {ComponentMetadata} from "../component/ComponentMatadata";
+import {filterEvents} from "../environment/EventFilter";
 
 class ComponentApp extends React.Component {
     
@@ -58,6 +59,7 @@ class ComponentApp extends React.Component {
             docId: this.props.match.params.docId,
             doc: null,
 
+            filterEvent: "",
             events: []
             };
         this.retrieveComponent = this.retrieveComponent.bind(this);
@@ -115,7 +117,7 @@ class ComponentApp extends React.Component {
     reloadEvents() {
         const thisComponent = this;
         axios.post('/data/events/reload-events')
-            .then(() => this.retrieveEvents(thisComponent.state.env))
+            .then(() => this.retrieveEvents(thisComponent.state.componentId))
             .catch((error) => console.log("reload error", error.response))
     }
     editLabel(componentId, label) {
@@ -622,9 +624,14 @@ class ComponentApp extends React.Component {
                        }/>
                        <Route path="/component/:id/events" render={props =>
                            <Fragment>
-                               <h3>Events</h3>
-                               <button onClick={e => this.reloadEvents()}>Reload Events</button>
-                               <Events events={this.state.events || []} errors={[]}/>
+                               <h3 style={{display: 'inline-block'}}>Events ({this.state.filterEvent})</h3>
+                               <div style={{float: 'right'}}>
+                                   <b>Search: </b>
+                                   <input type="text" value={this.state.filterEvent}
+                                          onChange={e => this.setState({filterEvent: e.target.value})} />
+                                   <button onClick={e => this.reloadEvents()}>Reload Events</button>
+                               </div>
+                               <Events events={filterEvents(this.state.events, this.state.filterEvent)} errors={[]}/>
                            </Fragment>
                        }/>
                        <Route path="/component/:id/versions" render={props =>

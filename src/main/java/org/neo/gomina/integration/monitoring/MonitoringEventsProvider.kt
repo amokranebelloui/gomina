@@ -2,10 +2,7 @@ package org.neo.gomina.integration.monitoring
 
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.component.ComponentRepo
-import org.neo.gomina.model.event.Event
-import org.neo.gomina.model.event.Events
-import org.neo.gomina.model.event.EventsProvider
-import org.neo.gomina.model.event.EventsProviderConfig
+import org.neo.gomina.model.event.*
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.monitoring.Monitoring
 import org.neo.gomina.model.monitoring.ServerStatus
@@ -32,7 +29,7 @@ class MonitoringEventsProvider : EventsProvider {
     fun init() {
         val now = LocalDateTime.now(Clock.systemUTC())
         val id = "$now-server-start"
-        events.save(listOf(Event(id, now, type = "info", message = "Server Started", global = true)), group())
+        events.save(listOf(Event(id, now, group = EventCategory.INFO, type = "info", message = "Server Started", global = true)))
         monitoring.onMessage { env, service, instanceId, oldValues, newValues ->
             oldValues?.let {
                 val newS = newValues.process.status
@@ -55,16 +52,14 @@ class MonitoringEventsProvider : EventsProvider {
                     val componentId = inventory.getEnvironment(env)
                             ?.services?.find { it.svc == service }
                             ?.componentId
-                    events.save(listOf(Event(id, timestamp, type = type, message = message,
-                            envId = env, instanceId = instanceId, componentId = componentId)), group())
+                    events.save(listOf(Event(id, timestamp, group = EventCategory.RUNTIME, type = type, message = message,
+                            envId = env, instanceId = instanceId, componentId = componentId)))
                 }
             }
         }
     }
 
     override fun name(): String = "internal"
-
-    override fun group(): String = "runtime"
 
     override fun reload(since: LocalDateTime) {
 

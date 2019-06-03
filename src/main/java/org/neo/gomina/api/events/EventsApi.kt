@@ -16,6 +16,7 @@ import org.neo.gomina.integration.events.EventsService
 import org.neo.gomina.integration.monitoring.MonitoringEventsProvider
 import org.neo.gomina.integration.monitoring.MonitoringEventsProviderConfig
 import org.neo.gomina.model.event.Event
+import org.neo.gomina.model.event.EventCategory
 import org.neo.gomina.model.event.Events
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -30,6 +31,7 @@ data class EventList(
 data class EventDetail(
         val id: String,
         val timestamp: Date,
+        val group: EventCategory,
         val type: String?,
         val message: String?,
 
@@ -58,49 +60,9 @@ class EventsApi {
         this.vertx = vertx
         this.router = Router.router(vertx)
 
-        router.get("/:envId").handler(this::events)
         router.get("/env/:envId").handler(this::eventsForEnv)
         router.get("/component/:componentId").handler(this::eventsForComponent)
         router.post("/reload-events").handler(this::reload)
-    }
-
-    private fun events(ctx: RoutingContext) {
-        try {
-            vertx.executeBlocking({future: Future<Pair<List<EventDetail>, List<String>>> ->
-                val envId = ctx.request().getParam("envId")
-                logger.info("Events for $envId")
-                val since = LocalDate.now().minusDays(7).atStartOfDay(ZoneOffset.UTC).toLocalDateTime()
-
-                val errors = mutableListOf<String>()
-                /*
-                val events = eventsService.eventProviders()
-                        .flatMap {
-                            try {
-                                it.events(since)
-                            } catch (e: Exception) {
-                                errors.add(e.message ?: "Unknown error")
-                                emptyList<Event>()
-                            }
-                        }
-                        .sortedByDescending { it.timestamp }
-                        .map { it.toEventDetail() }
-                */
-                val events = events.all()
-                        .filter { it.timestamp > since }
-                        .sortedByDescending { it.timestamp }
-                        .map { it.toEventDetail() }
-                future.complete(events to errors)
-            }, false)
-            {res: AsyncResult<Pair<List<EventDetail>, List<String>>> ->
-                ctx.response()
-                        .putHeader("content-type", "text/javascript")
-                        .end(mapper.writeValueAsString(EventList(res.result().first, res.result().second)))
-            }
-        }
-        catch (e: Exception) {
-            logger.error("Cannot get instances", e)
-            ctx.fail(500)
-        }
     }
 
     private fun eventsForEnv(ctx: RoutingContext) {
@@ -177,6 +139,7 @@ interface EventsProviderFactory {
 fun Event.toEventDetail() = EventDetail(
         id = this.id,
         timestamp = this.timestamp.toDateUtc,
+        group = this.group,
         type = this.type,
         message = this.message,
         envId =  this.envId,

@@ -14,6 +14,7 @@ import org.neo.gomina.model.component.VersionRelease
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
 import org.neo.gomina.model.event.Event
+import org.neo.gomina.model.event.EventCategory
 import org.neo.gomina.model.event.Events
 import org.neo.gomina.model.inventory.Inventory
 import org.neo.gomina.model.release.ReleaseService
@@ -137,10 +138,11 @@ class ScmService {
                 val releaseEvent = Event(
                         id = "${component.id}-${versionRelease.version}",
                         timestamp = versionRelease.releaseDate,
+                        group = EventCategory.VERSION,
                         type = "version", message = "Available",
                         componentId = component.id,
                         version = versionRelease.version.version)
-                events.save(listOf(releaseEvent), "version") // FIXME chgSignature
+                events.save(listOf(releaseEvent)) // FIXME chgSignature
             }
 
         }

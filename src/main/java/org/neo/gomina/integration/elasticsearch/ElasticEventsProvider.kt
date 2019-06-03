@@ -9,10 +9,7 @@ import org.elasticsearch.client.RestHighLevelClient
 import org.elasticsearch.index.query.QueryBuilders
 import org.elasticsearch.search.builder.SearchSourceBuilder
 import org.neo.gomina.model.component.ComponentRepo
-import org.neo.gomina.model.event.Event
-import org.neo.gomina.model.event.Events
-import org.neo.gomina.model.event.EventsProvider
-import org.neo.gomina.model.event.EventsProviderConfig
+import org.neo.gomina.model.event.*
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -49,8 +46,6 @@ class ElasticEventsProvider : EventsProvider {
 
     override fun name(): String = config.id
 
-    override fun group(): String = "release"
-
     override fun reload(since: LocalDateTime) {
         logger.info("Loading ES events from ${config.indice} since: $since maxResults: ${config.size}")
         val componentMap = components.getAll().map { it.artifactId to it.id }.toMap()
@@ -73,6 +68,7 @@ class ElasticEventsProvider : EventsProvider {
                             "es-${it.id}",
                             //timestamp = LocalDateTime.parse(map[config.timestamp] as String, pattern),
                             timestamp = timestamp,
+                            group = EventCategory.RELEASE,
                             type = config.type,
                             message = map[config.message] as String?,
                             envId = map[config.envId] as String?,
@@ -93,7 +89,7 @@ class ElasticEventsProvider : EventsProvider {
             throw Exception(msg)
         }
         logger.info("${eventsToSave.size} events found")
-        events.save(eventsToSave, group())
+        events.save(eventsToSave)
     }
 
     companion object {

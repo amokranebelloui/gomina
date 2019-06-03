@@ -5,6 +5,7 @@ import {Badge} from "../common/Badge";
 type EventType = {
     id: string,
     timestamp: string,
+    group: 'RUNTIME'|'RELEASE'|'VERSION'|'INFO',
     type?: ?string,
     message?: ?string,
     envId?: ?string,

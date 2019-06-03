@@ -5,12 +5,15 @@ import com.google.inject.name.Named
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.event.Event
+import org.neo.gomina.model.event.EventCategory
 import org.neo.gomina.model.event.Events
 import redis.clients.jedis.JedisPool
+import redis.clients.jedis.Pipeline
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 class RedisEvents : Events {
 
@@ -28,48 +31,60 @@ class RedisEvents : Events {
         logger.info("Events Database connected $host $port")
     }
 
-    override fun all(): List<Event> {
-        pool.resource.use { jedis ->
-            return jedis.keys("event:*:*").mapNotNull {
-                jedis.hgetAll(it).toEvent(it.substring(it.indexOf(':') + 1)?.let { it.substring(it.indexOf(':') + 1) })
-            }
-        }
-    }
-
     override fun forEnv(envId: String): List<Event> {
         pool.resource.use { jedis ->
+            val year = LocalDateTime.now(ZoneOffset.UTC).minusYears(1).toScore()
+            val day = LocalDateTime.of(LocalDate.now(ZoneOffset.UTC).minusDays(1), LocalTime.MIDNIGHT).toScore()
             val pipe = jedis.pipelined()
-            val vals = (
-                    jedis.zrange("events:env:$envId", 0, -1) +
-                    jedis.zrange("events:global", 0, -1)
-                    )
-                    .map { it to pipe.hgetAll("event:$it") }
-            pipe.sync()
-            return vals.map { (idWithSource, data) -> data.get().toEvent(idWithSource.substring(idWithSource.indexOf(':') + 1)) }
+            return process(pipe,
+                    jedis.zrevrangeByScore("events:env:version:$envId", "+inf", "($year") +
+                    jedis.zrevrangeByScore("events:env:release:$envId", "+inf", "($year") +
+                    jedis.zrevrangeByScore("events:env:runtime:$envId", "+inf", "($day")
+                    //jedis.zrange("events:global", 0, -1)
+            )
         }
     }
 
     override fun forComponent(componentId: String): List<Event> {
         pool.resource.use { jedis ->
+            val year = LocalDateTime.now(ZoneOffset.UTC).minusYears(1).toScore()
+            val day = LocalDateTime.of(LocalDate.now(ZoneOffset.UTC).minusDays(7), LocalTime.MIDNIGHT).toScore()
             val pipe = jedis.pipelined()
-            val vals = (
-                    jedis.zrange("events:component:$componentId", 0, -1) +
-                    jedis.zrange("events:global", 0, -1)
-                    )
-                    .map { it to pipe.hgetAll("event:$it") }
-            pipe.sync()
-            return vals.map { (idWithSource, data) -> data.get().toEvent(idWithSource.substring(idWithSource.indexOf(':') + 1)) }
+            return process(pipe,
+                    jedis.zrevrangeByScore("events:component:version:$componentId", "+inf", "($year") +
+                    jedis.zrevrangeByScore("events:component:release:$componentId", "+inf", "($year") +
+                    jedis.zrevrangeByScore("events:component:runtime:$componentId", "+inf", "($day")
+                    //jedis.zrange("events:component:$componentId", 0, -1) +
+                    //jedis.zrange("events:global", 0, -1)
+            )
         }
     }
 
     override fun releases(componentId: String, prodEnvs: List<String>): List<Event> {
-        return this.forComponent(componentId).filter { it.type == "release" && prodEnvs.contains(it.envId) }
+        pool.resource.use { jedis ->
+            val pipe = jedis.pipelined()
+            return process(pipe,
+                    jedis.zrange("events:component:release:$componentId", 0, -1)
+            )
+            .filter { prodEnvs.contains(it.envId) }
+        }
     }
 
-    private fun Map<String, String>.toEvent(id: String): Event {
+    private fun process(pipe: Pipeline, keys: Set<String>): List<Event> {
+        val eventFutures = keys
+                .map { it to pipe.hgetAll("event:$it") }
+        pipe.sync()
+        return eventFutures.map { (idWithSource, data) ->
+            val split = idWithSource.split(':')
+            data.get().toEvent(split[1], EventCategory.valueOf(split[0].toUpperCase()))
+        }
+    }
+
+    private fun Map<String, String>.toEvent(id: String, group: EventCategory): Event {
         return Event(
                 id = id,
                 timestamp = this["timestamp"].let { LocalDateTime.parse(it, DateTimeFormatter.ISO_DATE_TIME) },
+                group = group,
                 type = this["type"],
                 message = this["message"],
                 envId = this["env"],
@@ -79,11 +94,12 @@ class RedisEvents : Events {
         )
     }
 
-    override fun save(events: List<Event>, group: String) {
+    override fun save(events: List<Event>) {
         pool.resource.use { jedis ->
             val pipe = jedis.pipelined()
             events.forEach { event ->
                 val eventId = event.id.replace(':', '-')
+                val group = event.group.toString().toLowerCase()
                 pipe.hmset("event:$group:$eventId", listOfNotNull(
                         "timestamp" to event.timestamp.format(DateTimeFormatter.ISO_DATE_TIME),
                         event.type?.let { "type" to it },
@@ -94,15 +110,32 @@ class RedisEvents : Events {
                         event.version?.let { "version" to it }
                 ).toMap())
 
-                val time = Date.from(event.timestamp.atZone(ZoneOffset.UTC).toInstant()).time.toDouble()
-                val idWithSource = group + ":" + eventId
-                event.envId?.let { pipe.zadd("events:env:$it", time, idWithSource) }
-                event.instanceId?.let { pipe.zadd("events:instance:$it", time, idWithSource) }
-                event.componentId?.let { pipe.zadd("events:component:$it", time, idWithSource) }
-                if (event.global) { pipe.zadd("events:global", time, idWithSource) }
+                val time = event.timestamp.toScore()
+                val idWithSource = "$group:$eventId"
+                if (event.envId != null) {
+                    pipe.zadd("events:env:${event.envId}", time, idWithSource)
+                    pipe.zadd("events:env:$group:${event.envId}", time, idWithSource)
+                }
+                if (event.instanceId != null) {
+                    pipe.zadd("events:instance:${event.instanceId}", time, idWithSource)
+                    pipe.zadd("events:instance:$group:${event.instanceId}", time, idWithSource)
+                }
+                if (event.componentId != null) {
+                    pipe.zadd("events:component:${event.componentId}", time, idWithSource)
+                    pipe.zadd("events:component:$group:${event.componentId}", time, idWithSource)
+                }
+                if (event.global) {
+                    pipe.zadd("events:global", time, idWithSource)
+                }
             }
             pipe.sync()
         }
 
     }
+
+
+}
+
+fun main(args: Array<String>) {
+    println(LocalDateTime.now(ZoneOffset.UTC).minusYears(1).toScore())
 }
