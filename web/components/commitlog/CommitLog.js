@@ -10,7 +10,7 @@ import {Revision} from "./Revision";
 import type {UserRefType} from "../misc/UserType";
 import type {IssueRefType} from "../work/WorkType";
 import {Issue} from "../misc/Issue";
-import type {VersionType} from "../common/version-utils";
+import {isStable} from "../common/version-utils";
 import {flatMap} from "../common/utils";
 import {BranchColor} from "./Branch";
 import type {InstanceRefType} from "../environment/InstanceType";
@@ -98,7 +98,10 @@ class CommitLog extends React.Component<Props> {
                                     </span>
                                     {commit.version &&
                                     <span className="items" style={{display: 'inline-block', float: 'right'}}>
-                                        <Badge><i style={{opacity: .4}}>{commit.version}</i></Badge>
+                                        <Badge backgroundColor={isStable(commit.version) ? '#ff9c89' : null}
+                                               color={isStable(commit.version) ? null : '#E0E0E0'}>
+                                            {commit.version}
+                                        </Badge>
                                     </span>
                                     }
                                     <span className="items" style={{display: 'inline-block', float: 'right'}}>

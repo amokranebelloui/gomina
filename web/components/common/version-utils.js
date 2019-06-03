@@ -21,6 +21,10 @@ function isSnapshotVersion(version: ?VersionType) {
     return version && isSnapshot(version.version)
 }
 
+function isStable(version: ?string) {
+    return version && !isSnapshot(version)
+}
+
 function isSnapshot(version: ?string) {
     return version ? version.includes("-SNAPSHOT") : false;
 }
@@ -58,5 +62,5 @@ function compareVersions2 (a: string, b: string) {
 }
 
 
-export {isSnapshot, isStableVersion, isSnapshotVersion, compareVersions, compareVersionsReverse, compareVersionsRevisions, sameVersions}
+export {isSnapshot, isStable, isStableVersion, isSnapshotVersion, compareVersions, compareVersionsReverse, compareVersionsRevisions, sameVersions}
 export type { VersionType }
