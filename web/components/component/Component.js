@@ -40,6 +40,7 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
         const languages = component.languages || [];
         const tags = component.tags || [];
         let deployedStyle = {color: 'white', backgroundColor: '#ebebeb'};
+        const branches = component.branches.filter(b => !b.dismissed).length;
         return (
             <div className='component-row'>
                 <div className='summary'>
@@ -57,6 +58,10 @@ class ComponentSummary extends React.Component<ComponentSummaryProps> {
                         <Version version={component.released} />
                         <Version version={component.latest} displaySnapshotRevision={true} {...deployedStyle} />
                         <UnreleasedChangeCount changes={component.changes} />
+                        {branches > 1 &&
+                            <Badge backgroundColor={'black'} color={"#eed0b6"}>{branches} <span style={{fontSize: '7px'}}>branches</span>
+                            </Badge>
+                        }
                     </span>
                     <br/>
                     <span className="items">
