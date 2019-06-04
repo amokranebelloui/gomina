@@ -17,6 +17,14 @@ type EnvType = {
     active: boolean
 }
 
+type EnvHostsType = {
+    env: string,
+    type?: ?string,
+    description?: ?string,
+    active: boolean,
+    hosts: Array<string>
+}
+
 type EnvDataType = {
     type?: ?string,
     description?: ?string,
@@ -136,4 +144,4 @@ function sortInstances(instances: Array<InstanceType>) {
 }
 
 export {EnvironmentLogical}
-export type {EnvType, EnvDataType}
+export type {EnvType, EnvDataType, EnvHostsType}

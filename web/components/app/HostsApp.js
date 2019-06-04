@@ -10,6 +10,7 @@ import {Secure} from "../permission/Secure";
 import {HostConnectivityEditor} from "../environment/HostConnectivityEditor";
 import {OSFamily} from "../misc/OSFamily";
 import {ApplicationLayout} from "./common/ApplicationLayout";
+import {filterHosts, HostFilter} from "../environment/HostFilter";
 
 class HostsApp extends React.Component {
 
@@ -18,28 +19,29 @@ class HostsApp extends React.Component {
         super(props);
         this.state = {
             hosts: [],
+            envsHosts: [],
             hostId: this.props.match.params.id,
             hostEdition: false,
             hostEdited: null,
             hostConnectivityEdition: false,
-            hostConnectivityEdited: null
+            hostConnectivityEdited: null,
+            search: '',
+            selectedEnvHosts: []
         };
-        this.retrieveHosts = this.retrieveHosts.bind(this);
         console.info("hostsApp !constructor ");
     }
 
     retrieveHosts() {
-        console.log("hostsApp Retr Hosts ... ");
         const thisComponent = this;
         axios.get('/data/hosts')
-            .then(response => {
-                console.log("hostsApp data hosts", response.data);
-                thisComponent.setState({hosts: response.data});
-            })
-            .catch(function (error) {
-                console.log("hostsApp error", error);
-                thisComponent.setState({hosts: []});
-            });
+            .then(response => thisComponent.setState({hosts: response.data}))
+            .catch(error => thisComponent.setState({hosts: []}));
+    }
+    retrieveEnvsHosts() {
+        const thisComponent = this;
+        axios.get('/data/envs/hosts')
+            .then(response => thisComponent.setState({envsHosts: response.data}))
+            .catch(error => thisComponent.setState({envsHosts: []}));
     }
 
     reloadSsh() {
@@ -50,7 +52,8 @@ class HostsApp extends React.Component {
     }
 
     componentDidMount() {
-        this.retrieveHosts()
+        this.retrieveHosts();
+        this.retrieveEnvsHosts();
     }
 
     componentWillReceiveProps(nextProps) {
@@ -118,19 +121,22 @@ class HostsApp extends React.Component {
 
     render()  {
         const hosts = this.state.hosts;
+        const filteredHosts = filterHosts(hosts, this.state.search, this.state.selectedEnvHosts);
         const hostId = this.state.hostId;
         let host = hosts.find(h => h.host == hostId);
         return (
             <ApplicationLayout title="Hosts"
                 main={() =>
                     <div style={{display: 'flex', flexFlow: 'row wrap'}}>
-                        {hosts.map(host =>
-                            <Host key={host.host} host={host}></Host>
+                        {filteredHosts.map(host =>
+                            <Host key={host.host} host={host} />
                         )}
                     </div>
                 }
                 sidePrimary={() =>
                     <Fragment>
+                        <HostFilter envsHosts={this.state.envsHosts}
+                                    onFilterChanged={(search, hosts) => this.setState({search: search, selectedEnvHosts: hosts})} />
                         <Secure permission="host.add">
                             <Route render={({ history }) => (
                                 <InlineAdd type="Host"

@@ -9,7 +9,9 @@ import io.vertx.core.Vertx
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.RoutingContext
 import org.apache.logging.log4j.LogManager
+import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.inventory.Inventory
+import org.neo.gomina.model.runtime.Topology
 import javax.inject.Inject
 
 /**
@@ -21,6 +23,14 @@ data class Env(
     val description: String?,
     val monitoringUrl: String?,
     val active: Boolean
+)
+
+data class EnvHostsDetail(
+        val env: String,
+        val type: String,
+        val description: String?,
+        val active: Boolean,
+        val hosts: Set<String>
 )
 
 data class EnvData(
@@ -38,6 +48,9 @@ class EnvsApi {
     val router: Router
 
     @Inject private lateinit var inventory: Inventory
+    @Inject private lateinit var componentRepo: ComponentRepo
+    @Inject private lateinit var topology: Topology
+
     private val mapper = ObjectMapper()
             .registerKotlinModule()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -48,7 +61,8 @@ class EnvsApi {
     constructor(vertx: Vertx) {
         this.router = Router.router(vertx)
 
-        router.get("/").handler(this::data)
+        router.get("/").handler(this::envs)
+        router.get("/hosts").handler(this::envsHosts)
         router.post("/add").handler(this::addEnv)
         router.put("/:envId/update").handler(this::updateEnv)
         router.put("/:envId/enable").handler(this::enableEnv)
@@ -56,7 +70,7 @@ class EnvsApi {
         router.delete("/:envId/delete").handler(this::deleteEnv)
     }
 
-    private fun data(ctx: RoutingContext) {
+    private fun envs(ctx: RoutingContext) {
         try {
             val envs = inventory.getEnvironments().map { Env(it.id, it.type, it.name, it.monitoringUrl, it.active) }
             ctx.response().putHeader("content-type", "text/javascript")
@@ -64,6 +78,24 @@ class EnvsApi {
         }
         catch (e: Exception) {
             logger.error("Cannot get envs", e)
+            ctx.fail(500)
+        }
+    }
+
+    private fun envsHosts(ctx: RoutingContext) {
+        try {
+            val components = componentRepo.getAll()
+            val envs = inventory.getEnvironments().map { env ->
+                val hosts = topology.buildExtInstances(env, components)
+                        .flatMap { listOfNotNull(it.instance?.host, it.indicators?.process?.host) }
+                        .toSet()
+                EnvHostsDetail(env.id, env.type, env.name, env.active, hosts)
+            }
+            ctx.response().putHeader("content-type", "text/javascript")
+                    .end(mapper.writeValueAsString(envs))
+        }
+        catch (e: Exception) {
+            logger.error("Cannot get envs hosts", e)
             ctx.fail(500)
         }
     }
