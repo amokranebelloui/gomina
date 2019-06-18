@@ -19,8 +19,8 @@ class SonarService {
     fun url(component: Component) = sonarConfig.serverMap[component.sonarServer]?.url
             ?.let { "$it/dashboard/index/${component.artifactId}" }
 
-    fun reload(sonarServer: String) {
-        val metrics = connectors.getConnector(sonarServer)?.getMetrics()
+    fun reload(component: Component) {
+        val metrics = connectors.getConnector(component.sonarServer)?.getMetrics(component.artifactId)
         componentRepo.getAll().forEach { component ->
             try {
                 component.artifactId

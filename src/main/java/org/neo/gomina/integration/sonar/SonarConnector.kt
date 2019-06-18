@@ -4,7 +4,7 @@ import org.neo.gomina.integration.sonar.dummy.DummySonarConnector
 import org.neo.gomina.integration.sonar.sonar.HttpSonarConnector
 import javax.inject.Inject
 
-class SonarIndicators (
+data class SonarIndicators (
     var code: String,
     var loc: Double? = null,
     var coverage: Double? = null,

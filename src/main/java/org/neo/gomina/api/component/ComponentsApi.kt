@@ -506,15 +506,9 @@ class ComponentsApi {
         try {
             vertx.executeBlocking({future: Future<Void> ->
                 ctx.request().getParam("componentIds")?.split(",")?.map { it.trim() }?.forEach {
-                    logger.info("Reloading Sonar data for $it ... [actually doing it for all components]")
+                    logger.info("Reloading Sonar data for $it ...")
                 }
-                // TODO Limit Sonar reload scope  to a component
-                componentRepo.getAll()
-                        .map { it.sonarServer }
-                        .distinct()
-                        .forEach { sonarServer ->
-                            sonarService.reload(sonarServer)
-                        }
+                componentRepo.getAll().forEach { sonarService.reload(it) }
                 future.complete()
             }, false)
             {res: AsyncResult<Void> ->
