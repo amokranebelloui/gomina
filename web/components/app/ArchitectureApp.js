@@ -50,6 +50,7 @@ class ArchitectureApp extends React.Component<Props, State> {
     }
 
     componentDidMount() {
+        document.title = 'Architecture Diagrams';
         this.retrieveComponentRefs();
         this.retrieveSystems();
         this.retrieveDiagrams();
@@ -92,6 +93,7 @@ class ArchitectureApp extends React.Component<Props, State> {
         diagramId && axios.get('/data/diagram/data?diagramId=' + diagramId)
             .then(response => {
                 console.log(":diagram data", response.data);
+                document.title = response.data.name + ' - Diagram';
                 this.setState({selectedDiagram: response.data});
             })
             .catch(function (error) {

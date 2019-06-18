@@ -26,6 +26,7 @@ class DependenciesApp extends React.Component {
     }
 
     componentDidMount() {
+        document.title = 'Dependencies';
         this.retrieveSystems();
         this.retrieveWorkRefs();
         this.retrieveDependencies();

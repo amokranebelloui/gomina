@@ -52,6 +52,7 @@ class HostsApp extends React.Component {
     }
 
     componentDidMount() {
+        document.title = 'Hosts';
         this.retrieveHosts();
         this.retrieveEnvsHosts();
     }
@@ -60,6 +61,7 @@ class HostsApp extends React.Component {
         const newHostId = nextProps.match.params.id;
         this.setState({hostId: newHostId});
         if (this.props.match.params.id != newHostId && newHostId) {
+            document.title = newHostId + ' - Host';
             // do something with newHostId
             this.setState({"hostEdition": false, "hostConnectivityEdition": false});
         }

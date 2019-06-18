@@ -12,7 +12,9 @@ class SandboxApp extends React.Component {
             startDate: new Date()
         }
     }
-
+    componentDidMount() {
+        document.title = 'Sandbox';
+    }
     render() {
         return (
             <ApplicationLayout title={'Sandbox'}

@@ -27,6 +27,7 @@ class Index extends React.Component<Props, State> {
             .catch(error => thisComponent.setState({systems: []}));
     }
     componentDidMount() {
+        document.title = 'Gomina';
         this.retrieveSystems()
     }
     render() {

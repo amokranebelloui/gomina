@@ -222,11 +222,13 @@ class EnvApp extends React.Component {
         console.info("envApp !props-chg ", this.props.match.params.id, newEnv);
         this.setState({env: newEnv});
         if (this.props.match.params.id !== newEnv) {
+            document.title = newEnv + ' - Env';
             this.retrieveInstances(newEnv);
             this.retrieveEvents(newEnv);
         }
     }
     componentDidMount() {
+        document.title = 'Env';
         console.info("envApp !mount ");
         //this.connect();
         this.retrieveEnvs();

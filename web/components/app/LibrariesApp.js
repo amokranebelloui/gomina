@@ -60,7 +60,10 @@ class LibrariesApp extends React.Component<Props, State> {
     retrieveLibrary(libraryId: string) {
         const thisComponent = this;
         axios.get('/data/dependencies/library/' + libraryId)
-            .then(response => thisComponent.setState({library: response.data}))
+            .then(response => {
+                document.title = libraryId + ' - Library';
+                thisComponent.setState({library: response.data})
+            })
             .catch(error => thisComponent.setState({library: []}));
     }
     sortLibraryUsage(libraryUsage: Array<LibraryUsageType>): Array<LibraryUsageType> {
@@ -83,6 +86,7 @@ class LibrariesApp extends React.Component<Props, State> {
         }
     }
     componentDidMount() {
+        document.title = 'Libraries';
         this.retrieveEnvs();
 
         this.retrieveLibraries();

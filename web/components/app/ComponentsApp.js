@@ -105,6 +105,7 @@ class ComponentsApp extends React.Component {
             });
     }
     componentDidMount() {
+        document.title = 'Components';
         console.info("componentsApp !mount ", this.props.match.params.id);
         //this.retrieveSystems();
         this.reloadAll()

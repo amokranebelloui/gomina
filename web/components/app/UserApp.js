@@ -64,6 +64,7 @@ class UserApp extends React.Component<Props, State> {
         axios.get('/data/user/' + userId)
             .then(response => {
                 console.log("userApp user user", response.data);
+                document.title = response.data.shortName + ' - User';
                 thisComponent.setState({user: response.data});
             })
             .catch(function (error) {
@@ -132,6 +133,7 @@ class UserApp extends React.Component<Props, State> {
                 .catch((error) => thisComponent.setState({passwordEditionError: "Cannot change password at the moment"}));
     }
     componentDidMount() {
+        document.title = 'Users';
         console.info("userApp !did mount ");
         this.retrieveUsers();
         this.props.match.params.id && this.retrieveUser(this.props.match.params.id);

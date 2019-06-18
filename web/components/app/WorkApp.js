@@ -131,11 +131,15 @@ class WorkApp extends React.Component<Props, State> {
         const thisComponent = this;
         const refEnv_ = typeof refEnv !== 'undefined' ? refEnv : this.state.refEnv;
         axios.get('/data/work/detail' + (workId ? '/' + workId : '') + (refEnv_ ? '?refEnv=' + refEnv_ : ''))
-            .then(response => thisComponent.setState({workDetail: response.data}))
+            .then(response => {
+                document.title = response.data.work.label + ' - Work';
+                thisComponent.setState({workDetail: response.data})
+            })
             .catch(() => thisComponent.setState({workDetail: null}));
     }
 
     componentDidMount() {
+        document.title = 'Work List';
         console.info("workApp !did mount ", this.props.match.params.id);
         this.retrieveEnvs();
         this.retrieveWorkList();

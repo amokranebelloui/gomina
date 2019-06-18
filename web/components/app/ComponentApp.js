@@ -74,6 +74,7 @@ class ComponentApp extends React.Component {
         axios.get('/data/components/' + componentId)
             .then(response => {
                 console.log("components", response.data);
+                document.title = response.data.label + ' - Component';
                 thisComponent.setState({component: response.data});
             })
             .catch(function (error) {
@@ -423,6 +424,7 @@ class ComponentApp extends React.Component {
         return knowledge && knowledge.knowledge
     }
     componentDidMount() {
+        document.title = 'Component';
         console.info("componentApp !mount ", this.props.match.params.id);
 
         const thisComponent = this;

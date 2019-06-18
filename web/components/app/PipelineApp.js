@@ -44,6 +44,7 @@ class PipelineApp extends React.Component {
         console.info("pipeApp !props-chg ", this.props.match.params.id, nextProps.match.params.id);
     }
     componentDidMount() {
+        document.title = 'Pipeline';
         console.info("pipeApp !mount ");
         this.retrieveComponents();
         this.retrieveInstances();
