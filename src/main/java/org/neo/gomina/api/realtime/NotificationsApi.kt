@@ -69,7 +69,7 @@ class NotificationsApi {
             instanceRT.applyRealTime(newValues)
             try {
                 val message = mapper.writeValueAsString(instanceRT)
-                logger.info("Real time Update $instanceRT")
+                logger.debug("Real time Update $instanceRT")
                 val buffer = Buffer.buffer(message)
                 this.sockets.forEach { socket -> socket.write(buffer) }
             } catch (e: JsonProcessingException) {
