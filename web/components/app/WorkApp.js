@@ -132,8 +132,8 @@ class WorkApp extends React.Component<Props, State> {
         const refEnv_ = typeof refEnv !== 'undefined' ? refEnv : this.state.refEnv;
         axios.get('/data/work/detail' + (workId ? '/' + workId : '') + (refEnv_ ? '?refEnv=' + refEnv_ : ''))
             .then(response => {
-                document.title = response.data.work.label + ' - Work';
                 thisComponent.setState({workDetail: response.data})
+                document.title = (response.data.work && response.data.work.label || 'All') + ' - Work';
             })
             .catch(() => thisComponent.setState({workDetail: null}));
     }
