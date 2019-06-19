@@ -23,6 +23,8 @@ class RedisEvents : Events {
 
     private lateinit var pool: JedisPool
 
+    private val RUNTIME_EVENT_LIMIT = 100
+
     @Inject
     private fun initialize(@Named("database.host") host: String, @Named("database.port") port: Int) {
         pool = JedisPool(
@@ -40,6 +42,7 @@ class RedisEvents : Events {
                     jedis.zrevrangeByScore("events:env:version:$envId", "+inf", "($year") +
                     jedis.zrevrangeByScore("events:env:release:$envId", "+inf", "($year") +
                     jedis.zrevrangeByScore("events:env:runtime:$envId", "+inf", "($day")
+                            .take(RUNTIME_EVENT_LIMIT)
                     //jedis.zrange("events:global", 0, -1)
             )
         }
@@ -54,6 +57,7 @@ class RedisEvents : Events {
                     jedis.zrevrangeByScore("events:component:version:$componentId", "+inf", "($year") +
                     jedis.zrevrangeByScore("events:component:release:$componentId", "+inf", "($year") +
                     jedis.zrevrangeByScore("events:component:runtime:$componentId", "+inf", "($day")
+                            .take(RUNTIME_EVENT_LIMIT)
                     //jedis.zrange("events:component:$componentId", 0, -1) +
                     //jedis.zrange("events:global", 0, -1)
             )
