@@ -241,6 +241,18 @@ class WorkApp extends React.Component<Props, State> {
             .catch((error) => console.log("Work unarchive error", error.response));
     }
 
+    reloadScm(componentIds: Array<string>) {
+        console.info("Reloading", componentIds);
+        axios.put('/data/components/reload-scm?componentIds=' + componentIds)
+            .then(response => {
+                console.log("component reloaded", response.data);
+                this.retrieveWorkDetail(this.props.match.params.id);
+            })
+            .catch(function (error) {
+                console.log("component reload error", error.response);
+            });
+    }
+
     limit(commits: Array<CommitType>): Array<CommitType> {
         const count = Math.min(commits.length, this.state.commitLimit);
         return commits.slice(0, count);
@@ -290,6 +302,9 @@ class WorkApp extends React.Component<Props, State> {
                                                    }
                                                </button>
                                            </Secure>
+                                           <button onClick={e =>
+                                                    this.reloadScm(workDetail.work.components.concat(workDetail.work.missingComponents).map(c => c.id))}
+                                           >SCM</button>
                                            {!workDetail.work.archived && [
                                                <Secure key="Edit" permission="work.manage">
                                                    <button onClick={() => this.editWork()}>Edit</button>
@@ -342,8 +357,12 @@ class WorkApp extends React.Component<Props, State> {
                                {workDetail && workDetail.details &&
                                     workDetail.details.filter(componentFilter).length + '/' + workDetail.details.length + ' components '
                                }
-                               <button disabled={this.state.componentHighlight === 'all'} onClick={e => this.setComponentHighlight('all')}>ALL</button>
-                               <button disabled={this.state.componentHighlight === 'changes'} onClick={e => this.setComponentHighlight('changes')}>CHANGES</button>
+                               <button disabled={this.state.componentHighlight === 'all'}
+                                       onClick={e => this.setComponentHighlight('all')}
+                                       title="All components">ALL</button>
+                               <button disabled={this.state.componentHighlight === 'changes'}
+                                       onClick={e => this.setComponentHighlight('changes')}
+                                       title={"Components with changes not released to " + this.state.refEnv}>CHANGES</button>
                            </div>
                            <div style={{clear: 'both'}} />
                        </div>
@@ -375,6 +394,8 @@ class WorkApp extends React.Component<Props, State> {
                                                 <Link to={"/component/" + d.componentId}>{d.componentLabel}</Link>
                                                 &nbsp;
                                                 {d.notDeployed ? (this.state.refEnv && 'Not Deployed') : d.upToDate ? 'Up To Date' : (d.commits.length - 1)+' changes'}
+                                                &nbsp;
+                                                <button onClick={e => this.reloadScm([d.componentId])}>scm</button>
                                            </h3>
                                            <CommitLog type={d.scmType} commits={this.limit(d.commits)} highlightedIssues={highlightedIssues} />
                                            {d.commits.length > this.state.commitLimit && <i>... {d.commits.length - this.state.commitLimit} more filtered commits</i>}
