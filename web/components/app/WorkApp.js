@@ -21,6 +21,9 @@ import {WorkStatus} from "../work/WorkStatus";
 import {joinTags, splitTags} from "../common/utils";
 import {ApplicationLayout} from "./common/ApplicationLayout";
 import {Badge} from "../common/Badge";
+import {BuildLink} from "../build/BuildLink";
+import {BuildNumber} from "../build/BuildNumber";
+import {BuildStatus} from "../build/BuildStatus";
 
 type Props = {
     match: any
@@ -243,14 +246,20 @@ class WorkApp extends React.Component<Props, State> {
 
     reloadScm(componentIds: Array<string>) {
         console.info("Reloading", componentIds);
-        axios.put('/data/components/reload-scm?componentIds=' + componentIds)
-            .then(response => {
-                console.log("component reloaded", response.data);
-                this.retrieveWorkDetail(this.props.match.params.id);
-            })
-            .catch(function (error) {
-                console.log("component reload error", error.response);
-            });
+        axios.put('/data/components/reload-scm?componentIds=' + componentIds.join(","))
+            .then(response => this.retrieveWorkDetail(this.props.match.params.id))
+            .catch(error => console.log("component reload error", error.response));
+    }
+    reloadBuild(componentIds: Array<string>) {
+        console.info("Reloading build ", componentIds);
+        axios.put('/data/components/reload-build?componentIds=' + componentIds.join(","))
+            .then(response => this.retrieveWorkDetail(this.props.match.params.id))
+            .catch(error => console.log("component build reload error", error.response));
+    }
+    reloadSonar(componentIds: Array<string>) {
+        axios.put('/data/components/reload-sonar?componentIds=' + componentIds.join(","))
+            .then(response => this.retrieveWorkDetail(this.props.match.params.id))
+            .catch(error => console.log("sonar reload error", error.response));
     }
 
     limit(commits: Array<CommitType>): Array<CommitType> {
@@ -275,6 +284,8 @@ class WorkApp extends React.Component<Props, State> {
             componentFilter = d => d.commits.length > 1
         }
 
+        const allComponents = workDetail && workDetail.work && workDetail.work.components.concat(workDetail.work.missingComponents) || [];
+
         return (
             <ApplicationLayout title="Work List"
                header={() =>
@@ -294,17 +305,17 @@ class WorkApp extends React.Component<Props, State> {
                                <div>
                                    {!this.state.workEdition &&
                                    <div>
-                                       <div style={{float: 'right'}}>
+                                       <div className="items" style={{float: 'right'}}>
                                            <Secure permission="work.status">
-                                               <button onClick={() => this.state.selectedNewStatus && this.changeWorkStatus(this.state.selectedNewStatus)}>
-                                                   {this.state.selectedNewStatus && this.state.selectedNewStatus !== workDetail.work.status &&
-                                                   <span>Status to {this.state.selectedNewStatus}</span>
-                                                   }
-                                               </button>
+                                               {this.state.selectedNewStatus && this.state.selectedNewStatus !== workDetail.work.status &&
+                                                    <button onClick={() => this.state.selectedNewStatus && this.changeWorkStatus(this.state.selectedNewStatus)}>
+                                                        <span>Status to {this.state.selectedNewStatus}</span>
+                                                    </button>
+                                               }
                                            </Secure>
-                                           <button onClick={e =>
-                                                    this.reloadScm(workDetail.work.components.concat(workDetail.work.missingComponents).map(c => c.id))}
-                                           >SCM</button>
+                                           <button onClick={e => this.reloadScm(allComponents.map(c => c.id))}>SCM</button>
+                                           <button onClick={e => this.reloadSonar(allComponents.map(c => c.id))}>SONAR</button>
+                                           <button onClick={e => this.reloadBuild(allComponents.map(c => c.id))}>BUILD</button>
                                            {!workDetail.work.archived && [
                                                <Secure key="Edit" permission="work.manage">
                                                    <button onClick={() => this.editWork()}>Edit</button>
@@ -344,16 +355,16 @@ class WorkApp extends React.Component<Props, State> {
                            </div>
                        }
                        <div>
-                       {workDetail && workDetail.work &&
-                           <div style={{display: 'inline-block'}}>
-                               <button disabled={this.state.commitHighlight === 'all'} onClick={e => this.setCommitHighlight('all')}>ALL</button>
-                               <button disabled={this.state.commitHighlight === 'work'} onClick={e => this.setCommitHighlight('work')}>WORK</button>
-                               {workDetail.work.issues.map(issue =>
-                                   <button key={issue.issue} disabled={this.state.commitHighlight === issue.issue} onClick={e => this.setCommitHighlight(issue.issue, false)}>{issue.issue}</button>
-                               )}
-                           </div>
-                       }
-                           <div style={{float: 'right'}}>
+                           {workDetail && workDetail.work &&
+                               <div className="items" style={{display: 'inline'}}>
+                                   <button disabled={this.state.commitHighlight === 'all'} onClick={e => this.setCommitHighlight('all')}>ALL</button>
+                                   <button disabled={this.state.commitHighlight === 'work'} onClick={e => this.setCommitHighlight('work')}>WORK</button>
+                                   {workDetail.work.issues.map(issue =>
+                                       <button key={issue.issue} disabled={this.state.commitHighlight === issue.issue} onClick={e => this.setCommitHighlight(issue.issue, false)}>{issue.issue}</button>
+                                   )}
+                               </div>
+                           }
+                           <div className="items" style={{float: 'right'}}>
                                {workDetail && workDetail.details &&
                                     workDetail.details.filter(componentFilter).length + '/' + workDetail.details.length + ' components '
                                }
@@ -362,7 +373,22 @@ class WorkApp extends React.Component<Props, State> {
                                        title="All components">ALL</button>
                                <button disabled={this.state.componentHighlight === 'changes'}
                                        onClick={e => this.setComponentHighlight('changes')}
-                                       title={"Components with changes not released to " + this.state.refEnv}>CHANGES</button>
+                                       title={'Components with changes not released to ' + (this.state.refEnv || '')}>CHANGES</button>
+                               
+                               <select name="type" value={this.state.refEnv}
+                                       onChange={e => this.changeRefEnv(e.target.value)}
+                                       title="Reference environment"
+                                       style={{width: '150px'}}>
+                                   <option value=""></option>
+                                   {this.state.envs.map(e =>
+                                       <option key={e.env} value={e.env}>{e.description} ({e.env})</option>
+                                   )}
+                               </select>
+                               <input type="text" value={this.state.commitLimit}
+                                      onChange={e => this.changeCommitLimit(e.target.value)}
+                                      title="Commit limit"
+                                      style={{width: '30px'}} />
+
                            </div>
                            <div style={{clear: 'both'}} />
                        </div>
@@ -370,20 +396,6 @@ class WorkApp extends React.Component<Props, State> {
                }
                main={() =>
                    <Fragment>
-                       <div style={{float: 'right', display: 'inline-block'}}>
-                           {this.state.refEnv}&nbsp;
-                           <select name="type" value={this.state.refEnv}
-                                   onChange={e => this.changeRefEnv(e.target.value)}
-                                   style={{width: '150px', fontSize: 9}}>
-                               <option value=""></option>
-                               {this.state.envs.map(e =>
-                                   <option key={e.env} value={e.env}>{e.description} ({e.env})</option>
-                               )}
-                           </select>
-                           <input type="text" value={this.state.commitLimit}
-                                  onChange={e => this.changeCommitLimit(e.target.value)}
-                                  style={{width: '30px'}} />
-                       </div>
                        <div>
                            {workDetail && workDetail.details &&
                                 <Fragment>
@@ -391,11 +403,22 @@ class WorkApp extends React.Component<Props, State> {
                                        (workDetail.work || d.commits.length > 0) &&
                                        <div key={d.componentId}>
                                            <h3 title={d.componentId}>
-                                                <Link to={"/component/" + d.componentId}>{d.componentLabel}</Link>
-                                                &nbsp;
-                                                {d.notDeployed ? (this.state.refEnv && 'Not Deployed') : d.upToDate ? 'Up To Date' : (d.commits.length - 1)+' changes'}
-                                                &nbsp;
-                                                <button onClick={e => this.reloadScm([d.componentId])}>scm</button>
+                                               <Link to={"/component/" + d.componentId}>{d.componentLabel}</Link>
+                                               &nbsp;
+                                               {d.notDeployed ? (this.state.refEnv && 'Not Deployed') : d.upToDate ? 'Up To Date' : (d.commits.length - 1) + ' changes'}
+                                               &nbsp;
+                                               <span className="items">
+                                                   <button onClick={e => this.reloadScm([d.componentId])}>scm</button>
+                                                   <button onClick={e => this.reloadSonar([d.componentId])}>sonar</button>
+                                                   <button onClick={e => this.reloadBuild([d.componentId])}>build</button>
+                                                   <BuildNumber number={d.buildNumber}/>
+                                                   <BuildStatus status={d.buildStatus}/>
+                                                   <DateTime date={d.buildTimestamp}/>
+                                                   <BuildLink
+                                                       server={d.jenkinsServer}
+                                                       job={d.jenkinsJob}
+                                                       url={d.jenkinsUrl}/>
+                                               </span>
                                            </h3>
                                            <CommitLog type={d.scmType} commits={this.limit(d.commits)} highlightedIssues={highlightedIssues} />
                                            {d.commits.length > this.state.commitLimit && <i>... {d.commits.length - this.state.commitLimit} more filtered commits</i>}

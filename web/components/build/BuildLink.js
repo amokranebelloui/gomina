@@ -1,6 +1,7 @@
 // @flow
 import React from "react";
 import jenkinsIcon from "./build-jenkins.png";
+import {Badge} from "../common/Badge";
 
 type Props = {
     server?: ?string,
@@ -19,25 +20,25 @@ class BuildLink extends React.Component<Props> {
             ' job:' + (this.props.job||'?') +
             ' url:' + (this.props.url||'?');
         return (
-            <a href={this.props.url} target="_blank"
-               title={title}
-               style={{
-                   display: 'table', 
-                   opacity: opacity,
-                   padding: '1px',
-                   borderRadius: '3px',
-                   color: 'white',
-                   backgroundColor: '#E8BD30'
-               }}>
-                <img style={{opacity: opacity, marginRight: '3px', display: 'table-cell', verticalAlign: 'middle'}}
-                     src={icon} width="12" height="12"/>
-                <span style={{display: 'table-cell', verticalAlign: 'middle'}}>
+            <Badge color="white" backgroundColor="#E8BD30">
+                <img style={{opacity: opacity, marginRight: '3px', marginBottom: '1px',
+                    //display: 'table-cell',
+                    verticalAlign: 'middle'}}
+                     src={icon} width="10" height="10"/>
+                <a href={this.props.url} target="_blank"
+                   title={title}
+                   style={{
+                       //display: 'table',
+                       opacity: opacity,
+                       //padding: '1px',
+                       borderRadius: '3px'
+                   }}>
                     {this.props.server ? this.props.server : ""}
                     {this.props.job &&
                         (this.props.server ? ":" : "?:") + this.props.job
                     }
-                </span>
-            </a>
+                </a>
+            </Badge>
         )
     }
 }

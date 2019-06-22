@@ -15,6 +15,7 @@ import org.neo.gomina.api.component.CommitDetail
 import org.neo.gomina.api.component.CommitLogEnricher
 import org.neo.gomina.api.component.ComponentRef
 import org.neo.gomina.api.component.toComponentRef
+import org.neo.gomina.integration.jenkins.JenkinsService
 import org.neo.gomina.integration.scm.impl.ScmClients
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.event.Events
@@ -53,7 +54,15 @@ data class ComponentWorkDetail(val componentId: String,
                                val scmType: String?,
                                val commits: List<CommitDetail>,
                                val upToDate: Boolean,
-                               val notDeployed: Boolean
+                               val notDeployed: Boolean,
+
+                               var jenkinsServer: String? = null,
+                               var jenkinsJob: String? = null,
+                               var jenkinsUrl: String? = null,
+                               var buildNumber: String? = null,
+                               var buildStatus: String? = null,
+                               var buildTimestamp: Long? = null
+
 )
 
 /*
@@ -90,6 +99,7 @@ class WorkApi {
     @Inject private lateinit var componentRepo: ComponentRepo
     @Inject private lateinit var scmClients: ScmClients
     @Inject private lateinit var commitLogEnricher: CommitLogEnricher
+    @Inject private lateinit var jenkinsService: JenkinsService
     @Inject private lateinit var inventory: Inventory
     @Inject private lateinit var topology: Topology
     @Inject private lateinit var users: Users
@@ -268,7 +278,13 @@ class WorkApi {
                                         scmType = component.scm?.type,
                                         commits = commits,
                                         upToDate = last == 0,
-                                        notDeployed = last == -1
+                                        notDeployed = last == -1,
+                                        jenkinsServer = component.jenkinsServer,
+                                        jenkinsJob = component.jenkinsJob,
+                                        jenkinsUrl = jenkinsService.url(component),
+                                        buildNumber = component.buildNumber,
+                                        buildStatus = if (component.buildBuilding == true) "BUILDING" else component.buildStatus,
+                                        buildTimestamp = component.buildTimestamp
                                 )
                             }
                             catch (e: Exception) {

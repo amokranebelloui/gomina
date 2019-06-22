@@ -36,7 +36,13 @@ type ComponentWorkType = {
     scmType?: ?string,
     commits: Array<any>, // FIXME Replace by CommitDetail
     upToDate: boolean,
-    notDeployed: boolean
+    notDeployed: boolean,
+    jenkinsServer?: ?string,
+    jenkinsJob?: ?string,
+    jenkinsUrl?: ?string,
+    buildNumber?: ?string,
+    buildStatus?: ?string,
+    buildTimestamp?: ?number
 }
 
 type WorkDataType = {

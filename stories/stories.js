@@ -198,7 +198,7 @@ storiesOf('CommitLog', module)
 storiesOf('Build', module)
     .add('Build Link', () => {
         return [
-            <BuildLink server="home" job="mylib" />,
+            <BuildLink server="home" job="MYLIB" />,
             <BuildLink server="home" job="mylib" url="http://jenkins.io" />,
             <BuildLink server="home" />,
             <BuildLink job="mylib"/>,
