@@ -8,13 +8,12 @@ import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.eclipse.jgit.treewalk.TreeWalk
 import org.neo.gomina.integration.scm.impl.CommitDecorator
-import org.neo.gomina.model.scm.Branch
+import org.neo.gomina.model.scm.ScmBranch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
 import java.io.File
 import java.time.Instant
 import java.time.ZoneOffset
-import java.util.*
 
 
 /**
@@ -40,7 +39,7 @@ class GitClient : ScmClient {
         return masterName
     }
 
-    override fun getBranches(): List<Branch> {
+    override fun getBranches(): List<ScmBranch> {
         logger.info("Retrieve Branches")
         val branches = git.branchList().call()
         val result = branches.map {
@@ -56,7 +55,7 @@ class GitClient : ScmClient {
             }
             else null
 
-            Branch(name = branchName, originRevision = originRev)
+            ScmBranch(name = branchName, originRevision = originRev)
         }
         logger.info("Retrieved ${result.size} Branches")
         return result

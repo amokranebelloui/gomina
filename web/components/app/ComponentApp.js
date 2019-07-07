@@ -30,6 +30,7 @@ import {ComponentSonar} from "../component/ComponentSonar";
 import {Well} from "../common/Well";
 import {ComponentMetadata} from "../component/ComponentMatadata";
 import {filterEvents} from "../environment/EventFilter";
+import {BranchBuild} from "../component/BranchBuild";
 
 class ComponentApp extends React.Component {
     
@@ -183,6 +184,11 @@ class ComponentApp extends React.Component {
         axios.put('/data/components/' + componentId + '/build?server=' + server + '&job=' + job)
             .then(() => this.retrieveComponent(componentId))
             .catch((error) => console.error("cannot edit buil", error.response));
+    }
+    editBranchBuild(componentId, branchId, server, job) {
+        axios.put('/data/components/' + componentId + '/branch/build?branchId=' + branchId + '&server=' + server + '&job=' + job)
+            .then(() => this.retrieveComponent(componentId))
+            .catch((error) => console.error("cannot edit branch build", error.response));
     }
     addSystem(componentId, system) {
         axios.put('/data/components/' + componentId + '/add-system/' + system)
@@ -562,18 +568,32 @@ class ComponentApp extends React.Component {
                        <Route path="/component/:id/branches" render={props =>
                             <Fragment>
                                 <h3>Branches</h3>
+                                <table>
                                 {component.branches && sortBranchesDetails(component.branches).map(branch =>
-                                    <div key={branch.name}
-                                         title={"from: " + (branch.origin || "") + " rev:" + (branch.originRevision || "")}>
-                                        <Branch branch={branch} />
-                                        {!isTrunk(branch.name) && (
-                                            branch.dismissed
-                                                ? <button onClick={e => this.reactivateBranch(component.id, branch.name)}>Reactivate</button>
-                                                : <button onClick={e => this.dismissBranch(component.id, branch.name)}>Dismiss</button>
-                                        )}
-                                        <br/>
-                                    </div>
+                                    <tr>
+                                        <td>
+                                            <div key={branch.name}
+                                                 title={"from: " + (branch.origin || "") + " rev:" + (branch.originRevision || "")}>
+                                                <Branch branch={branch} />
+                                                &nbsp;
+                                                {!isTrunk(branch.name) && (
+                                                    branch.dismissed
+                                                        ? <button onClick={e => this.reactivateBranch(component.id, branch.name)}>Reactivate</button>
+                                                        : <button onClick={e => this.dismissBranch(component.id, branch.name)}>Dismiss</button>
+                                                )}
+                                                <br/>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <BranchBuild component={component} branch={branch}
+                                                         buildServers={this.state.buildServers}
+                                                         onBuildEdited={(id, s, j) => this.editBranchBuild(id, branch.name, s, j)}
+                                                         onReloadBuild={id => this.reloadBuild(id)}
+                                            />
+                                        </td>
+                                    </tr>
                                 )}
+                                </table>
                             </Fragment>
                        }/>
                        <Route path="/component/:id/doc/:docId" render={props =>

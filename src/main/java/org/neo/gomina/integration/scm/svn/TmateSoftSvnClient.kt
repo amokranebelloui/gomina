@@ -3,7 +3,7 @@ package org.neo.gomina.integration.scm.svn
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.scm.impl.CommitDecorator
-import org.neo.gomina.model.scm.Branch
+import org.neo.gomina.model.scm.ScmBranch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
 import org.tmatesoft.svn.core.SVNDirEntry
@@ -48,7 +48,7 @@ class TmateSoftSvnClient : ScmClient {
         return "trunk"
     }
 
-    override fun getBranches(): List<Branch> {
+    override fun getBranches(): List<ScmBranch> {
         logger.info("Retrieve Branches")
 
         val entries = arrayListOf<SVNDirEntry>()
@@ -71,10 +71,10 @@ class TmateSoftSvnClient : ScmClient {
                     svnProperties,
                     { logEntries.add(it) })
             val copy = logEntries.lastOrNull()?.changedPaths?.values?.firstOrNull()
-            Branch(name = "branches/${it.name}", origin = copy?.copyPath, originRevision = copy?.copyRevision?.toString())
+            ScmBranch(name = "branches/${it.name}", origin = copy?.copyPath, originRevision = copy?.copyRevision?.toString())
         }
         logger.info("Retrieved ${result.size} Branches")
-        return result + Branch("trunk")
+        return result + ScmBranch("trunk")
     }
 
     override fun getLog(branch: String, startRev: String, count: Int): List<Commit> {

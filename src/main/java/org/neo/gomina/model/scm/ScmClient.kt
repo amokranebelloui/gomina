@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.model.issues.IssueProjects
 import org.neo.gomina.model.issues.extractIssues
 import org.neo.gomina.model.version.Version
-import org.neo.gomina.model.version.isStableVersion
 import java.time.LocalDateTime
 
 data class Commit (
@@ -67,18 +66,17 @@ fun List<Commit>.activity(reference: LocalDateTime): Int {
             .sumBy { it }
 }
 
-data class Branch(
+data class ScmBranch(
         var name: String,
         var origin: String? = null,
-        var originRevision: String? = null,
-        var dismissed: Boolean = false
+        var originRevision: String? = null
 )
 
 interface ScmClient {
 
     fun getTrunk(): String = ""
 
-    fun getBranches(): List<Branch> = arrayListOf()
+    fun getBranches(): List<ScmBranch> = arrayListOf()
 
     /** Get log from HEAD to revision, max @count elements */
     fun getLog(branch: String, rev: String, count: Int): List<Commit>

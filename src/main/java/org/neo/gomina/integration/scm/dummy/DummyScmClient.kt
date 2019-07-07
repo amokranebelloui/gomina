@@ -9,7 +9,7 @@ import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.Artifact
-import org.neo.gomina.model.scm.Branch
+import org.neo.gomina.model.scm.ScmBranch
 import org.neo.gomina.model.scm.Commit
 import org.neo.gomina.model.scm.ScmClient
 import java.io.File
@@ -40,12 +40,12 @@ class DummyScmClient : ScmClient {
         return "trunk"
     }
 
-    override fun getBranches(): List<Branch> {
+    override fun getBranches(): List<ScmBranch> {
         val projectData = getProjectData(url)
         val branches = projectData?.let { project ->
-            project.keys.filter { key -> key.startsWith("branch") }.map { key -> Branch(key, originRevision = (project[key] as Map<String, Any>)["origin"] as String?) }
+            project.keys.filter { key -> key.startsWith("branch") }.map { key -> ScmBranch(key, originRevision = (project[key] as Map<String, Any>)["origin"] as String?) }
         } ?: emptyList()
-        return listOf(Branch("trunk")) + branches
+        return listOf(ScmBranch("trunk")) + branches
     }
 
     override fun getLog(branch: String, rev: String, count: Int): List<Commit> {

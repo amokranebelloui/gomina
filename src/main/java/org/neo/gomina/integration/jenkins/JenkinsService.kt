@@ -14,11 +14,14 @@ class JenkinsService {
     fun servers() = jenkinsConfig.servers.map { it.id }
 
     fun url(component: Component): String? {
-        return if (component.jenkinsJob?.isNotBlank() == true) {
-            val root = jenkinsConfig.serverMap[component.jenkinsServer]?.location
-            return "$root${URLCodec().encode(component.jenkinsJob).replace("+", "%20")}"
-        }
-        else null
+        return url(component.jenkinsServer, component.jenkinsJob)
+    }
+
+    fun url(server: String, job: String?): String? {
+        return if (job?.isNotBlank() == true) {
+            val root = jenkinsConfig.serverMap[server]?.location
+            return "$root${URLCodec().encode(job).replace("+", "%20")}"
+        } else null
     }
 
     fun reload(component: Component) {
@@ -26,6 +29,13 @@ class JenkinsService {
             // FIXME Return something when failing to retrieve status
             jenkinsConnector.getStatus(url)?.let {
                 componentRepo.updateBuildStatus(component.id, it.id, it.result, it.building, it.timestamp)
+            }
+        }
+        component.branches.forEach { b ->
+            url(b.buildServer, b.buildJob)?.let { url ->
+                jenkinsConnector.getStatus(url)?.let {
+                    componentRepo.updateBranchBuildStatus(component.id, b.name, it.id, it.result, it.building, it.timestamp)
+                }
             }
         }
     }

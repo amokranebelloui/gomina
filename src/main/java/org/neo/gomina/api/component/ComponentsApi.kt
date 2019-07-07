@@ -80,6 +80,12 @@ data class BranchDetail (
         var name: String,
         var origin: String? = null,
         var originRevision: String? = null,
+        var buildServer: String = "",
+        var buildJob: String? = null,
+        var buildUrl: String? = null,
+        var buildNumber: String? = null,
+        var buildStatus: String? = null,
+        var buildTimestamp: Long? = null,
         var dismissed: Boolean
 )
 
@@ -180,6 +186,7 @@ class ComponentsApi {
         router.get("/:componentId/versions").handler(this::versions)
         router.get("/:componentId/versions/current").handler(this::currentVersions)
 
+        router.put("/:componentId/branch/build").handler(this::editBranchBuild)
         router.put("/:componentId/branch/dismiss").handler(this::branchDismiss)
         router.put("/:componentId/branch/reactivate").handler(this::branchReactivate)
 
@@ -384,6 +391,22 @@ class ComponentsApi {
         }
         catch (e: Exception) {
             logger.error("Cannot get current versions $componentId")
+            ctx.fail(500)
+        }
+    }
+
+    private fun editBranchBuild(ctx: RoutingContext) {
+        val componentId = ctx.request().getParam("componentId")
+        val branchId = ctx.request().getParam("branchId")
+        try {
+            val server = ctx.request().getParam("server")
+            val job = ctx.request().getParam("job")
+            logger.info("Edit Branch Build $componentId $branchId $server $job")
+            componentRepo.editBranchBuild(componentId, branchId, server, job)
+            ctx.response().putHeader("content-type", "text/html").end()
+        }
+        catch (e: Exception) {
+            logger.error("Cannot dismiss Branch $componentId $branchId")
             ctx.fail(500)
         }
     }
@@ -658,9 +681,14 @@ class ComponentsApi {
             val componentId = ctx.request().getParam("componentId")
             val server = ctx.request().getParam("server")
             val job = ctx.request().getParam("job")
-            logger.info("Edit Buil $componentId $server $job ...")
+            logger.info("Edit Build $componentId $server $job ...")
+            val component = componentRepo.get(componentId)
             componentRepo.editBuild(componentId, server, job)
-            componentRepo.get(componentId)?.let { component ->
+            component?.scm?.let { scm ->
+                val client = scmClients.getClient(scm)
+                componentRepo.editBranchBuild(componentId, client.getTrunk(), server, job)
+            }
+            component?.let { component ->
                 logger.info("Reload Jenkins data for $componentId ...")
                 jenkinsService.reload(component)
             }
@@ -823,7 +851,14 @@ private fun ComponentDetail.apply(component: Component, sonarService: SonarServi
     this.owner = component.owner
     this.criticity = component.criticity
     this.branches = component.branches.map {
-        BranchDetail(name = it.name, origin = it.origin, originRevision = it.originRevision, dismissed = it.dismissed)
+        BranchDetail(name = it.name, origin = it.origin, originRevision = it.originRevision,
+                buildServer = it.buildServer,
+                buildJob = it.buildJob,
+                buildUrl = jenkinsService.url(it.buildServer, it.buildJob),
+                buildNumber = it.buildNumber,
+                buildStatus = if (it.buildBuilding == true) "BUILDING" else it.buildStatus,
+                buildTimestamp = it.buildTimestamp,
+                dismissed = it.dismissed)
     }
     this.docFiles = component.docFiles
     this.changes = component.changes
