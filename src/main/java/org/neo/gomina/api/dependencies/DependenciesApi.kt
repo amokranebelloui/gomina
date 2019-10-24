@@ -21,6 +21,7 @@ import org.neo.gomina.integration.maven.parseArtifact
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
 import org.neo.gomina.model.component.ComponentVersionService
+import org.neo.gomina.model.component.VersionRelease
 import org.neo.gomina.model.dependency.*
 import org.neo.gomina.model.dependency.Function
 import org.neo.gomina.model.inventory.Inventory
@@ -349,8 +350,8 @@ class DependenciesApi {
         try {
             val environments = inventory.getEnvironments()
             val summaryMap = componentRepo.getAll().filter { !it.disabled }.map { c ->
-                val instances = topology.buildExtInstances(c, environments)
-                val currentVersions = componentVersionService.currentVersions(c, instances)
+                val instances: List<ExtInstance> = topology.buildExtInstances(c, environments)
+                val currentVersions: List<VersionRelease> = componentVersionService.currentVersions(c, instances)
                 c.id to ComponentVersionsSummary(c, instances, currentVersions.map { it.version.simple() })
             }
             .toMap()

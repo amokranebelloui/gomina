@@ -28,6 +28,9 @@ type State = {
     libraries: Array<LibraryType>,
     libraryId: ?string,
     library: Array<LibraryUsageType>,
+    showUnused: boolean,
+    showVersions: boolean,
+    showEnv: ?string,
     filterComponent: string,
     sort: SortDirection
 }
@@ -106,14 +109,44 @@ class LibrariesApp extends React.Component<Props, State> {
         const libraries = filterLibraries(this.state.libraries, this.state.search) || [];
         const totalCount = this.state.libraries && this.state.libraries.length || 0;
 
-
+        const libraryUsage = this.sortLibraryUsage(this.state.library)
+            .map(libraryUsage => ({
+                    "version": libraryUsage.version,
+                    "components": libraryUsage.components
+                        .filter(c => c.component.label && c.component.label.match(RegExp(this.state.filterComponent, 'i')))
+                        .map(u => ({
+                            "component": u.component,
+                            "version": u.version,
+                            "instances": u.instances.filter(i => !this.state.showEnv || i.env === this.state.showEnv),
+                        }))
+                        .filter(c => this.state.showVersions || c.instances.length > 0)
+                })
+            )
+            .filter(libraryUsage => this.state.showUnused || libraryUsage.components.length > 0);
         return (
-            <ApplicationLayout title="Libraries"
+            <ApplicationLayout title="Libraries 1"
                header={() =>
                    <Fragment>
                        <h3 style={{display: 'inline-block'}}>Usage of '{this.state.libraryId}'</h3>
                        <div style={{float: 'right'}}>
+                           Show unused
+                           <input type="checkbox" checked={this.state.showUnused} onChange={e => this.setState({showUnused: e.target.checked})} />
+                           &nbsp;
+                           Show versions
+                           <input type="checkbox" checked={this.state.showVersions} onChange={e => this.setState({showVersions: e.target.checked})} />
+                           &nbsp;
+                           Envs
+                           <select name="env" value={this.state.showEnv}
+                                   onChange={e => this.setState({showEnv: e.target.value})}>
+                               <option value=""></option>
+                               {this.state.envs.map(e =>
+                                   <option value={e.env}>{e.env}</option>
+                               )}
+                           </select>
+                           &nbsp;
+                           Component:
                            <input type="text" value={this.state.filterComponent} onChange={e => this.setState({filterComponent: e.target.value})} />
+                           &nbsp;
                            <button onClick={e => this.changeSort('ascending')}
                                    style={{padding: '2px', color: this.state.sort === 'ascending' ? 'gray' : null}}>
                                OLD FIRST
@@ -133,7 +166,7 @@ class LibrariesApp extends React.Component<Props, State> {
 
                            <table width="100%">
                                <tbody>
-                               {this.sortLibraryUsage(this.state.library).map(libUsage =>
+                               {libraryUsage.map(libUsage =>
                                    <tr key={libUsage.version}>
                                        <td valign="top" style={{
                                            textAlign: 'right', minWidth: '40px', padding: '0px 5px',
@@ -145,11 +178,10 @@ class LibrariesApp extends React.Component<Props, State> {
                                        </td>
                                        <td width="100%" style={{borderBottom: '1px solid lightgray'}}>
                                            {this.groupByComponent(libUsage.components).map(usage =>
-                                               usage.component.label && usage.component.label.match(RegExp(this.state.filterComponent, 'i')) &&
-                                                   <Fragment>
-                                                       <ComponentVersions usage={usage} envs={this.state.envs} sort={this.state.sort} />
-                                                       <br/>
-                                                   </Fragment>
+                                               <Fragment>
+                                                   <ComponentVersions usage={usage} envs={this.state.envs} sort={this.state.sort} />
+                                                   <br/>
+                                               </Fragment>
                                            )}
                                        </td>
                                    </tr>
