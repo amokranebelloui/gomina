@@ -7,8 +7,8 @@ import org.apache.logging.log4j.LogManager
 import org.neo.gomina.integration.maven.Artifact
 import org.neo.gomina.model.component.*
 import org.neo.gomina.model.issues.IssueProjects
-import org.neo.gomina.model.scm.Branch
 import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.ScmBranch
 import org.neo.gomina.model.version.Version
 import redis.clients.jedis.JedisPool
 import java.time.*
@@ -142,6 +142,12 @@ class RedisComponentRepo : ComponentRepo {
     private fun toBranch(id: String, map: Map<String, String>): Branch {
         return Branch(
                 name = id,
+                buildServer = map["build_server"] ?: "",
+                buildJob = map["build_job"],
+                buildNumber = map["build_number"],
+                buildStatus = map["build_status"],
+                buildBuilding = map["build_building"]?.toBoolean(),
+                buildTimestamp = map["build_timestamp"]?.toLong(),
                 dismissed = map["dismissed"]?.toBoolean() == true
         )
     }
@@ -330,6 +336,18 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
+    override fun updateBranchBuildStatus(componentId: String, branchId: String, number: String?, status: String?, building: Boolean?, timestamp: Long?) {
+        pool.resource.use { jedis ->
+            jedis.hmset("branch:$componentId:$branchId", listOfNotNull(
+                    "build_update_time" to now(Clock.systemUTC()).format(ISO_DATE_TIME),
+                    number?. let { "build_number" to it },
+                    status?. let { "build_status" to it },
+                    building?. let { "build_building" to it.toString() },
+                    timestamp?. let { "build_timestamp" to it.toString() }
+            ).toMap())
+        }
+    }
+
     override fun updateVersions(componentId: String, latest: Version?, released: Version?, changes: Int?) {
         pool.resource.use { jedis ->
             val data = mapOf(
@@ -385,7 +403,7 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
-    override fun updateBranches(componentId: String, branches: List<Branch>) {
+    override fun updateBranches(componentId: String, branches: List<ScmBranch>) {
         pool.resource.use { jedis ->
             val pipe = jedis.pipelined()
             //pipe.hset("component:$componentId", "branches", branches.map { it.name }.toStr())
@@ -395,6 +413,15 @@ class RedisComponentRepo : ComponentRepo {
                 ))
             }
             pipe.sync()
+        }
+    }
+
+    override fun editBranchBuild(componentId: String, branchId: String, buildServer: String, buildJob: String) {
+        pool.resource.use { jedis ->
+            jedis.persist("branch:$componentId:$branchId", mapOf(
+                    "build_server" to buildServer,
+                    "build_job" to buildJob
+            ))
         }
     }
 

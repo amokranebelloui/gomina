@@ -6,6 +6,12 @@ type BranchDetailType = {
     name: string,
     origin?: ?string,
     originRevision?: ?string,
+    buildServer: string,
+    buildJob?: ?string,
+    buildUrl?: ?string,
+    buildNumber?: ?string,
+    buildStatus?: ?string,
+    buildTimestamp?: ?number,
     dismissed?: boolean
 }
 
