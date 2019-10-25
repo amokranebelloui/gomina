@@ -1,6 +1,8 @@
 Database structure    
 Contexts, entities, schemas  
 
+## Data Schema
+
 ### Users (0)
 
 ### Components (1)
@@ -64,8 +66,13 @@ Contexts, entities, schemas
 - knowledge:user:`<userId>` (zset) component{knowledge}
 
 ### Libraries (8) 
+ - library:`<artifactId>`:`<version>` (hash) dismissed
  - libraries:`<componentId>`:`<version>` (set) libraries used by a component
- - library:`<artifactId>`:`<version>` (set) components using a library
+ - library_usage:`<artifactId>`:`<version>` (set) components using a library
+
+## Migrations
+
+25/10 `eval "local log = {} for _,key in pairs(redis.call('keys','library:*')) do redis.call('rename', key, 'library_usage'..string.sub(key, 8)) table.insert(log, 'library_usage'..string.sub(key, 8)) end return log" 0`
 
 ## Tools
 

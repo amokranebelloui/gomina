@@ -393,12 +393,11 @@ class RedisComponentRepo : ComponentRepo {
         }
     }
 
-    override fun cleanSnapshotVersions(componentId: String) {
+    override fun dismissSnapshotVersion(componentId: String, branch: String, artifactId: Artifact, version: Version) {
         pool.resource.use { jedis ->
             val pipe = jedis.pipelined()
-            jedis.keys("versions:$componentId:*-SNAPSHOT").forEach {
-                pipe.del(it)
-            }
+            //pipe.zrem("versions:$componentId:$branch", "${artifactId.withoutVersion()}:${version.version}")
+            // FIXME Dismiss version rather than deleting
             pipe.sync()
         }
     }

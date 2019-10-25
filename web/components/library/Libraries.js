@@ -31,7 +31,7 @@ class LibraryCatalog extends React.Component<Props> {
                         {l.versions
                             .sort((a,b) => compareVersionsReverse(a.version, b.version))
                             .map(v =>
-                                <b key={v.version}>{v.version}<i style={{color: 'lightgray'}}>({v.dependents})</i> &nbsp;&nbsp;</b>
+                                <b key={v.version} style={{textDecoration: v.dismissed ? "line-through": null}}>{v.version}<i style={{color: 'lightgray'}}>({v.dependents})</i> &nbsp;&nbsp;</b>
                             )
                         }
                     </div>

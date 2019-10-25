@@ -49,10 +49,10 @@ data class CallChainDetail(val serviceId: String,
 data class FunctionData(val name: String, val type: String)
 data class FunctionUsageData(val name: String, val type: String, val usage: String? = null)
 
-data class VersionUsageDetail(val version: String, val dependents: Int)
+data class VersionUsageDetail(val version: String, val dismissed: Boolean, val dependents: Int)
 data class LibraryDetail(val artifactId: String, val versions: Collection<VersionUsageDetail>)
 
-data class LibraryUsageDetail(val version: String, val components: List<ComponentVersionDetail>)
+data class LibraryUsageDetail(val version: String, val dismissed: Boolean, val components: List<ComponentVersionDetail>)
 data class ComponentVersionDetail(val component: ComponentRef, val version: String, val instances: List<InstanceRefDetail>)
 
 class DependenciesApi {
@@ -331,7 +331,7 @@ class DependenciesApi {
             val libs = libraries.libraries()
                     .map { it.artifactId to it.versions.merge(components[it.artifactId]) }//.toMap()
                     .map { (artifactId, versions) ->
-                        LibraryDetail(artifactId.toString(), versions.map { VersionUsageDetail(it.version.version, it.dependents) })
+                        LibraryDetail(artifactId.toString(), versions.map { VersionUsageDetail(it.version.version, it.version.dismissed, it.dependents) })
                     }
 
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(libs))
@@ -385,7 +385,7 @@ class DependenciesApi {
                                         emptyList()
                                     }
                                 }
-                        LibraryUsageDetail(version.version, componentVersionsForVersion)
+                        LibraryUsageDetail(version.version, version.dismissed, componentVersionsForVersion)
                     }
 
             ctx.response().putHeader("content-type", "text/javascript").end(Json.encode(usageDetail))

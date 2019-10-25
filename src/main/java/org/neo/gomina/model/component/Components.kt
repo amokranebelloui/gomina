@@ -127,7 +127,7 @@ interface ComponentRepo {
     fun updateVersions(componentId: String, latest: Version?, released: Version?, changes: Int?)
     fun getVersions(componentId: String, branchId: String?): List<VersionRelease>
     fun addVersions(componentId: String, branch: String, versions: List<VersionRelease>)
-    fun cleanSnapshotVersions(componentId: String)
+    fun dismissSnapshotVersion(componentId: String, branch: String, artifactId: Artifact, version: Version)
 
     fun updateBranches(componentId: String, branches: List<ScmBranch>)
     fun editBranchBuild(componentId: String, branchId: String, buildServer: String, buildJob: String)

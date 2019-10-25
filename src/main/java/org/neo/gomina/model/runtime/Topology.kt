@@ -77,7 +77,7 @@ class Topology {
 
         val merge = merge(inventory, runtime)
 
-        return merge
+        val result = merge
                 .mapNotNull { (id, eInstance, eRuntime) ->
                     val svc = Service.safe(eInstance?.service?.svc ?: eRuntime?.indicators?.service)
                     val envService = eInstance?.let { services[it.envId to it.service.svc] }
@@ -85,9 +85,9 @@ class Topology {
                             ?: EnvService(id.first, Service(svc = svc, type = eRuntime?.indicators?.type, undefined = true))
                     if (envService.service.componentId == component.id) {
                         ExtInstance(id.first to id.second, component, envService.service, eInstance?.instance, eRuntime?.indicators)
-                    }
-                    else null
+                    } else null
                 }
+        return result
     }
 
 }

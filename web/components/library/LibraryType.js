@@ -3,6 +3,7 @@ import type {InstanceRefType} from "../environment/InstanceType";
 
 type VersionUsage = {
     version: string,
+    dismissed: boolean,
     dependents: number
 }
 
@@ -19,6 +20,7 @@ type ComponentVersionType = {
 
 type LibraryUsageType = {
     version: string,
+    dismissed: boolean,
     components: Array<ComponentVersionType>
 }
 

@@ -2,6 +2,7 @@ package org.neo.gomina.integration.scm
 
 import com.github.rjeschke.txtmark.Processor
 import org.apache.logging.log4j.LogManager
+import org.eclipse.aether.resolution.ArtifactResult
 import org.neo.gomina.integration.maven.Artifact
 import org.neo.gomina.integration.maven.MavenDependencyResolver
 import org.neo.gomina.integration.maven.MavenUtils
@@ -52,9 +53,6 @@ class ScmService {
         val scmClient = scmClients.getClient(scm)
         //-----------------------
 
-        componentRepo.cleanSnapshotVersions(component.id)
-        libraries.cleanSnapshotVersions(component.id)
-
         val visitor = object : ComponentScmVisitor {
             override fun visitTrunk(commitLog: List<Commit>, latestVersion: Version?, releasedVersion: Version?, changes: Int?) {
 
@@ -72,7 +70,7 @@ class ScmService {
             }
 
             override fun visitHead(commit: Commit, branch: String, isTrunk: Boolean) {
-                println("--> visit head isTrunk=$isTrunk")
+                logger.info("--> visit head isTrunk=$isTrunk")
                 val pomFile: String? = scmClient.getFile(branch, "pom.xml", commit.revision)
                 val artifact = MavenUtils.extractArtifactId(pomFile)
                 val latestVersion = latestVersion(listOf(commit), pomFile) // FIXME chgSignature
@@ -117,7 +115,7 @@ class ScmService {
             }
 
             override fun visitVersion(commit: Commit, branch: String, isTrunk: Boolean, versionRelease: VersionRelease) {
-                println("--> visit version ${component.id} isTrunk=$isTrunk $versionRelease")
+                logger.info("--> visit version ${component.id} isTrunk=$isTrunk $versionRelease")
                 val pomFile: String? = scmClient.getFile(branch, "pom.xml", commit.revision)
 
                 componentRepo.addVersions(component.id, branch, listOf(versionRelease)) // FIXME chgSignature
@@ -145,19 +143,24 @@ class ScmService {
                 events.save(listOf(releaseEvent)) // FIXME chgSignature
             }
 
+            override fun visitDismissedVersion(arifactId: Artifact, dismissedVersion: Version, branch: String, isTrunk: Boolean) {
+                componentRepo.dismissSnapshotVersion(component.id, branch, arifactId, dismissedVersion)
+                libraries.dismissSnapshotVersion(arifactId, dismissedVersion)
+            }
         }
 
         component.accept(scmClient, componentRepo, visitor)
+        logger.info("Reload SCM Details for ${component.id} $scm done")
     }
 
     private fun processLibraryUsage(component: Component, version: Version, pom: String?) {
         try {
-            val dependencies = pom?.let { mavenDependencyResolver.dependencies(it) } ?: emptyList()
+            val dependencies: List<ArtifactResult> = pom?.let { mavenDependencyResolver.dependencies(it) } ?: emptyList()
             libraries.addUsage(component.id, version, dependencies.map {
                 Artifact.from(
                         it.artifact.groupId,
                         it.artifact.artifactId,
-                        it.artifact.version,
+                        it.artifact.baseVersion,
                         type = it.artifact.extension,
                         classifier = it.artifact.classifier
                 )

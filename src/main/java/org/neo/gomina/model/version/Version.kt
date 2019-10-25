@@ -2,7 +2,7 @@ package org.neo.gomina.model.version
 
 import org.apache.commons.lang3.StringUtils
 
-data class Version(val version: String = "", val revision: String?) : Comparable<Version> {
+data class Version(val version: String = "", val revision: String? = null, val dismissed: Boolean = false) : Comparable<Version> {
 
     companion object {
         fun isSnapshot(version: String) = version.endsWith("-SNAPSHOT")
@@ -13,10 +13,11 @@ data class Version(val version: String = "", val revision: String?) : Comparable
                 if (version?.isNotEmpty() == true) Version(version, revision) else null
     }
 
-    constructor(version: String = "") : this(version, null)
+    //constructor(version: String = "") : this(version, null)
 
     fun isSnapshot() = isSnapshot(version)
     fun isStable() = isStable(version)
+    fun withoutSnapshot() = Version(version.replace("-SNAPSHOT", ""))
 
     /*
     override fun equals(other: Any?): Boolean {

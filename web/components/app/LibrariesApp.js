@@ -112,6 +112,7 @@ class LibrariesApp extends React.Component<Props, State> {
         const libraryUsage = this.sortLibraryUsage(this.state.library)
             .map(libraryUsage => ({
                     "version": libraryUsage.version,
+                    "dismissed": libraryUsage.dismissed,
                     "components": libraryUsage.components
                         .filter(c => c.component.label && c.component.label.match(RegExp(this.state.filterComponent, 'i')))
                         .map(u => ({
@@ -174,7 +175,7 @@ class LibrariesApp extends React.Component<Props, State> {
                                            borderRight: '1px solid lightgray',
                                            whiteSpace: 'nowrap'
                                        }}>
-                                           <b>{libUsage.version}</b>
+                                           <b style={{textDecoration: libUsage.dismissed ? "line-through": null}}>{libUsage.version}</b>
                                        </td>
                                        <td width="100%" style={{borderBottom: '1px solid lightgray'}}>
                                            {this.groupByComponent(libUsage.components).map(usage =>

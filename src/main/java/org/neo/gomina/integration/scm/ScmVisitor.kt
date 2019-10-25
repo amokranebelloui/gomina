@@ -1,6 +1,7 @@
 package org.neo.gomina.integration.scm
 
 import org.apache.commons.lang3.StringUtils
+import org.neo.gomina.integration.maven.Artifact
 import org.neo.gomina.integration.maven.MavenUtils
 import org.neo.gomina.model.component.Component
 import org.neo.gomina.model.component.ComponentRepo
@@ -13,6 +14,7 @@ interface ComponentScmVisitor {
     fun visitTrunk(commitLog: List<Commit>, latestVersion: Version?, releasedVersion: Version?, changes: Int?)
     fun visitHead(commit: Commit, branch: String, isTrunk: Boolean)
     fun visitVersion(commit: Commit, branch: String, isTrunk: Boolean, versionRelease: VersionRelease)
+    fun visitDismissedVersion(artifact: Artifact, dismissedVersion: Version, branch: String, isTrunk: Boolean)
 }
 
 fun Component.accept(scmClient: ScmClient, componentRepo: ComponentRepo, visitor: ComponentScmVisitor) {
@@ -31,6 +33,10 @@ fun Component.accept(scmClient: ScmClient, componentRepo: ComponentRepo, visitor
 
         visitor.visitTrunk(log, latestVersion, releasedVersion, changes)
 
+        val releasedVersions = mutableListOf<String>()
+        val processedSnapshot = mutableSetOf<String>()
+        val dismissSnapshots = mutableSetOf<Pair<Artifact, Version>>()
+
         // Commit Log
         val branches = scmClient.getBranches()
         componentRepo.updateBranches(this.id, branches)
@@ -45,18 +51,34 @@ fun Component.accept(scmClient: ScmClient, componentRepo: ComponentRepo, visitor
 
             // Versions
             commitLog
-                    .filter { c -> c.version != null && Version.isStable(c.version) }
+                    //.filter { c -> c.version != null && Version.isStable(c.version) }
                     .mapNotNull { commit -> commit.version?.let { Triple(
                             MavenUtils.extractArtifactId(scmClient.getFile(branch.name, "pom.xml", commit.revision)),
-                            it,
+                            Version(it),
                             commit
                     )}}
                     //.filter { (_, release, _) -> Version.isStable(release) }
-                    .map { (artifactId, release, commit) ->
-                        val versionRelease = VersionRelease(artifactId, Version(release), commit.date, branch.name)
-                        visitor.visitVersion(commit, branch.name, isTrunk, versionRelease)
-                        versionRelease
+                    .forEach { (artifactId, version, commit) ->
+                        val versionRelease = VersionRelease(artifactId, version, commit.date, branch.name)
+                        if (version.isStable()) {
+                            visitor.visitVersion(commit, branch.name, isTrunk, versionRelease)
+                            releasedVersions.add(version.version)
+                        }
+                        else {
+                            if (!processedSnapshot.contains(version.version)) {
+                                visitor.visitVersion(commit, branch.name, isTrunk, versionRelease)
+                                processedSnapshot.add(version.version)
+                            }
+                            if (releasedVersions.contains(version.withoutSnapshot().version)) {
+                                artifactId?.let { dismissSnapshots.add(it to version) }
+                            }
+                        }
                     }
+
+            dismissSnapshots.forEach { (artifactId, version) ->
+                println("Dismiss $version")
+                visitor.visitDismissedVersion(artifactId, version, branch.name, isTrunk)
+            }
         }
     }
 
