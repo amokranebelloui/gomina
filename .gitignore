@@ -7,4 +7,5 @@ npm-debug.log
 dist/
 *.iml
 .cache
-
+data
+target

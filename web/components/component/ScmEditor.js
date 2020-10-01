@@ -82,6 +82,7 @@ class ScmEditor extends React.Component<Props, State> {
                         style={{width: '50px', fontSize: 9}}>
                     <option value=""></option>
                     <option value="git">GIT</option>
+                    <option value="git_local">GIT(L)</option>
                     <option value="svn">SVN</option>
                     <option value="mercurial">Mercurial</option>
                     <option value="cvs">CVS</option>

@@ -49,11 +49,11 @@ class Branch extends React.Component<BranchLabelProps> {
 }
 
 function isTrunk(branch: ?string) {
-    return branch === "trunk" || branch === "master" || branch === "refs/heads/master";
+    return branch === "trunk" || branch === "master" || branch === "refs/heads/master" || branch === "refs/remotes/origin/master";
 }
 
 function simplifyName(branch: string) {
-    return branch.replace(/(^refs\/heads\/|^branches\/)/, '');
+    return branch.replace(/(^refs\/heads\/|^branches\/|^refs\/remotes\/origin\/)/, '');
 }
 
 function color(branch: string) {
@@ -61,7 +61,12 @@ function color(branch: string) {
     if (isTrunk(branch)) {
         return "#000000"
     }
-    var colors = ["#e51c23", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#5677fc", "#03a9f4", "#00bcd4", "#009688", "#259b24", "#8bc34a", "#afb42b", "#ff9800", "#ff5722", "#795548", "#607d8b"]
+    var colors = [
+        "#e51c23", "#e91e63", "#9c27b0", "#673ab7",
+        "#3f51b5", "#5677fc", "#03a9f4", "#00bcd4",
+        "#009688", "#259b24", "#8bc34a", "#afb42b",
+        "#ff9800", "#ff5722", "#795548", "#607d8b"
+    ];
 
     var hash = 0;
     if (branch.length === 0) return hash;

@@ -3,13 +3,16 @@ package org.neo.gomina.integration.scm.git
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.api.ListBranchCommand.ListMode
 import org.eclipse.jgit.lib.Repository
 import org.eclipse.jgit.revwalk.RevWalk
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
+import org.eclipse.jgit.transport.CredentialsProvider
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider
 import org.eclipse.jgit.treewalk.TreeWalk
 import org.neo.gomina.integration.scm.impl.CommitDecorator
-import org.neo.gomina.model.scm.ScmBranch
 import org.neo.gomina.model.scm.Commit
+import org.neo.gomina.model.scm.ScmBranch
 import org.neo.gomina.model.scm.ScmClient
 import java.io.File
 import java.time.Instant
@@ -24,16 +27,40 @@ class GitClient : ScmClient {
         private val logger = LogManager.getLogger(GitClient::class.java)
     }
 
+    internal val cp:CredentialsProvider?
+    internal val local:Boolean
     internal val repository: Repository
     internal val git:Git
     private val commitDecorator = CommitDecorator()
 
-    constructor(url: String) {
-        this.repository = FileRepositoryBuilder().setGitDir(File(url)).build()
+    constructor(url: String, username: String? = null, password: String? = null, local: Boolean = false) {
+        this.local = local
+
+        if (!local) {
+            this.cp = UsernamePasswordCredentialsProvider(username, password)
+            val name = url.replace('\\', '_')
+                    .replace('/', '_')
+                    .replace(':', '_')
+            val location = ".cache\\git\\$name"
+            val folder = File(location)
+            if (!folder.exists()) {
+                Git.cloneRepository()
+                        .setURI(url)
+                        .setDirectory(folder)
+                        .setCloneAllBranches(true)
+                        .setCredentialsProvider(cp)
+                        .call()
+            }
+            this.repository = FileRepositoryBuilder().setGitDir(File("$location\\.git")).build()
+        }
+        else {
+            this.cp = null
+            this.repository = FileRepositoryBuilder().setGitDir(File(url)).build()
+        }
         this.git = Git(repository)
     }
 
-    private val masterName = "refs/heads/master"
+    private val masterName: String get() = if (local) "refs/heads/master" else "refs/remotes/origin/master"
 
     override fun getTrunk(): String {
         return masterName
@@ -41,7 +68,9 @@ class GitClient : ScmClient {
 
     override fun getBranches(): List<ScmBranch> {
         logger.info("Retrieve Branches")
-        val branches = git.branchList().call()
+        val branches = git.branchList()
+                .let { if (local) it.setListMode(ListMode.REMOTE) else it }
+                .call()
         val result = branches.map {
             val branchName = it.name
             val originRev = if (branchName != masterName) {
@@ -65,6 +94,9 @@ class GitClient : ScmClient {
         //git.branchList().call().forEach { println("branch ${it.name}") }
         //val master = repository.getRef(folder)
         //println("$folder -> $master")
+        git.pull()
+                .let { if (!local) it.setCredentialsProvider(cp) else it }
+                .call()
         val commits = git.log().add(repository.resolve(branch)).setMaxCount(count).call()
         return commits.map {
             val revision = it.name

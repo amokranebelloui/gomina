@@ -11,6 +11,7 @@ function iconForType(type) {
     switch (type) {
         case "svn" : return svnIcon;
         case "git" : return gitIcon;
+        case "git_local" : return gitIcon;
         case "mercurial" : return mercurialIcon;
         case "dummy" : return dummyIcon;
         default : return defaultIcon;

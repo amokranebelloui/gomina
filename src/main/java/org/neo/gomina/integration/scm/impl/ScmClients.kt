@@ -38,8 +38,11 @@ class ScmClients {
 
     private fun buildScmClient(scm: Scm, passwords: Passwords): ScmClient? {
         return when (scm.type) {
-            "svn" -> TmateSoftSvnClient(baseUrl = scm.url, projectUrl = scm.path, username = scm.username, password = passwords.getRealPassword(scm.passwordAlias))
-            "git" -> GitClient(scm.url)
+            "svn" -> TmateSoftSvnClient(baseUrl = scm.url, projectUrl = scm.path,
+                    username = scm.username, password = passwords.getRealPassword(scm.passwordAlias))
+            "git", "git_local" -> GitClient(scm.url,
+                    username = scm.username, password = passwords.getRealPassword(scm.passwordAlias),
+                    local = scm.type == "git_local")
             "dummy" -> DummyScmClient(scm.url)
             else -> null
         }
