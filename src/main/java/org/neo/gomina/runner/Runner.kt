@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
     System.setProperty("vertx.disableFileCaching", "true")
     if (args.isNotEmpty()) System.setProperty("gomina.config.file", args[0])
 
-    System.getProperties().forEach { (key, `val`) -> logger.info(key.toString() + "=" + `val`) }
+    System.getProperties().forEach { (key, value) -> logger.info("$key=$value") }
 
     val vertx = Vertx.vertx()
 
