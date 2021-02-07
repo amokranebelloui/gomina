@@ -25,7 +25,7 @@ module.exports = {
     //devtool: 'eval',
     entry: {
         //components: './web/components/components.js',
-        app: './web/components/application.js'
+        app: './web/application.js'
         //react: ['react', 'react-router', 'react-dom']
     },
     plugins: [
@@ -36,7 +36,10 @@ module.exports = {
             inject: false,
             filename: 'index.html'
         }),
-        new CopyWebpackPlugin([{from: "web/*.ico", to: "", flatten: true}]),
+        new CopyWebpackPlugin([
+            {from: "web/*.ico", to: "", flatten: true},
+            {from: "node_modules/@blueprintjs/**/*.css", to: "", flatten: true}
+        ]),
         new webpack.optimize.CommonsChunkPlugin({name: 'shared'}),
         /*
         new webpack.optimize.CommonsChunkPlugin({

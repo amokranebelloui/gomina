@@ -2,28 +2,28 @@
 import axios from "axios/index";
 import React, {Fragment} from "react";
 import Link from "react-router-dom/es/Link";
-import type {CommitType} from "../commitlog/CommitLog";
-import {CommitLog, CommitLogLegend} from "../commitlog/CommitLog";
-import {InlineAdd} from "../common/InlineAdd";
-import {Secure} from "../permission/Secure";
+import type {CommitType} from "../components/commitlog/CommitLog";
+import {CommitLog, CommitLogLegend} from "../components/commitlog/CommitLog";
+import {InlineAdd} from "../components/common/InlineAdd";
+import {Secure} from "../components/permission/Secure";
 import Route from "react-router-dom/es/Route";
-import {WorkEditor} from "../work/WorkEditor";
-import {DateTime} from "../common/DateTime";
-import {sortWorkBy, WorkSort} from "../work/WorkSort";
+import {WorkEditor} from "../components/work/WorkEditor";
+import {DateTime} from "../components/common/DateTime";
+import {sortWorkBy, WorkSort} from "../components/work/WorkSort";
 import ls from "local-storage";
-import {filterWork, WorkFilter} from "../work/WorkFilter";
-import type {ComponentRefType} from "../component/ComponentType";
-import type {UserRefType} from "../misc/UserType";
-import type {WorkDataType, WorkManifestType, WorkStatusType, WorkType} from "../work/WorkType";
-import {Issue} from "../misc/Issue";
-import type {EnvType} from "../environment/Environment";
-import {WorkStatus} from "../work/WorkStatus";
-import {joinTags, splitTags} from "../common/utils";
+import {filterWork, WorkFilter} from "../components/work/WorkFilter";
+import type {ComponentRefType} from "../components/component/ComponentType";
+import type {UserRefType} from "../components/misc/UserType";
+import type {WorkDataType, WorkManifestType, WorkStatusType, WorkType} from "../components/work/WorkType";
+import {Issue} from "../components/misc/Issue";
+import type {EnvType} from "../components/environment/Environment";
+import {WorkStatus} from "../components/work/WorkStatus";
+import {joinTags, splitTags} from "../components/common/utils";
 import {ApplicationLayout} from "./common/ApplicationLayout";
-import {Badge} from "../common/Badge";
-import {BuildLink} from "../build/BuildLink";
-import {BuildNumber} from "../build/BuildNumber";
-import {BuildStatus} from "../build/BuildStatus";
+import {Badge} from "../components/common/Badge";
+import {BuildLink} from "../components/build/BuildLink";
+import {BuildNumber} from "../components/build/BuildNumber";
+import {BuildStatus} from "../components/build/BuildStatus";
 
 type Props = {
     match: any

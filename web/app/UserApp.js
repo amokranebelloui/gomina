@@ -1,15 +1,15 @@
 // @flow
 import React, {Fragment} from "react"
-import {Secure} from "../permission/Secure"
+import {Secure} from "../components/permission/Secure"
 import axios from "axios/index";
 import Link from "react-router-dom/es/Link";
-import type {KnowledgeType} from "../knowledge/Knowledge";
-import {Knowledge} from "../knowledge/Knowledge";
-import {Badge} from "../common/Badge";
-import type {UserDataType, UserType} from "../user/UserType";
-import {InlineAdd} from "../common/InlineAdd";
+import type {KnowledgeType} from "../components/knowledge/Knowledge";
+import {Knowledge} from "../components/knowledge/Knowledge";
+import {Badge} from "../components/common/Badge";
+import type {UserDataType, UserType} from "../components/user/UserType";
+import {InlineAdd} from "../components/common/InlineAdd";
 import Route from "react-router-dom/es/Route";
-import {UserEditor} from "../user/UserEditor";
+import {UserEditor} from "../components/user/UserEditor";
 import {ApplicationLayout} from "./common/ApplicationLayout";
 
 

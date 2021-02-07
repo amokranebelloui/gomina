@@ -1,36 +1,23 @@
-// @flow
-import React from "react";
+import React from 'react';
 import {Link} from "react-router-dom";
 import "./layout.css"
 import Cookies from "js-cookie";
-import {LoginForm} from "../../common/LoginForm";
+import {LoginForm} from "../../components/common/LoginForm";
 import axios from "axios/index";
-import {LoggedUserContext} from "../../permission/Secure"
-import {Container} from "../../common/Container";
-import {Well} from "../../common/Well";
-import type {Element} from "react"
-type ClockProps = {
+import {LoggedUserContext} from "../../components/permission/Secure"
 
-}
-
-type ClockState = {
-    date: Date
-}
-
-class Clock2 extends React.Component<ClockProps, ClockState> {
-    constructor(props: ClockProps) {
+class Clock extends React.Component {
+    constructor(props) {
         super(props);
         this.state = {date: new Date()};
 
     }
     componentDidMount() {
         //console.info("mounted clock");
-        //$FlowFixMe
         this.tid = setInterval(() => this.tick(), 1000);
     }
     componentWillUnmount() {
         //console.info("unmounted clock");
-        //$FlowFixMe
         clearInterval(this.tid);
     }
     tick() {
@@ -47,24 +34,8 @@ class Clock2 extends React.Component<ClockProps, ClockState> {
     }
 }
 
-
-type Props = {
-    onUserLoggedIn?: string => void,
-    title?: string,
-    header?: () => Element<any>,
-    main?: () => Element<any>,
-    sidePrimary?: () => Element<any>,
-    sideSecondary?: () => Element<any>
-}
-
-type State = {
-    userId: ?string,
-    login: ?string,
-    permissions: Array<string>,
-}
-
-class ApplicationLayout extends React.Component<Props, State> {
-    constructor(props: Props) {
+class AppLayout extends React.Component {
+    constructor(props) {
         super(props);
         this.state = {
             userId: Cookies.get('gomina-userId'),
@@ -72,7 +43,7 @@ class ApplicationLayout extends React.Component<Props, State> {
             permissions: Cookies.get('gomina-permissions')
         }
     }
-    login(login: string, password: string) {
+    login(login, password) {
         console.info("Authenticating", login);
         axios.post('/authenticate', {login: login, password: password})
             .then(response => {
@@ -96,7 +67,7 @@ class ApplicationLayout extends React.Component<Props, State> {
         Cookies.remove('gomina-userId');
         Cookies.remove('gomina-login');
         Cookies.remove('gomina-permissions');
-        this.setState({'userId': null, 'login': null, 'permissions': []})
+        this.setState({'userId': null, 'login': null, 'permissions': null})
     }
     render() {
         return (
@@ -126,53 +97,13 @@ class ApplicationLayout extends React.Component<Props, State> {
                                 {this.state.userId && <input type="button" onClick={e => this.logout()} value="Logout" />}
                                 {!this.state.userId && <LoginForm onAuthenticate={e => this.login(e.login, e.password)} />}
 
-                                <Clock2 />
+                                <Clock />
                             </span>
                         </div>
                     </div>
                     <div className="content">
                         <div className="content-wrapper">
-                            <div className='main-content'>
-                                <div className='principal-content'>
-                                    <table border="0" style={{height: '100%', width: '100%'}}>
-                                        <tr>
-                                            <td>
-                                                {this.props.header &&
-                                                    <Well block>{this.props.header()}</Well>
-                                                }
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td style={{height: '100%'}}>
-                                                <Container>
-                                                    {this.props.main && this.props.main()}
-                                                </Container>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div className='side-content'>
-                                    <div className='side-content-wrapper'>
-                                        {this.props.sidePrimary &&
-                                        <div className='side-primary'>
-                                            <Well block>
-                                            {this.props.sidePrimary()}
-                                            </Well>
-                                        </div>
-                                        }
-                                        {this.props.sideSecondary &&
-                                        <div className='side-secondary'>
-                                            <Container>
-                                                <Well block>
-                                                {this.props.sideSecondary()}
-                                                </Well>
-                                            </Container>
-                                        </div>
-                                        }
-                                    </div>
-                                </div>
-
-                            </div>
+                            {this.props.children}
                         </div>
                     </div>
                     <div className="footer">
@@ -184,5 +115,29 @@ class ApplicationLayout extends React.Component<Props, State> {
     }
 }
 
-export { ApplicationLayout };
+class PrimarySecondaryLayout extends React.Component {
+    render() {
+        return (
+            <div className='main-content'>
+                <div className='principal-content'>
+                    {this.props.children[0]}
+                </div>
+                <div className='side-content'>
+                    <div className='side-content-wrapper'>
+                        <div className='side-primary'>
+                            {this.props.children[1]}
+                        </div>
+                        <div className='side-secondary'>
+                            {this.props.children[2]}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        )
+    }
+}
+
+
+export { AppLayout, PrimarySecondaryLayout, Clock };
 

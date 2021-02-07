@@ -117,7 +117,6 @@ data class InstanceRefDetail(
         val deployed: VersionDetail?)
 
 data class NewComponentDetail(
-        var id: String,
         var label: String? = null,
         var artifactId: String? = null,
         var type: String? = null,
@@ -457,7 +456,6 @@ class ComponentsApi {
             val newComp = mapper.readValue<NewComponentDetail>(ctx.body.toString())
             logger.info("Adding component $componentId => $newComp")
             componentRepo.add(NewComponent(
-                    id = newComp.id,
                     label = newComp.label,
                     artifactId = newComp.artifactId,
                     type = newComp.type,

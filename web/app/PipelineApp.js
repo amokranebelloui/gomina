@@ -1,6 +1,6 @@
 import React, {Fragment} from "react";
-import {groupBy} from "../common/utils";
-import {DeploymentPipeline} from "../pipeline/DeploymentPipeline";
+import {groupBy} from "../components/common/utils";
+import {DeploymentPipeline} from "../components/pipeline/DeploymentPipeline";
 import axios from "axios";
 import {ApplicationLayout} from "./common/ApplicationLayout";
 

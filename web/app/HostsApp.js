@@ -1,16 +1,16 @@
 import axios from "axios/index";
 import React, {Fragment} from "react";
-import {Well} from "../common/Well";
+import {Well} from "../components/common/Well";
 import Link from "react-router-dom/es/Link";
-import {Badge} from "../common/Badge";
-import {InlineAdd} from "../common/InlineAdd";
+import {Badge} from "../components/common/Badge";
+import {InlineAdd} from "../components/common/InlineAdd";
 import Route from "react-router-dom/es/Route";
-import {HostEditor} from "../environment/HostEditor";
-import {Secure} from "../permission/Secure";
-import {HostConnectivityEditor} from "../environment/HostConnectivityEditor";
-import {OSFamily} from "../misc/OSFamily";
+import {HostEditor} from "../components/environment/HostEditor";
+import {Secure} from "../components/permission/Secure";
+import {HostConnectivityEditor} from "../components/environment/HostConnectivityEditor";
+import {OSFamily} from "../components/misc/OSFamily";
 import {ApplicationLayout} from "./common/ApplicationLayout";
-import {filterHosts, HostFilter} from "../environment/HostFilter";
+import {filterHosts, HostFilter} from "../components/environment/HostFilter";
 
 class HostsApp extends React.Component {
 

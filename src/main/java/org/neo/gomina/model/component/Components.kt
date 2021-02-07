@@ -65,7 +65,6 @@ data class Branch(
 data class VersionRelease(val artifact: Artifact?, val version: Version, val releaseDate: LocalDateTime, val branchId: String)
 
 data class NewComponent(
-        var id: String,
         var label: String? = null,
         var artifactId: String? = null,
         var type: String? = null,

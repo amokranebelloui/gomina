@@ -1,17 +1,15 @@
 import React, {Fragment} from "react";
 import ls from "local-storage"
-import {Secure} from "../permission/Secure"
-import {ComponentHeader, ComponentSummary} from "../component/Component";
+import {Secure} from "../components/permission/Secure"
+import {ComponentHeader, ComponentSummary} from "../components/component/Component";
 import axios from "axios/index";
-import {Well} from "../common/Well";
-import {flatMap, joinTags, splitTags} from "../common/utils";
-import {ComponentSort, sortComponentsBy} from "../component/ComponentSort";
-import {extendSystems} from "../system/system-utils";
-import {AddComponent} from "../component/AddComponent";
-import {ComponentFilter, filterComponents} from "../component/ComponentFilter";
+import {flatMap, joinTags, splitTags} from "../components/common/utils";
+import {ComponentSort, sortComponentsBy} from "../components/component/ComponentSort";
+import {extendSystems} from "../components/system/system-utils";
+import {AddComponent} from "../components/component/AddComponent";
+import {ComponentFilter, filterComponents} from "../components/component/ComponentFilter";
 import Cookies from "js-cookie";
 import {ApplicationLayout} from "./common/ApplicationLayout";
-import {Container} from "../common/Container";
 
 class ComponentsApp extends React.Component {
 

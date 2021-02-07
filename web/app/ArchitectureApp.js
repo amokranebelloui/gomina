@@ -2,22 +2,22 @@
 import React, {Fragment} from "react";
 import axios from "axios/index";
 import {AppLayout, PrimarySecondaryLayout} from "./common/layout";
-import type {DiagramComponentType} from "../archidiagram/ArchiDiagram";
-import {ArchiDiagram} from "../archidiagram/ArchiDiagram";
-import {Container} from "../common/Container";
-import type {ComponentRefType} from "../component/ComponentType";
-import {Well} from "../common/Well";
-import type {DiagramRefType} from "../archidiagram/DiagramEditor";
-import {DiagramEditor} from "../archidiagram/DiagramEditor";
-import {InlineAdd} from "../common/InlineAdd";
+import type {DiagramComponentType} from "../components/archidiagram/ArchiDiagram";
+import {ArchiDiagram} from "../components/archidiagram/ArchiDiagram";
+import {Container} from "../components/common/Container";
+import type {ComponentRefType} from "../components/component/ComponentType";
+import {Well} from "../components/common/Well";
+import type {DiagramRefType} from "../components/archidiagram/DiagramEditor";
+import {DiagramEditor} from "../components/archidiagram/DiagramEditor";
+import {InlineAdd} from "../components/common/InlineAdd";
 import Link from "react-router-dom/es/Link";
-import type {DiagramType} from "../archidiagram/DiagramType";
+import type {DiagramType} from "../components/archidiagram/DiagramType";
 import Route from "react-router-dom/es/Route";
-import {EditableLabel} from "../common/EditableLabel";
-import {TagCloud} from "../common/TagCloud";
-import {joinTags, matchesList, splitTags} from "../common/utils";
+import {EditableLabel} from "../components/common/EditableLabel";
+import {TagCloud} from "../components/common/TagCloud";
+import {joinTags, matchesList, splitTags} from "../components/common/utils";
 import ls from "local-storage";
-import {extendSystems} from "../system/system-utils";
+import {extendSystems} from "../components/system/system-utils";
 import {ApplicationLayout} from "./common/ApplicationLayout";
 
 type Props = {

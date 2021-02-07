@@ -72,7 +72,7 @@ class WebVerticle : AbstractVerticle() {
                 .mountSubRouter("/data/diagram", injector.getInstance(DiagramApi::class.java).router)
                 .mountSubRouter("/realtime", injector.getInstance(NotificationsApi::class.java).apply { start() }.router)
 
-        router.get("/*").pathRegex(".*\\.(js|ico|map)").handler(StaticHandler.create("dist").setCachingEnabled(false))
+        router.get("/*").pathRegex(".*\\.(js|ico|map|css)").handler(StaticHandler.create("dist").setCachingEnabled(false))
 
         router.route().pathRegex("/.*").handler { ctx ->
             val response = ctx.response()

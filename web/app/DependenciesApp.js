@@ -1,11 +1,11 @@
 import React, {Fragment} from "react";
 import axios from "axios/index";
-import {DSM} from "../dependency/DSM";
-import {Dependencies} from "../dependency/Dependencies";
-import {TagCloud} from "../common/TagCloud";
+import {DSM} from "../components/dependency/DSM";
+import {Dependencies} from "../components/dependency/Dependencies";
+import {TagCloud} from "../components/common/TagCloud";
 import ls from "local-storage"
-import {Well} from "../common/Well";
-import {joinTags, splitTags} from "../common/utils";
+import {Well} from "../components/common/Well";
+import {joinTags, splitTags} from "../components/common/utils";
 import {ApplicationLayout} from "./common/ApplicationLayout";
 
 class DependenciesApp extends React.Component {

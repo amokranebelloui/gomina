@@ -1,36 +1,36 @@
 import React, {Fragment} from "react";
 import axios from "axios/index";
-import {ComponentBadge, ComponentMenu} from "../component/Component";
-import "../component/Component.css"
-import "../common/items.css"
-import {CommitLog, CommitLogLegend} from "../commitlog/CommitLog";
-import {Documentation} from "../documentation/Documentation";
+import {ComponentBadge, ComponentMenu} from "../components/component/Component";
+import "../components/component/Component.css"
+import "../components/common/items.css"
+import {CommitLog, CommitLogLegend} from "../components/commitlog/CommitLog";
+import {Documentation} from "../components/documentation/Documentation";
 import queryString from 'query-string'
-import {Dependencies} from "../dependency/Dependencies";
-import {CallChain} from "../dependency/CallChain";
+import {Dependencies} from "../components/dependency/Dependencies";
+import {CallChain} from "../components/dependency/CallChain";
 import Link from "react-router-dom/es/Link";
-import {ScmLink} from "../component/ScmLink";
-import {UnreleasedChangeCount} from "../component/UnreleasedChangeCount";
-import {ApiDefinition} from "../component/ApiDefinition";
-import {ApiUsage} from "../component/ApiUsage";
-import {ApiDefinitionEditor} from "../component/ApiDefinitionEditor";
-import {LoggedUserContext, Secure} from "../permission/Secure";
-import {Events} from "../environment/Events";
-import {Knowledge} from "../knowledge/Knowledge";
-import {DateTime} from "../common/DateTime";
+import {ScmLink} from "../components/component/ScmLink";
+import {UnreleasedChangeCount} from "../components/component/UnreleasedChangeCount";
+import {ApiDefinition} from "../components/component/ApiDefinition";
+import {ApiUsage} from "../components/component/ApiUsage";
+import {ApiDefinitionEditor} from "../components/component/ApiDefinitionEditor";
+import {LoggedUserContext, Secure} from "../components/permission/Secure";
+import {Events} from "../components/environment/Events";
+import {Knowledge} from "../components/knowledge/Knowledge";
+import {DateTime} from "../components/common/DateTime";
 import Route from "react-router-dom/es/Route";
-import {Branch, isTrunk, sortBranchesDetails} from "../commitlog/Branch";
-import {Libraries} from "../library/Libraries";
-import {filterLibraries, LibraryFilter} from "../library/LibraryFilter";
+import {Branch, isTrunk, sortBranchesDetails} from "../components/commitlog/Branch";
+import {Libraries} from "../components/library/Libraries";
+import {filterLibraries, LibraryFilter} from "../components/library/LibraryFilter";
 import {ApplicationLayout} from "./common/ApplicationLayout";
-import {ComponentBanner} from "../component/ComponentBanner";
-import {ComponentScm} from "../component/ComponentScm";
-import {ComponentBuild} from "../component/ComponentBuild";
-import {ComponentSonar} from "../component/ComponentSonar";
-import {Well} from "../common/Well";
-import {ComponentMetadata} from "../component/ComponentMatadata";
-import {filterEvents} from "../environment/EventFilter";
-import {BranchBuild} from "../component/BranchBuild";
+import {ComponentBanner} from "../components/component/ComponentBanner";
+import {ComponentScm} from "../components/component/ComponentScm";
+import {ComponentBuild} from "../components/component/ComponentBuild";
+import {ComponentSonar} from "../components/component/ComponentSonar";
+import {Well} from "../components/common/Well";
+import {ComponentMetadata} from "../components/component/ComponentMatadata";
+import {filterEvents} from "../components/environment/EventFilter";
+import {BranchBuild} from "../components/component/BranchBuild";
 
 class ComponentApp extends React.Component {
     

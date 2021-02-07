@@ -99,6 +99,10 @@ class EnvironmentLogical extends React.Component<Props, State> {
                     }
                     const opacity = serviceHighlighted ? 1 : 0.2;
 
+                    //const highlightFunction = this.props.highlight || ((instance, svc) => true);
+                    let serviceInstances = sortInstances(svc.instances || []).filter(instance => highlightFunction(instance, svc.service));
+
+                    // Graphical part
                     const service = (
                         <tr key={'service' + svc.service.svc} className='env-row' style={{opacity: opacity}}>
                             <Route render={({ history}) => (
@@ -114,11 +118,9 @@ class EnvironmentLogical extends React.Component<Props, State> {
                     );
                     let instances = [];
                     if (this.isOpen(svc.service.svc)) {
-                        instances = sortInstances(svc.instances || []).map(instance => {
-                            const highlightFunction = this.props.highlight || ((instance, svc) => true);
-                            const highlighted = highlightFunction(instance, svc.service);
+                        instances = serviceInstances.map(instance => {
                             return (
-                                <tr key={instance.id} className='env-row instance' style={{opacity: (highlighted) ? 1 : 0.1}}>
+                                <tr key={instance.id} className='env-row instance'>
                                     <td key={'space' + instance.id} style={{display: 'table-cell', minWidth: '30px'}}></td>
                                     <Route render={({ history}) => (
                                         <Status key={'status' + instance.id} status={instance.status} leader={instance.leader}
@@ -128,7 +130,8 @@ class EnvironmentLogical extends React.Component<Props, State> {
                                     )} />
                                     <Instance key={'instance' + instance.id} instance={instance} />
                                 </tr>
-                            )});
+                            )
+                        })
                     }
                     return [service].concat(instances)
                 })

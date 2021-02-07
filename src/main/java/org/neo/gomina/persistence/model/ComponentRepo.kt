@@ -154,10 +154,8 @@ class RedisComponentRepo : ComponentRepo {
 
     override fun add(component: NewComponent) {
         pool.resource.use { jedis ->
-            if (jedis.exists("component:${component.id}")) {
-                throw Exception("${component.id} already exists")
-            }
-            jedis.persist("component:${component.id}", listOfNotNull(
+            val id = "c" + jedis.incr("_component:seq").toString()
+            jedis.persist("component:${id}", listOfNotNull(
                     "artifact_id" to component.artifactId,
                     "label" to component.label,
                     "type" to component.type,

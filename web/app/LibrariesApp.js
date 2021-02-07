@@ -3,17 +3,17 @@ import React, {Fragment} from "react"
 import axios from "axios/index";
 import ls from "local-storage"
 import Link from "react-router-dom/es/Link";
-import {compareVersions} from "../common/version-utils";
-import type {ComponentRefType} from "../component/ComponentType";
-import type {InstanceRefType} from "../environment/InstanceType";
-import {Badge} from "../common/Badge";
-import {groupingBy} from "../common/utils";
-import type {EnvType} from "../environment/Environment";
-import type {ComponentVersionType, LibraryType, LibraryUsageType} from "../library/LibraryType";
-import {LibraryCatalog} from "../library/Libraries";
-import {filterLibraries, LibraryFilter} from "../library/LibraryFilter";
-import "../common/items.css"
-import {LibrariesSummary} from "../library/LibrariesSummary";
+import {compareVersions} from "../components/common/version-utils";
+import type {ComponentRefType} from "../components/component/ComponentType";
+import type {InstanceRefType} from "../components/environment/InstanceType";
+import {Badge} from "../components/common/Badge";
+import {groupingBy} from "../components/common/utils";
+import type {EnvType} from "../components/environment/Environment";
+import type {ComponentVersionType, LibraryType, LibraryUsageType} from "../components/library/LibraryType";
+import {LibraryCatalog} from "../components/library/Libraries";
+import {filterLibraries, LibraryFilter} from "../components/library/LibraryFilter";
+import "../components/common/items.css"
+import {LibrariesSummary} from "../components/library/LibrariesSummary";
 import {ApplicationLayout} from "./common/ApplicationLayout";
 
 type Props = {

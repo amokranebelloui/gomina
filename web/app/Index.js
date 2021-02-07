@@ -1,8 +1,8 @@
 // @flow
 import React, {Fragment} from "react"
 import axios from "axios/index"
-import type {SystemType} from "../system/Systems";
-import {Systems} from "../system/Systems";
+import type {SystemType} from "../components/system/Systems";
+import {Systems} from "../components/system/Systems";
 import {ApplicationLayout} from "./common/ApplicationLayout";
 
 type Props = {

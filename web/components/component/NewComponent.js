@@ -3,6 +3,7 @@ import * as React from "react"
 import {ScmEditor} from "./ScmEditor";
 import {SonarEditor} from "./SonarEditor";
 import {BuildEditor} from "./BuildEditor";
+import {Button, FormGroup, InputGroup, TagInput, Intent} from "@blueprintjs/core";
 
 type NewComponentType = {
     id: string,
@@ -46,54 +47,67 @@ class NewComponent extends React.Component<Props, NewComponentType> {
     render() {
         return (
             <div>
-                <b>Add new component</b>
-                <br/>
+                <FormGroup label="Label" labelInfo="(required)" labelFor="label-input" intent={Intent.PRIMARY}>
+                    <InputGroup id="label-input" placeholder="Component Label"
+                                onChange={e => this.setState({label: e.target.value})} />
+                </FormGroup>
 
-                ID <input type="text" name="id" placeholder="Component Id" onChange={e => this.setState({id: e.target.value})} /><br/>
+                <FormGroup label="ArtifactId" labelFor="artifactid-input">
+                    <InputGroup id="artifactid-input" placeholder="Artifact Id"
+                                onChange={e => this.setState({artifactId: e.target.value})} />
+                </FormGroup>
 
-                Label <input type="text" name="label" placeholder="Label" onChange={e => this.setState({label: e.target.value})} /><br/>
-                ArtifactId <input type="text" name="artifactId" placeholder="Artifact Id" onChange={e => this.setState({artifactId: e.target.value})} /><br/>
+                <FormGroup label="Type" labelFor="type-input">
+                    <InputGroup id="type-input" placeholder="Type"
+                                onChange={e => this.setState({type: e.target.value})} />
+                </FormGroup>
 
-                Type <input type="text" name="type" placeholder="Type" onChange={e => this.setState({type: e.target.value})} /><br/>
-                Systems
-                <input type="text" name="systems" placeholder="Systems"
-                       value={this.state.systems.join(' ')}
-                       onChange={e => this.setState({systems: e.target.value.split(' ')})} />
-                <br/>
-                Languages <input type="text" name="languages" placeholder="Languages" onChange={e => this.setState({languages: e.target.value.split(' ')})} /><br/>
-                Tags <input type="text" name="tags" placeholder="Tags" onChange={e => this.setState({tags: e.target.value.split(' ')})} /><br/>
+                <FormGroup label="Systems" labelFor="systems-input">
+                    <TagInput id="systems-input" placeholder="Systems" values={this.state.systems}
+                              onChange={values => this.setState({systems: values})} />
+                </FormGroup>
 
-                SCM <ScmEditor onChanged={(type, url, path, md, u, p) => this.setState({
-                    scmType: type,
-                    scmUrl: url,
-                    scmPath: path,
-                    scmUsername: u,
-                    scmPasswordAlias: p,
-                    hasMetadata: md
+                <FormGroup label="Languages" labelFor="languages-input">
+                    <TagInput id="languages-input" placeholder="Languages Used" values={this.state.languages}
+                              onChange={values => this.setState({languages: values})} />
+                </FormGroup>
 
-                })} />
-                <br/>
+                <FormGroup label="Tags" labelFor="tags-input">
+                    <TagInput id="tags-input" placeholder="Tags" values={this.state.tags}
+                              onChange={values => this.setState({tags: values})} />
+                </FormGroup>
 
-                Sonar <SonarEditor servers={this.props.sonarServers || []} onChanged={(server) => this.setState({
-                    sonarServer: server
-                })} />
-                <br/>
+                <FormGroup label="SCM" labelFor="scm-input">
+                    <ScmEditor onChanged={(type, url, path, md, u, p) => this.setState({
+                        scmType: type,
+                        scmUrl: url,
+                        scmPath: path,
+                        scmUsername: u,
+                        scmPasswordAlias: p,
+                        hasMetadata: md
 
-                Build <BuildEditor servers={this.props.buildServers || []} onChanged={(server, job) => this.setState({
-                    jenkinsServer: server,
-                    jenkinsJob: job
-                })} />
-                <br/>
+                    })} />
+                </FormGroup>
+
+                <FormGroup label="Sonar" labelFor="sonar-input">
+                    <SonarEditor servers={this.props.sonarServers || []} onChanged={(server) => this.setState({
+                        sonarServer: server
+                    })} />
+                </FormGroup>
+
+                <FormGroup label="Build" labelFor="build-input">
+                    <BuildEditor servers={this.props.buildServers || []} onChanged={(server, job) => this.setState({
+                        jenkinsServer: server,
+                        jenkinsJob: job
+                    })} />
+                </FormGroup>
 
                 <hr style={{marginTop: '4px', marginBottom: '4px'}} />
                 {this.props.error &&
                     <span style={{color: 'red'}}><i>Error: {this.props.error}</i></span>
                 }
-                {!this.props.processing
-                    ? <input type="button" value="Add" onClick={e => this.props.onAdd(this.state)} />
-                    : <span><i>Adding</i></span>
-                }
-                <input type="button" value="Cancel" onClick={e => this.props.onCancel()} />
+                <Button text="Add" icon="add" onClick={e => this.props.onAdd(this.state)} disabled={this.props.processing} />
+                <Button text="Cancel" icon="remove" onClick={e => this.props.onCancel()} />
 
                 <br/>
                 {JSON.stringify(this.state)}

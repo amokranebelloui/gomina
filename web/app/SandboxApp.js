@@ -1,8 +1,8 @@
 import React, {Fragment} from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios/index"
-import "../common/common.css"
-import {BuildLink} from "../build/BuildLink";
+import "../components/common/common.css"
+import {BuildLink} from "../components/build/BuildLink";
 import {ApplicationLayout} from "./common/ApplicationLayout";
 
 class SandboxApp extends React.Component {

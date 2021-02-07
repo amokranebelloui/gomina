@@ -4,11 +4,11 @@ import {MyComponent, Posts, Toggle2} from "../web/components/sandbox/sandbox";
 import {DSM} from "../web/components/dependency/DSM";
 import {DiffView} from "../web/components/diff/DiffView";
 import {TextLines} from "../web/components/diff/TextLines";
-import "../web/components/application.css"
+import "../web/application.css"
 import {Toggle} from "../web/components/common/Toggle";
 import {action} from '@storybook/addon-actions';
 import C1 from "../web/components/sandbox/module";
-import {Clock} from "../web/components/app/common/layout";
+import {Clock} from "../web/app/common/layout";
 import {CommitLog} from "../web/components/commitlog/CommitLog";
 import {Documentation} from "../web/components/documentation/Documentation";
 import {Badge} from "../web/components/common/Badge";

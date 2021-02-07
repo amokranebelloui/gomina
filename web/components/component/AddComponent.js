@@ -6,7 +6,7 @@ import {NewComponent} from "./NewComponent";
 import * as axios from "axios";
 import {ComponentAdded} from "./ComponentAdded";
 import type {ComponentType} from "./ComponentType";
-
+import {Button, Dialog, Classes} from "@blueprintjs/core";
 
 type Props = {
     systemsContext?: Array<string>,
@@ -101,21 +101,28 @@ class AddComponent extends React.Component<Props, State> {
         return (
             <div>
                 {(!this.state.adding || this.state.successful) &&
-                <input type="button" value="Add Component" onClick={e => this.newComponent()}/>
+                    <Button text="Add Component" onClick={e => this.newComponent()} />
                 }
-                {this.state.adding &&
-                (this.state.successful
+
+                <Dialog icon="projects" title="New Component"
+                        className={Classes.OVERLAY_SCROLL_CONTAINER} autoFocus={true} enforceFocus={true} usePortal={true}
+                        isOpen={this.state.adding} onClose={e => this.cancelAddComponent()}>
+                    <div className={Classes.DIALOG_BODY}>
+                        {(this.state.successful
                         ? this.state.data && <ComponentAdded component={this.state.data}/>
                         : <NewComponent
-                            systemsContext={this.props.systemsContext}
-                            sonarServers={this.state.sonarServers}
-                            buildServers={this.state.buildServers}
-                            processing={this.state.processing}
-                            error={this.state.error}
-                            onAdd={d => {this.addComponent(d) }}
-                            onCancel={e => this.cancelAddComponent()} />
-                )
-                }
+                        systemsContext={this.props.systemsContext}
+                        sonarServers={this.state.sonarServers}
+                        buildServers={this.state.buildServers}
+                        processing={this.state.processing}
+                        error={this.state.error}
+                        onAdd={d => {this.addComponent(d) }}
+                        onCancel={e => this.cancelAddComponent()} />
+                        )}
+                    </div>
+                </Dialog>
+
+
             </div>
         )
     }
