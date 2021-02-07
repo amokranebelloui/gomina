@@ -10,8 +10,8 @@ class MavenDependencyResolverTest {
     fun testMavenDependencies() {
         val pom = FileUtils.readFileToString(File("pom.xml"), Charset.defaultCharset())
 
-        val remote = MavenRepo("central", "default", "http://central.maven.org/maven2/")
-        val local = "/Users/Amokrane/Applications/maven-libs"
+        val remote = MavenRepo("central", "default", "https://repo.maven.apache.org/maven2/")
+        val local = "~/.m2"
         val resolver = MavenDependencyResolver().apply { init(listOf(remote), local) }
 
         resolver.dependencies(pom)

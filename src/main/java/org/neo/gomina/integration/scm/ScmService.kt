@@ -155,6 +155,7 @@ class ScmService {
 
     private fun processLibraryUsage(component: Component, version: Version, pom: String?) {
         try {
+            logger.info("Getting libraries for ${component.id}...")
             val dependencies: List<ArtifactResult> = pom?.let { mavenDependencyResolver.dependencies(it) } ?: emptyList()
             libraries.addUsage(component.id, version, dependencies.map {
                 Artifact.from(
@@ -165,6 +166,7 @@ class ScmService {
                         classifier = it.artifact.classifier
                 )
             })
+            logger.info("Getting libraries for ${component.id} done")
         }
         catch (e: Exception) {
             logger.error("", e)

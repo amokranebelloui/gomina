@@ -17,11 +17,11 @@ database:
   port: '7080'
 
 maven:
-  localRepository: '/Users/Amokrane/Applications/maven-libs'
+  localRepository: '~/.m2'
   remoteRepositories:
     - id: 'central'
       type: 'default'
-      url: 'http://central.maven.org/maven2/'
+      url: 'https://repo.maven.apache.org/maven2/'
 
 monitoring:
   timeout: 4
